@@ -13,7 +13,7 @@ Interesting points :
 Further work :
 - Continue work on MeshModel loading and rendering.
 - Add a material system.
-- Add an optimised système of SkyBox/SkyDom
+- Add an optimised système of Skybox/Skydome
 - Work on dynamic shadow.
 - Work on a SSAO(Screen Space Ambient Occlusion) technic.
 - Work with more advanced lighting (my own test projet [here](https://www.dropbox.com/s/0q6zmvcgw8a06o2/normal-mapping.avi?dl=0).)

@@ -1,0 +1,34 @@
+#include "TextureManager.h"
+#include "png/PngLoader.h"
+
+IMPGEARS_BEGIN
+
+TextureMap TextureManager::textures;
+
+TextureManager::TextureManager()
+{
+    //ctor
+}
+
+TextureManager::~TextureManager()
+{
+    //dtor
+}
+
+Texture* TextureManager::getTexture(std::string name){
+    Texture* result = textures[name];
+
+    if(result == IMP_NULL){
+        result = PngLoader::loadFromFile(name.c_str());
+        result->updateGlTex();
+        textures[name] = result;
+    }
+
+    return result;
+}
+
+void TextureManager::addTexture(std::string name, Texture* texture){
+    textures[name] = texture;
+}
+
+IMPGEARS_END

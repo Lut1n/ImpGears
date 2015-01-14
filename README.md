@@ -5,6 +5,21 @@
 
 This is a project of C++ 3D Engine using OpenGL. It supports voxel map.
 
+Interesting points :
+- We can use a custom scene camera : Free fly camera and Strategic camera are already available.
+- Adapter can be developped for adding new window system like FreeGlut, GLFW, SDL, etc. A SFML adapter is already available.
+- Render target can be used for Deferred rendering.
+- VBO Manager ensures the correct using of the GPU memory.
+- Texture manager is able to get textures already loaded.
+
+Further work :
+- Continue work on MeshModel loading and rendering.
+- Add a material system.
+- Add an optimised système of SkyBox/SkyDom
+- Work on dynamic shadow.
+- Work on a SSAO(Screen Space Ambient Occlusion) technic.
+- Work with more advanced lighting (my own test projet [here](https://www.dropbox.com/s/0q6zmvcgw8a06o2/normal-mapping.avi?dl=0).)
+
 Sorry for the lack of comments. There are still some major code changes that could be made, the comments will come after ;)
 
 A screenshot of the result with a voxel terrain :

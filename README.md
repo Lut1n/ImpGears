@@ -1,8 +1,5 @@
 # ImpGears
 
-3D Engine
-=====
-
 This is a project of C++ 3D Engine using OpenGL. It supports voxel map.
 
 Interesting points :

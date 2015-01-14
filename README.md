@@ -8,6 +8,7 @@ Interesting points :
 - Render target can be used for Deferred rendering.
 - VBO Manager ensures the correct using of the GPU memory.
 - Texture manager is able to get textures already loaded.
+- Random terrain can be generated with Perlin noise technic (2D example [here](https://www.dropbox.com/s/wchzmdgojrvp1mz/infinite-perlin.avi?dl=0)). 
 
 Further work :
 - Continue work on MeshModel loading and rendering.

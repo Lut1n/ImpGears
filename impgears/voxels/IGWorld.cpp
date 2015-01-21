@@ -23,9 +23,9 @@ IGWorld::IGWorld(imp::Uint32 _sizeX, imp::Uint32 _sizeY, imp::Uint32 _sizeZ)
     chunkVBOs = new VBOChunk[chunkCount];
 
 	int i=0;
+    for(imp::Uint32 z = 0; z<chunkSizeZ; ++z)
     for(imp::Uint32 x = 0; x<chunkSizeX; ++x)
     for(imp::Uint32 y = 0; y<chunkSizeY; ++y)
-    for(imp::Uint32 z = 0; z<chunkSizeZ; ++z)
     {
         imp::Vector3 position((float)x*CHUNK_DIM,(float)y*CHUNK_DIM,(float)z*CHUNK_DIM);
         data[x*chunkSizeY*chunkSizeZ + y*chunkSizeZ + z] = new ChunkData(position);
@@ -178,12 +178,12 @@ void IGWorld::UpdateChunk(imp::Uint32 _x, imp::Uint32 _y, imp::Uint32 _z)
 }
 
 //--------------------------------------------------------------
-void IGWorld::Render(const imp::Vector3& playerPos)
+void IGWorld::Render(const imp::Vector3& playerPos, imp::Uint32 passID)
 {
 	dataLock.lock();
 
     for(imp::Uint32 index = 0; index<chunkCount; ++index)
-        chunkVBOs[index].Render();
+        chunkVBOs[index].Render(passID);
 
 	dataLock.unlock();
 }

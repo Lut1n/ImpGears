@@ -2,6 +2,8 @@
 
 #include "GLcommon.h"
 
+#include <cstdio>
+
 //--------------------------------------------------------------
 VBOData::VBOData()
 {

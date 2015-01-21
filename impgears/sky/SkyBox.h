@@ -1,41 +1,44 @@
-#ifndef SKYBOX_H
-#define SKYBOX_H
+#ifndef IMP_SKYBOX_H
+#define IMP_SKYBOX_H
 
-#include "Sky.h"
-#include "../graphics/TextureManager.h"
+#include "base/impBase.hpp"
+#include "Entity.h"
+#include "scene/SceneNode.h"
+#include "graphics/VBOData.h"
+#include "graphics/Texture.h"
+#include "shaders/SkyShader.h"
 
-#define SKYBOX_SIZE 5000.f
+IMPGEARS_BEGIN
 
-typedef struct{
-
-    float top_x, top_y;
-    float bottom_x, bottom_y;
-    float front_x, front_y;
-    float back_x, back_y;
-    float left_x, left_y;
-    float right_x, right_y;
-    float width, height;
-    bool isBottom;
-
-} SkyBoxProperties;
-
-class SkyBox : public Sky
+class SkyBox : public Entity, public SceneNode, public VBOData
 {
     public:
-        SkyBox();
-        SkyBox(const std::string& filename, const SkyBoxProperties properties);
+        SkyBox(const Texture* left, const Texture* right, const Texture* front, const Texture* back, const Texture* top, const Texture* bottom, float scale);
         virtual ~SkyBox();
 
-        virtual void load(const std::string& filename);
-        virtual void update(const imp::Vector3& position, const imp::Vector3& orientation);
-        virtual void render();
+        virtual void render(Uint32 passID);
+        virtual void update();
+        virtual void onEvent(const Event& evn);
 
-        static SkyBoxProperties getCrossSkyBoxProperties();
     protected:
     private:
-        imp::Texture* texture;
-        imp::Vector3 position;
-        SkyBoxProperties properties;
+
+        Uint64 m_leftOffset, m_rightOffset, m_frontOffset, m_backOffset, m_topOffset, m_bottomOffset;
+        Uint64 m_txCoordOffset;
+
+        const Texture* m_left;
+        const Texture* m_right;
+        const Texture* m_front;
+        const Texture* m_back;
+        const Texture* m_top;
+        const Texture* m_bottom;
+
+        Vector3 m_center;
+        float m_scale;
+
+        SkyShader m_shader;
 };
 
-#endif // SKYBOX_H
+IMPGEARS_END
+
+#endif // IMP_SKYBOX_H

@@ -53,7 +53,7 @@ public:
     void UpdateChunk(imp::Uint32 _index);
     void UpdateChunk(imp::Uint32 _x, imp::Uint32 _y, imp::Uint32 _z);
 
-    void Render(const imp::Vector3& playerPos);
+    void Render(const imp::Vector3& playerPos, imp::Uint32 passID);
 
     void OnValueChangedBegin();
     void OnValueChangedEnd();

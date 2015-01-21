@@ -2,6 +2,9 @@
 #include "camera/SceneCamera.h"
 #include "graphics/GLcommon.h"
 
+#include "shaders/DefaultShader.h"
+#include "scene/GraphicRenderer.h"
+
 imp::Texture* VBOChunk::atlasTex = 0;
 
 //--------------------------------------------------------------
@@ -20,21 +23,18 @@ VBOChunk::~VBOChunk()
 void VBOChunk::UpdateBuffer(ChunkData* _chunk, IGWorld* _world)
 {
     chunk = _chunk;
-
-    FloatBuffer vertexBuffer;
-    FloatBuffer& textCoordsBuffer = vertexBuffer;
-
-    vertexBuffer.reserve(0.5f*CHUNK_VOLUME*6*4*(3+2)); //reserve 50%
-
     const imp::Vector3& position = _chunk->GetPosition();
 
-    for(imp::Uint8 x = 0; x<CHUNK_DIM; ++x)
-    for(imp::Uint8 y = 0; y<CHUNK_DIM; ++y)
-    for(imp::Uint8 z = 0; z<CHUNK_DIM; ++z)
-    {
+    FloatBuffer vertexBuffer;
+    FloatBuffer normalsBuffer;
+    FloatBuffer textCoordsBuffer;
 
-        imp::Uint8 texIndex = _chunk->GetValue(x,y,z);
-        imp::Uint8 other = 0;
+    for(imp::Uint32 z = 0; z<CHUNK_DIM; ++z)
+    for(imp::Uint32 x = 0; x<CHUNK_DIM; ++x)
+    for(imp::Uint32 y = 0; y<CHUNK_DIM; ++y)
+    {
+        imp::Uint32 texIndex = _chunk->GetValue(x,y,z);
+        imp::Uint32 other = 0;
 
         if(texIndex == 0)
             continue;
@@ -45,99 +45,120 @@ void VBOChunk::UpdateBuffer(ChunkData* _chunk, IGWorld* _world)
 
         other = _world->GetValue(absX-1, absY, absZ);
         if(other == 0)
-            AddVboFace(vertexBuffer, textCoordsBuffer, x,y,z,CubeFaces_LEFT, texIndex/*-1*/);
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_LEFT, texIndex);
 
         other = _world->GetValue(absX+1, absY, absZ);
         if(other == 0)
-            AddVboFace(vertexBuffer, textCoordsBuffer, x,y,z,CubeFaces_RIGHT, texIndex/*-1*/);
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_RIGHT, texIndex);
 
         other = _world->GetValue(absX, absY-1, absZ);
         if(other == 0)
-            AddVboFace(vertexBuffer, textCoordsBuffer, x,y,z,CubeFaces_BACK, texIndex/*-1*/);
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_BACK, texIndex);
 
         other = _world->GetValue(absX, absY+1, absZ);
         if(other == 0)
-            AddVboFace(vertexBuffer, textCoordsBuffer, x,y,z,CubeFaces_FRONT, texIndex/*-1*/);
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_FRONT, texIndex);
 
         other = _world->GetValue(absX, absY, absZ-1);
         if(other == 0)
-            AddVboFace(vertexBuffer, textCoordsBuffer, x,y,z,CubeFaces_BOTTOM, texIndex/*-1*/);
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_BOTTOM, texIndex);
 
         other = _world->GetValue(absX, absY, absZ+1);
         if(other == 0)
-            AddVboFace(vertexBuffer, textCoordsBuffer, x,y,z,CubeFaces_TOP, texIndex/*-1*/);
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_TOP, texIndex);
     }
 
-    BuildBuffer(vertexBuffer, textCoordsBuffer);
-
-	vertexBuffer.clear();
-	textCoordsBuffer.clear();
+    BuildBuffer(vertexBuffer, normalsBuffer, textCoordsBuffer);
 }
 
 //--------------------------------------------------------------
-void VBOChunk::AddVboFace(FloatBuffer& _vertex, FloatBuffer& _textCoords,
+void VBOChunk::AddVboFace(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuffer& _textCoords,
                           float _x, float _y, float _z, CubeFaces _face, imp::Uint32 _texIndex)
 {
     switch(_face)
     {
         case CubeFaces_LEFT:
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y-VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, -1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 0, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y-VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, -1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 1, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y+VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, -1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 2, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y+VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, -1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 3, _texIndex);
         break;
         case CubeFaces_RIGHT:
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y+VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 1, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y-VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 2, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y-VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 3, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y+VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 1.f, 0.f, 0.f);
             AddTexCoord(_textCoords, 0, _texIndex);
         break;
         case CubeFaces_TOP:
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y+VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, 1.f);
             AddTexCoord(_textCoords, 0, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y-VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, 1.f);
             AddTexCoord(_textCoords, 1, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y-VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, 1.f);
             AddTexCoord(_textCoords, 2, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y+VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, 1.f);
             AddTexCoord(_textCoords, 3, _texIndex);
         break;
         case CubeFaces_BOTTOM:
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y+VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, -1.f);
             AddTexCoord(_textCoords, 0, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y-VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, -1.f);
             AddTexCoord(_textCoords, 1, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y-VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, -1.f);
             AddTexCoord(_textCoords, 2, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y+VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 0.f, -1.f);
             AddTexCoord(_textCoords, 3, _texIndex);
         break;
         case CubeFaces_FRONT:
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y+VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 1.f, 0.f);
             AddTexCoord(_textCoords, 2, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y+VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 1.f, 0.f);
             AddTexCoord(_textCoords, 3, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y+VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 1.f, 0.f);
             AddTexCoord(_textCoords, 0, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y+VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, 1.f, 0.f);
             AddTexCoord(_textCoords, 1, _texIndex);
         break;
         case CubeFaces_BACK:
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y-VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, -1.f, 0.f);
             AddTexCoord(_textCoords, 1, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y-VOXEL_RADIUS, _z+VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, -1.f, 0.f);
             AddTexCoord(_textCoords, 2, _texIndex);
             AddVertex(_vertex, _x-VOXEL_RADIUS, _y-VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, -1.f, 0.f);
             AddTexCoord(_textCoords, 3, _texIndex);
             AddVertex(_vertex, _x+VOXEL_RADIUS, _y-VOXEL_RADIUS, _z-VOXEL_RADIUS);
+            AddNormal(_normals, 0.f, -1.f, 0.f);
             AddTexCoord(_textCoords, 0, _texIndex);
         break;
         case CubeFaces_DIAG1:
@@ -171,6 +192,14 @@ void VBOChunk::AddVertex(FloatBuffer& _vertex, float _x, float _y, float _z)
     _vertex.push_back(_x);
     _vertex.push_back(_y);
     _vertex.push_back(_z);
+}
+
+//--------------------------------------------------------------
+void VBOChunk::AddNormal(FloatBuffer& _normals, float _x, float _y, float _z)
+{
+    _normals.push_back( (_x+1.f)/2.f );
+    _normals.push_back( (_y+1.f)/2.f );
+    _normals.push_back( (_z+1.f)/2.f );
 }
 
 //--------------------------------------------------------------
@@ -211,24 +240,38 @@ void VBOChunk::AddTexCoord(FloatBuffer& _texCoords, imp::Uint8 _corner, imp::Uin
 }
 
 //--------------------------------------------------------------
-void VBOChunk::BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _textCoords)
+void VBOChunk::BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuffer& _textCoords)
 {
-    if(getVBOID() == 0)
+    imp::Uint32 vboSize = (_vertex.size()+_normals.size()+_textCoords.size())*sizeof(float);
+
+    if(vboSize > 0 && getVBOID() == 0)
     {
-        requestVBO(_vertex.size()*sizeof(float));
+        requestVBO(vboSize);
     }
-    else if(getVBOSize() != _vertex.size()*sizeof(float))
+    else if(vboSize == 0 && getVBOID() > 0)
     {
-        resizeVBO(_vertex.size()*sizeof(float));
+        releaseVBO();
     }
 
-	// releaseVBO();
-    // requestVBO(_vertex.size()*sizeof(float));
-    setData(_vertex.data(), _vertex.size()*sizeof(float));
+    if(getVBOSize() != vboSize)
+    {
+        resizeVBO(vboSize);
+    }
+
+    int vertexBuffSize = _vertex.size()*sizeof(float);
+    int normalBuffSize = _normals.size()*sizeof(float);
+    int texcooBuffSize = _textCoords.size()*sizeof(float);
+
+    m_normalOffset = vertexBuffSize;
+    m_texCoordOffset = vertexBuffSize + normalBuffSize;
+
+    setData(_vertex.data(), vertexBuffSize, 0);
+    setData(_normals.data(), normalBuffSize, m_normalOffset);
+    setData(_textCoords.data(), texcooBuffSize, m_texCoordOffset);
 }
 
 //--------------------------------------------------------------
-void VBOChunk::Render()
+void VBOChunk::Render(imp::Uint32 passID)
 {
     if(chunk == IMP_NULL)
         return;
@@ -245,30 +288,39 @@ void VBOChunk::Render()
 
         ///vertex
         glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 5*sizeof(GL_FLOAT), (char*)NULL+0);
+        glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+0);
+
+        ///normals
+        glEnableClientState( GL_NORMAL_ARRAY );
+        glNormalPointer(GL_FLOAT, 0, (GLvoid*)(m_normalOffset));
 
         ///texture coord
         glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-        glTexCoordPointer(2,GL_FLOAT, 5*sizeof(GL_FLOAT), (char*)(3*sizeof(GL_FLOAT)) );
+        glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(m_texCoordOffset));
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        ///texture
-        atlasTex->bind();
 
-        glEnable(GL_CULL_FACE);
-        int count = getVBOSize()/sizeof(float);
-        count /= 5;
+        if(passID == 1)
+        {
+            imp::DefaultShader::instance->setMat4Parameter("shadow_mvMat", m_mvMat);
+            imp::DefaultShader::instance->setFloatParameter("chunkZ", position.getZ());
+        }
+        else if(passID == 0)
+        {
+            m_mvMat = imp::GraphicRenderer::getInstance()->getModelViewMatrix();
+        }
+
+        int count = m_normalOffset/sizeof(float);
+        count /= 3;
 		#ifdef GRID_DEBUG
         glDrawArrays(GL_LINES, 0, count);
         #else
         glDrawArrays(GL_QUADS, 0, count);
         #endif
 
-        ///texture
-        atlasTex->unbind();
-
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
 
         glPopMatrix();

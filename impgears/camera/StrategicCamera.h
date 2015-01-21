@@ -13,7 +13,7 @@ class StrategicCamera : public Camera
         virtual ~StrategicCamera();
 
         virtual void initialize();
-        virtual void onEvent(imp::Event evn);
+        virtual void onEvent(const imp::Event& evn);
         virtual void update();
     protected:
 

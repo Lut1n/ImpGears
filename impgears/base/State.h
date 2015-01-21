@@ -28,6 +28,10 @@ class State
 
         float xdep, ydep;
 
+        bool mapUp_down, mapDown_down;
+        bool zoomUp_down, zoomDown_down;
+        bool save_down;
+
     protected:
     private:
 

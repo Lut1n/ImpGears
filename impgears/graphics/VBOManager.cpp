@@ -45,7 +45,7 @@ imp::Uint32 VBOManager::request(imp::Uint32 _size)
     GLuint id[1];
     glGenBuffers(1, id);
     glBindBuffer(GL_ARRAY_BUFFER, id[0]);
-    glBufferData(GL_ARRAY_BUFFER, _size, 0, /*GL_DYNAMIC_DRAW*/GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _size, 0, GL_DYNAMIC_DRAW);//GL_STATIC_DRAW);
 
     VBO_Info info;
     info.videoID = (imp::Uint32)id[0];

@@ -24,6 +24,15 @@ Camera::~Camera()
 {
 }
 
+void Camera::initialize(){
+}
+
+void Camera::onEvent(const imp::Event& evn){
+}
+
+void Camera::update(){
+}
+
 void Camera::lookAt()
 {
     imp::Vector3 pos = m_position;
@@ -58,6 +67,9 @@ void Camera::rotate(float theta, float phi)
 {
     m_theta += theta;
     m_phi += phi;
+
+    if(m_phi > 3.14f/2.f)m_phi = 3.14f/2.f;
+    else if(m_phi < -3.14f/2.f)m_phi = -3.14f/2.f;
 
     m_orientation.setRadial(m_theta, m_phi);
 }
@@ -106,22 +118,36 @@ bool Camera::testFov(float x, float y, float z, float r)
 
     ///frustum culling (spheric)///
     #ifdef SPHERIC_FOV
-    imp::Vector3 relSphere = cam2pos - frustumSphereCenter;
-    float sphereSquareDist = relSphere.getSquareNorm();
-    sumR = (frustumConf.sphereRadius+effectiveR);
+    imp::Vector3 relSphere = cam2pos - m_frustumSphereCenter;
+    float sphereSquareDist = relSphere.getSqNorm();
+    sumR = (m_frustumConf.sphereRadius+effectiveR);
     if( sphereSquareDist >  sumR*sumR )return false;
     #endif
 
     #ifdef CONIC_FOV
     ///frustum culling (conic)///
-    float r_local = (frustumConf.tanfov*depth);
-    imp::Vector3 projectionTotal(orientation * depth);
+    float r_local = (m_frustumConf.tanfov*depth);
+    imp::Vector3 projectionTotal(m_orientation * depth);
     imp::Vector3 distVect( projectionTotal - cam2pos );
-    float dist = distVect.getSquareNorm();
+    float dist = distVect.getSqNorm();
     sumR = (r_local+effectiveR);
     if( dist > sumR*sumR )return false;
 
     #else
+     ///frustum culling (pyramide fovX)///
+     /*{
+        float r_local = (m_frustumConf.tanfovx*depth);
+        float dist = camDist * cam2posN.dotProduct(m_lateralVector);
+        sumR = (r_local+effectiveR);
+        if( dist*dist > sumR*sumR )return false;
+     }*/
+     ///frustum culling (pyramide fovY)///
+     /*{
+        float r_local = (m_frustumConf.tanfovy*depth);
+        float dist = camDist * cam2posN.dotProduct(m_headVector);
+        sumR = (r_local+effectiveR);
+        if( dist*dist > sumR*sumR )return false;
+     }*/
      ///frustum culling (pyramide fovX)///
      {
         float r_local = (m_frustumConf.tanfovx*depth);

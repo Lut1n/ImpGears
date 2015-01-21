@@ -10,7 +10,9 @@ State* State::m_singleton = IMP_NULL;
 State::State()
 {
 
-    key_up = key_down = key_left = key_right = false;
+    key_up = key_down = key_left = key_right = mapUp_down = mapDown_down = false;
+    zoomUp_down = zoomDown_down = false;
+    save_down = false;
     xdep = ydep = 0.0f;
 
     if(m_singleton != IMP_NULL)
@@ -54,6 +56,26 @@ void State::onEvent(const imp::Event& event)
         if(event.getKeyboard().keyCode == imp::Event::Escape){
             exit(0);
         }
+        if(event.getKeyboard().keyCode == imp::Event::PageDown)
+        {
+            mapDown_down = true;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::PageUp)
+        {
+            mapUp_down = true;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::Up)
+        {
+            zoomUp_down = true;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::Down)
+        {
+            zoomDown_down = true;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::F)
+        {
+            save_down = true;
+        }
     }
     if(event.getType() == imp::Event::Type_KeyReleased){
         if(event.getKeyboard().keyCode == imp::Event::Q){
@@ -70,6 +92,26 @@ void State::onEvent(const imp::Event& event)
         }
         if(event.getKeyboard().keyCode == imp::Event::LShift){
             key_shift = false;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::PageDown)
+        {
+            mapDown_down = false;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::PageUp)
+        {
+            mapUp_down = false;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::Up)
+        {
+            zoomUp_down = false;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::Down)
+        {
+            zoomDown_down = false;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::F)
+        {
+            save_down = false;
         }
     }
     if(event.getType() == imp::Event::Type_MouseMoved)

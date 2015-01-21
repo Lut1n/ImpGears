@@ -43,6 +43,8 @@ public:
 
     imp::Uint32 getVideoID(imp::Uint32 _index);
     imp::Uint32 findVideoID(imp::Uint32 _id);
+
+    imp::Uint32 getMemoryUsed() const{return memoryUsed;}
 };
 
 #endif // VBOMANAGER_H

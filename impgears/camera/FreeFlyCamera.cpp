@@ -1,6 +1,8 @@
 #include "FreeFlyCamera.h"
 #include "graphics/GLcommon.h"
 #include "base/State.h"
+#include "EvnContextInterface.h"
+
 #include <cmath>
 
 IMPGEARS_BEGIN
@@ -14,6 +16,8 @@ FreeFlyCamera::FreeFlyCamera(float xref, float yref, const imp::Vector3& positio
     this->xref = xref;
     this->yref = yref;
 
+    setPosition(imp::Vector3(100.f, 100.f, 100.f)); //temp
+
     m_cursorTimer.reset();
 }
 
@@ -25,7 +29,7 @@ FreeFlyCamera::~FreeFlyCamera()
 void FreeFlyCamera::initialize(){
 }
 
-void FreeFlyCamera::onEvent(imp::Event evn){
+void FreeFlyCamera::onEvent(const imp::Event& evn){
 }
 
 void FreeFlyCamera::update(){
@@ -55,6 +59,8 @@ void FreeFlyCamera::update(){
         if(state->key_right)move(getLateralVector() * speed * (elapsed/TIME_UPDATE));
 
         updateFov();
+
+        imp::EvnContextInterface::getInstance()->setCursorPosition(0, WIN_W/2.f, WIN_H/2.f);
 
         m_cursorTimer.reset();
     }

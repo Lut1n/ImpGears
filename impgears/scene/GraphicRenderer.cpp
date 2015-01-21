@@ -17,42 +17,23 @@ GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
     if (GLEW_OK != err)
     {
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-        exit(-1);
+        exit(0);
     }
 
-    /// Gl FACE CULLING
-    glCullFace(GL_BACK); // GL_FRONT, GL_BACK or GL_FRONT_AND_BACK
-    glFrontFace(GL_CCW); // GL_CW or GL_CCW
-    glEnable(GL_CULL_FACE);
+    int major, minor;
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	fprintf(stdout, "ogl version %d.%d\n", major, minor);
+	fprintf(stdout, "OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
-    /// Enable gl texture
-    glEnable(GL_TEXTURE_2D);
+	if(!sf::Shader::isAvailable())
+    {
+        fprintf(stderr, "[impError] shader not supported. Exit...\n");
+        exit(0);
+    }
 
-    /// Enable Blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    /// Enable Z-buffer read and write
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_TRUE);
-    glClearDepth(1.f);
-
-    /// Setup a perspective projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    Uint32 width = EvnContextInterface::getInstance()->getWidth(windowID);
-    Uint32 height = EvnContextInterface::getInstance()->getHeight(windowID);
-    gluPerspective(FRUSTUM_FOVY, width/height, FRUSTUM_NEAR, FRUSTUM_FAR);      /// go to camera
-
-    /// Fog
-    //glEnable(GL_FOG);
-    GLfloat fogDensity = 0.3f;
-    GLfloat fogColor[4] = {0.5f, 0.5f, 0.5f, 1.f};
-    glFogi(GL_FOG_MODE, GL_EXP2);
-    glFogfv(GL_FOG_COLOR, fogColor);
-    glFogf(GL_FOG_DENSITY, fogDensity);
-    glHint(GL_FOG_HINT, GL_NICEST);
+    /// Perspective as default projection
+    setPerspectiveProjection();
 
     setInstance(this);
 }
@@ -61,9 +42,10 @@ GraphicRenderer::~GraphicRenderer()
 {
 }
 
-void GraphicRenderer::renderScene(){
+void GraphicRenderer::renderScene(imp::Uint32 passID){
 
-    glClearColor(0.4f,0.5f,1.f,1.f);
+    m_parameters.enable();
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
@@ -74,29 +56,42 @@ void GraphicRenderer::renderScene(){
 
     camera->lookAt();
 
-    scene.renderAll();
+    scene.renderAll(passID);
+
+    m_parameters.disable();
 }
 
-void GraphicRenderer::updateScene(){
-    scene.updateAll();
+void GraphicRenderer::setPerspectiveProjection()
+{
+    Uint32 width = EvnContextInterface::getInstance()->getWidth(windowID);
+    Uint32 height = EvnContextInterface::getInstance()->getHeight(windowID);
 
-    camera->update();
-
-    if(centerCursor)
-    {
-        EvnContextInterface* interface = EvnContextInterface::getInstance();
-        Uint32 width = interface->getWidth(windowID);
-        Uint32 height = interface->getHeight(windowID);
-
-        interface->setCursorPosition(windowID, width/2,height/2);
-    }
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(FRUSTUM_FOVY, width/height, FRUSTUM_NEAR, FRUSTUM_FAR);
 }
 
-void GraphicRenderer::onEventScene(imp::Event evn){
+void GraphicRenderer::setOrthographicProjection(float left, float right, float bottom, float top)
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(left, right, bottom, top, FRUSTUM_NEAR, FRUSTUM_FAR);
+}
 
-    scene.onEventAll(evn);
+const Mat4 GraphicRenderer::getProjectionMatrix() const
+{
+    float data[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, data);
 
-    camera->onEvent(evn);
+    return Mat4(data);
+}
+
+const Mat4 GraphicRenderer::getModelViewMatrix() const
+{
+    float data[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, data);
+
+    return Mat4(data);
 }
 
 IMPGEARS_END

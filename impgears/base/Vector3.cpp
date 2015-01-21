@@ -156,7 +156,7 @@ float Vector3::getNorm() const
 
 float Vector3::getSqNorm() const
 {
-    return (m_x*m_x + m_y*m_y + m_z*m_z)/3.f;
+    return (m_x*m_x + m_y*m_y + m_z*m_z);///3.f;
 }
 
 void Vector3::truncate()

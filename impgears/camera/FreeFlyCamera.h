@@ -18,7 +18,7 @@ class FreeFlyCamera : public Camera
 
         virtual void initialize();
         virtual void update();
-        virtual void onEvent(imp::Event evn);
+        virtual void onEvent(const imp::Event& evn);
 
     protected:
     private:

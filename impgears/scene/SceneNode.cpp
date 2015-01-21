@@ -14,15 +14,15 @@ SceneNode::~SceneNode(){
 
 }
 
-void SceneNode::addSubSceneNode(SceneNode* SceneNode){
+void SceneNode::addSubNode(SceneNode* SceneNode){
     subSceneNodes.push_back(SceneNode);
 }
 
-void SceneNode::removeSubSceneNode(SceneNode* SceneNode){
+void SceneNode::removeSubNode(SceneNode* SceneNode){
     subSceneNodes.remove(SceneNode);
 }
 
-void SceneNode::renderAll(){
+void SceneNode::renderAll(imp::Uint32 passID){
 
     if(!renderActivated)return;
 
@@ -35,34 +35,14 @@ void SceneNode::renderAll(){
     glRotatef(ry, 0.f, 1.f, 0.f);
     glRotatef(rx, 1.f, 0.f, 0.f);
 
-    render();
+    render(passID);
 
     for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++){
         SceneNode* sub = *it;
-        sub->renderAll();
+        sub->renderAll(passID);
     }
 
     glPopMatrix();
-}
-
-void SceneNode::updateAll(){
-
-    update();
-
-    for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++){
-        SceneNode* sub = *it;
-        sub->updateAll();
-    }
-}
-
-void SceneNode::onEventAll(imp::Event evn){
-
-    onEvent(evn);
-
-    for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++){
-        SceneNode* sub = *it;
-        sub->onEventAll(evn);
-    }
 }
 
 void SceneNode::calculateRotation(){

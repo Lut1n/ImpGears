@@ -27,13 +27,12 @@ class Texture
         enum Format
         {
             Format_RGBA = 0,
-            Format_RGB
+            Format_RGB,
+            Format_Depth16 /// /!\ Conflicting with set/get/copy Pixels
         };
 
         Texture();
-        Texture(Uint32 width, Uint32 height, MemoryMode memoryMode = MemoryMode_ramAndVideo);
-        Texture(const char* filename, MemoryMode memoryMode = MemoryMode_ramAndVideo);
-        Texture(const Texture& other);
+
         virtual ~Texture();
 
         void loadFromMemory(char* data, Uint32 width, Uint32 height, Format format = Format_RGBA, MemoryMode memoryMode = MemoryMode_ramAndVideo);

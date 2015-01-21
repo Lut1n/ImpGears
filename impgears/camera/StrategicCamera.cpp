@@ -18,7 +18,7 @@ StrategicCamera::~StrategicCamera()
 void StrategicCamera::initialize(){
 }
 
-void StrategicCamera::onEvent(imp::Event evn){
+void StrategicCamera::onEvent(const imp::Event& evn){
 }
 
 void StrategicCamera::update(){
@@ -38,6 +38,15 @@ void StrategicCamera::update(){
     }
     else if(state->key_right && !state->key_left){
         move(imp::Vector3(speed, 0.f, 0.f));
+    }
+
+    if(state->zoomUp_down)
+    {
+        move(imp::Vector3(0.f, 0.f, 1.f));
+    }
+    else if(state->zoomDown_down)
+    {
+        move(imp::Vector3(0.f, 0.f, -1.f));
     }
 
     updateFov();

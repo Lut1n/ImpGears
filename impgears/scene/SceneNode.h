@@ -16,9 +16,7 @@ class SceneNode
         SceneNode();
         virtual ~SceneNode();
 
-        virtual void render() = 0;
-        virtual void update() = 0;
-        virtual void onEvent(imp::Event evn) = 0;
+        virtual void render(imp::Uint32 passID) = 0;
 
         void setRotation(float rx, float ry, float rz){
             this->rx = rx;
@@ -38,9 +36,7 @@ class SceneNode
         float getRy() const{return ry;}
         float getRz() const{return rz;}
 
-        void renderAll();
-        void updateAll();
-        void onEventAll(imp::Event evn);
+        void renderAll(imp::Uint32 passID);
 
         const imp::Vector3 getPosition() const{return position;}
         const imp::Vector3 getOrientation() const{return orientation;}
@@ -53,8 +49,8 @@ class SceneNode
 
     protected:
 
-        void addSubSceneNode(SceneNode* SceneNode);
-        void removeSubSceneNode(SceneNode* SceneNode);
+        void addSubNode(SceneNode* SceneNode);
+        void removeSubNode(SceneNode* SceneNode);
 
         /**
          * Prevoir un parametre supplementaire pour la rotation sur axe frontal (x)

@@ -20,51 +20,6 @@ Texture::Texture():
     //ctor
 }
 
-Texture::Texture(const char* filename, MemoryMode memoryMode):
-    m_data(IMP_NULL),
-    m_width(0),
-    m_height(0),
-    m_format(Format_RGBA),
-    m_memoryMode(memoryMode),
-    m_videoID(0),
-    m_isSmooth(false),
-    m_isRepeated(false),
-    m_hasMipmap(false),
-    m_mipmapMaxLevel(1000)
-{
-    //ctor
-}
-
-Texture::Texture(Uint32 width, Uint32 height, MemoryMode memoryMode):
-    m_data(IMP_NULL),
-    m_width(width),
-    m_height(height),
-    m_format(Format_RGBA),
-    m_memoryMode(memoryMode),
-    m_videoID(0),
-    m_isSmooth(false),
-    m_isRepeated(false),
-    m_hasMipmap(false),
-    m_mipmapMaxLevel(1000)
-{
-
-}
-
-Texture::Texture(const Texture& other):
-    m_data(IMP_NULL),
-    m_width(0),
-    m_height(0),
-    m_format(Format_RGBA),
-    m_memoryMode(MemoryMode_ramAndVideo),
-    m_videoID(0),
-    m_isSmooth(false),
-    m_isRepeated(false),
-    m_hasMipmap(false),
-    m_mipmapMaxLevel(1000)
-{
-
-}
-
 Texture::~Texture()
 {
     destroy();
@@ -84,6 +39,7 @@ void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, Format for
             bpp = 32;
             break;
         default:
+            fprintf(stderr, "[impError] format not supported.\n");
             break;
     }
 
@@ -107,6 +63,8 @@ void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memo
         case Format_RGBA:
             bpp = 32;
             break;
+        case Format_Depth16:
+            bpp = 32;
         default:
             break;
     }
@@ -153,17 +111,23 @@ void Texture::updateGlTex()
 
         int texture_format;
         int gl_texture_format;
+        int component_format = GL_UNSIGNED_BYTE;
+
         if (m_format == Format_RGBA)     // alpha
         {
             texture_format = GL_RGBA;
             gl_texture_format = GL_RGBA8;
-            // fprintf(stdout, "pixel format = RGBA8\n");
         }
         else if(m_format == Format_RGB)  // no alpha
         {
             texture_format = GL_RGB;
             gl_texture_format = GL_RGB8;
-            // fprintf(stdout, "pixel format = RGB8\n");
+        }
+        else if(m_format == Format_Depth16)
+        {
+            texture_format = GL_DEPTH_COMPONENT;
+            gl_texture_format = GL_DEPTH_COMPONENT32;
+            component_format = GL_UNSIGNED_BYTE;
         }
         else
         {
@@ -183,8 +147,13 @@ void Texture::updateGlTex()
         }
 
         glBindTexture(GL_TEXTURE_2D, id);
-        glTexImage2D(GL_TEXTURE_2D, 0, gl_texture_format, m_width, m_height, 0, texture_format, GL_UNSIGNED_BYTE, m_data);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+        if(m_format == Format_Depth16)
+        {
+            delete [] m_data;
+            m_data = IMP_NULL;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, gl_texture_format, m_width, m_height, 0, texture_format, component_format, m_data);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapValue);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapValue);
@@ -201,6 +170,7 @@ void Texture::updateGlTex()
 
 void Texture::bind() const
 {
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(m_videoID));
 }
 

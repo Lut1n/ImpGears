@@ -14,6 +14,8 @@ The next step is to reduce the number of rendered faces by choosing a simpler me
 
 #include <vector>
 
+#include "base/Mat4.h"
+
 #include "../graphics/VBOData.h"
 #include "../graphics/Texture.h"
 #include "IGWorld.h"
@@ -46,13 +48,14 @@ private:
 
     ChunkData* chunk;
 
-    void AddVboFace(FloatBuffer& _vertex, FloatBuffer& _textCoords,
+    void AddVboFace(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuffer& _textCoords,
                     float _x, float _y, float _z, CubeFaces _face, imp::Uint32 _texIndex);
 
     void AddVertex(FloatBuffer& _vertex, float _x, float _y, float _z);
+    void AddNormal(FloatBuffer& _normals, float _x, float _y, float _z);
     void AddTexCoord(FloatBuffer& _texCoords, imp::Uint8 _corner, imp::Uint8 _texIndex);
 
-    void BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _textCoords);
+    void BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuffer& _textCoords);
 
 public:
 
@@ -64,7 +67,11 @@ public:
 
     void UpdateBuffer(ChunkData* _chunk, IGWorld* _world);
 
-    void Render();
+    void Render(imp::Uint32 passID);
+
+    imp::Uint64 m_texCoordOffset, m_normalOffset;
+
+    Mat4 m_mvMat;
 
 };
 

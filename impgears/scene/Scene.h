@@ -12,25 +12,16 @@ class Scene : public SceneNode
         Scene();
         virtual ~Scene();
 
-        virtual void render();
-        virtual void update();
-        virtual void onEvent(imp::Event evn);
+        virtual void render(imp::Uint32 passID);
 
         void addSceneComponent(SceneNode* SceneNode);
         void removeSceneComponent(SceneNode* SceneNode);
 
-        void setSky(Sky* sky){this->sky = sky;}
-
-        TerrainSceneNode* getTerrain(){return &terrain;}
-
         static Scene* getInstance(){return instance;}
     protected:
-        TerrainSceneNode terrain;
 
         static void setInstance(Scene* i){instance = i;}
     private:
-//        LightManager Lights;
-        Sky* sky;
 
         static Scene* instance;
 };

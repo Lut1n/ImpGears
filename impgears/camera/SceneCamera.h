@@ -4,13 +4,14 @@
 #include "EvnContextInterface.h"
 #include "base/Vector3.h"
 #include "base/impBase.hpp"
+#include "Entity.h"
 
 IMPGEARS_BEGIN
 
 //#define CONIC_FOV 1
 //#define SPHERIC_FOV 1
 
-class Camera
+class Camera : public Entity
 {
     public:
 
@@ -32,9 +33,9 @@ class Camera
         Camera(bool active = true);
         virtual ~Camera();
 
-        virtual void initialize() = 0;
-        virtual void update() = 0;
-        virtual void onEvent(imp::Event evn) = 0;
+        virtual void initialize();
+        virtual void update();
+        virtual void onEvent(const Event& evn);
 
         virtual void activate() {setActiveCamera(this);}
         virtual void lookAt();

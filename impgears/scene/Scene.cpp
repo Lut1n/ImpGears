@@ -2,34 +2,21 @@
 
 Scene* Scene::instance = NULL;
 
-Scene::Scene():
-    sky(NULL)
+Scene::Scene()
 {
-    //addSubSceneNode(&world);
-    addSubSceneNode(&terrain);
     Scene::setInstance(this);
 }
 
 Scene::~Scene(){
 }
 
-void Scene::render(){
-    if(sky != NULL)sky->render();
-}
-
-void Scene::update(){
-    if(sky != NULL){
-            imp::Vector3 pos = imp::Camera::getActiveCamera()->getPosition();
-            sky->update(pos, pos);
-    }
+void Scene::render(imp::Uint32 passID){
 }
 
 void Scene::addSceneComponent(SceneNode* SceneNode){
-    addSubSceneNode(SceneNode);
+    addSubNode(SceneNode);
 }
 
 void Scene::removeSceneComponent(SceneNode* SceneNode){
-    removeSubSceneNode(SceneNode);
+    removeSubNode(SceneNode);
 }
-
-void Scene::onEvent(imp::Event evn){}

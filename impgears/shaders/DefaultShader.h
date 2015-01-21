@@ -13,6 +13,8 @@ class DefaultShader : public Shader
         DefaultShader();
         virtual ~DefaultShader();
 
+        static DefaultShader* instance;
+
     protected:
     private:
 

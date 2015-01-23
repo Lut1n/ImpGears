@@ -4,15 +4,14 @@
 #define COORD_TO_INDEX(x,y,z) (x*CHUNK_SURFACE + y*CHUNK_DIM + z)
 
 //--------------------------------------------------------------
-ChunkData::ChunkData(const imp::Vector3& _position)
+ChunkData::ChunkData(const imp::Vector3& _position):
+    position(_position)
 {
-    position = _position;
 }
 
 //--------------------------------------------------------------
 ChunkData::~ChunkData()
 {
-
 }
 
 //--------------------------------------------------------------

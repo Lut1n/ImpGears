@@ -7,13 +7,12 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines the default shader.
 class DefaultShader : public Shader
 {
     public:
         DefaultShader();
         virtual ~DefaultShader();
-
-        static DefaultShader* instance;
 
     protected:
     private:

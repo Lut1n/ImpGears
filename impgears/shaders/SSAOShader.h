@@ -6,6 +6,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines the Screen Space Ambient Occlusion shader.
 class SSAOShader : public Shader
 {
     public:

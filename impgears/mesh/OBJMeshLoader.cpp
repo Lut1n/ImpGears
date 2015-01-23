@@ -69,34 +69,105 @@ void getVertex(std::string& buff, std::vector<float>& vertices)
 }
 
 void getIndices(std::string& buff, std::vector<float>& vertices, std::vector<float>& texCoords, std::vector<float>& normals,
-                std::vector<float>& vertexBuffer, std::vector<float>& texCoordBuffer, std::vector<float>& normalBuffer)
+                std::vector<float>& vertexBuffer, std::vector<float>& texCoordBuffer, std::vector<float>& normalBuffer, bool& isQuad)
 {
-    char p1[64], p2[64], p3[64];
+    isQuad = false;
 
-    std::sscanf(buff.c_str(), "f %s %s %s", p1, p2, p3);
+    char p1[64], p2[64], p3[64], p4[64];
 
-    std::string p1str(p1), p2str(p2), p3str(p3);
+    int nbInd = occurrenceOf(buff.c_str(), ' ');
+
+    if(nbInd == 3)
+    {
+        std::sscanf(buff.c_str(), "f %s %s %s", p1, p2, p3);
+        p4[0] = '\0';
+    }
+    else if(nbInd == 4)
+    {
+        std::sscanf(buff.c_str(), "f %s %s %s %s", p1, p2, p3, p4);
+        isQuad = true;
+    }
+
+    std::string p1str(p1), p2str(p2), p3str(p3), p4str(p4);
 
     normalizeIndicesString(p1str);
     normalizeIndicesString(p2str);
     normalizeIndicesString(p3str);
 
-    float v1, vt1, vn1, v2, vt2, vn2, v3, vt3, vn3;
+    float v1, vt1, vn1, v2, vt2, vn2, v3, vt3, vn3, v4, vt4, vn4;
     std::sscanf(p1str.c_str(), "%f/%f/%f", &v1, &vt1, &vn1);
     std::sscanf(p2str.c_str(), "%f/%f/%f", &v2, &vt2, &vn2);
     std::sscanf(p3str.c_str(), "%f/%f/%f", &v3, &vt3, &vn3);
 
-    vertexBuffer.push_back(vertices[v1]);
-    vertexBuffer.push_back(vertices[v2]);
-    vertexBuffer.push_back(vertices[v3]);
+    --v1;
+    --vt1;
+    --vn1;
+    --v2;
+    --vt2;
+    --vn2;
+    --v3;
+    --vt3;
+    --vn3;
 
-    texCoordBuffer.push_back(texCoords[vt1]);
-    texCoordBuffer.push_back(texCoords[vt2]);
-    texCoordBuffer.push_back(texCoords[vt3]);
+    vertexBuffer.push_back(vertices[v1*3]);
+    vertexBuffer.push_back(vertices[v1*3+1]);
+    vertexBuffer.push_back(vertices[v1*3+2]);
+    vertexBuffer.push_back(vertices[v2*3]);
+    vertexBuffer.push_back(vertices[v2*3+1]);
+    vertexBuffer.push_back(vertices[v2*3+2]);
+    vertexBuffer.push_back(vertices[v3*3]);
+    vertexBuffer.push_back(vertices[v3*3+1]);
+    vertexBuffer.push_back(vertices[v3*3+2]);
 
-    normalBuffer.push_back(normals[vn1]);
-    normalBuffer.push_back(normals[vn2]);
-    normalBuffer.push_back(normals[vn3]);
+    if(texCoords.size() > 0)
+    {
+        texCoordBuffer.push_back(texCoords[vt1*2]);
+        texCoordBuffer.push_back(texCoords[vt1*2+1]);
+        texCoordBuffer.push_back(texCoords[vt2*2]);
+        texCoordBuffer.push_back(texCoords[vt2*2+1]);
+        texCoordBuffer.push_back(texCoords[vt3*2]);
+        texCoordBuffer.push_back(texCoords[vt3*2+1]);
+    }
+
+    if(normals.size() > 0)
+    {
+        normalBuffer.push_back(normals[vn1*3]);
+        normalBuffer.push_back(normals[vn1*3+1]);
+        normalBuffer.push_back(normals[vn1*3+2]);
+        normalBuffer.push_back(normals[vn2*3]);
+        normalBuffer.push_back(normals[vn2*3+1]);
+        normalBuffer.push_back(normals[vn2*3+2]);
+        normalBuffer.push_back(normals[vn3*3]);
+        normalBuffer.push_back(normals[vn3*3+1]);
+        normalBuffer.push_back(normals[vn3*3+2]);
+    }
+
+    if(isQuad)
+    {
+        normalizeIndicesString(p4str);
+        std::sscanf(p4str.c_str(), "%f/%f/%f", &v4, &vt4, &vn4);
+
+        --v4;
+        --vt4;
+        --vn4;
+
+        vertexBuffer.push_back(vertices[v4*3]);
+        vertexBuffer.push_back(vertices[v4*3+1]);
+        vertexBuffer.push_back(vertices[v4*3+2]);
+
+        if(texCoords.size() > 0)
+        {
+            texCoordBuffer.push_back(texCoords[vt4*2]);
+            texCoordBuffer.push_back(texCoords[vt4*2+1]);
+        }
+
+        if(normals.size() > 0)
+        {
+            normalBuffer.push_back(normals[vn4*3]);
+            normalBuffer.push_back(normals[vn4*3+1]);
+            normalBuffer.push_back(normals[vn4*3+2]);
+        }
+    }
 }
 
 
@@ -121,7 +192,10 @@ MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
     std::ifstream f(filename, std::ifstream::in);
     std::string buff;
 
-    while(f.eof() == false)
+    bool isQuad = false;
+    MeshModel::VertexMode vertexMode = MeshModel::VertexMode_Triangles;
+
+    while(f.good())
     {
         getline(f, buff);
 
@@ -151,28 +225,34 @@ MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
         else if(buff[0] == 'p')
         {
             // points
-            getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer);
+            getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer, isQuad);
+            vertexMode = MeshModel::VertexMode_Points;
         }
         else if(buff[0] == 'l')
         {
             // lines
-            getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer);
+            getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer, isQuad);
+            vertexMode = MeshModel::VertexMode_Lines;
         }
         else if(buff[0] == 'f')
         {
             // faces
-            getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer);
+            getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer, isQuad);
+            if(isQuad)
+                vertexMode = MeshModel::VertexMode_Quads;
         }
     }
 
     f.close();
 
     MeshModel* model = new MeshModel();
+
     model->setVertexBuffer(vertexBuffer.data(), vertexBuffer.size());
     model->setTexCoordBuffer(texCoordBuffer.data(), texCoordBuffer.size());
     model->setNormalBuffer(normalBuffer.data(), normalBuffer.size());
 
-    model->updateVBO(true);
+    model->setVertexMode(vertexMode);
+    model->updateVBO(false);
 
     return model;
 }

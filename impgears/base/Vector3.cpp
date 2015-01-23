@@ -4,6 +4,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 Vector3::Vector3():
     m_x(0),
     m_y(0),
@@ -11,6 +12,7 @@ Vector3::Vector3():
 {
 }
 
+//--------------------------------------------------------------
 Vector3::Vector3(float x, float y, float z):
     m_x(x),
     m_y(y),
@@ -18,6 +20,7 @@ Vector3::Vector3(float x, float y, float z):
 {
 }
 
+//--------------------------------------------------------------
 Vector3::Vector3(const Vector3& other):
     m_x(other.m_x),
     m_y(other.m_y),
@@ -25,10 +28,12 @@ Vector3::Vector3(const Vector3& other):
 {
 }
 
+//--------------------------------------------------------------
 Vector3::~Vector3()
 {
 }
 
+//--------------------------------------------------------------
 void Vector3::setRadial(float theta, float phi, float norm)
 {
     m_x = norm * cosf(phi) * cosf(theta);
@@ -36,6 +41,7 @@ void Vector3::setRadial(float theta, float phi, float norm)
     m_z = norm * sinf(phi);
 }
 
+//--------------------------------------------------------------
 Vector3& Vector3::operator*=(const float scalar)
 {
     m_x *= scalar;
@@ -45,11 +51,13 @@ Vector3& Vector3::operator*=(const float scalar)
     return *this;
 }
 
+//--------------------------------------------------------------
 Vector3 Vector3::operator*(const float scalar) const
 {
     return Vector3(m_x*scalar, m_y*scalar, m_z*scalar);
 }
 
+//--------------------------------------------------------------
 Vector3& Vector3::operator=(const Vector3& other)
 {
     m_x = other.m_x;
@@ -59,6 +67,7 @@ Vector3& Vector3::operator=(const Vector3& other)
     return *this;
 }
 
+//--------------------------------------------------------------
 Vector3& Vector3::operator+=(const Vector3& other)
 {
     m_x += other.m_x;
@@ -68,6 +77,7 @@ Vector3& Vector3::operator+=(const Vector3& other)
     return *this;
 }
 
+//--------------------------------------------------------------
 Vector3& Vector3::operator-=(const Vector3& other)
 {
     m_x -= other.m_x;
@@ -77,24 +87,30 @@ Vector3& Vector3::operator-=(const Vector3& other)
     return *this;
 }
 
+//--------------------------------------------------------------
 Vector3 Vector3::operator+(const Vector3& other) const
 {
     return Vector3(m_x+other.m_x, m_y+other.m_y, m_z+other.m_z);
 }
 
+//--------------------------------------------------------------
 Vector3 Vector3::operator-(const Vector3& other) const
 {
     return Vector3(m_x-other.m_x, m_y-other.m_y, m_z-other.m_z);
 }
 
-/*Vector3& Vector3::operator*=(const Matrix3& matrix)
+/*
+//--------------------------------------------------------------
+Vector3& Vector3::operator*=(const Matrix3& matrix)
 {
 }
 
+//--------------------------------------------------------------
 Vector3 Vector3::operator*(const Matrix3& matrix) const
 {
 }*/
 
+//--------------------------------------------------------------
 void Vector3::rotationX(float rx)
 {
     /*
@@ -107,6 +123,7 @@ void Vector3::rotationX(float rx)
     m_z = m_y*sinf(rx) + m_z*cosf(rx);
 }
 
+//--------------------------------------------------------------
 void Vector3::rotationY(float ry)
 {
     /*
@@ -119,6 +136,7 @@ void Vector3::rotationY(float ry)
     m_z = m_y*sinf(ry) + m_z*cosf(ry);
 }
 
+//--------------------------------------------------------------
 void Vector3::rotationZ(float rz)
 {
     /*
@@ -131,11 +149,13 @@ void Vector3::rotationZ(float rz)
     m_y = m_x*sinf(rz) + m_y*cosf(rz);
 }
 
+//--------------------------------------------------------------
 float Vector3::dotProduct(const Vector3& other) const
 {
     return m_x*other.m_x + m_y*other.m_y + m_z*other.m_z;
 }
 
+//--------------------------------------------------------------
 Vector3 Vector3::crossProduct(const Vector3& other) const
 {
     /*
@@ -149,16 +169,19 @@ Vector3 Vector3::crossProduct(const Vector3& other) const
                m_x*other.m_y - m_y*other.m_x);
 }
 
+//--------------------------------------------------------------
 float Vector3::getNorm() const
 {
     return sqrtf(getSqNorm());
 }
 
+//--------------------------------------------------------------
 float Vector3::getSqNorm() const
 {
     return (m_x*m_x + m_y*m_y + m_z*m_z);///3.f;
 }
 
+//--------------------------------------------------------------
 void Vector3::truncate()
 {
     int i;
@@ -168,6 +191,7 @@ void Vector3::truncate()
     i=m_z; m_z=i;
 }
 
+//--------------------------------------------------------------
 void Vector3::normalize()
 {
     float n = getNorm();

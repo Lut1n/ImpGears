@@ -6,6 +6,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 RenderTarget::RenderTarget():
     m_type(TargetType_Unkown),
     m_width(0),
@@ -17,11 +18,13 @@ RenderTarget::RenderTarget():
 {
 }
 
+//--------------------------------------------------------------
 RenderTarget::~RenderTarget()
 {
     destroy();
 }
 
+//--------------------------------------------------------------
 void RenderTarget::createScreenTarget(Uint32 windowID)
 {
     destroy();
@@ -34,6 +37,7 @@ void RenderTarget::createScreenTarget(Uint32 windowID)
     m_hasDepthBuffer = false;
 }
 
+//--------------------------------------------------------------
 void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, bool depthBuffer)
 {
     destroy();
@@ -71,6 +75,7 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, bool depthBuf
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+//--------------------------------------------------------------
 void RenderTarget::destroy()
 {
     if(m_type == TargetType_Buffer)
@@ -90,6 +95,7 @@ void RenderTarget::destroy()
     m_type = TargetType_Unkown;
 }
 
+//--------------------------------------------------------------
 const Texture* RenderTarget::asTexture()
 {
     if(m_type != TargetType_Buffer)
@@ -101,6 +107,7 @@ const Texture* RenderTarget::asTexture()
     return m_colorTexture;
 }
 
+//--------------------------------------------------------------
 const Texture* RenderTarget::getDepthTexture()
 {
     if(m_type != TargetType_Buffer || m_hasDepthBuffer == false)
@@ -112,6 +119,7 @@ const Texture* RenderTarget::getDepthTexture()
     return m_depthTexture;
 }
 
+//--------------------------------------------------------------
 void RenderTarget::bind()
 {
     if(m_type != TargetType_Buffer)
@@ -120,6 +128,7 @@ void RenderTarget::bind()
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
 }
 
+//--------------------------------------------------------------
 void RenderTarget::unbind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

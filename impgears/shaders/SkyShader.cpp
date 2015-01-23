@@ -2,15 +2,18 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 SkyShader::SkyShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
 {
 }
 
+//--------------------------------------------------------------
 SkyShader::~SkyShader()
 {
 }
 
+//--------------------------------------------------------------
 /// =========== VERTEX SHADER SOURCE =====================
 const char* SkyShader::vertexCodeSource = IMP_GLSL_SRC(
 
@@ -25,6 +28,7 @@ void main(){
 
 );
 
+//--------------------------------------------------------------
 /// =========== FRAGMENT SHADER SOURCE =====================
 const char* SkyShader::fragmentCodeSource = IMP_GLSL_SRC(
 

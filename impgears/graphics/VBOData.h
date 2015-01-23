@@ -9,6 +9,7 @@ Define an interface for using VBO. VBOData keeps memory size used after request.
 
 #include "VBOManager.h"
 
+/// \brief Defines a vbo data.
 class VBOData
 {
 private:

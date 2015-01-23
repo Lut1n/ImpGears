@@ -17,6 +17,7 @@ struct VBO_Info
     imp::Uint32 size;
 };
 
+/// \brief Defines The game VBO Manager.
 class VBOManager
 {
 private:

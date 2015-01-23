@@ -2,18 +2,21 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 ShadowShader::ShadowShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
 {
     //ctor
 }
 
+//--------------------------------------------------------------
 ShadowShader::~ShadowShader()
 {
     //dtor
 }
 
 
+//--------------------------------------------------------------
 /// =========== VERTEX SHADER SOURCE =====================
 const char* ShadowShader::vertexCodeSource = IMP_GLSL_SRC(
 
@@ -28,6 +31,7 @@ void main(){
 
 );
 
+//--------------------------------------------------------------
 /// =========== FRAGMENT SHADER SOURCE =====================
 const char* ShadowShader::fragmentCodeSource = IMP_GLSL_SRC(
 

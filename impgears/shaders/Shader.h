@@ -9,7 +9,7 @@ IMPGEARS_BEGIN
 
 #define IMP_GLSL_SRC( src ) #src
 
-
+/// \brief Defines a shader (vertex and fragment shaders).
 class Shader
 {
     public:

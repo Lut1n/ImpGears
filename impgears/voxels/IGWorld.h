@@ -1,12 +1,3 @@
-/*
-voxels/IGWorld.h
-
-Define a world made of voxels.
-
-IGWorld uses ChunkData in order to separate world data in multiple chunks and VBOChunk for their rendering.
-On a value change, it makes a redirection to the good chunk and updates VBO if necessary.
-*/
-
 #ifndef IGWORLD_H
 #define IGWORLD_H
 
@@ -14,11 +5,15 @@ On a value change, it makes a redirection to the good chunk and updates VBO if n
 #include "../base/impBase.hpp"
 #include "../base/Vector3.h"
 #include "../io/IGStreamable.h"
+#include "scene/SceneNode.h"
 #include "ChunkData.h"
 
 class VBOChunk;
 
-class IGWorld : IGStreamable
+/// \brief Defines a world made of voxels.
+/// IGWorld uses ChunkData in order to separate world data in multiple chunks and VBOChunk for their rendering.
+/// On a value change, it makes a redirection to the good chunk and updates VBO if necessary.
+class IGWorld : public IGStreamable, public SceneNode
 {
 private:
     imp::Uint32 sizeX, sizeY, sizeZ;
@@ -53,7 +48,7 @@ public:
     void UpdateChunk(imp::Uint32 _index);
     void UpdateChunk(imp::Uint32 _x, imp::Uint32 _y, imp::Uint32 _z);
 
-    void Render(const imp::Vector3& playerPos, imp::Uint32 passID);
+    virtual void render(imp::Uint32 passID);
 
     void OnValueChangedBegin();
     void OnValueChangedEnd();

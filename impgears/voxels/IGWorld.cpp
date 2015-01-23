@@ -2,14 +2,13 @@
 #include "VBOChunk.h"
 
 //--------------------------------------------------------------
-IGWorld::IGWorld(imp::Uint32 _sizeX, imp::Uint32 _sizeY, imp::Uint32 _sizeZ)
+IGWorld::IGWorld(imp::Uint32 _sizeX, imp::Uint32 _sizeY, imp::Uint32 _sizeZ):
+    sizeX(_sizeX),
+    sizeY(_sizeY),
+    sizeZ(_sizeZ)
 {
     valueChangedLock = false;
     dirtChunksCount = 0;
-
-	sizeX = _sizeX;
-	sizeY = _sizeY;
-	sizeZ = _sizeZ;
 
     imp::Uint32 chunkSizeX = sizeX/CHUNK_DIM;
     imp::Uint32 chunkSizeY = sizeY/CHUNK_DIM;
@@ -178,7 +177,7 @@ void IGWorld::UpdateChunk(imp::Uint32 _x, imp::Uint32 _y, imp::Uint32 _z)
 }
 
 //--------------------------------------------------------------
-void IGWorld::Render(const imp::Vector3& playerPos, imp::Uint32 passID)
+void IGWorld::render(imp::Uint32 passID)
 {
 	dataLock.lock();
 

@@ -2,15 +2,18 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 SSAOShader::SSAOShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
 {
 }
 
+//--------------------------------------------------------------
 SSAOShader::~SSAOShader()
 {
 }
 
+//--------------------------------------------------------------
 /// =========== VERTEX SHADER SOURCE =====================
 const char* SSAOShader::vertexCodeSource = IMP_GLSL_SRC(
 
@@ -28,6 +31,7 @@ void main(){
 
 );
 
+//--------------------------------------------------------------
 /// =========== FRAGMENT SHADER SOURCE =====================
 const char* SSAOShader::fragmentCodeSource = IMP_GLSL_SRC(
 

@@ -5,6 +5,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 Texture::Texture():
     m_data(IMP_NULL),
     m_width(0),
@@ -20,11 +21,13 @@ Texture::Texture():
     //ctor
 }
 
+//--------------------------------------------------------------
 Texture::~Texture()
 {
     destroy();
 }
 
+//--------------------------------------------------------------
 void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, Format format, MemoryMode memoryMode)
 {
     create(width, height, format, memoryMode);
@@ -48,6 +51,7 @@ void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, Format for
     memcpy(m_data, data, size);
 }
 
+//--------------------------------------------------------------
 void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memoryMode)
 {
     m_width = width;
@@ -78,6 +82,7 @@ void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memo
     memset(m_data, 0, size);
 }
 
+//--------------------------------------------------------------
 void Texture::destroy()
 {
     if(m_data != IMP_NULL)
@@ -94,6 +99,7 @@ void Texture::destroy()
     }
 }
 
+//--------------------------------------------------------------
 void Texture::updateGlTex()
 {
     if(m_videoID > 0)
@@ -168,18 +174,20 @@ void Texture::updateGlTex()
     }
 }
 
+//--------------------------------------------------------------
 void Texture::bind() const
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(m_videoID));
 }
 
+//--------------------------------------------------------------
 void Texture::unbind() const
 {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-
+//--------------------------------------------------------------
 Pixel Texture::getPixel(Uint32 _x, Uint32 _y) const
 {
     Uint32 channels = 4;
@@ -199,6 +207,7 @@ Pixel Texture::getPixel(Uint32 _x, Uint32 _y) const
 	return pixel;
 }
 
+//--------------------------------------------------------------
 void Texture::setPixel(Uint32 _x, Uint32 _y, Pixel _pixel)
 {
     Uint32 channels = 4;
@@ -216,6 +225,7 @@ void Texture::setPixel(Uint32 _x, Uint32 _y, Pixel _pixel)
     	updateGlTex();
 }
 
+//--------------------------------------------------------------
 void Texture::getPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, Pixel* _data) const
 {
     Uint32 channels = 4;
@@ -239,6 +249,7 @@ void Texture::getPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, Pixel* _data
 	}
 }
 
+//--------------------------------------------------------------
 void Texture::setPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, const Pixel* _data)
 {
     Uint32 channels = 4;
@@ -271,11 +282,13 @@ void Texture::setPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, const Pixel*
 	}
 }
 
+//--------------------------------------------------------------
 void Texture::lockPixels()
 {
 	m_pixelsLocked = true;
 }
 
+//--------------------------------------------------------------
 void Texture::unlockPixels()
 {
 	if(m_pixelsLocked)
@@ -285,11 +298,13 @@ void Texture::unlockPixels()
 	}
 }
 
+//--------------------------------------------------------------
 void Texture::draw2D(Uint32 x, Uint32 y, float alpha) const
 {
 	draw2D(x, y, m_width+x, m_height+y, alpha);
 }
 
+//--------------------------------------------------------------
 void Texture::draw2D(Uint32 x, Uint32 y, Uint32 x2, Uint32 y2, float alpha) const
 {
 	bind();
@@ -310,6 +325,7 @@ void Texture::draw2D(Uint32 x, Uint32 y, Uint32 x2, Uint32 y2, float alpha) cons
 	glEnd();
 }
 
+//--------------------------------------------------------------
 void Texture::copyPixelsFrom(const Texture* _src,
                     Uint32 _srcx, Uint32 _srcy, Uint32 _srcw, Uint32 _srch,
                     Uint32 _dstx, Uint32 _dsty)

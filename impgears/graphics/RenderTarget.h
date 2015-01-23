@@ -7,6 +7,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a render target. A render target can be a texture or a window.
 class RenderTarget
 {
     public:
@@ -21,7 +22,14 @@ class RenderTarget
         RenderTarget();
         virtual ~RenderTarget();
 
+        /// \brief Creates a window render target.
+        /// \param windowID - The ID of the window.
         void createScreenTarget(Uint32 windowID);
+
+        /// \brief Creates a texture render target.
+        /// \param width - The width of the internal texture.
+        /// \param height - The height of the internal texture.
+        /// \param depthBuffer - A second buffer for the depth must be created ?
         void createBufferTarget(Uint32 width, Uint32 height, bool depthBuffer);
 
         void destroy();

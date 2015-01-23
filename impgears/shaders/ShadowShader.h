@@ -7,6 +7,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a shadow shader.
 class ShadowShader : public Shader
 {
     public:

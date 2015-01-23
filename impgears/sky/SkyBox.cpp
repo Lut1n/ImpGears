@@ -8,6 +8,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 SkyBox::SkyBox(const Texture* left, const Texture* right, const Texture* front, const Texture* back, const Texture* top, const Texture* bottom, float scale):
     m_left(left),
     m_right(right),
@@ -71,11 +72,13 @@ SkyBox::SkyBox(const Texture* left, const Texture* right, const Texture* front, 
     setData(vertexBuffer.data(), vboSize);
 }
 
+//--------------------------------------------------------------
 SkyBox::~SkyBox()
 {
     releaseVBO();
 }
 
+//--------------------------------------------------------------
 void SkyBox::render(Uint32 passID)
 {
     if(passID != 1)
@@ -126,11 +129,13 @@ void SkyBox::render(Uint32 passID)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+//--------------------------------------------------------------
 void SkyBox::update()
 {
     setPosition(Camera::getActiveCamera()->getPosition());
 }
 
+//--------------------------------------------------------------
 void SkyBox::onEvent(const Event& evn)
 {
 

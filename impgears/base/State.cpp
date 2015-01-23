@@ -5,8 +5,10 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 State* State::m_singleton = IMP_NULL;
 
+//--------------------------------------------------------------
 State::State()
 {
 
@@ -21,11 +23,13 @@ State::State()
     m_singleton = this;
 }
 
+//--------------------------------------------------------------
 State::~State()
 {
     //dtor
 }
 
+//--------------------------------------------------------------
 void State::onEvent(const imp::Event& event)
 {
     imp::EvnContextInterface* evnContext = imp::EvnContextInterface::getInstance();

@@ -8,6 +8,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines the render parameters.
 class RenderParameters
 {
     public:

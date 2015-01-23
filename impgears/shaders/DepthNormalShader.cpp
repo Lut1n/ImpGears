@@ -4,15 +4,18 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 DepthNormalShader::DepthNormalShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
 {
 }
 
+//--------------------------------------------------------------
 DepthNormalShader::~DepthNormalShader()
 {
 }
 
+//--------------------------------------------------------------
 /// =========== VERTEX SHADER SOURCE =====================
 const char* DepthNormalShader::vertexCodeSource = IMP_GLSL_SRC(
 
@@ -27,6 +30,7 @@ void main(){
 
 );
 
+//--------------------------------------------------------------
 /// =========== FRAGMENT SHADER SOURCE =====================
 const char* DepthNormalShader::fragmentCodeSource = IMP_GLSL_SRC(
 

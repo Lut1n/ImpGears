@@ -6,6 +6,7 @@
 #include "terrain/TerrainNode.h"
 #include "sky/Sky.h"
 
+/// \brief Defines the Scene. A scene is rendered by the graphic renderer.
 class Scene : public SceneNode
 {
     public:
@@ -14,8 +15,13 @@ class Scene : public SceneNode
 
         virtual void render(imp::Uint32 passID);
 
-        void addSceneComponent(SceneNode* SceneNode);
-        void removeSceneComponent(SceneNode* SceneNode);
+        /// \brief Adds a node to the scene.
+        /// \param sceneNode - the node to add.
+        void addSceneComponent(SceneNode* sceneNode);
+
+        /// \brief Removes a node from the scene.
+        /// \param sceneNode - the node to remove.
+        void removeSceneComponent(SceneNode* sceneNode);
 
         static Scene* getInstance(){return instance;}
     protected:

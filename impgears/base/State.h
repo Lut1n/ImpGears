@@ -11,14 +11,19 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a temporary game state. To be modified.
 class State
 {
     public:
         State();
         virtual ~State();
 
+        /// \brief Called when event is received.
+        /// \param event - The received event.
         void onEvent(const imp::Event& event);
 
+        /// \brief Gets the instance of the game state.
+        /// \return The instance.
         static State* getInstance()
         {
                 return m_singleton;

@@ -1,7 +1,10 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include "base/impBase.hpp"
 #include <ctime>
+
+IMPGEARS_BEGIN
 
 class Timer
 {
@@ -16,5 +19,7 @@ class Timer
     clock_t t;
 //    IMPuint8 m;
 };
+
+IMPGEARS_END
 
 #endif // TIMER_H

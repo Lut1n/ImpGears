@@ -7,6 +7,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a shader to be used with the skybox.
 class SkyShader : public Shader
 {
     public:

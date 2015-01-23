@@ -10,6 +10,7 @@ class SceneNode;
 typedef std::list<SceneNode*> SceneNodeList;
 typedef SceneNodeList::iterator SceneNodeIt;
 
+/// \brief Defines a scene node. Has to be added to a scene for rendering.
 class SceneNode
 {
     public:
@@ -49,12 +50,8 @@ class SceneNode
 
     protected:
 
-        void addSubNode(SceneNode* SceneNode);
-        void removeSubNode(SceneNode* SceneNode);
-
-        /**
-         * Prevoir un parametre supplementaire pour la rotation sur axe frontal (x)
-         */
+        void addSubNode(SceneNode* sceneNode);
+        void removeSubNode(SceneNode* sceneNode);
         void calculateRotation();
 
     private:

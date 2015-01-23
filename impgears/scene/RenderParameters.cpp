@@ -2,6 +2,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 RenderParameters::RenderParameters():
     m_faceCullingMode(FaceCullingMode_Back),
     m_blendMode(BlendMode_SrcAlphaBased)
@@ -9,6 +10,7 @@ RenderParameters::RenderParameters():
     m_clearColor = Vector3(0.2f, 0.5f, 1.f); //alpha = 1.f
 }
 
+//--------------------------------------------------------------
 RenderParameters::RenderParameters(const RenderParameters& other):
     m_faceCullingMode(other.m_faceCullingMode),
     m_blendMode(other.m_blendMode)
@@ -16,11 +18,13 @@ RenderParameters::RenderParameters(const RenderParameters& other):
     m_clearColor = other.m_clearColor;
 }
 
+//--------------------------------------------------------------
 RenderParameters::~RenderParameters()
 {
     disable();
 }
 
+//--------------------------------------------------------------
 const RenderParameters& RenderParameters::operator=(const RenderParameters& other)
 {
     m_faceCullingMode = other.m_faceCullingMode;
@@ -30,11 +34,13 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
     return *this;
 }
 
+//--------------------------------------------------------------
 void RenderParameters::setClearColor(const Vector3& clearColor)
 {
     m_clearColor = clearColor;
 }
 
+//--------------------------------------------------------------
 void RenderParameters::enable() const
 {
     glClearColor(m_clearColor.getX(), m_clearColor.getY(), m_clearColor.getZ(), 1.f);
@@ -86,6 +92,7 @@ void RenderParameters::enable() const
     glHint(GL_FOG_HINT, GL_NICEST);*/
 }
 
+//--------------------------------------------------------------
 void RenderParameters::disable() const
 {
 }

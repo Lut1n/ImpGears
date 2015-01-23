@@ -1,9 +1,3 @@
-/*
-voxels/ChunkData.h
-
-Define a data chunk of a world. A ChunkData is streamable and directly used by a IGWorld object.
-*/
-
 #ifndef CHUNKDATA_H
 #define CHUNKDATA_H
 
@@ -15,6 +9,7 @@ Define a data chunk of a world. A ChunkData is streamable and directly used by a
 #define CHUNK_SURFACE CHUNK_DIM*CHUNK_DIM
 #define CHUNK_VOLUME CHUNK_SURFACE*CHUNK_DIM
 
+/// \brief Define a data chunk of a voxel terrain. A ChunkData is streamable and directly used by a IGWorld object.
 class ChunkData : IGStreamable
 {
 private:

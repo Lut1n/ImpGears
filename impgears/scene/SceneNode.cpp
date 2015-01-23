@@ -3,25 +3,31 @@
 
 #include <cmath>
 
+//--------------------------------------------------------------
 int SceneNode::nbDisplayed = 0;
 
+//--------------------------------------------------------------
 SceneNode::SceneNode():
     rx(0.f), ry(0.f), rz(0.f), renderActivated(true)
 {
 }
 
+//--------------------------------------------------------------
 SceneNode::~SceneNode(){
 
 }
 
-void SceneNode::addSubNode(SceneNode* SceneNode){
-    subSceneNodes.push_back(SceneNode);
+//--------------------------------------------------------------
+void SceneNode::addSubNode(SceneNode* sceneNode){
+    subSceneNodes.push_back(sceneNode);
 }
 
-void SceneNode::removeSubNode(SceneNode* SceneNode){
-    subSceneNodes.remove(SceneNode);
+//--------------------------------------------------------------
+void SceneNode::removeSubNode(SceneNode* sceneNode){
+    subSceneNodes.remove(sceneNode);
 }
 
+//--------------------------------------------------------------
 void SceneNode::renderAll(imp::Uint32 passID){
 
     if(!renderActivated)return;
@@ -45,6 +51,7 @@ void SceneNode::renderAll(imp::Uint32 passID){
     glPopMatrix();
 }
 
+//--------------------------------------------------------------
 void SceneNode::calculateRotation(){
 
     orientation.normalize();

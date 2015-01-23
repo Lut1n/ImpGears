@@ -4,8 +4,10 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 GraphicRenderer* GraphicRenderer::instance = NULL;
 
+//--------------------------------------------------------------
 GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
 {
     //ctor
@@ -38,10 +40,12 @@ GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
     setInstance(this);
 }
 
+//--------------------------------------------------------------
 GraphicRenderer::~GraphicRenderer()
 {
 }
 
+//--------------------------------------------------------------
 void GraphicRenderer::renderScene(imp::Uint32 passID){
 
     m_parameters.enable();
@@ -61,6 +65,7 @@ void GraphicRenderer::renderScene(imp::Uint32 passID){
     m_parameters.disable();
 }
 
+//--------------------------------------------------------------
 void GraphicRenderer::setPerspectiveProjection()
 {
     Uint32 width = EvnContextInterface::getInstance()->getWidth(windowID);
@@ -71,6 +76,7 @@ void GraphicRenderer::setPerspectiveProjection()
     gluPerspective(FRUSTUM_FOVY, width/height, FRUSTUM_NEAR, FRUSTUM_FAR);
 }
 
+//--------------------------------------------------------------
 void GraphicRenderer::setOrthographicProjection(float left, float right, float bottom, float top)
 {
     glMatrixMode(GL_PROJECTION);
@@ -78,6 +84,7 @@ void GraphicRenderer::setOrthographicProjection(float left, float right, float b
     glOrtho(left, right, bottom, top, FRUSTUM_NEAR, FRUSTUM_FAR);
 }
 
+//--------------------------------------------------------------
 const Mat4 GraphicRenderer::getProjectionMatrix() const
 {
     float data[16];
@@ -86,6 +93,7 @@ const Mat4 GraphicRenderer::getProjectionMatrix() const
     return Mat4(data);
 }
 
+//--------------------------------------------------------------
 const Mat4 GraphicRenderer::getModelViewMatrix() const
 {
     float data[16];

@@ -7,6 +7,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines the depth and normals rendering shader.
 class DepthNormalShader : public Shader
 {
     public:

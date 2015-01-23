@@ -11,6 +11,7 @@ IMPGEARS_BEGIN
 //#define CONIC_FOV 1
 //#define SPHERIC_FOV 1
 
+/// \brief Defines a scene camera.
 class Camera : public Entity
 {
     public:

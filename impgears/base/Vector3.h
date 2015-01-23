@@ -5,6 +5,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a float vector3.
 class Vector3
 {
     public:
@@ -28,6 +29,10 @@ class Vector3
             m_z = z;
         }
 
+        /// \brief Sets the vector value from angles and norm.
+        /// \param theta - Z axis rotation angle.
+        /// \param phi - X axis rotation angle.
+        /// \param norm - The norm of the vector.
         void setRadial(float theta, float phi, float norm = 1);
 
         Vector3& operator*=(const float scalar);
@@ -44,13 +49,22 @@ class Vector3
         void rotationY(float ry);
         void rotationZ(float rz);
 
+        /// \brief Applies a dot product.
+        /// \param other - An other vector3.
+        /// \return The result of the dot product.
         float dotProduct(const Vector3& other) const;
+
+        /// \brief Applies a cross product.
+        /// \param other - An other vector3.
+        /// \return The result of the cross product.
         Vector3 crossProduct(const Vector3& other) const;
 
         float getNorm() const;
         float getSqNorm() const;
 
+        /// \brief Applies a truncation on the vector values.
         void truncate();
+
         void normalize();
 
     protected:

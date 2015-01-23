@@ -6,6 +6,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 Shader::Shader(const char* vertexShader, const char* fragmentShader)
 {
     GLint result;
@@ -56,6 +57,7 @@ Shader::Shader(const char* vertexShader, const char* fragmentShader)
     glLinkProgram (m_programID) ;
 }
 
+//--------------------------------------------------------------
 void Shader::setTextureParameter(const char* name, const Texture* texture, Int32 textureUnit)
 {
     enable();
@@ -69,6 +71,7 @@ void Shader::setTextureParameter(const char* name, const Texture* texture, Int32
         fprintf(stderr, "impError : Send texture(%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
 }
 
+//--------------------------------------------------------------
 void Shader::setFloatParameter(const char* name, float value)
 {
     enable();
@@ -78,6 +81,7 @@ void Shader::setFloatParameter(const char* name, float value)
         fprintf(stderr, "impError : Send float(%s (value : %f)) to shader (error %d : %s)\n", name, value, errorState, gluErrorString(errorState));
 }
 
+//--------------------------------------------------------------
 void Shader::setMat4Parameter(const char* name, const Mat4& mat4)
 {
     enable();
@@ -87,6 +91,7 @@ void Shader::setMat4Parameter(const char* name, const Mat4& mat4)
         fprintf(stderr, "impError : Send Mat4(%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
 }
 
+//--------------------------------------------------------------
 Shader::~Shader()
 {
     disable();
@@ -98,12 +103,14 @@ Shader::~Shader()
     glDeleteProgram (m_programID);
 }
 
+//--------------------------------------------------------------
 void Shader::enable()
 {
     glEnable(GL_DEPTH_TEST);
     glUseProgram (m_programID) ;
 }
 
+//--------------------------------------------------------------
 void Shader::disable()
 {
     glUseProgram (0) ;

@@ -2,7 +2,7 @@
 #include "camera/SceneCamera.h"
 #include "graphics/GLcommon.h"
 
-#include "shaders/DefaultShader.h"
+#include "shaders/TerrainShader.h"
 #include "scene/GraphicRenderer.h"
 
 imp::Texture* VBOChunk::atlasTex = 0;
@@ -303,8 +303,8 @@ void VBOChunk::Render(imp::Uint32 passID)
 
         if(passID == 1)
         {
-            imp::DefaultShader::instance->setMat4Parameter("shadow_mvMat", m_mvMat);
-            imp::DefaultShader::instance->setFloatParameter("chunkZ", position.getZ());
+            imp::TerrainShader::instance->setMat4Parameter("shadow_mvMat", m_mvMat);
+            imp::TerrainShader::instance->setFloatParameter("chunkZ", position.getZ());
         }
         else if(passID == 0)
         {

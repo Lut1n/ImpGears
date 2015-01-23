@@ -10,6 +10,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines The graphic renderer.
 class GraphicRenderer
 {
     public:

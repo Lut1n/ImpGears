@@ -11,6 +11,7 @@ IMPGEARS_BEGIN
 
 #define SPEED 0.2f
 
+//--------------------------------------------------------------
 FreeFlyCamera::FreeFlyCamera(float xref, float yref, const imp::Vector3& position, const imp::Vector3& target)
 {
     this->xref = xref;
@@ -21,17 +22,21 @@ FreeFlyCamera::FreeFlyCamera(float xref, float yref, const imp::Vector3& positio
     m_cursorTimer.reset();
 }
 
+//--------------------------------------------------------------
 FreeFlyCamera::~FreeFlyCamera()
 {
     //dtor
 }
 
+//--------------------------------------------------------------
 void FreeFlyCamera::initialize(){
 }
 
+//--------------------------------------------------------------
 void FreeFlyCamera::onEvent(const imp::Event& evn){
 }
 
+//--------------------------------------------------------------
 void FreeFlyCamera::update(){
 
     imp::State* state = imp::State::getInstance();

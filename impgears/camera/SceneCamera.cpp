@@ -10,29 +10,37 @@ IMPGEARS_BEGIN
 
 #define STRAT_CAM_HEIGHT 70.f
 
+//--------------------------------------------------------------
 const imp::Vector3 Camera::m_upVector(0.f, 0.f, 1.f);
 
+//--------------------------------------------------------------
 Camera* Camera::m_activeCamera = IMP_NULL;
 
+//--------------------------------------------------------------
 Camera::Camera(bool active)
 {
     if(active)
         activate();
 }
 
+//--------------------------------------------------------------
 Camera::~Camera()
 {
 }
 
+//--------------------------------------------------------------
 void Camera::initialize(){
 }
 
+//--------------------------------------------------------------
 void Camera::onEvent(const imp::Event& evn){
 }
 
+//--------------------------------------------------------------
 void Camera::update(){
 }
 
+//--------------------------------------------------------------
 void Camera::lookAt()
 {
     imp::Vector3 pos = m_position;
@@ -50,6 +58,7 @@ void Camera::lookAt()
               m_upVector.getX(), m_upVector.getY(), m_upVector.getZ());
 }
 
+//--------------------------------------------------------------
 void Camera::setTarget(const imp::Vector3& target)
 {
     m_target = target;
@@ -58,11 +67,13 @@ void Camera::setTarget(const imp::Vector3& target)
     m_orientation.normalize();
 }
 
+//--------------------------------------------------------------
 void Camera::move(const imp::Vector3& move)
 {
     m_position = m_position + move;
 }
 
+//--------------------------------------------------------------
 void Camera::rotate(float theta, float phi)
 {
     m_theta += theta;
@@ -74,6 +85,7 @@ void Camera::rotate(float theta, float phi)
     m_orientation.setRadial(m_theta, m_phi);
 }
 
+//--------------------------------------------------------------
 void Camera::initFrustum(float width, float height, float fovy, float nearDist, float farDist)
 {
     float w2 = width/2.f;
@@ -97,6 +109,7 @@ void Camera::initFrustum(float width, float height, float fovy, float nearDist, 
     m_frustumConf.tanfovy = tanf(m_frustumConf.frustum_fovy);
 }
 
+//--------------------------------------------------------------
 bool Camera::testFov(float x, float y, float z, float r)
 {
     imp::Vector3 v(x,y,z);
@@ -167,6 +180,7 @@ bool Camera::testFov(float x, float y, float z, float r)
     return true;
 }
 
+//--------------------------------------------------------------
 void Camera::debugDraw()
 {
     #ifdef CAMERA_DEBUG
@@ -188,12 +202,14 @@ void Camera::debugDraw()
     #endif
 }
 
+//--------------------------------------------------------------
 void Camera::updateLateralVector()
 {
     m_lateralVector = m_orientation.crossProduct(m_upVector);
     m_lateralVector.normalize();
 }
 
+//--------------------------------------------------------------
 void Camera::updateFov()
 {
     m_orientation.normalize();
@@ -205,6 +221,7 @@ void Camera::updateFov()
     m_headVector.normalize();
 }
 
+//--------------------------------------------------------------
 const Vector3 Camera::getVectorFromCursor(float x, float y)
 {
     GLdouble modelview[16];

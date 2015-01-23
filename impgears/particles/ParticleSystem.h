@@ -49,8 +49,8 @@ class ParticleSystem
     RenderType renderType;
     float timeBetweenP;
     GLuint tx;
-    Timer timectrl;
-    Timer timer;
+    imp::Timer timectrl;
+    imp::Timer timer;
 
         pos_t nullpos;
 

@@ -46,7 +46,7 @@ void VBOData::resizeVBO(imp::Uint32 _size)
 void VBOData::setData(void* _buffer, imp::Uint32 _size, imp::Uint32 _vboOffset)
 {
     glBindBuffer(GL_ARRAY_BUFFER, (GLuint)vboID);
-    glBufferSubData(GL_ARRAY_BUFFER, _vboOffset, _size, _buffer );
+    glBufferSubData(GL_ARRAY_BUFFER, _vboOffset, _size, _buffer);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

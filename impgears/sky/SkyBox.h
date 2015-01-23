@@ -10,6 +10,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a sky box.
 class SkyBox : public Entity, public SceneNode, public VBOData
 {
     public:

@@ -3,6 +3,7 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
 StrategicCamera::StrategicCamera()
 {
     setPosition(imp::Vector3(100.f, 100.f, 100.f));
@@ -10,17 +11,21 @@ StrategicCamera::StrategicCamera()
     updateFov();
 }
 
+//--------------------------------------------------------------
 StrategicCamera::~StrategicCamera()
 {
     //dtor
 }
 
+//--------------------------------------------------------------
 void StrategicCamera::initialize(){
 }
 
+//--------------------------------------------------------------
 void StrategicCamera::onEvent(const imp::Event& evn){
 }
 
+//--------------------------------------------------------------
 void StrategicCamera::update(){
     float speed = 0.4f;
 

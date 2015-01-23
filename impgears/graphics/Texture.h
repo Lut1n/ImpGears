@@ -5,6 +5,7 @@
 
 IMPGEARS_BEGIN
 
+/// \struct Pixel - Defines a rgba pixel.
 struct Pixel
 {
 	imp::Uint8 red;
@@ -13,6 +14,7 @@ struct Pixel
 	imp::Uint8 alpha;
 };
 
+/// \brief Defines a texture.
 class Texture
 {
     public:
@@ -35,8 +37,19 @@ class Texture
 
         virtual ~Texture();
 
+        /// \brief Loads the texture from memory.
+        /// \param data - A pointer to the data buffer.
+        /// \param width - The width of the texture.
+        /// \param height - The height of the texture.
+        /// \param format - The pixel format.
+        /// \param memoryMode - The memory mode.
         void loadFromMemory(char* data, Uint32 width, Uint32 height, Format format = Format_RGBA, MemoryMode memoryMode = MemoryMode_ramAndVideo);
 
+        /// \brief Creates a texture.
+        /// \param width - The width of the texture.
+        /// \param height - The height of the texture.
+        /// \param format - The pixel format.
+        /// \param memoryMode - The memory mode.
 		void create(Uint32 width, Uint32 height, Format format = Format_RGBA, MemoryMode memoryMode = MemoryMode_ramAndVideo);
 		void destroy();
 

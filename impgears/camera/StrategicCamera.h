@@ -6,6 +6,7 @@
 
 IMPGEARS_BEGIN
 
+/// \brief Defines a strategic camera.
 class StrategicCamera : public Camera
 {
     public:

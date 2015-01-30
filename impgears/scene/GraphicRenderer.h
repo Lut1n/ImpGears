@@ -19,7 +19,7 @@ class GraphicRenderer
 
         void renderScene(Uint32 passID);
 
-        void setCamera(Camera* camera){this->camera = camera; camera->activate();}
+        void setCamera(Camera* camera){this->camera = camera; if(camera != IMP_NULL)camera->activate();}
         Camera* getCamera(){return camera;}
 
         void setRenderParameters(const RenderParameters& parameters){m_parameters = parameters;}
@@ -36,6 +36,8 @@ class GraphicRenderer
         const Mat4 getProjectionMatrix() const;
         const Mat4 getModelViewMatrix() const;
 
+        const Mat4& getViewMatrix() const {return m_viewMat;}
+
     protected:
 
         RenderParameters m_parameters;
@@ -49,6 +51,8 @@ class GraphicRenderer
 
         static GraphicRenderer* instance;
         bool centerCursor;
+
+        Mat4 m_viewMat;
 };
 
 IMPGEARS_END

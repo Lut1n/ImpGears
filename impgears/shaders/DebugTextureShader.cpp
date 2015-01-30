@@ -1,47 +1,45 @@
-#include "SSAOShader.h"
+#include "DebugTextureShader.h"
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-SSAOShader::SSAOShader():
+DebugTextureShader::DebugTextureShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
 {
 }
 
 //--------------------------------------------------------------
-SSAOShader::~SSAOShader()
+DebugTextureShader::~DebugTextureShader()
 {
 }
 
+
 //--------------------------------------------------------------
 /// =========== VERTEX SHADER SOURCE =====================
-const char* SSAOShader::vertexCodeSource = IMP_GLSL_SRC(
+const char* DebugTextureShader::vertexCodeSource = IMP_GLSL_SRC(
 
-uniform mat4 biasMat;
-varying vec4 depthUV;
+varying vec2 texCoord;
 
 void main(){
 
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-    depthUV = gl_Position;
-    depthUV.xy /= depthUV.w;
-    depthUV.xy = depthUV.xy *0.5f + 0.5f;
-    gl_FrontColor = gl_Color;
+    gl_FrontColor = vec4(1.f, 1.f, 1.f, 1.f);
+    texCoord = vec2(gl_MultiTexCoord0);
 }
 
 );
 
 //--------------------------------------------------------------
 /// =========== FRAGMENT SHADER SOURCE =====================
-const char* SSAOShader::fragmentCodeSource = IMP_GLSL_SRC(
+const char* DebugTextureShader::fragmentCodeSource = IMP_GLSL_SRC(
 
-uniform sampler2D depthTex;
-varying vec4 depthUV;
+varying vec2 texCoord;
+uniform sampler2D u_colorTexture;
 
 void main(){
 
-    vec4 depthColor = texture2D(depthTex, depthUV.xy);
-    gl_FragData[0] = vec4(depthColor.xyz, 1.f);
+    vec4 texColor = texture2D(u_colorTexture, texCoord);
+    gl_FragData[0] = gl_Color;
 }
 
 );

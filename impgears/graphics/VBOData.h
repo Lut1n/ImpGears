@@ -28,9 +28,9 @@ public:
 
     void resizeVBO(imp::Uint32 _size);
 
-    void setData(void* _buffer, imp::Uint32 _size, imp::Uint32 _vboOffset);
+    void setData(const void* _buffer, imp::Uint32 _size, imp::Uint32 _vboOffset);
 
-    void setData(void* _buffer, imp::Uint32 _size);
+    void setData(const void* _buffer, imp::Uint32 _size);
 
     imp::Uint32 getVBOID();
     imp::Uint32 getVBOSize();

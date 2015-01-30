@@ -29,7 +29,7 @@ class State
                 return m_singleton;
         }
 
-        bool key_up, key_down, key_left, key_right, key_shift;
+        bool key_up, key_down, key_left, key_right, key_shift, key_ctrl;
 
         float xdep, ydep;
 

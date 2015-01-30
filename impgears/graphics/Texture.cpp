@@ -95,6 +95,7 @@ void Texture::destroy()
     {
         GLuint id = static_cast<GLuint>(m_videoID);
         glDeleteTextures(1, &id);
+        GL_CHECKERROR("delete texture");
         m_videoID = 0;
     }
 }
@@ -172,6 +173,7 @@ void Texture::updateGlTex()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    GL_CHECKERROR("texture update");
 }
 
 //--------------------------------------------------------------

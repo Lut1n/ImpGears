@@ -7,7 +7,7 @@ RenderParameters::RenderParameters():
     m_faceCullingMode(FaceCullingMode_Back),
     m_blendMode(BlendMode_SrcAlphaBased)
 {
-    m_clearColor = Vector3(0.2f, 0.5f, 1.f); //alpha = 1.f
+    m_clearColor = Vector3(1.f, 1.f, 1.f); //alpha = 1.f
 }
 
 //--------------------------------------------------------------
@@ -43,7 +43,7 @@ void RenderParameters::setClearColor(const Vector3& clearColor)
 //--------------------------------------------------------------
 void RenderParameters::enable() const
 {
-    glClearColor(m_clearColor.getX(), m_clearColor.getY(), m_clearColor.getZ(), 1.f);
+    glClearColor(m_clearColor.getX(), m_clearColor.getY(), m_clearColor.getZ(), 0.f);
 
     /// Face culling mode
     if(m_faceCullingMode == FaceCullingMode_None)

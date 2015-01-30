@@ -30,6 +30,11 @@ class Mat4
         /// \return The internal mat4 data (column major).
         const float* getData() const;
 
+        /// \brief Set a value
+        /// \param c - the column
+        /// \param l - the line
+        void setValue(Uint32 c, Uint32 l, float v);
+
     protected:
     private:
 

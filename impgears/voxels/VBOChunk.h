@@ -71,7 +71,7 @@ public:
 
     imp::Uint64 m_texCoordOffset, m_normalOffset;
 
-    imp::Mat4 m_mvMat;
+    imp::Mat4 m_shadowMvMat, m_mvMat;
 
 };
 

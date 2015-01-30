@@ -30,13 +30,14 @@ class RenderTarget
         /// \param width - The width of the internal texture.
         /// \param height - The height of the internal texture.
         /// \param depthBuffer - A second buffer for the depth must be created ?
-        void createBufferTarget(Uint32 width, Uint32 height, bool depthBuffer);
+        void createBufferTarget(Uint32 width, Uint32 height, Uint32 textureCount, bool depthBuffer);
 
         void destroy();
 
         bool hasDepthBuffer() const{return m_hasDepthBuffer;}
 
-        const Texture* asTexture();
+
+        const Texture* getTexture(Uint32 n);
         const Texture* getDepthTexture();
 
         void bind();
@@ -49,9 +50,11 @@ class RenderTarget
     Uint32 m_width;
     Uint32 m_height;
     Uint32 m_bpp;
+
+    Uint32 m_textureCount;
     bool m_hasDepthBuffer;
 
-    Texture* m_colorTexture;
+    Texture* m_colorTextures[5];
     Texture* m_depthTexture;
     GLuint m_frameBufferID;
 };

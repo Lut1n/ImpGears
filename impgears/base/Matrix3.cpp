@@ -3,6 +3,10 @@
 #include <cstring>
 #include <cmath>
 
+#include "base/Mat4.h"
+
+#define IDX(x,y)m_values[y*3+x]
+
 IMPGEARS_BEGIN
 
 Matrix3::Matrix3()
@@ -14,6 +18,15 @@ Matrix3::Matrix3()
 Matrix3::Matrix3(const Matrix3& other)
 {
     memcpy(m_values, other.m_values, sizeof(float)*9);
+}
+
+Matrix3::Matrix3(const Mat4& mat4)
+{
+    const float* value4 = mat4.getData();
+    for(int c=0; c<3; ++c)
+    {
+        memcpy(&(m_values[c*3]), &(value4[c*4]), sizeof(float)*3);
+    }
 }
 
 Matrix3::Matrix3(const float values[9])
@@ -118,8 +131,23 @@ imp::Vector3 Matrix3::operator*(const imp::Vector3& vector) const
 
 float Matrix3::getDet() const
 {
-    /// not implemented
-    return 0;
+    /**
+    A = | a b c |
+        | d e f |
+        | g h i |
+
+    det(A) = aei + bfg + cdh - ceg - fha - ibd
+    */
+
+    float result =
+    IDX(0,0)*IDX(1,1)*IDX(2,2)
+    + IDX(1,0)*IDX(2,1)*IDX(0,2)
+    + IDX(2,0)*IDX(0,1)*IDX(1,2)
+    - IDX(2,0)*IDX(1,1)*IDX(0,2)
+    - IDX(2,1)*IDX(1,2)*IDX(0,0)
+    - IDX(2,2)*IDX(1,0)*IDX(0,1);
+
+    return result;
 }
 
 Matrix3 Matrix3::getTranspose() const
@@ -136,8 +164,49 @@ Matrix3 Matrix3::getTranspose() const
 
 Matrix3 Matrix3::getInverse() const
 {
-    /// not implemented
-    return Matrix3();
+    /**
+    A = | a b c |
+        | d e f |
+        | g h i |
+
+    A-1 = 1/det(A) * transpose( | ei-fh  fg-di  dh-eg | )
+                                | ch-bi  ai-cg  bg-ah |
+                                | bf-ce  cd-af  ae-bd |
+    */
+
+    float result[9];
+    result[0] = IDX(1,1)*IDX(2,2) - IDX(2,1)*IDX(1,2);
+    result[1] = IDX(2,0)*IDX(1,2) - IDX(1,0)*IDX(2,2);
+    result[2] = IDX(1,0)*IDX(2,1) - IDX(2,0)*IDX(1,1);
+
+    result[3] = IDX(2,1)*IDX(0,2) - IDX(0,1)*IDX(2,2);
+    result[4] = IDX(0,0)*IDX(2,2) - IDX(2,0)*IDX(0,2);
+    result[5] = IDX(2,0)*IDX(0,1) - IDX(0,0)*IDX(2,1);
+
+    result[6] = IDX(0,1)*IDX(1,2) - IDX(1,1)*IDX(0,2);
+    result[7] = IDX(1,0)*IDX(0,2) - IDX(0,0)*IDX(1,2);
+    result[8] = IDX(0,0)*IDX(1,1) - IDX(1,0)*IDX(0,1);
+
+    Matrix3 mat(result);
+    float matDet = mat.getDet();
+    mat = mat.getTranspose();
+
+    return mat * (1.f/matDet);
+}
+
+Mat4 Matrix3::asMatrix4() const
+{
+    Mat4 matrix4;
+
+    for(int c=0; c<3; ++c)
+    {
+        for(int l=0; l<3; ++l)
+        {
+            matrix4.setValue(c, l, getValue(l,c));
+        }
+    }
+
+    return matrix4;
 }
 
 const Matrix3 Matrix3::getRotationMatrixX(float rad)

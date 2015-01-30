@@ -46,4 +46,10 @@ const float* Mat4::getData() const
     return m_data;
 }
 
+//--------------------------------------------------------------
+void Mat4::setValue(Uint32 c, Uint32 l, float v)
+{
+    m_data[c*4+l] = v;
+}
+
 IMPGEARS_END

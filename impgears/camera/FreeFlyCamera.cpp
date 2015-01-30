@@ -57,6 +57,7 @@ void FreeFlyCamera::update(){
 
         float speed = SPEED;
         if(state->key_shift)speed *= 2;
+        else if(state->key_ctrl)speed *= 0.2f;
 
         if(state->key_down)move(getForwardVector() * -speed * (elapsed/TIME_UPDATE));
         if(state->key_up)move(getForwardVector() * speed * (elapsed/TIME_UPDATE));

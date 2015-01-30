@@ -19,6 +19,7 @@ class Shader
         void setTextureParameter(const char* name, const Texture* texture, Int32 textureUnit = 0);
         void setFloatParameter(const char* name, float value);
         void setMat4Parameter(const char* name, const Mat4& mat4);
+        void setVector3ArrayParameter(const char* name, float* vector3Array, Uint32 count);
 
         void enable();
         void disable();

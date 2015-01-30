@@ -2,8 +2,11 @@
 #include "camera/SceneCamera.h"
 #include "graphics/GLcommon.h"
 
-#include "shaders/TerrainShader.h"
+#include "shaders/DeferredShader.h"
 #include "scene/GraphicRenderer.h"
+
+#include "base/Matrix3.h"
+
 
 imp::Texture* VBOChunk::atlasTex = 0;
 
@@ -16,7 +19,6 @@ VBOChunk::VBOChunk()
 //--------------------------------------------------------------
 VBOChunk::~VBOChunk()
 {
-
 }
 
 //--------------------------------------------------------------
@@ -44,19 +46,27 @@ void VBOChunk::UpdateBuffer(ChunkData* _chunk, IGWorld* _world)
         imp::Int32 absZ = position.getZ()+(imp::Int32)z;
 
         other = _world->GetValue(absX-1, absY, absZ);
-        if(other == 0)
+        if(other == 0  && texIndex == 1)
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_LEFT, texIndex+1);
+        else if(other == 0)
             AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_LEFT, texIndex);
 
         other = _world->GetValue(absX+1, absY, absZ);
-        if(other == 0)
+        if(other == 0  && texIndex == 1)
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_RIGHT, texIndex+1);
+        else if(other == 0)
             AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_RIGHT, texIndex);
 
         other = _world->GetValue(absX, absY-1, absZ);
-        if(other == 0)
+        if(other == 0  && texIndex == 1)
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_BACK, texIndex+1);
+        else if(other == 0)
             AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_BACK, texIndex);
 
         other = _world->GetValue(absX, absY+1, absZ);
-        if(other == 0)
+        if(other == 0  && texIndex == 1)
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_FRONT, texIndex+1);
+        else if(other == 0)
             AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_FRONT, texIndex);
 
         other = _world->GetValue(absX, absY, absZ-1);
@@ -64,7 +74,9 @@ void VBOChunk::UpdateBuffer(ChunkData* _chunk, IGWorld* _world)
             AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_BOTTOM, texIndex);
 
         other = _world->GetValue(absX, absY, absZ+1);
-        if(other == 0)
+        if(other == 0  && texIndex == 1)
+            AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_TOP, texIndex+2);
+        else if(other == 0)
             AddVboFace(vertexBuffer, normalsBuffer, textCoordsBuffer, x,y,z,CubeFaces_TOP, texIndex);
     }
 
@@ -242,20 +254,25 @@ void VBOChunk::AddTexCoord(FloatBuffer& _texCoords, imp::Uint8 _corner, imp::Uin
 //--------------------------------------------------------------
 void VBOChunk::BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuffer& _textCoords)
 {
+
     imp::Uint32 vboSize = (_vertex.size()+_normals.size()+_textCoords.size())*sizeof(float);
 
-    if(vboSize > 0 && getVBOID() == 0)
+
+    if(/*vboSize > 0 && */getVBOID() == 0)
     {
         requestVBO(vboSize);
+        GL_CHECKERROR("request VBO");
     }
-    else if(vboSize == 0 && getVBOID() > 0)
+    /*else if(vboSize == 0 && getVBOID() > 0)
     {
         releaseVBO();
-    }
+        GL_CHECKERROR("release VBO");
+    }*/
 
     if(getVBOSize() != vboSize)
     {
         resizeVBO(vboSize);
+        GL_CHECKERROR("resize VBO");
     }
 
     int vertexBuffSize = _vertex.size()*sizeof(float);
@@ -301,14 +318,20 @@ void VBOChunk::Render(imp::Uint32 passID)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
-        if(passID == 1)
+        if(passID == 0)
         {
-            imp::TerrainShader::instance->setMat4Parameter("shadow_mvMat", m_mvMat);
-            imp::TerrainShader::instance->setFloatParameter("chunkZ", position.getZ());
+            m_shadowMvMat = imp::GraphicRenderer::getInstance()->getModelViewMatrix();
         }
-        else if(passID == 0)
+        else if(passID == 3)
         {
             m_mvMat = imp::GraphicRenderer::getInstance()->getModelViewMatrix();
+            imp::Matrix3 normalMat3(m_mvMat);
+            imp::Mat4 normalMat4 = normalMat3.getInverse().getTranspose().asMatrix4();
+
+            imp::DeferredShader::instance->setMat4Parameter("u_mvMat", m_mvMat);
+            imp::DeferredShader::instance->setMat4Parameter("u_normalMat", normalMat4);
+            imp::DeferredShader::instance->setFloatParameter("u_chunkLevel", position.getZ());
+			imp::DeferredShader::instance->setMat4Parameter("u_shadowMvMat", m_shadowMvMat);
         }
 
         int count = m_normalOffset/sizeof(float);

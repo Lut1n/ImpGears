@@ -12,10 +12,12 @@ RenderTarget::RenderTarget():
     m_width(0),
     m_height(0),
     m_bpp(0),
+    m_textureCount(0),
     m_hasDepthBuffer(false),
-    m_colorTexture(IMP_NULL),
     m_depthTexture(IMP_NULL)
 {
+    for(Uint32 i=0; i<5; ++i)
+        m_colorTextures[i] = IMP_NULL;
 }
 
 //--------------------------------------------------------------
@@ -38,36 +40,44 @@ void RenderTarget::createScreenTarget(Uint32 windowID)
 }
 
 //--------------------------------------------------------------
-void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, bool depthBuffer)
+void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textureCount, bool depthBuffer)
 {
     destroy();
     m_type = TargetType_Buffer;
     m_hasDepthBuffer = depthBuffer;
 
-
     glGenFramebuffers(1, &m_frameBufferID);
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
+    GL_CHECKERROR("bind FBO");
 
-    m_colorTexture = new Texture();
-    m_colorTexture->create(width, height, Texture::Format_RGBA, Texture::MemoryMode_ramAndVideo);
-    m_colorTexture->setSmooth(false);
-    m_colorTexture->setRepeated(false);
-    m_colorTexture->updateGlTex();
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTexture->getVideoID(), 0);
+    GLenum DrawBuffers[5] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
 
-    m_depthTexture = new Texture();
-    m_depthTexture->create(width, height, Texture::Format_Depth16, Texture::MemoryMode_ramAndVideo);
-    m_depthTexture->setSmooth(false);
-    m_depthTexture->setRepeated(false);
-    m_depthTexture->updateGlTex();
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->getVideoID(), 0);
+    for(Uint32 i=0; i<textureCount; ++i)
+    {
+        m_colorTextures[i] = new Texture();
+        m_colorTextures[i]->create(width, height, Texture::Format_RGBA, Texture::MemoryMode_ramAndVideo);
+        m_colorTextures[i]->setSmooth(false);
+        m_colorTextures[i]->setRepeated(false);
+        m_colorTextures[i]->updateGlTex();
+        m_colorTextures[i]->bind();
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, m_colorTextures[i]->getVideoID(), 0);
+        GL_CHECKERROR("set color buffer");
+    }
 
-    GLenum DrawBuffers[2] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
-
-    int drawBuffersSize = 1;
     if(m_hasDepthBuffer)
-        ++drawBuffersSize;
-    glDrawBuffers(drawBuffersSize, DrawBuffers);
+    {
+        m_depthTexture = new Texture();
+        m_depthTexture->create(width, height, Texture::Format_Depth16, Texture::MemoryMode_ramAndVideo);
+        m_depthTexture->setSmooth(false);
+        m_depthTexture->setRepeated(false);
+        m_depthTexture->updateGlTex();
+        m_depthTexture->bind();
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->getVideoID(), 0);
+        GL_CHECKERROR("set depth buffer");
+    }
+
+    glDrawBuffers(textureCount, DrawBuffers);
+    GL_CHECKERROR("set draw buffers");
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         fprintf(stderr, "[impError] FrameBuffer creation failed.\n");
@@ -81,8 +91,12 @@ void RenderTarget::destroy()
     if(m_type == TargetType_Buffer)
     {
         glDeleteFramebuffers(1, &m_frameBufferID);
-        delete m_colorTexture;
-        m_colorTexture = IMP_NULL;
+
+        for(Uint32 i=0; i<m_textureCount; ++i)
+        {
+            delete m_colorTextures[i];
+            m_colorTextures[i] = IMP_NULL;
+        }
 
         if(m_hasDepthBuffer)
         {
@@ -91,20 +105,21 @@ void RenderTarget::destroy()
         }
     }
 
+    m_textureCount = 0;
     m_hasDepthBuffer = false;
     m_type = TargetType_Unkown;
 }
 
 //--------------------------------------------------------------
-const Texture* RenderTarget::asTexture()
+const Texture* RenderTarget::getTexture(Uint32 n)
 {
     if(m_type != TargetType_Buffer)
     {
-        fprintf(stderr, "[impError] Render target cannot be convert as texture.\n");
+        fprintf(stderr, "[impError] Render target has not texture buffer.\n");
         return IMP_NULL;
     }
 
-    return m_colorTexture;
+    return m_colorTextures[n];
 }
 
 //--------------------------------------------------------------

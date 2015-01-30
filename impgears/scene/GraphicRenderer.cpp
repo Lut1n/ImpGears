@@ -58,7 +58,10 @@ void GraphicRenderer::renderScene(imp::Uint32 passID){
     Uint32 height = EvnContextInterface::getInstance()->getHeight(windowID);
     glViewport(0, 0, width, height);
 
-    camera->lookAt();
+    if(camera != IMP_NULL)
+        camera->lookAt();
+
+    m_viewMat = getModelViewMatrix();
 
     scene.renderAll(passID);
 

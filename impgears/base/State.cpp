@@ -13,6 +13,7 @@ State::State()
 {
 
     key_up = key_down = key_left = key_right = mapUp_down = mapDown_down = false;
+    key_shift = key_ctrl = false;
     zoomUp_down = zoomDown_down = false;
     save_down = false;
     xdep = ydep = 0.0f;
@@ -57,6 +58,9 @@ void State::onEvent(const imp::Event& event)
         if(event.getKeyboard().keyCode == imp::Event::LShift){
             key_shift = true;
         }
+        if(event.getKeyboard().keyCode == imp::Event::LControl){
+            key_ctrl = true;
+        }
         if(event.getKeyboard().keyCode == imp::Event::Escape){
             exit(0);
         }
@@ -96,6 +100,9 @@ void State::onEvent(const imp::Event& event)
         }
         if(event.getKeyboard().keyCode == imp::Event::LShift){
             key_shift = false;
+        }
+        if(event.getKeyboard().keyCode == imp::Event::LControl){
+            key_ctrl = false;
         }
         if(event.getKeyboard().keyCode == imp::Event::PageDown)
         {

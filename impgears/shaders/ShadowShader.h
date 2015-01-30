@@ -20,6 +20,8 @@ class ShadowShader : public Shader
         static const char* fragmentCodeSource;
 };
 
+// source : http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
+
 IMPGEARS_END
 
 #endif // IMP_SHADOWSHADER_H

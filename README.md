@@ -9,18 +9,22 @@ Interesting points :
 - VBO Manager ensures the correct using of the GPU memory.
 - Texture manager is able to get textures already loaded.
 - Random terrain can be generated with Perlin noise technic (2D example [here](https://www.dropbox.com/s/wchzmdgojrvp1mz/infinite-perlin.avi?dl=0)). 
+- Dynamic shadow shaders
+- Simplified technic of SSAO (Screen Space Ambient Occlusion)
+- Simplified technic of lighting
 
 Further work :
 - Continue work on MeshModel loading and rendering.
 - Add a material system.
 - Add an optimised système of Skybox/Skydome
 - Work on dynamic shadow.
-- Work on a SSAO(Screen Space Ambient Occlusion) technic.
+- Work on an advanced SSAO technic.
 - Work with more advanced lighting (my own test projet [here](https://www.dropbox.com/s/0q6zmvcgw8a06o2/normal-mapping.avi?dl=0).)
 
 Sorry for the lack of comments. There are still some major code changes that could be made, the comments will come after ;)
 
-A screenshot of the result with a voxel terrain and dynamic shadow :
-![screenshot](http://uprapide.com/images/Lut1n/impgears22012015.png "Screenshot of the result")
+Some screenshots of the result with a voxel terrain and dynamic shadow, SSAO and light system :
+![screenshot](http://uprapide.com/images/Lut1n/screenvoxel2015-1.png "Screenshot of the result")
+![screenshot](http://uprapide.com/images/Lut1n/screenvoxel2015-2.png "Screenshot of the result")
 
 You can also find some short videos demonstration [here](https://www.dropbox.com/s/46u9sc8ovv2soy0/3d-engine.avi?dl=0) and [here](https://www.dropbox.com/s/7l09s7f07hehs3l/voxel-video.mp4?dl=0).

@@ -54,6 +54,7 @@ class Texture
 		void destroy();
 
 		void updateGlTex();
+		void synchronize();
 
         void bind() const;
         void unbind() const;
@@ -90,6 +91,8 @@ class Texture
         bool hasMimap() const{return m_hasMipmap;}
         void setMipmap(bool mipmap, Uint32 maxLevel = 1000){m_hasMipmap = mipmap; m_mipmapMaxLevel = maxLevel;}
 
+        void notifyVideoMemModified();
+
     protected:
     private:
 
@@ -106,6 +109,8 @@ class Texture
 		bool m_hasMipmap;
 
 		Uint32 m_mipmapMaxLevel;
+
+		bool m_videoMemLastModified;
 };
 
 

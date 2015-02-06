@@ -5,9 +5,9 @@
 
 #include "base/Mat4.h"
 
-#define IDX(x,y)m_values[y*3+x]
-
 IMPGEARS_BEGIN
+
+#define IDX(x,y)m_values[y*3+x]
 
 Matrix3::Matrix3()
 {

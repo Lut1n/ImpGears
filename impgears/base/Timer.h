@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef IMP_TIMER_H
+#define IMP_TIMER_H
 
 #include "base/impBase.hpp"
 #include <ctime>
@@ -22,4 +22,4 @@ class Timer
 
 IMPGEARS_END
 
-#endif // TIMER_H
+#endif // IMP_TIMER_H

@@ -9,6 +9,8 @@ Define an interface for using VBO. VBOData keeps memory size used after request.
 
 #include "VBOManager.h"
 
+IMPGEARS_BEGIN
+
 /// \brief Defines a vbo data.
 class VBOData
 {
@@ -16,13 +18,14 @@ private:
 
     imp::Uint32 vboID;
     imp::Uint32 vboSize;
+    VBOManager::UsageMode usage;
 
 public:
     VBOData();
 
     ~VBOData();
 
-    void requestVBO(imp::Uint32 _size);
+    void requestVBO(imp::Uint32 _size, VBOManager::UsageMode _usage = VBOManager::UsageMode_Static);
 
     void releaseVBO();
 
@@ -32,8 +35,19 @@ public:
 
     void setData(const void* _buffer, imp::Uint32 _size);
 
-    imp::Uint32 getVBOID();
-    imp::Uint32 getVBOSize();
+    void enableVertexArray(imp::Uint64 _offset);
+    void enableNormalArray(imp::Uint64 _offset);
+    void enableTexCoordArray(imp::Uint64 _offset);
+    void enableColorArray(imp::Uint64 _offset);
+
+    imp::Uint32 getVBOID() const;
+    imp::Uint32 getVBOSize() const;
+
+    static imp::Uint32 getBoundVbo();
+    static void bindVBO(const VBOData& _vboData);
+    static void unbindVBO();
 };
+
+IMPGEARS_END
 
 #endif // VBODATA_H

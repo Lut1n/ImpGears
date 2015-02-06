@@ -20,7 +20,7 @@ Texture* TextureManager::getTexture(std::string name){
 
     if(result == IMP_NULL){
         result = PngLoader::loadFromFile(name.c_str());
-        result->updateGlTex();
+        result->synchronize();
         textures[name] = result;
     }
 

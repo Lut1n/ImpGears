@@ -22,6 +22,16 @@ class Mat4
 
         const Mat4& operator=(const Mat4& other);
 
+        const Mat4& operator*=(const Mat4& other);
+        const Mat4 operator*(const Mat4& other) const;
+
+        const Mat4& operator*=(float scalar);
+        const Mat4 operator*(float scalar) const;
+
+        float getDet() const;
+
+        const Mat4 getInverse() const;
+
         /// \brief Sets the mat4 with float buffer.
         /// \param data - The mat4 data (column major).
         void setData(const float* data);
@@ -34,6 +44,11 @@ class Mat4
         /// \param c - the column
         /// \param l - the line
         void setValue(Uint32 c, Uint32 l, float v);
+
+        /// \brief Get a value
+        /// \param c - the column
+        /// \param l - the line
+        float getValue(Uint32 c, Uint32 l) const;
 
     protected:
     private:

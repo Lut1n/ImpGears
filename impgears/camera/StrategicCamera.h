@@ -1,8 +1,8 @@
-#ifndef STRATEGICCAMERA_H
-#define STRATEGICCAMERA_H
+#ifndef IMP_STRATEGICCAMERA_H
+#define IMP_STRATEGICCAMERA_H
 
 #include "graphics/GLcommon.h"
-#include "camera/SceneCamera.h"
+#include "camera/Camera.h"
 
 IMPGEARS_BEGIN
 
@@ -23,4 +23,4 @@ class StrategicCamera : public Camera
 
 IMPGEARS_END
 
-#endif // STRATEGICCAMERA_H
+#endif // IMP_STRATEGICCAMERA_H

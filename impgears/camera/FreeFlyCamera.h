@@ -1,9 +1,9 @@
-#ifndef FREEFLYCAMERA_H
-#define FREEFLYCAMERA_H
+#ifndef IMP_FREEFLYCAMERA_H
+#define IMP_FREEFLYCAMERA_H
 
 #define DIST_ACTION 300.f
 
-#include "SceneCamera.h"
+#include "Camera.h"
 #include <iostream>
 #include "base/impBase.hpp"
 #include "base/Timer.h"
@@ -39,4 +39,4 @@ class FreeFlyCamera : public Camera
 
 IMPGEARS_END
 
-#endif // FREEFLYCAMERA_H
+#endif // IMP_FREEFLYCAMERA_H

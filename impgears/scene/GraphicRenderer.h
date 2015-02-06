@@ -1,11 +1,11 @@
-#ifndef GRAPHICRENDERER_H
-#define GRAPHICRENDERER_H
+#ifndef IMP_GRAPHICRENDERER_H
+#define IMP_GRAPHICRENDERER_H
 
 #include "base/impBase.hpp"
 #include "base/Mat4.h"
 #include "EvnContextInterface.h"
 #include "Scene.h"
-#include "camera/SceneCamera.h"
+#include "camera/Camera.h"
 #include "scene/RenderParameters.h"
 
 IMPGEARS_BEGIN
@@ -57,4 +57,4 @@ class GraphicRenderer
 
 IMPGEARS_END
 
-#endif // GRAPHICRENDERER_H
+#endif // IMP_GRAPHICRENDERER_H

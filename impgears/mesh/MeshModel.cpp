@@ -115,7 +115,7 @@ void MeshModel::setVertexMode(VertexMode vertexMode)
 
 void MeshModel::updateVBO(bool clearLocalData)
 {
-    Uint32 vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
+    Uint32 vboSize = ((1.f+4.f/3.f)*m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
 
     if(getVBOID() == 0)
     {
@@ -127,6 +127,8 @@ void MeshModel::updateVBO(bool clearLocalData)
     }
 
     setData(m_vertexBuffer, m_vertexBufferSize*sizeof(float), 0);
+    float colors[(int)(m_vertexBufferSize*4.f/3.f)] = {1.f};
+    setData(colors, m_vertexBufferSize*sizeof(float)*4.f/3.f, m_vertexBufferSize*sizeof(float));
     //setData(m_texCoordBuffer, m_texCoordBufferSize*sizeof(float), m_vertexBufferSize*sizeof(float));
     //setData(m_normalBuffer, m_normalBufferSize*sizeof(float), m_texCoordBufferSize*sizeof(float));
 
@@ -140,11 +142,11 @@ void MeshModel::updateVBO(bool clearLocalData)
 
 void MeshModel::render()
 {
-    glBindBuffer(GL_ARRAY_BUFFER, getVBOID());
+    //setVertexMode(VertexMode_Lines);
 
-    ///vertex
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
+    bindVBO(*this);
+    enableVertexArray(0);
+    enableColorArray(m_vertexBufferSize*sizeof(float));
 
     ///texture coord
     if(m_texCoordBufferSize  != 0)
@@ -152,8 +154,6 @@ void MeshModel::render()
         //glEnableClientState( GL_TEXTURE_COORD_ARRAY );
         //glTexCoordPointer(2 ,GL_FLOAT, 0, (void*)(m_vertexBufferSize*sizeof(GL_FLOAT)) );
     }
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     ///texture
     /*if(m_material != IMP_NULL)
@@ -188,8 +188,7 @@ void MeshModel::render()
         unbind();
     }*/
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    unbindVBO();
 }
 
 void MeshModel::destroy()

@@ -1,5 +1,5 @@
 #include "VBOChunk.h"
-#include "camera/SceneCamera.h"
+#include "camera/Camera.h"
 #include "graphics/GLcommon.h"
 
 #include "shaders/DeferredShader.h"
@@ -7,6 +7,7 @@
 
 #include "base/Matrix3.h"
 
+IMPGEARS_BEGIN
 
 imp::Texture* VBOChunk::atlasTex = 0;
 
@@ -22,7 +23,7 @@ VBOChunk::~VBOChunk()
 }
 
 //--------------------------------------------------------------
-void VBOChunk::UpdateBuffer(ChunkData* _chunk, IGWorld* _world)
+void VBOChunk::UpdateBuffer(ChunkData* _chunk, VoxelWorld* _world)
 {
     chunk = _chunk;
     const imp::Vector3& position = _chunk->GetPosition();
@@ -301,22 +302,13 @@ void VBOChunk::Render(imp::Uint32 passID)
         glPushMatrix();
         glTranslatef(position.getX(),position.getY(),position.getZ());
 
-        glBindBuffer(GL_ARRAY_BUFFER, getVBOID());
-
+        bindVBO(*this);
         ///vertex
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+0);
-
+        enableVertexArray(0);
         ///normals
-        glEnableClientState( GL_NORMAL_ARRAY );
-        glNormalPointer(GL_FLOAT, 0, (GLvoid*)(m_normalOffset));
-
+        enableNormalArray(m_normalOffset);
         ///texture coord
-        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-        glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(m_texCoordOffset));
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+        enableTexCoordArray(m_texCoordOffset);
 
         if(passID == 0)
         {
@@ -342,10 +334,10 @@ void VBOChunk::Render(imp::Uint32 passID)
         glDrawArrays(GL_QUADS, 0, count);
         #endif
 
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_NORMAL_ARRAY);
-        glDisableClientState(GL_VERTEX_ARRAY);
+        unbindVBO();
 
         glPopMatrix();
     }
 }
+
+IMPGEARS_END

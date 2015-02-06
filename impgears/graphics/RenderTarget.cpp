@@ -2,7 +2,7 @@
 #include "EvnContextInterface.h"
 #include <cstdio>
 
-#include "camera/SceneCamera.h"
+#include "camera/Camera.h"
 
 IMPGEARS_BEGIN
 
@@ -45,6 +45,9 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textur
     destroy();
     m_type = TargetType_Buffer;
     m_hasDepthBuffer = depthBuffer;
+    m_width = width;
+    m_height = height;
+    m_textureCount = textureCount;
 
     glGenFramebuffers(1, &m_frameBufferID);
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
@@ -58,7 +61,7 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textur
         m_colorTextures[i]->create(width, height, Texture::Format_RGBA, Texture::MemoryMode_ramAndVideo);
         m_colorTextures[i]->setSmooth(false);
         m_colorTextures[i]->setRepeated(false);
-        m_colorTextures[i]->updateGlTex();
+        m_colorTextures[i]->synchronize();
         m_colorTextures[i]->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, m_colorTextures[i]->getVideoID(), 0);
         GL_CHECKERROR("set color buffer");
@@ -70,7 +73,7 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textur
         m_depthTexture->create(width, height, Texture::Format_Depth16, Texture::MemoryMode_ramAndVideo);
         m_depthTexture->setSmooth(false);
         m_depthTexture->setRepeated(false);
-        m_depthTexture->updateGlTex();
+        m_depthTexture->synchronize();
         m_depthTexture->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->getVideoID(), 0);
         GL_CHECKERROR("set depth buffer");
@@ -137,15 +140,24 @@ const Texture* RenderTarget::getDepthTexture()
 //--------------------------------------------------------------
 void RenderTarget::bind()
 {
-    if(m_type != TargetType_Buffer)
-        return;
-
-    glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
+    if(m_type == TargetType_Buffer)
+        glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
+    else
+        unbind();
 }
 
 //--------------------------------------------------------------
 void RenderTarget::unbind()
 {
+    if(m_type == TargetType_Buffer)
+    {
+        for(Uint32 i=0; i<m_textureCount; ++i)
+            {
+                m_colorTextures[i]->notifyVideoMemModified();
+                m_colorTextures[i]->synchronize();
+            }
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

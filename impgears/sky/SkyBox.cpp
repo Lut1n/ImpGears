@@ -2,7 +2,7 @@
 
 #include "graphics/GLcommon.h"
 
-#include "camera/SceneCamera.h"
+#include "camera/Camera.h"
 
 #include <vector>
 
@@ -86,47 +86,39 @@ void SkyBox::render(Uint32 passID)
 
     glScalef(m_scale, m_scale, m_scale);
 
-    glBindBuffer(GL_ARRAY_BUFFER, getVBOID());
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-
-    glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(m_txCoordOffset));
+    bindVBO(*this);
+    enableTexCoordArray(m_txCoordOffset);
 
     m_shader.enable();
 
     /// Left
     m_shader.setTextureParameter("skyTexture", m_left, 0);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+m_leftOffset);
+    enableVertexArray(m_leftOffset);
     glDrawArrays(GL_QUADS, 0, 4);
     /// Right
     m_shader.setTextureParameter("skyTexture", m_right, 0);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+m_rightOffset);
+    enableVertexArray(m_rightOffset);
     glDrawArrays(GL_QUADS, 0, 4);
     /// Front
     m_shader.setTextureParameter("skyTexture", m_front, 0);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+m_frontOffset);
+    enableVertexArray(m_frontOffset);
     glDrawArrays(GL_QUADS, 0, 4);
     /// Back
     m_shader.setTextureParameter("skyTexture", m_back, 0);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+m_backOffset);
+    enableVertexArray(m_backOffset);
     glDrawArrays(GL_QUADS, 0, 4);
     /// Top
     m_shader.setTextureParameter("skyTexture", m_top, 0);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+m_topOffset);
+    enableVertexArray(m_topOffset);
     glDrawArrays(GL_QUADS, 0, 4);
     /// Bottom
     m_shader.setTextureParameter("skyTexture", m_bottom, 0);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+m_bottomOffset);
+    enableVertexArray(m_bottomOffset);
     glDrawArrays(GL_QUADS, 0, 4);
 
     m_shader.disable();
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    unbindVBO();
 }
 
 //--------------------------------------------------------------

@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
+IMPGEARS_BEGIN
+
 VBOManager* VBOManager::instance = IMP_NULL;
 
 //--------------------------------------------------------------
@@ -16,11 +18,10 @@ VBOManager* VBOManager::getInstance()
 }
 
 //--------------------------------------------------------------
-VBOManager::VBOManager()
+VBOManager::VBOManager():
+    memoryUsed(0),
+    nbVbo(0)
 {
-    memoryUsed = 0;
-    nbVbo = 0;
-
     VBOManager::instance = this;
 }
 
@@ -37,24 +38,21 @@ VBOManager::~VBOManager()
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOManager::request(imp::Uint32 _size)
+imp::Uint32 VBOManager::request(imp::Uint32 _size, UsageMode _usage)
 {
     if(nbVbo >= VBO_MAX)
         return 0;
 
-    GLuint id[1];
-    glGenBuffers(1, id);
-    glBindBuffer(GL_ARRAY_BUFFER, id[0]);
-    glBufferData(GL_ARRAY_BUFFER, _size, 0, GL_DYNAMIC_DRAW);
+    GLuint id;
+    glGenBuffers(1, &id);
 
     VBO_Info info;
-    info.videoID = (imp::Uint32)id[0];
-    info.size = _size;
+    info.videoID = static_cast<imp::Uint32>(id);
+    info.size = 0;
 
-    vboInfos[nbVbo] = info;
-    ++nbVbo;
+    vboInfos[nbVbo++] = info;
 
-    memoryUsed += info.size;
+    resize(info.videoID, _size, _usage);
 
     return info.videoID;
 }
@@ -81,7 +79,7 @@ void VBOManager::release(imp::Uint32 _id)
 }
 
 //--------------------------------------------------------------
-void VBOManager::resize(imp::Uint32 _id, imp::Uint32 _size)
+void VBOManager::resize(imp::Uint32 _id, imp::Uint32 _size, UsageMode _usage)
 {
     if(_id == 0)
         return;
@@ -89,8 +87,10 @@ void VBOManager::resize(imp::Uint32 _id, imp::Uint32 _size)
     GLuint id[1];
     id[0] = (GLuint)_id;
 
+    GLint glUsage = _usage == UsageMode_Dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+
     glBindBuffer(GL_ARRAY_BUFFER, id[0]);
-    glBufferData(GL_ARRAY_BUFFER, _size, 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _size, 0, glUsage);
 
 
     imp::Uint32 index = findVideoID(_id);
@@ -114,3 +114,5 @@ imp::Uint32 VBOManager::findVideoID(imp::Uint32 _id)
 
     return 0;
 }
+
+IMPGEARS_END

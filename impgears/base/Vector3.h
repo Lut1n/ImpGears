@@ -1,5 +1,5 @@
-#ifndef IMP_Vector3_H
-#define IMP_Vector3_H
+#ifndef IMP_VECTOR3_H
+#define IMP_VECTOR3_H
 
 #include "impBase.hpp"
 
@@ -77,4 +77,4 @@ class Vector3
 
 IMPGEARS_END
 
-#endif // IMP_Vector3_H
+#endif // IMP_VECTOR3_H

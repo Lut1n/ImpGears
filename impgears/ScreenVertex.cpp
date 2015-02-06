@@ -39,23 +39,18 @@ ScreenVertex::~ScreenVertex()
 
 void ScreenVertex::render(imp::Uint32 passID)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, getVBOID());
+    bindVBO(*this);
 
     ///vertex
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, (char*)NULL+0);
+    enableVertexArray(0);
     GL_CHECKERROR("vertex pointer");
 
     ///texture coord
-    glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-    glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(m_texCoordOffset));
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    enableTexCoordArray(m_texCoordOffset);
 
     glDrawArrays(GL_QUADS, 0, 4);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    unbindVBO();
 }
 
 IMPGEARS_END

@@ -1,12 +1,15 @@
-#ifndef Scene_H
-#define Scene_H
+#ifndef IMP_SCENE_H
+#define IMP_SCENE_H
 
+#include "base/impBase.hpp"
 #include "SceneNode.h"
 //#include "lights/LightManager.h"
 #include "terrain/TerrainNode.h"
 #include "sky/Sky.h"
 
-/// \brief Defines the Scene. A scene is rendered by the graphic renderer.
+IMPGEARS_BEGIN
+
+/// \brief Defines the Scene. A scene is the root node of the graph scene and is rendered by the graphic renderer.
 class Scene : public SceneNode
 {
     public:
@@ -32,4 +35,6 @@ class Scene : public SceneNode
         static Scene* instance;
 };
 
-#endif // Scene_H
+IMPGEARS_END
+
+#endif // IMP_SCENE_H

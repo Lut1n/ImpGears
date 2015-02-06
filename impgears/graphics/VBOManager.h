@@ -11,6 +11,8 @@ Define a manager for using VBOs. VBOManager keeps id and size of VBO created. It
 
 #define VBO_MAX 500
 
+IMPGEARS_BEGIN
+
 struct VBO_Info
 {
     imp::Uint32 videoID;
@@ -33,19 +35,28 @@ private:
 
 public:
 
+
+    enum UsageMode
+    {
+        UsageMode_Static = 0,
+        UsageMode_Dynamic
+    };
+
     virtual ~VBOManager();
 
     static VBOManager* getInstance();
 
-    imp::Uint32 request(imp::Uint32 _size);
+    imp::Uint32 request(imp::Uint32 _size, UsageMode _usage);
     void release(imp::Uint32 _id);
 
-    void resize(imp::Uint32 _id, imp::Uint32 _size);
+    void resize(imp::Uint32 _id, imp::Uint32 _size, UsageMode _usage);
 
     imp::Uint32 getVideoID(imp::Uint32 _index);
     imp::Uint32 findVideoID(imp::Uint32 _id);
 
     imp::Uint32 getMemoryUsed() const{return memoryUsed;}
 };
+
+IMPGEARS_END
 
 #endif // VBOMANAGER_H

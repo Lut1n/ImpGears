@@ -1,5 +1,5 @@
-#ifndef TEXTUREMANAGER_H
-#define TEXTUREMANAGER_H
+#ifndef IMP_TEXTUREMANAGER_H
+#define IMP_TEXTUREMANAGER_H
 
 #include "../base/impBase.hpp"
 #include <map>
@@ -24,4 +24,4 @@ class TextureManager
 
 IMPGEARS_END
 
-#endif // TEXTUREMANAGER_H
+#endif // IMP_TEXTUREMANAGER_H

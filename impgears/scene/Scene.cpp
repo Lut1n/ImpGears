@@ -1,5 +1,7 @@
 #include "Scene.h"
 
+IMPGEARS_BEGIN
+
 //--------------------------------------------------------------
 Scene* Scene::instance = NULL;
 
@@ -26,3 +28,5 @@ void Scene::addSceneComponent(SceneNode* sceneNode){
 void Scene::removeSceneComponent(SceneNode* sceneNode){
     removeSubNode(sceneNode);
 }
+
+IMPGEARS_END

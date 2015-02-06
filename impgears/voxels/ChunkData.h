@@ -1,16 +1,18 @@
 #ifndef CHUNKDATA_H
 #define CHUNKDATA_H
 
-#include "../base/impBase.hpp"
-#include "../base/Vector3.h"
-#include "../io/IGStreamable.h"
+#include "base/impBase.hpp"
+#include "base/Vector3.h"
+#include "io/Streamable.h"
 
 #define CHUNK_DIM 32
 #define CHUNK_SURFACE CHUNK_DIM*CHUNK_DIM
 #define CHUNK_VOLUME CHUNK_SURFACE*CHUNK_DIM
 
+IMPGEARS_BEGIN
+
 /// \brief Define a data chunk of a voxel terrain. A ChunkData is streamable and directly used by a IGWorld object.
-class ChunkData : IGStreamable
+class ChunkData : public Streamable
 {
 private:
 
@@ -28,8 +30,10 @@ public:
     imp::Uint8 GetValue(imp::Uint8 _x, imp::Uint8 _y, imp::Uint8 _z);
     void SetValue(imp::Uint8 _x, imp::Uint8 _y, imp::Uint8 _z, imp::Uint8 _value);
 
-    virtual void Load(IGParser* _parser);
-    virtual void Save(IGParser* _parser);
+    virtual void Load(Parser* _parser);
+    virtual void Save(Parser* _parser);
 };
+
+IMPGEARS_END
 
 #endif // CHUNKDATA_H

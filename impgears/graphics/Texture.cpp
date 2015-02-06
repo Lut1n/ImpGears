@@ -16,7 +16,8 @@ Texture::Texture():
     m_isSmooth(false),
     m_isRepeated(false),
     m_hasMipmap(false),
-    m_mipmapMaxLevel(1000)
+    m_mipmapMaxLevel(1000),
+    m_videoMemLastModified(false)
 {
     //ctor
 }
@@ -49,6 +50,8 @@ void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, Format for
     Uint32 size = width*height*(bpp/8);
 
     memcpy(m_data, data, size);
+
+    m_videoMemLastModified = false;
 }
 
 //--------------------------------------------------------------
@@ -68,7 +71,7 @@ void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memo
             bpp = 32;
             break;
         case Format_Depth16:
-            bpp = 32;
+            bpp = 16;
         default:
             break;
     }
@@ -80,6 +83,8 @@ void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memo
 
     m_data = new char[size];
     memset(m_data, 0, size);
+
+    m_videoMemLastModified = false;
 }
 
 //--------------------------------------------------------------
@@ -98,6 +103,8 @@ void Texture::destroy()
         GL_CHECKERROR("delete texture");
         m_videoID = 0;
     }
+
+    m_videoMemLastModified = false;
 }
 
 //--------------------------------------------------------------
@@ -133,7 +140,7 @@ void Texture::updateGlTex()
         else if(m_format == Format_Depth16)
         {
             texture_format = GL_DEPTH_COMPONENT;
-            gl_texture_format = GL_DEPTH_COMPONENT32;
+            gl_texture_format = GL_DEPTH_COMPONENT16;
             component_format = GL_UNSIGNED_BYTE;
         }
         else
@@ -174,6 +181,25 @@ void Texture::updateGlTex()
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     GL_CHECKERROR("texture update");
+}
+
+//--------------------------------------------------------------
+void Texture::synchronize()
+{
+    if(m_memoryMode != MemoryMode_ramAndVideo)
+        return;
+
+    if(m_videoMemLastModified)
+    {
+        //glReadBuffer(GL_COLOR_ATTACHMENT0+buffer);
+        //glReadPixels(0, 0, WIN_W, WIN_H, internal_format, GL_UNSIGNED_BYTE, &pixels[0]);
+        m_videoMemLastModified = false;
+    }
+    else
+    {
+        updateGlTex();
+    }
+
 }
 
 //--------------------------------------------------------------
@@ -223,8 +249,10 @@ void Texture::setPixel(Uint32 _x, Uint32 _y, Pixel _pixel)
     if(channels == 4)
         m_data[_y*m_width*channels + _x*channels+3] = _pixel.alpha;
 
+    m_videoMemLastModified = false;
+
 	if(m_pixelsLocked == false)
-    	updateGlTex();
+    	synchronize();
 }
 
 //--------------------------------------------------------------
@@ -272,6 +300,8 @@ void Texture::setPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, const Pixel*
 		++index;
 	}
 
+	m_videoMemLastModified = false;
+
 	if(m_pixelsLocked == false)
 	{
 	    GLuint videoFormat = GL_RGBA;
@@ -295,7 +325,7 @@ void Texture::unlockPixels()
 {
 	if(m_pixelsLocked)
 	{
-		updateGlTex();
+		synchronize();
 		m_pixelsLocked = false;
 	}
 }
@@ -336,6 +366,12 @@ void Texture::copyPixelsFrom(const Texture* _src,
 
 	_src->getPixels(_srcx, _srcy, _srcw, _srch, buffer);
 	setPixels(_dstx, _dsty, _srcw, _srch, buffer);
+}
+
+//--------------------------------------------------------------
+void Texture::notifyVideoMemModified()
+{
+    m_videoMemLastModified = true;
 }
 
 IMPGEARS_END

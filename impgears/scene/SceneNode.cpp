@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+IMPGEARS_BEGIN
+
 //--------------------------------------------------------------
 int SceneNode::nbDisplayed = 0;
 
@@ -66,3 +68,5 @@ void SceneNode::calculateRotation(){
     ry = -convertion * atan2f(orientation.getZ(), xy);
     rz = convertion * atan2f(orientation.getY(), orientation.getX());
 }
+
+IMPGEARS_END

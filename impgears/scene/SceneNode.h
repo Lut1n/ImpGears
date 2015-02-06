@@ -1,9 +1,12 @@
-#ifndef SceneNode_H
-#define SceneNode_H
+#ifndef IMP_SCENENODE_H
+#define IMP_SCENENODE_H
 
+#include "base/impBase.hpp"
 #include <list>
 #include "base/Vector3.h"
 #include "EvnContextInterface.h"
+
+IMPGEARS_BEGIN
 
 class SceneNode;
 
@@ -65,4 +68,6 @@ class SceneNode
         bool renderActivated;
 };
 
-#endif // SceneNode_H
+IMPGEARS_END
+
+#endif // IMP_SCENENODE_H

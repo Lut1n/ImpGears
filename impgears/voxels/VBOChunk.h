@@ -14,22 +14,25 @@ The next step is to reduce the number of rendered faces by choosing a simpler me
 
 #include <vector>
 
+#include "base/impBase.hpp"
 #include "base/Mat4.h"
 
-#include "../graphics/VBOData.h"
-#include "../graphics/Texture.h"
-#include "IGWorld.h"
-#include "ChunkData.h"
+#include "graphics/VBOData.h"
+#include "graphics/Texture.h"
+#include "voxels/VoxelWorld.h"
+#include "voxels/ChunkData.h"
 
 #define VOXEL_RADIUS 0.5f
 
 //#define GRID_DEBUG
 
+IMPGEARS_BEGIN
+
 typedef std::vector<float> FloatBuffer;
 
-class IGWorld;
+class VoxelWorld;
 
-class VBOChunk : VBOData
+class VBOChunk : public imp::VBOData
 {
 private:
 
@@ -65,7 +68,7 @@ public:
     VBOChunk();
     virtual ~VBOChunk();
 
-    void UpdateBuffer(ChunkData* _chunk, IGWorld* _world);
+    void UpdateBuffer(ChunkData* _chunk, VoxelWorld* _world);
 
     void Render(imp::Uint32 passID);
 
@@ -74,5 +77,7 @@ public:
     imp::Mat4 m_shadowMvMat, m_mvMat;
 
 };
+
+IMPGEARS_END
 
 #endif // VBOCHUNK_H

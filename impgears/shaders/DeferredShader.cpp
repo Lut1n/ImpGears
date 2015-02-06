@@ -84,6 +84,21 @@ uniform sampler2D u_shadowBuffer;
 uniform float u_chunkLevel;
 uniform float u_mapLevel;
 
+mat3 transpose(mat3 m)
+{
+    mat3 result;
+
+    for(int i=0; i<3; ++i)
+    {
+        for(int j=0; j<3; ++j)
+        {
+            result[i][j] = m[j][i];
+        }
+    }
+
+    return result;
+}
+
 void main(){
 
     // define poisson disk
@@ -107,6 +122,7 @@ void main(){
     vec4 specMaterial = texture2D(u_specTexture, v_texCoord);
 
     mat3 TBN = mat3(v_tan, v_bitan, v_normal);
+    // TBN = transpose(TBN);
     normalMaterial = TBN * normalMaterial;
 
     vec3 sunVec = normalize(v_mvSun.xyz - v_mvPosition.xyz);
@@ -129,15 +145,15 @@ void main(){
     visibility = max(0.f, visibility);
 
     vec4 texColor = texture2D(u_colorTexture, v_texCoord) * vec4(visibility, visibility, visibility, 1.f);
-    texColor *= diffuseFactor;
+    texColor *= vec4(diffuseFactor, diffuseFactor, diffuseFactor, 1.f);
 
-    if(diffuseFactor > 0.f && visibility >= 0.5f)
+    if(diffuseFactor > 0.f && visibility >= 0.4f)
     {
-        texColor *= vec4(diffuseFactor, diffuseFactor, diffuseFactor, 1.f);
         texColor += specMaterial*vec4(specularFactor, specularFactor, specularFactor, 1.f);
     }
 
-    texColor += vec4(selfMaterial.xyz, 1.f);
+    //texColor += vec4(selfMaterial.xyz, 1.f);
+    gl_FragData[3] = vec4(selfMaterial.xyz, 1.f);
 
     if(v_position.z+u_chunkLevel > u_mapLevel)
         texColor *= vec4(0.0, 0.0, 0.0, 1.0);

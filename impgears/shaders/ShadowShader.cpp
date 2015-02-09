@@ -20,9 +20,11 @@ const char* ShadowShader::vertexCodeSource = IMP_GLSL_SRC(
 
 varying vec2 v_texCoord;
 
+uniform mat4 u_projection;
+
 void main(){
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = u_projection * gl_ModelViewMatrix * gl_Vertex;
     gl_FrontColor = gl_Color;
     v_texCoord = vec2(gl_MultiTexCoord0);
 }

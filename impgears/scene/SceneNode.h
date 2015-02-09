@@ -4,6 +4,7 @@
 #include "base/impBase.hpp"
 #include <list>
 #include "base/Vector3.h"
+#include "base/Matrix4.h"
 #include "EvnContextInterface.h"
 
 IMPGEARS_BEGIN
@@ -48,6 +49,13 @@ class SceneNode
         bool renderIsActivated() const{return renderActivated;}
         void setRenderActivated(bool activated){renderActivated = activated;}
 
+        const Matrix4 getModelMatrix() const;
+        const Matrix4 getNormalMatrix() const;
+        const void setParentModelMatrices(const Matrix4& pModelMat, const Matrix4& pNormalMat)
+        {
+            m_parentModelMatrix = pModelMat;
+            m_parentNormalMatrix = pNormalMat;
+        }
 
         static int nbDisplayed;
 
@@ -65,7 +73,12 @@ class SceneNode
         imp::Vector3 position;
         imp::Vector3 orientation;
 
+        Vector3 scale;
+
         bool renderActivated;
+
+        Matrix4 m_parentModelMatrix;
+        Matrix4 m_parentNormalMatrix;
 };
 
 IMPGEARS_END

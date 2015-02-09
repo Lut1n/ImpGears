@@ -3,13 +3,12 @@
 #include "graphics/GLcommon.h"
 
 #include "shaders/DeferredShader.h"
+#include "shaders/ShadowBufferShader.h"
 #include "scene/GraphicRenderer.h"
 
 #include "base/Matrix3.h"
 
 IMPGEARS_BEGIN
-
-imp::Texture* VBOChunk::atlasTex = 0;
 
 //--------------------------------------------------------------
 VBOChunk::VBOChunk()
@@ -27,6 +26,7 @@ void VBOChunk::UpdateBuffer(ChunkData* _chunk, VoxelWorld* _world)
 {
     chunk = _chunk;
     const imp::Vector3& position = _chunk->GetPosition();
+    setPosition(position);
 
     FloatBuffer vertexBuffer;
     FloatBuffer normalsBuffer;
@@ -289,7 +289,7 @@ void VBOChunk::BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuf
 }
 
 //--------------------------------------------------------------
-void VBOChunk::Render(imp::Uint32 passID)
+void VBOChunk::render(imp::Uint32 passID)
 {
     if(chunk == IMP_NULL)
         return;
@@ -299,9 +299,6 @@ void VBOChunk::Render(imp::Uint32 passID)
     if(getVBOSize() > 0
        && imp::Camera::getActiveCamera()->testFov(position.getX(),position.getY(),position.getZ(),CHUNK_DIM/2) )
     {
-        glPushMatrix();
-        glTranslatef(position.getX(),position.getY(),position.getZ());
-
         bindVBO(*this);
         ///vertex
         enableVertexArray(0);
@@ -312,18 +309,15 @@ void VBOChunk::Render(imp::Uint32 passID)
 
         if(passID == 0)
         {
-            m_shadowMvMat = imp::GraphicRenderer::getInstance()->getModelViewMatrix();
+            m_shadowModelMat = getModelMatrix();
+            ShadowBufferShader::instance->setMatrix4Parameter("u_model", m_shadowModelMat);
         }
         else if(passID == 3)
         {
-            m_mvMat = imp::GraphicRenderer::getInstance()->getModelViewMatrix();
-            imp::Matrix3 normalMat3(m_mvMat);
-            imp::Mat4 normalMat4 = normalMat3.getInverse().getTranspose().asMatrix4();
-
-            imp::DeferredShader::instance->setMat4Parameter("u_mvMat", m_mvMat);
-            imp::DeferredShader::instance->setMat4Parameter("u_normalMat", normalMat4);
+            imp::DeferredShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
+            imp::DeferredShader::instance->setMatrix4Parameter("u_normal", getModelMatrix()); // /!\ scaling
             imp::DeferredShader::instance->setFloatParameter("u_chunkLevel", position.getZ());
-			imp::DeferredShader::instance->setMat4Parameter("u_shadowMvMat", m_shadowMvMat);
+			imp::DeferredShader::instance->setMatrix4Parameter("u_shadowModelMat", m_shadowModelMat);
         }
 
         int count = m_normalOffset/sizeof(float);
@@ -335,8 +329,6 @@ void VBOChunk::Render(imp::Uint32 passID)
         #endif
 
         unbindVBO();
-
-        glPopMatrix();
     }
 }
 

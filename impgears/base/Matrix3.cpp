@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cmath>
 
-#include "base/Mat4.h"
+#include "base/Matrix4.h"
 
 IMPGEARS_BEGIN
 
@@ -20,9 +20,9 @@ Matrix3::Matrix3(const Matrix3& other)
     memcpy(m_values, other.m_values, sizeof(float)*9);
 }
 
-Matrix3::Matrix3(const Mat4& mat4)
+Matrix3::Matrix3(const Matrix4& Matrix4)
 {
-    const float* value4 = mat4.getData();
+    const float* value4 = Matrix4.getData();
     for(int c=0; c<3; ++c)
     {
         memcpy(&(m_values[c*3]), &(value4[c*4]), sizeof(float)*3);
@@ -194,9 +194,9 @@ Matrix3 Matrix3::getInverse() const
     return mat * (1.f/matDet);
 }
 
-Mat4 Matrix3::asMatrix4() const
+Matrix4 Matrix3::asMatrix4() const
 {
-    Mat4 matrix4;
+    Matrix4 matrix4 = Matrix4::getIdentityMat();
 
     for(int c=0; c<3; ++c)
     {

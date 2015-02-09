@@ -19,9 +19,11 @@ const char* BlurShader::vertexCodeSource = IMP_GLSL_SRC(
 
 varying vec2 v_texCoord;
 
+uniform mat4 u_projection;
+
 void main(){
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = u_projection * gl_Vertex;
 
     gl_FrontColor = vec4(1.f, 1.f, 1.f, 1.f);
     v_texCoord = vec2(gl_MultiTexCoord0);

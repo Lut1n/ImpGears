@@ -15,12 +15,14 @@ The next step is to reduce the number of rendered faces by choosing a simpler me
 #include <vector>
 
 #include "base/impBase.hpp"
-#include "base/Mat4.h"
+#include "base/Matrix4.h"
 
 #include "graphics/VBOData.h"
 #include "graphics/Texture.h"
 #include "voxels/VoxelWorld.h"
 #include "voxels/ChunkData.h"
+
+#include "scene/SceneNode.h"
 
 #define VOXEL_RADIUS 0.5f
 
@@ -32,7 +34,7 @@ typedef std::vector<float> FloatBuffer;
 
 class VoxelWorld;
 
-class VBOChunk : public imp::VBOData
+class VBOChunk : public imp::VBOData, public SceneNode
 {
 private:
 
@@ -62,19 +64,16 @@ private:
 
 public:
 
-    // temporary
-    static imp::Texture* atlasTex;
-
     VBOChunk();
     virtual ~VBOChunk();
 
     void UpdateBuffer(ChunkData* _chunk, VoxelWorld* _world);
 
-    void Render(imp::Uint32 passID);
+    void render(imp::Uint32 passID);
 
     imp::Uint64 m_texCoordOffset, m_normalOffset;
 
-    imp::Mat4 m_shadowMvMat, m_mvMat;
+    imp::Matrix4 m_shadowModelMat, m_mMat, m_nMat;
 
 };
 

@@ -2,10 +2,13 @@
 
 IMPGEARS_BEGIN
 
+ShadowBufferShader* ShadowBufferShader::instance = IMP_NULL;
+
 //--------------------------------------------------------------
 ShadowBufferShader::ShadowBufferShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
 {
+    instance = this;
 }
 
 //--------------------------------------------------------------
@@ -20,9 +23,13 @@ const char* ShadowBufferShader::vertexCodeSource = IMP_GLSL_SRC(
 
 varying vec2 texture_coordinate;
 
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_model;
+
 void main(){
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = u_projection * u_view * u_model * gl_Vertex;
     gl_FrontColor = gl_Color;
     texture_coordinate = vec2(gl_MultiTexCoord0);
 }

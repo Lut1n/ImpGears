@@ -12,6 +12,9 @@ int SceneNode::nbDisplayed = 0;
 SceneNode::SceneNode():
     rx(0.f), ry(0.f), rz(0.f), renderActivated(true)
 {
+    m_parentModelMatrix = Matrix4::getIdentityMat();
+    m_parentNormalMatrix = Matrix4::getIdentityMat();
+    scale = Vector3(1.f, 1.f, 1.f);
 }
 
 //--------------------------------------------------------------
@@ -36,21 +39,17 @@ void SceneNode::renderAll(imp::Uint32 passID){
 
     SceneNode::nbDisplayed++;
 
-    glPushMatrix();
-
-    glTranslatef(position.getX(), position.getY(), position.getZ());
-    glRotatef(rz, 0.f, 0.f, 1.f);
-    glRotatef(ry, 0.f, 1.f, 0.f);
-    glRotatef(rx, 1.f, 0.f, 0.f);
+    Matrix4 modelMat = getModelMatrix();
+    Matrix4 normalMat = getNormalMatrix();
 
     render(passID);
 
-    for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++){
+    for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++)
+    {
         SceneNode* sub = *it;
+        sub->setParentModelMatrices(modelMat, normalMat);
         sub->renderAll(passID);
     }
-
-    glPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -67,6 +66,32 @@ void SceneNode::calculateRotation(){
     rx = 0.f; //Rotation sur axe frontal
     ry = -convertion * atan2f(orientation.getZ(), xy);
     rz = convertion * atan2f(orientation.getY(), orientation.getX());
+}
+
+//--------------------------------------------------------------
+const Matrix4 SceneNode::getModelMatrix() const
+{
+    return m_parentModelMatrix
+            * Matrix4::getTranslationMat(position.getX(), position.getY(), position.getZ())
+            * Matrix4::getRotationMat(rx, 0.f, 0.f)
+            * Matrix4::getRotationMat(0.f, ry, 0.f)
+            * Matrix4::getRotationMat(0.f, 0.f, rz)
+            * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ());
+
+    //return m_parentModelMatrix * Matrix4::getTranslationMat() * Matrix4::getRotationMat(rx, ry, rz);
+}
+
+//--------------------------------------------------------------
+const Matrix4 SceneNode::getNormalMatrix() const
+{
+    return m_parentNormalMatrix
+            * Matrix4::getTranslationMat(position.getX(), position.getY(), position.getZ())
+            * Matrix4::getRotationMat(rx, 0.f, 0.f)
+            * Matrix4::getRotationMat(0.f, ry, 0.f)
+            * Matrix4::getRotationMat(0.f, 0.f, rz)
+            * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ()).getInverse();
+
+    //return m_parentModelMatrix * Matrix4::getTranslationMat() * Matrix4::getRotationMat(rx, ry, rz);
 }
 
 IMPGEARS_END

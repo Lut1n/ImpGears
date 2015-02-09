@@ -12,6 +12,8 @@ class ShadowBufferShader : public Shader
     public:
         ShadowBufferShader();
         virtual ~ShadowBufferShader();
+
+        static ShadowBufferShader* instance;
     protected:
     private:
 

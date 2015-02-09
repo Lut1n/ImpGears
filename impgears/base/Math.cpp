@@ -5,12 +5,13 @@
 
 IMPGEARS_BEGIN
 
-
+//--------------------------------------------------------------
 void initRandom()
 {
     srand(time(NULL));
 }
 
+//--------------------------------------------------------------
 float random(float min, float max, float precision)
 {
     Int64 iMin = (Int64)(min/precision);
@@ -21,6 +22,7 @@ float random(float min, float max, float precision)
     return (float)(iRand)*precision;
 }
 
+//--------------------------------------------------------------
 float lerp(float a, float b, float value)
 {
     return a + value*(b-a);

@@ -107,13 +107,32 @@ void Shader::setFloatParameter(const char* name, float value)
 }
 
 //--------------------------------------------------------------
-void Shader::setMat4Parameter(const char* name, const Mat4& mat4)
+void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
 {
     enable();
-    glUniformMatrix4fv(glGetUniformLocation(m_programID, name), 1, false, mat4.getData());
+    Int32 location = glGetUniformLocation(m_programID, name);
+    if(location == -1)
+        fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
+    GL_CHECKERROR("Matrix4 location");
+    glUniformMatrix4fv(location, 1, false, Matrix4.getData());
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
-        fprintf(stderr, "impError : Send Mat4(%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
+        fprintf(stderr, "impError : Send Matrix4(%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
+}
+
+//--------------------------------------------------------------
+void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
+{
+    enable();
+    Int32 location = glGetUniformLocation(m_programID, name);
+    if(location == -1)
+        fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
+    GL_CHECKERROR("vec3 location");
+
+    glUniform3f(location, vec3.getX(), vec3.getY(), vec3.getZ());
+    GLenum errorState = glGetError();
+    if(errorState != GL_NO_ERROR)
+        fprintf(stderr, "impError : Send vector3 (%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
 }
 
 //--------------------------------------------------------------

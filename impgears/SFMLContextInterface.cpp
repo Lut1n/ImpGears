@@ -19,7 +19,7 @@ Uint32 SFMLContextInterface::createWindow(Uint32 width, Uint32 height)
     sf::RenderWindow* window =
         new sf::RenderWindow(sf::VideoMode(width, height), "SFML Window", sf::Style::Default, sf::ContextSettings(24));
 
-    window->setFramerateLimit(30);
+    window->setFramerateLimit(60);
     m_windows.push_back(window);
 
     return id;

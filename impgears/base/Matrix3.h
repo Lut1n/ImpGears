@@ -6,14 +6,14 @@
 
 IMPGEARS_BEGIN
 
-class Mat4;
+class Matrix4;
 
 class Matrix3
 {
     public:
         Matrix3();
         Matrix3(const Matrix3& other);
-        Matrix3(const Mat4& mat4);
+        Matrix3(const Matrix4& Matrix4);
         Matrix3(const float values[9]);
         virtual ~Matrix3();
 
@@ -36,7 +36,7 @@ class Matrix3
         Matrix3 getTranspose() const;
         Matrix3 getInverse() const;
 
-        Mat4 asMatrix4() const;
+        Matrix4 asMatrix4() const;
 
         static const Matrix3 getRotationMatrixX(float rad);
         static const Matrix3 getRotationMatrixY(float rad);

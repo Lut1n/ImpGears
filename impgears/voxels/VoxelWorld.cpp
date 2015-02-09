@@ -184,7 +184,7 @@ void VoxelWorld::render(imp::Uint32 passID)
 	dataLock.lock();
 
     for(imp::Uint32 index = 0; index<chunkCount; ++index)
-        chunkVBOs[index].Render(passID);
+        chunkVBOs[index].render(passID);
 
 	dataLock.unlock();
 }

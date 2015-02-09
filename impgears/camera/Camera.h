@@ -3,6 +3,7 @@
 
 #include "EvnContextInterface.h"
 #include "base/Vector3.h"
+#include "base/Matrix4.h"
 #include "base/impBase.hpp"
 #include "Entity.h"
 
@@ -69,6 +70,8 @@ class Camera : public Entity
 
         const Vector3 getVectorFromCursor(float x, float y);
 
+        const Matrix4& getViewMatrix() const{return m_viewMatrix;}
+
     protected:
 
         void debugDraw();
@@ -102,6 +105,8 @@ class Camera : public Entity
 
         /// interet ?
         imp::Vector3 m_frustumSphereCenter;
+
+        Matrix4 m_viewMatrix;
 };
 
 IMPGEARS_END

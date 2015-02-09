@@ -2,7 +2,7 @@
 #define IMP_GRAPHICRENDERER_H
 
 #include "base/impBase.hpp"
-#include "base/Mat4.h"
+#include "base/Matrix4.h"
 #include "EvnContextInterface.h"
 #include "Scene.h"
 #include "camera/Camera.h"
@@ -30,13 +30,8 @@ class GraphicRenderer
 
         Scene* getScene(){return &scene;}
 
-        void setPerspectiveProjection();
-        void setOrthographicProjection(float left, float right, float bottom, float top);
-
-        const Mat4 getProjectionMatrix() const;
-        const Mat4 getModelViewMatrix() const;
-
-        const Mat4& getViewMatrix() const {return m_viewMat;}
+        void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
+        const Matrix4& getProjectionMatrix() const {return m_projMat;}
 
     protected:
 
@@ -52,7 +47,7 @@ class GraphicRenderer
         static GraphicRenderer* instance;
         bool centerCursor;
 
-        Mat4 m_viewMat;
+        Matrix4 m_projMat;
 };
 
 IMPGEARS_END

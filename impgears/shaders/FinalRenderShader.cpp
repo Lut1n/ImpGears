@@ -19,9 +19,11 @@ const char* FinalRenderShader::vertexCodeSource = IMP_GLSL_SRC(
 
 varying vec2 texCoord;
 
+uniform mat4 u_projection;
+
 void main(){
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = u_projection * gl_Vertex;
     gl_FrontColor = vec4(1.f, 1.f, 1.f, 1.f);
     texCoord = vec2(gl_MultiTexCoord0);
 }

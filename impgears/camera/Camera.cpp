@@ -53,9 +53,11 @@ void Camera::lookAt()
     target = m_position;
      #endif
 
-    gluLookAt(pos.getX(), pos.getY(), pos.getZ(),
+    /*gluLookAt(pos.getX(), pos.getY(), pos.getZ(),
               target.getX(),target.getY(), target.getZ(),
-              m_upVector.getX(), m_upVector.getY(), m_upVector.getZ());
+              m_upVector.getX(), m_upVector.getY(), m_upVector.getZ());*/
+
+    m_viewMatrix = Matrix4::getViewMat(pos, target, m_upVector);
 }
 
 //--------------------------------------------------------------
@@ -184,21 +186,7 @@ bool Camera::testFov(float x, float y, float z, float r)
 void Camera::debugDraw()
 {
     #ifdef CAMERA_DEBUG
-    glPushMatrix();
-    glTranslatef(m_position.getX(), m_position.getY(), m_position.getZ());
-
-    glBegin(GL_QUADS);
-    glColor3f(0.f,1.f,1.f);
-    glVertex3f(-0.2f,0.f,-0.2f);
-    glColor3f(0.f,1.f,1.f);
-    glVertex3f(-0.2f,0.f,0.2f);
-    glColor3f(0.f,1.f,1.f);
-    glVertex3f(0.2f,0.f,0.2f);
-    glColor3f(0.f,1.f,1.f);
-    glVertex3f(0.2f,0.f,-0.2f);
-    glEnd();
-
-    glPopMatrix();
+    // Implementation to update
     #endif
 }
 

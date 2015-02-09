@@ -2,7 +2,7 @@
 #define IMP_SHADER_H
 
 #include "base/impBase.hpp"
-#include "base/Mat4.h"
+#include "base/Matrix4.h"
 #include "graphics/Texture.h"
 
 IMPGEARS_BEGIN
@@ -18,8 +18,9 @@ class Shader
 
         void setTextureParameter(const char* name, const Texture* texture, Int32 textureUnit = 0);
         void setFloatParameter(const char* name, float value);
-        void setMat4Parameter(const char* name, const Mat4& mat4);
+        void setMatrix4Parameter(const char* name, const Matrix4& Matrix4);
         void setVector3ArrayParameter(const char* name, float* vector3Array, Uint32 count);
+        void setVector3Parameter(const char* name, const Vector3& vec3);
 
         void enable();
         void disable();

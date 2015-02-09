@@ -19,9 +19,13 @@ const char* SkyShader::vertexCodeSource = IMP_GLSL_SRC(
 
 varying vec2 texCoords;
 
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_model;
+
 void main(){
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = u_projection * u_view * u_model * gl_Vertex;
     gl_FrontColor = gl_Color;
     texCoords = vec2(gl_MultiTexCoord0);
 }

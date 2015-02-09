@@ -35,7 +35,7 @@ GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
     }
 
     /// Perspective as default projection
-    setPerspectiveProjection();
+    setProjectionMatrix(Matrix4::getPerspectiveProjectionMat(FRUSTUM_FOVY, 4.f/3.f, 0.1f, 512.f));
 
     setInstance(this);
 }
@@ -52,8 +52,6 @@ void GraphicRenderer::renderScene(imp::Uint32 passID){
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     Uint32 width = EvnContextInterface::getInstance()->getWidth(windowID);
     Uint32 height = EvnContextInterface::getInstance()->getHeight(windowID);
     glViewport(0, 0, width, height);
@@ -61,48 +59,9 @@ void GraphicRenderer::renderScene(imp::Uint32 passID){
     if(camera != IMP_NULL)
         camera->lookAt();
 
-    m_viewMat = getModelViewMatrix();
-
     scene.renderAll(passID);
 
     m_parameters.disable();
-}
-
-//--------------------------------------------------------------
-void GraphicRenderer::setPerspectiveProjection()
-{
-    Uint32 width = EvnContextInterface::getInstance()->getWidth(windowID);
-    Uint32 height = EvnContextInterface::getInstance()->getHeight(windowID);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(FRUSTUM_FOVY, width/height, FRUSTUM_NEAR, FRUSTUM_FAR);
-}
-
-//--------------------------------------------------------------
-void GraphicRenderer::setOrthographicProjection(float left, float right, float bottom, float top)
-{
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(left, right, bottom, top, FRUSTUM_NEAR, FRUSTUM_FAR);
-}
-
-//--------------------------------------------------------------
-const Mat4 GraphicRenderer::getProjectionMatrix() const
-{
-    float data[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, data);
-
-    return Mat4(data);
-}
-
-//--------------------------------------------------------------
-const Mat4 GraphicRenderer::getModelViewMatrix() const
-{
-    float data[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, data);
-
-    return Mat4(data);
 }
 
 IMPGEARS_END

@@ -8,6 +8,7 @@ RenderParameters::RenderParameters():
     m_blendMode(BlendMode_SrcAlphaBased)
 {
     m_clearColor = Vector3(1.f, 1.f, 1.f); //alpha = 1.f
+    m_projectionMatrix = Matrix4::getPerspectiveProjectionMat(45.f, 4.f/3.f, 0.1f, 100.f);
 }
 
 //--------------------------------------------------------------
@@ -16,6 +17,7 @@ RenderParameters::RenderParameters(const RenderParameters& other):
     m_blendMode(other.m_blendMode)
 {
     m_clearColor = other.m_clearColor;
+    m_projectionMatrix = other.m_projectionMatrix;
 }
 
 //--------------------------------------------------------------
@@ -30,6 +32,7 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
     m_faceCullingMode = other.m_faceCullingMode;
     m_blendMode = other.m_blendMode;
     m_clearColor = other.m_clearColor;
+    m_projectionMatrix = other.m_projectionMatrix;
 
     return *this;
 }
@@ -95,6 +98,18 @@ void RenderParameters::enable() const
 //--------------------------------------------------------------
 void RenderParameters::disable() const
 {
+}
+
+//--------------------------------------------------------------
+void RenderParameters::setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue)
+{
+    m_projectionMatrix = Matrix4::getPerspectiveProjectionMat(fovx, ratio, nearValue, farValue);
+}
+
+//--------------------------------------------------------------
+void RenderParameters::setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue)
+{
+    m_projectionMatrix = Matrix4::getOrthographicProjectionMat(left, right, bottom, top, nearValue, farValue);
 }
 
 IMPGEARS_END

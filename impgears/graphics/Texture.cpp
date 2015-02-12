@@ -57,6 +57,8 @@ void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, Format for
 //--------------------------------------------------------------
 void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memoryMode)
 {
+    destroy();
+
     m_width = width;
     m_height = height;
     m_format = format;
@@ -77,9 +79,6 @@ void Texture::create(Uint32 width, Uint32 height, Format format, MemoryMode memo
     }
 
     Uint32 size = width*height*(bpp/8);
-
-    if(m_data != IMP_NULL)
-        delete [] m_data;
 
     m_data = new char[size];
     memset(m_data, 0, size);
@@ -110,19 +109,15 @@ void Texture::destroy()
 //--------------------------------------------------------------
 void Texture::updateGlTex()
 {
-    if(m_videoID > 0)
-    {
-        GLuint id = static_cast<GLuint>(m_videoID);
-        glDeleteTextures(1, &id);
-        m_videoID = 0;
-    }
-
-    if(m_data != IMP_NULL)
+    if(m_videoID == 0)
     {
         GLuint id = 0;
         glGenTextures(1, &id);
         m_videoID = static_cast<Uint32>(id);
+    }
 
+    if(m_data != IMP_NULL)
+    {
         int texture_format;
         int gl_texture_format;
         int component_format = GL_UNSIGNED_BYTE;
@@ -160,7 +155,7 @@ void Texture::updateGlTex()
                 glFilterMinValue = GL_LINEAR_MIPMAP_LINEAR;
         }
 
-        glBindTexture(GL_TEXTURE_2D, id);
+        glBindTexture(GL_TEXTURE_2D, m_videoID);
         if(m_format == Format_Depth16)
         {
             delete [] m_data;

@@ -6,6 +6,8 @@
 
 IMPGEARS_BEGIN
 
+Shader* Shader::m_instance = IMP_NULL;
+
 //--------------------------------------------------------------
 Shader::Shader(const char* vertexShader, const char* fragmentShader)
 {
@@ -136,6 +138,24 @@ void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
 }
 
 //--------------------------------------------------------------
+void Shader::setProjection(const Matrix4& projection)
+{
+    setMatrix4Parameter("u_projection", projection);
+}
+
+//--------------------------------------------------------------
+void Shader::setView(const Matrix4& view)
+{
+    setMatrix4Parameter("u_view", view);
+}
+
+//--------------------------------------------------------------
+void Shader::setModel(const Matrix4& model)
+{
+    setMatrix4Parameter("u_model", model);
+}
+
+//--------------------------------------------------------------
 Shader::~Shader()
 {
     disable();
@@ -158,6 +178,7 @@ void Shader::enable()
 */
     glUseProgram (m_programID) ;
     GL_CHECKERROR("use shader program");
+    m_instance = this;
 /*
         glValidateProgram(m_programID);
         GL_CHECKERROR("validate shader program");
@@ -169,6 +190,7 @@ void Shader::enable()
 void Shader::disable()
 {
     glUseProgram (0) ;
+    m_instance = IMP_NULL;
 }
 
 IMPGEARS_END

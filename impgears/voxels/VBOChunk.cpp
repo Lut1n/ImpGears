@@ -210,9 +210,12 @@ void VBOChunk::AddVertex(FloatBuffer& _vertex, float _x, float _y, float _z)
 //--------------------------------------------------------------
 void VBOChunk::AddNormal(FloatBuffer& _normals, float _x, float _y, float _z)
 {
-    _normals.push_back( (_x+1.f)/2.f );
+    /*_normals.push_back( (_x+1.f)/2.f );
     _normals.push_back( (_y+1.f)/2.f );
-    _normals.push_back( (_z+1.f)/2.f );
+    _normals.push_back( (_z+1.f)/2.f );*/
+    _normals.push_back(_x);
+    _normals.push_back(_y);
+    _normals.push_back(_z);
 }
 
 //--------------------------------------------------------------
@@ -223,7 +226,7 @@ void VBOChunk::AddTexCoord(FloatBuffer& _texCoords, imp::Uint8 _corner, imp::Uin
 
     float left = 0.125*_texIndex;
     float  right = left + 0.125;
-    float bottom = 0.875f;
+    float bottom = 0.f;//0.875f;
     float top = 1.f;
 
 	left += CORRECTION;

@@ -34,9 +34,6 @@ GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
         exit(0);
     }
 
-    /// Perspective as default projection
-    setProjectionMatrix(Matrix4::getPerspectiveProjectionMat(FRUSTUM_FOVY, 4.f/3.f, 0.1f, 512.f));
-
     setInstance(this);
 }
 
@@ -51,10 +48,6 @@ void GraphicRenderer::renderScene(imp::Uint32 passID){
     m_parameters.enable();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    Uint32 width = EvnContextInterface::getInstance()->getWidth(windowID);
-    Uint32 height = EvnContextInterface::getInstance()->getHeight(windowID);
-    glViewport(0, 0, width, height);
 
     if(camera != IMP_NULL)
         camera->lookAt();

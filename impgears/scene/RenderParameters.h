@@ -3,6 +3,7 @@
 
 #include "base/impBase.hpp"
 #include "base/Vector3.h"
+#include "base/Matrix4.h"
 
 #include "graphics/GLcommon.h"
 
@@ -44,10 +45,17 @@ class RenderParameters
         void enable() const;
         void disable() const;
 
+        void setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue);
+        void setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue);
+
+        void setProjectionMatrix(const Matrix4& projection){m_projectionMatrix = projection;}
+        const Matrix4& getProjectionMatrix() const {return m_projectionMatrix;}
+
     protected:
     private:
 
         Vector3 m_clearColor;
+        Matrix4 m_projectionMatrix;
         FaceCullingMode m_faceCullingMode;
         BlendMode m_blendMode;
 };

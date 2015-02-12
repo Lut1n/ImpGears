@@ -27,8 +27,10 @@ varying vec3 v_bitan;
 varying vec4 v_mPosition;
 
 varying vec4 v_position;
+varying vec4 v_viewPosition;
 varying vec2 v_texCoord;
-varying vec4 v_shadowCoord;
+varying vec4 v_shadowProjCoord;
+varying vec4 v_shadowViewPosition;
 
 uniform mat4 u_projection;
 uniform mat4 u_view;
@@ -43,8 +45,9 @@ void main(){
 
     gl_Position = u_projection * u_view * u_model * gl_Vertex;
     v_position = gl_Vertex;
-    v_shadowCoord = u_shadowProjMat * u_shadowViewMat * u_shadowModelMat * gl_Vertex;
-    v_shadowCoord = v_shadowCoord * 0.5f + 0.5f;
+    v_viewPosition = u_view * u_model * gl_Vertex;
+    v_shadowViewPosition = u_shadowViewMat * u_shadowModelMat * gl_Vertex;
+    v_shadowProjCoord = u_shadowProjMat * v_shadowViewPosition;
     v_texCoord = vec2(gl_MultiTexCoord0);
     gl_FrontColor = gl_Color;
 
@@ -72,8 +75,10 @@ varying vec3 v_bitan;
 varying vec4 v_mPosition;
 
 varying vec4 v_position;
+varying vec4 v_viewPosition;
 varying vec2 v_texCoord;
-varying vec4 v_shadowCoord;
+varying vec4 v_shadowProjCoord;
+varying vec4 v_shadowViewPosition;
 
 uniform sampler2D u_colorTexture;
 uniform sampler2D u_specTexture;
@@ -84,8 +89,9 @@ uniform sampler2D u_shadowBuffer;
 uniform vec3 u_sun;
 uniform vec3 u_eye;
 
-uniform float u_chunkLevel;
 uniform float u_mapLevel;
+
+uniform float u_far;
 
 mat3 transpose(mat3 m)
 {
@@ -111,11 +117,11 @@ void main(){
     poissonDisk[2] = vec2(-0.094184101, -0.92938870);
     poissonDisk[3] = vec2(0.34495938, 0.29387760);
 
-    if(v_position.z+u_chunkLevel > u_mapLevel+1.f)
+    if(v_mPosition.z > u_mapLevel+1.f)
+    {
+        gl_FragDepth = gl_FragCoord.z;
         discard;
-
-    vec4 fragPosition = (v_position + 1.f)/2.f;
-    gl_FragData[2] = fragPosition;
+    }
 
     vec3 normalMaterial = texture2D(u_normalTexture, v_texCoord).xyz * 2.f - 1.f;
     vec4 selfMaterial = texture2D(u_selfTexture, v_texCoord);
@@ -128,40 +134,51 @@ void main(){
     vec3 fragNormal = (normalMaterial + 1.f) /2.f;
     gl_FragData[1] = vec4(fragNormal, 1.f);
 
-    vec3 sunVec = normalize(u_sun - v_mPosition.xyz);
+    vec3 vertexToSun = normalize(u_sun - v_mPosition.xyz);
 	vec3 vertexToEye = normalize(u_eye - v_mPosition.xyz);
 
-	float diffuseFactor = max(0.f, dot(sunVec, normalMaterial));
+	float diffuseFactor = max(0.f, dot(vertexToSun, normalMaterial));
 
-    vec3 lightReflect = normalize(reflect(sunVec, normalMaterial));
+    vec3 lightReflect = normalize(reflect(vertexToSun, normalMaterial));
     float specularFactor = dot(vertexToEye, lightReflect);
 
     if(diffuseFactor > 0.f)
         specularFactor = pow(specularFactor, 32.0);
 
+    vec2 shadowCoord = v_shadowProjCoord.xy / v_shadowProjCoord.w;
+    shadowCoord = (shadowCoord + 1.f)/2.f;
+
     float visibility = 1.f;
     for(int i=0; i<4; i++)
     {
-         if( texture2D(u_shadowBuffer, v_shadowCoord.xy + poissonDisk[i]/1500.f).z < v_shadowCoord.z - 0.005f )
-                visibility -= 0.15f;
+         if( texture2D(u_shadowBuffer, shadowCoord + poissonDisk[i]/2000.f).z * 512.f < -v_shadowViewPosition.z - 0.005f )
+                visibility -= 0.2f;
     }
     visibility = max(0.f, visibility);
 
-    vec4 texColor = texture2D(u_colorTexture, v_texCoord) * vec4(visibility, visibility, visibility, 1.f);
-    texColor *= vec4(diffuseFactor, diffuseFactor, diffuseFactor, 1.f);
+    vec4 texColor = texture2D(u_colorTexture, v_texCoord);
 
-    if(diffuseFactor > 0.f && visibility >= 0.4f)
+    vec4 fragColor = texColor * 0.2f; // simul base for ambiant;
+
+    fragColor += texColor * diffuseFactor; // diffuse
+
+    if(diffuseFactor > 0.f && visibility > 0.4f)
     {
-        texColor += specMaterial*vec4(specularFactor, specularFactor, specularFactor, 1.f);
+        fragColor += specMaterial * specularFactor; // specular
     }
 
-    //texColor += vec4(selfMaterial.xyz, 1.f);
+    float linearDepth = -v_viewPosition.z / u_far;
+    gl_FragData[2] = vec4(linearDepth, 0.f, 0.f, 1.f);
+    gl_FragDepth = linearDepth;
+
     gl_FragData[3] = vec4(selfMaterial.xyz, 1.f);
 
-    if(v_position.z+u_chunkLevel > u_mapLevel)
-        texColor *= vec4(0.0, 0.0, 0.0, 1.0);
+    if(v_mPosition.z > u_mapLevel)
+        fragColor *= 0.f;
 
-    gl_FragData[0] = texColor * gl_Color;
+    fragColor *= visibility;
+    fragColor.w = 1.f;
+    gl_FragData[0] = fragColor * gl_Color;
 }
 
 );

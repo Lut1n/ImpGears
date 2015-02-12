@@ -37,8 +37,8 @@ class RenderTarget
         bool hasDepthBuffer() const{return m_hasDepthBuffer;}
 
 
-        const Texture* getTexture(Uint32 n);
-        const Texture* getDepthTexture();
+        Texture* getTexture(Uint32 n);
+        Texture* getDepthTexture();
 
         void bind();
         void unbind();

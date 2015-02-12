@@ -23,6 +23,7 @@ class GraphicRenderer
         Camera* getCamera(){return camera;}
 
         void setRenderParameters(const RenderParameters& parameters){m_parameters = parameters;}
+        const RenderParameters& getRenderParameters() const {return m_parameters;}
 
         static GraphicRenderer* getInstance(){return instance;}
 
@@ -30,8 +31,8 @@ class GraphicRenderer
 
         Scene* getScene(){return &scene;}
 
-        void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
-        const Matrix4& getProjectionMatrix() const {return m_projMat;}
+        //void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
+        const Matrix4& getProjectionMatrix() const {return m_parameters.getProjectionMatrix();}
 
     protected:
 
@@ -47,7 +48,7 @@ class GraphicRenderer
         static GraphicRenderer* instance;
         bool centerCursor;
 
-        Matrix4 m_projMat;
+        //Matrix4 m_projMat;
 };
 
 IMPGEARS_END

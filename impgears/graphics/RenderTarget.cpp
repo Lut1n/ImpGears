@@ -114,7 +114,7 @@ void RenderTarget::destroy()
 }
 
 //--------------------------------------------------------------
-const Texture* RenderTarget::getTexture(Uint32 n)
+Texture* RenderTarget::getTexture(Uint32 n)
 {
     if(m_type != TargetType_Buffer)
     {
@@ -126,7 +126,7 @@ const Texture* RenderTarget::getTexture(Uint32 n)
 }
 
 //--------------------------------------------------------------
-const Texture* RenderTarget::getDepthTexture()
+Texture* RenderTarget::getDepthTexture()
 {
     if(m_type != TargetType_Buffer || m_hasDepthBuffer == false)
     {
@@ -144,6 +144,8 @@ void RenderTarget::bind()
         glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
     else
         unbind();
+
+    glViewport(0, 0, m_width, m_height);
 }
 
 //--------------------------------------------------------------

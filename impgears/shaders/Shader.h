@@ -22,14 +22,23 @@ class Shader
         void setVector3ArrayParameter(const char* name, float* vector3Array, Uint32 count);
         void setVector3Parameter(const char* name, const Vector3& vec3);
 
+        void setProjection(const Matrix4& projection);
+        void setView(const Matrix4& view);
+        void setModel(const Matrix4& model);
+
         void enable();
         void disable();
+
+        static const Shader* getActiveShader() {return m_instance;}
+
     protected:
     private:
 
         Uint32 m_vertexID;
         Uint32 m_fragmentID;
         Uint32 m_programID;
+
+        static Shader* m_instance;
 };
 
 IMPGEARS_END

@@ -72,7 +72,10 @@ class Texture
 
 		Uint32 getWidth() const{return m_width;}
 		Uint32 getHeight() const{return m_height;}
+
 		Format getFormat()const{return m_format;}
+		void setFormat(Format format){m_format = format; notifyVideoMemModified();}
+
 		MemoryMode getMemoryMode() const{return m_memoryMode;}
 
 		void draw2D(Uint32 x, Uint32 y, float alpha) const;

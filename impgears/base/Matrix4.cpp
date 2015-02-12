@@ -297,11 +297,45 @@ const Matrix4 Matrix4::getTranslationMat(float tx, float ty, float tz)
 //--------------------------------------------------------------
 const Matrix4 Matrix4::getRotationMat(float rx, float ry, float rz)
 {
+    return getRotationXAxisMat(rx) * getRotationYAxisMat(ry) * getRotationZAxisMat(rz);
+}
+
+//--------------------------------------------------------------
+const Matrix4 Matrix4::getRotationXAxisMat(float rx)
+{
     const float data[16] = {
-        1.f,    0.f,    0.f,    0.f,
-        0.f,    1.f,    0.f,    0.f,
-        0.f,    0.f,    1.f,    0.f,
-        0.f,    0.f,    0.f,    1.f
+        1.f,    0.f,        0.f,        0.f,
+        0.f,    cosf(rx),   -sinf(rx),  0.f,
+        0.f,    sinf(rx),   cosf(rx),   0.f,
+        0.f,    0.f,        0.f,        1.f
+    };
+
+    return Matrix4(data, true);
+}
+
+
+//--------------------------------------------------------------
+const Matrix4 Matrix4::getRotationYAxisMat(float ry)
+{
+    const float data[16] = {
+        cosf(ry),    0.f,        sinf(ry),   0.f,
+        0.f,         1.f,        0.f,        0.f,
+        -sinf(ry),   0.f,        cosf(ry),   0.f,
+        0.f,         0.f,        0.f,        1.f
+    };
+
+    return Matrix4(data, true);
+}
+
+
+//--------------------------------------------------------------
+const Matrix4 Matrix4::getRotationZAxisMat(float rz)
+{
+    const float data[16] = {
+        cosf(rz),    -sinf(rz),   0.f,    0.f,
+        sinf(rz),    cosf(rz),    0.f,    0.f,
+        0.f,        0.f,          1.f,    0.f,
+        0.f,        0.f,          0.f,    1.f
     };
 
     return Matrix4(data, true);

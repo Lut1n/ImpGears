@@ -61,6 +61,9 @@ class Matrix4
         static const Matrix4 getIdentityMat();
         static const Matrix4 getTranslationMat(float tx, float ty, float tz);
         static const Matrix4 getRotationMat(float rx, float ry, float rz);
+        static const Matrix4 getRotationXAxisMat(float rx);
+        static const Matrix4 getRotationYAxisMat(float ry);
+        static const Matrix4 getRotationZAxisMat(float rz);
         static const Matrix4 getScaleMat(float sx, float sy, float sz);
 
     protected:

@@ -91,9 +91,9 @@ void SkyBox::render(Uint32 passID)
     enableTexCoordArray(m_txCoordOffset);
 
     m_shader.enable();
-    m_shader.setMatrix4Parameter("u_projection", GraphicRenderer::getInstance()->getProjectionMatrix());
-    m_shader.setMatrix4Parameter("u_view", Camera::getActiveCamera()->getViewMatrix());
-    m_shader.setMatrix4Parameter("u_model", getModelMatrix());
+    m_shader.setProjection(GraphicRenderer::getInstance()->getProjectionMatrix());
+    m_shader.setView(Camera::getActiveCamera()->getViewMatrix());
+    m_shader.setModel(getModelMatrix());
 
     /// Left
     m_shader.setTextureParameter("skyTexture", m_left, 0);

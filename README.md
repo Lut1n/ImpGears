@@ -24,7 +24,7 @@ Further work :
 Sorry for the lack of comments. There are still some major code changes that could be made, the comments will come after ;)
 
 Some screenshots of the result with a voxel terrain and dynamic shadow, SSAO and light system :
-![screenshot](http://uprapide.com/images/Lut1n/screenvoxel2015-1.png "Screenshot of the result")
-![screenshot](http://uprapide.com/images/Lut1n/screenvoxel2015-2.png "Screenshot of the result")
+![screenshot](http://uprapide.com/images/Lut1n/impgears-2-2015-b.png "Screenshot of the result")
+![screenshot](http://uprapide.com/images/Lut1n/impgears-2-2015-a.png "Screenshot of the result")
 
 You can also find some short videos demonstration [here](https://www.dropbox.com/s/46u9sc8ovv2soy0/3d-engine.avi?dl=0) and [here](https://www.dropbox.com/s/7l09s7f07hehs3l/voxel-video.mp4?dl=0).

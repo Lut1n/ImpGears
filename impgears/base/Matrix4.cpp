@@ -91,6 +91,20 @@ const Matrix4 Matrix4::operator*(float scalar) const
 }
 
 //--------------------------------------------------------------
+const Vector3 Matrix4::operator*(const Vector3& vec) const
+{
+    Vector3 result;
+
+    result.setXYZ(
+                  vec.getX()*IDX(1,1) + vec.getY()*IDX(2,1) + vec.getZ()*IDX(3,1) + IDX(4,1),
+                  vec.getX()*IDX(1,2) + vec.getY()*IDX(2,2) + vec.getZ()*IDX(3,2) + IDX(4,2),
+                  vec.getX()*IDX(1,3) + vec.getY()*IDX(2,3) + vec.getZ()*IDX(3,3) + IDX(4,3)
+                  );
+
+    return result;
+}
+
+//--------------------------------------------------------------
 const Matrix4 Matrix4::getTranspose() const
 {
     Matrix4 transposed(*this);

@@ -51,7 +51,7 @@ void main(){
     vec4 textcolor = texture2D(my_color_texture, texture_coordinate);
     gl_FragData[0] = textcolor * gl_Color;
 
-    //gl_FragDepth = -v_viewPosition.z/512.f;
+    gl_FragDepth = -v_viewPosition.z/512.f;
 }
 
 );

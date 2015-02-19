@@ -30,6 +30,8 @@ class Matrix4
         const Matrix4& operator*=(float scalar);
         const Matrix4 operator*(float scalar) const;
 
+        const Vector3 operator*(const Vector3& vec) const;
+
         const Matrix4 getTranspose() const;
 
         float getDet() const;

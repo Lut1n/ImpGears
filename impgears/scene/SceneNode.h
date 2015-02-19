@@ -57,6 +57,8 @@ class SceneNode
             m_parentNormalMatrix = pNormalMat;
         }
 
+        void setScale(const Vector3& _scale) {scale = _scale;}
+
         static int nbDisplayed;
 
     protected:

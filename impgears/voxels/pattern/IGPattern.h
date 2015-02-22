@@ -1,17 +1,19 @@
-#ifndef IGPATTERN_H
-#define IGPATTERN_H
+#ifndef IMP_PATTERN_H
+#define IMP_PATTERN_H
 
-#include "../../base/impBase.hpp"
-#include "../../io/IGStreamable.h"
+#include "base/impBase.hpp"
+#include "io/Streamable.h"
 
-class IGPattern : public IGStreamable
+IMPGEARS_BEGIN
+
+class Pattern : public imp::Streamable
 {
 	public:
-		IGPattern();
-		virtual ~IGPattern();
+		Pattern();
+		virtual ~Pattern();
 
-    virtual void Load(IGParser* _parser);
-    virtual void Save(IGParser* _parser);
+    virtual void Load(imp::Parser* _parser);
+    virtual void Save(imp::Parser* _parser);
 
 	imp::Uint32 GetSizeX()
 	{
@@ -41,4 +43,6 @@ class IGPattern : public IGStreamable
 	imp::Uint8* data;
 };
 
-#endif // IGPATTERN_H
+IMPGEARS_END
+
+#endif // IMP_PATTERN_H

@@ -33,7 +33,8 @@ SSAOShader::SSAOShader():
     }
 
     m_noise.create(4, 4);
-    m_noise.lockPixels();
+    PixelData pixels;
+    m_noise.getPixelData(&pixels);
     for(Uint32 i=0; i<4; ++i)
     {
         for(Uint32 j=0; j<4; ++j)
@@ -45,10 +46,10 @@ SSAOShader::SSAOShader():
             pix.green = ((v.getY()+1.f)/2.f)*255;
             pix.blue = ((v.getZ()+1.f)/2.f)*255;;
             pix.alpha = 255;
-            m_noise.setPixel(i,j, pix);
+            pixels.setPixel(i,j, pix);
         }
     }
-    m_noise.unlockPixels();
+    m_noise.loadFromPixelData(&pixels);
 }
 
 //--------------------------------------------------------------
@@ -89,18 +90,6 @@ uniform float u_far;
 
 varying vec2 v_texCoord;
 
-
-float NoneLinearizeDepth(vec2 uv)
-{
-  return texture2D(depthTex, uv.xy).x;
-}
-
-float LinearizeDepth(vec2 uv)
-{
-  float z = texture2D(depthTex, uv.xy).x;
-  return (2.0 * u_near) / (u_far + u_near - z * (u_far - u_near));
-}
-
 vec4 unproject(vec2 txCoord)
 {
     float radFov = 60.f * 3.14f / 180.f;
@@ -110,28 +99,11 @@ vec4 unproject(vec2 txCoord)
     vec2 ndc = txCoord * 2.f - 1.f;
 
     vec3 viewRay = vec3(ndc.x*thfov, ndc.y*thfov/whRatio, -1.f);
-    float viewDepth = NoneLinearizeDepth(txCoord) * u_far;
+    float viewDepth = texture2D(depthTex, txCoord).x * u_far;
     vec4 viewVec = vec4(viewRay * viewDepth, 1.f);
     //viewVec /= viewVec.w;
 
     return viewVec;
-}
-
-mat3 getTBN(vec3 normal)
-{
-    vec3 t1 = cross(normal, vec3(0.0, 0.0, 1.0));
-	vec3 t2 = cross(normal, vec3(0.0, 1.0, 0.0));
-
-	vec3 tan;
-	if(length(t1) > length(t2))
-		tan = t1;
-	else
-		tan = t2;
-
-	tan = normalize(tan);
-	vec3 bitan = normalize(cross(normal, tan));
-
-	return mat3(tan, bitan, normal);
 }
 
 void main(){
@@ -141,7 +113,7 @@ void main(){
     normal = normalize(normal);
 
     // get depth
-    float originDepth = NoneLinearizeDepth(v_texCoord);
+    float originDepth = texture2D(depthTex, v_texCoord).x;
 
     // get origin (in model view space)
     vec4 origin = unproject(v_texCoord);
@@ -152,7 +124,7 @@ void main(){
     vec3 rotationVec = texture2D(noiseTex, v_texCoord*noiseScale).xyz * 2.f - 1.f;
     vec3 tangent = normalize(rotationVec - normal * dot(rotationVec, normal));
     vec3 bitangent = normalize(cross(normal, tangent));
-    mat3 tbn = mat3(tangent, bitangent, normal); //getTBN(normal);
+    mat3 tbn = mat3(tangent, bitangent, normal);
 
     float sampleRadius = 3.f;
 
@@ -171,7 +143,7 @@ void main(){
         offset.xy = (offset.xy + 1.f) / 2.f;
 
         // get sample depth
-        float sampleDepth = NoneLinearizeDepth(offset.xy);
+        float sampleDepth = texture2D(depthTex, offset.xy).x;
 
         // range check and acc
         float rangeCheck = abs(originDepth - sampleDepth)*u_far < sampleRadius ? 1.f : 0.f;
@@ -181,15 +153,7 @@ void main(){
 
     occlusion = 1.f - (occlusion/16.f);
 
-    vec4 testO = pMat * origin;
-    testO /= testO.w;
-    testO.xy = (testO.xy + 1.f)/2.f;
-
     gl_FragData[0] = vec4(occlusion, occlusion, occlusion, 1.f);
-    //gl_FragData[0] = vec4(sampleDepth, sampleDepth, sampleDepth+originDepth, 1.f);
-    //gl_FragData[0] = vec4(testO.x, testO.y, 0.f, 1.f);
-    //gl_FragData[0] = vec4(originDepth, originDepth, originDepth, 1.f);
-    //gl_FragData[0] = vec4(offset.x, offset.y, 0.f, 1.f);
 }
 
 );

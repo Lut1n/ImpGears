@@ -1,36 +1,22 @@
 #ifndef IMP_TEXTURE_H
 #define IMP_TEXTURE_H
 
-#include "../base/impBase.hpp"
+#include "base/impBase.hpp"
+#include "graphics/PixelData.h"
 
 IMPGEARS_BEGIN
-
-/// \struct Pixel - Defines a rgba pixel.
-struct Pixel
-{
-	imp::Uint8 red;
-	imp::Uint8 green;
-	imp::Uint8 blue;
-	imp::Uint8 alpha;
-};
 
 /// \brief Defines a texture.
 class Texture
 {
     public:
 
-        enum MemoryMode
+        enum MemorySyncMode
         {
-            MemoryMode_ramAndVideo = 0,
-            MemoryMode_videoMemOnly,
-            MemoryMode_ramOnly
-        };
-
-        enum Format
-        {
-            Format_RGBA = 0,
-            Format_RGB,
-            Format_Depth16 /// /!\ Conflicting with set/get/copy Pixels
+            MemorySyncMode_None = 0,
+            MemorySyncMode_VideoOnLocal,
+            MemorySyncMode_LocalOnVideo,
+            MemorySyncMode_Bidirectional
         };
 
         Texture();
@@ -43,77 +29,66 @@ class Texture
         /// \param height - The height of the texture.
         /// \param format - The pixel format.
         /// \param memoryMode - The memory mode.
-        void loadFromMemory(char* data, Uint32 width, Uint32 height, Format format = Format_RGBA, MemoryMode memoryMode = MemoryMode_ramAndVideo);
+        void loadFromMemory(char* data, Uint32 width, Uint32 height, PixelFormat format = PixelFormat_RGBA8);
+
+        /// \brief Loads the texture from pixel buffer.
+        /// \param data - A pointer to the data buffer.
+        /// \param memoryMode - The memory mode.
+        void loadFromPixelData(const PixelData* data);
 
         /// \brief Creates a texture.
         /// \param width - The width of the texture.
         /// \param height - The height of the texture.
         /// \param format - The pixel format.
         /// \param memoryMode - The memory mode.
-		void create(Uint32 width, Uint32 height, Format format = Format_RGBA, MemoryMode memoryMode = MemoryMode_ramAndVideo);
+		void create(Uint32 width, Uint32 height, PixelFormat format = PixelFormat_RGBA8);
+
+		/// \brief Destroy a texture
 		void destroy();
 
-		void updateGlTex();
+        void getPixelData(PixelData* data) const;
+
+        void notifyTextureRendering(){m_videoMemLastModified = true;}
 		void synchronize();
 
         void bind() const;
         void unbind() const;
 
-		Pixel getPixel(Uint32 _x, Uint32 _y) const;
-		void setPixel(Uint32 _x, Uint32 _y, Pixel _pixel);
-
-		void getPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, Pixel* _data) const;
-		void setPixels(Uint32 _x, Uint32 _y, Uint32 _w, Uint32 _h, const Pixel* _data);
-
-		void lockPixels();
-		void unlockPixels();
-
 		Uint32 getVideoID() const{return m_videoID;}
 
-		Uint32 getWidth() const{return m_width;}
-		Uint32 getHeight() const{return m_height;}
-
-		Format getFormat()const{return m_format;}
-		void setFormat(Format format){m_format = format; notifyVideoMemModified();}
-
-		MemoryMode getMemoryMode() const{return m_memoryMode;}
-
-		void draw2D(Uint32 x, Uint32 y, float alpha) const;
-		void draw2D(Uint32 x, Uint32 y, Uint32 x2, Uint32 y2, float alpha) const;
-
-		void copyPixelsFrom(const Texture* _src,
-									Uint32 _srcx, Uint32 _srcy, Uint32 _srcw, Uint32 _srch,
-									Uint32 _dstx, Uint32 _dsty);
-
         bool isSmooth() const{return m_isSmooth;}
-        void setSmooth(bool smooth){m_isSmooth = smooth;}
+        void setSmooth(bool smooth){m_isSmooth = smooth; updateVideoParams();}
 
         bool isRepeated() const{return m_isRepeated;}
-        void setRepeated(bool repeated){m_isRepeated = repeated;}
+        void setRepeated(bool repeated){m_isRepeated = repeated; updateVideoParams();}
 
         bool hasMimap() const{return m_hasMipmap;}
-        void setMipmap(bool mipmap, Uint32 maxLevel = 1000){m_hasMipmap = mipmap; m_mipmapMaxLevel = maxLevel;}
+        void setMipmap(bool mipmap, Uint32 maxLevel = 1000){m_hasMipmap = mipmap; m_mipmapMaxLevel = maxLevel; updateVideoParams();}
 
-        void notifyVideoMemModified();
+        void setMemorySyncMode(MemorySyncMode mode){m_syncMode = mode;}
+
+        Uint32 getWidth() const {return m_data.getWidth();}
+        Uint32 getHeight() const {return m_data.getHeight();}
 
     protected:
     private:
 
-        char* m_data;
-        Uint32 m_width, m_height;
-        Format m_format;
-        MemoryMode m_memoryMode;
+		void updateVideoMemory();
+        void updateVideoParams();
+		void updateLocalMemory();
+
+        PixelData m_data;
+
         Uint32 m_videoID;
 
-		bool m_pixelsLocked;
+        MemorySyncMode m_syncMode;
+        bool m_videoMemLastModified;
 
 		bool m_isSmooth;
 		bool m_isRepeated;
 		bool m_hasMipmap;
 
 		Uint32 m_mipmapMaxLevel;
-
-		bool m_videoMemLastModified;
 };
 
 

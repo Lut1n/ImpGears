@@ -68,6 +68,7 @@ vec4 unproject(vec2 txCoord)
 void main(){
 
     float ambientIntensity = texture2D(u_ambientIntensity, v_texCoord).x;
+    ambientIntensity *= ambientIntensity;
 
     vec3 normalMaterial = texture2D(u_normalSampler, v_texCoord).xyz * 2.f - 1.f;
 
@@ -90,12 +91,15 @@ void main(){
     float specularFactor = max(dot(halfVector, normalMaterial), 0.f);
 
     specularFactor = diffuseFactor > 0.f ? specularFactor : 0.f;
-    // specularFactor = length(diffuseColor.xyz) > 0.4f ? specularFactor : 0.f; //shadows ?
     specularFactor = pow(specularFactor, u_shininess);
 
-    vec4 fragColor = vec4(diffuseColor.xyz * u_intensity * ambientIntensity, diffuseColor.w) +
+    vec4 fragColor = vec4(diffuseColor.xyz * ambientIntensity, 0.f) +
                      vec4(diffuseColor.xyz * diffuseFactor, 0.f) +
-                     vec4(specularColor * specularFactor * u_intensity, 0.f);
+                     vec4(specularColor * specularFactor, 0.f);
+
+    fragColor /= 3.f;
+    fragColor *= u_intensity;
+    fragColor.w = diffuseColor.w;
 
     gl_FragData[0] = fragColor;
 }

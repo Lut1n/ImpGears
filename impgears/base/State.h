@@ -36,6 +36,9 @@ class State
         bool mapUp_down, mapDown_down;
         bool zoomUp_down, zoomDown_down;
         bool save_down;
+        Uint32 debugMode;
+
+        void setDebugMode(Uint32 _debugMode) {debugMode = _debugMode;}
 
     protected:
     private:

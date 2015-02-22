@@ -58,7 +58,7 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textur
     for(Uint32 i=0; i<textureCount; ++i)
     {
         m_colorTextures[i] = new Texture();
-        m_colorTextures[i]->create(width, height, Texture::Format_RGBA, Texture::MemoryMode_ramAndVideo);
+        m_colorTextures[i]->create(width, height, PixelFormat_RGBA8);
         m_colorTextures[i]->setSmooth(false);
         m_colorTextures[i]->setRepeated(false);
         m_colorTextures[i]->synchronize();
@@ -70,7 +70,7 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textur
     if(m_hasDepthBuffer)
     {
         m_depthTexture = new Texture();
-        m_depthTexture->create(width, height, Texture::Format_Depth16, Texture::MemoryMode_ramAndVideo);
+        m_depthTexture->create(width, height, PixelFormat_R16);
         m_depthTexture->setSmooth(false);
         m_depthTexture->setRepeated(false);
         m_depthTexture->synchronize();
@@ -155,7 +155,7 @@ void RenderTarget::unbind()
     {
         for(Uint32 i=0; i<m_textureCount; ++i)
             {
-                m_colorTextures[i]->notifyVideoMemModified();
+                m_colorTextures[i]->notifyTextureRendering();
                 m_colorTextures[i]->synchronize();
             }
     }

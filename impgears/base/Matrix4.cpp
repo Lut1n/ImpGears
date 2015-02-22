@@ -127,10 +127,10 @@ float Matrix4::getDet() const
                  + IDX(1,2)*IDX(2,1)*IDX(3,4)*IDX(4,3) + IDX(1,2)*IDX(2,3)*IDX(3,1)*IDX(4,4) + IDX(1,2)*IDX(2,4)*IDX(3,3)*IDX(4,1)
                  + IDX(1,3)*IDX(2,1)*IDX(3,2)*IDX(4,4) + IDX(1,3)*IDX(2,2)*IDX(3,4)*IDX(4,1) + IDX(1,3)*IDX(2,4)*IDX(3,1)*IDX(4,2)
                  + IDX(1,4)*IDX(2,1)*IDX(3,3)*IDX(4,2) + IDX(1,4)*IDX(2,2)*IDX(3,1)*IDX(4,3) + IDX(1,4)*IDX(2,3)*IDX(3,2)*IDX(4,1)
-                 - IDX(1,1)*IDX(2,2)*IDX(3,4)*IDX(4,3) + IDX(1,1)*IDX(2,3)*IDX(3,2)*IDX(4,4) + IDX(1,1)*IDX(2,4)*IDX(3,3)*IDX(4,2)
-                 - IDX(1,2)*IDX(2,1)*IDX(3,3)*IDX(4,4) + IDX(1,2)*IDX(2,3)*IDX(3,4)*IDX(4,1) + IDX(1,2)*IDX(2,4)*IDX(3,1)*IDX(4,3)
-                 - IDX(1,3)*IDX(2,1)*IDX(3,4)*IDX(4,2) + IDX(1,3)*IDX(2,2)*IDX(3,1)*IDX(4,4) + IDX(1,3)*IDX(2,4)*IDX(3,2)*IDX(4,1)
-                 - IDX(1,4)*IDX(2,1)*IDX(3,2)*IDX(4,3) + IDX(1,4)*IDX(2,2)*IDX(3,3)*IDX(4,1) + IDX(1,4)*IDX(2,3)*IDX(3,1)*IDX(4,2);
+                 - IDX(1,1)*IDX(2,2)*IDX(3,4)*IDX(4,3) - IDX(1,1)*IDX(2,3)*IDX(3,2)*IDX(4,4) - IDX(1,1)*IDX(2,4)*IDX(3,3)*IDX(4,2)
+                 - IDX(1,2)*IDX(2,1)*IDX(3,3)*IDX(4,4) - IDX(1,2)*IDX(2,3)*IDX(3,4)*IDX(4,1) - IDX(1,2)*IDX(2,4)*IDX(3,1)*IDX(4,3)
+                 - IDX(1,3)*IDX(2,1)*IDX(3,4)*IDX(4,2) - IDX(1,3)*IDX(2,2)*IDX(3,1)*IDX(4,4) - IDX(1,3)*IDX(2,4)*IDX(3,2)*IDX(4,1)
+                 - IDX(1,4)*IDX(2,1)*IDX(3,2)*IDX(4,3) - IDX(1,4)*IDX(2,2)*IDX(3,3)*IDX(4,1) - IDX(1,4)*IDX(2,3)*IDX(3,1)*IDX(4,2);
 
     return result;
 }

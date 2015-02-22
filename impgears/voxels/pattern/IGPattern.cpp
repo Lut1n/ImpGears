@@ -1,18 +1,20 @@
 #include "IGPattern.h"
 
-IGPattern::IGPattern()
+IMPGEARS_BEGIN
+
+Pattern::Pattern()
 {
 	sizeX = sizeY = sizeZ = 0;
 	data = IMP_NULL;
 }
 
-IGPattern::~IGPattern()
+Pattern::~Pattern()
 {
 	if(data != IMP_NULL)
 	delete [] data;
 }
 
-void IGPattern::Load(IGParser* _parser)
+void Pattern::Load(imp::Parser* _parser)
 {
 	imp::Int8 size[3];
 	_parser->Read(size, 3);
@@ -25,7 +27,9 @@ void IGPattern::Load(IGParser* _parser)
 	_parser->Read(data, count);
 }
 
-void IGPattern::Save(IGParser* _parser)
+void Pattern::Save(imp::Parser* _parser)
 {
 
 }
+
+IMPGEARS_END

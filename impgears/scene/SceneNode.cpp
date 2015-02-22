@@ -77,8 +77,6 @@ const Matrix4 SceneNode::getModelMatrix() const
             * Matrix4::getRotationMat(0.f, ry, 0.f)
             * Matrix4::getRotationMat(0.f, 0.f, rz)
             * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ());
-
-    //return m_parentModelMatrix * Matrix4::getTranslationMat() * Matrix4::getRotationMat(rx, ry, rz);
 }
 
 //--------------------------------------------------------------
@@ -90,8 +88,6 @@ const Matrix4 SceneNode::getNormalMatrix() const
             * Matrix4::getRotationMat(0.f, ry, 0.f)
             * Matrix4::getRotationMat(0.f, 0.f, rz)
             * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ()).getInverse();
-
-    //return m_parentModelMatrix * Matrix4::getTranslationMat() * Matrix4::getRotationMat(rx, ry, rz);
 }
 
 IMPGEARS_END

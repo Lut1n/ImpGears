@@ -13,7 +13,7 @@ Two main functions can be used.
 
 #include "base/impBase.hpp"
 #include "voxels/VoxelWorld.h"
-#include "graphics/Texture.h"
+#include "graphics/PixelData.h"
 
 IMPGEARS_BEGIN
 
@@ -35,7 +35,7 @@ public:
     void Generate(VoxelWorld* _world);
 
 	// Generate world from heightmap
-    void Generate(VoxelWorld* _world, const imp::Texture* _heightmap);
+    void Generate(VoxelWorld* _world, const imp::PixelData* _heightmap);
 
     void InitRand();
 

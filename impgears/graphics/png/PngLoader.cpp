@@ -10,9 +10,10 @@ PngLoader::~PngLoader()
     //dtor
 }
 
-imp::Texture* PngLoader::loadFromFile(const char* filename)
+
+imp::PixelData* PngLoader::loadPixelDataFromFile(const char* filename)
 {
-    FILE *fp = fopen(filename, "rb");
+       FILE *fp = fopen(filename, "rb");
     if (!fp)
        return (IMP_NULL);
 
@@ -114,13 +115,23 @@ imp::Texture* PngLoader::loadFromFile(const char* filename)
     //delete[] (png_bytep)rowPtrs;
     png_destroy_read_struct(&png_ptr, &info_ptr,(png_infopp)0);
 
-    imp::Texture* tex = new imp::Texture();
-    imp::Texture::Format format = imp::Texture::Format_RGBA;
+    imp::PixelData* image = new imp::PixelData();
+    imp::PixelFormat format = imp::PixelFormat_RGBA8;
     if(channels == 3)
-        format = imp::Texture::Format_RGB;
-    tex->loadFromMemory(data, imgWidth, imgHeight, format);
+        format = imp::PixelFormat_RGB8;
+    image->loadFromMemory(data, imgWidth, imgHeight, format);
 
     delete [] data;
+
+    return image;
+}
+
+imp::Texture* PngLoader::loadFromFile(const char* filename)
+{
+    imp::PixelData* data = loadPixelDataFromFile(filename);
+    imp::Texture* tex = new imp::Texture();
+    tex->loadFromPixelData(data);
+    delete data;
 
     return tex;
 }

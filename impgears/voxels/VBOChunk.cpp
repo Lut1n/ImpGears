@@ -210,9 +210,6 @@ void VBOChunk::AddVertex(FloatBuffer& _vertex, float _x, float _y, float _z)
 //--------------------------------------------------------------
 void VBOChunk::AddNormal(FloatBuffer& _normals, float _x, float _y, float _z)
 {
-    /*_normals.push_back( (_x+1.f)/2.f );
-    _normals.push_back( (_y+1.f)/2.f );
-    _normals.push_back( (_z+1.f)/2.f );*/
     _normals.push_back(_x);
     _normals.push_back(_y);
     _normals.push_back(_z);
@@ -226,7 +223,7 @@ void VBOChunk::AddTexCoord(FloatBuffer& _texCoords, imp::Uint8 _corner, imp::Uin
 
     float left = 0.125*_texIndex;
     float  right = left + 0.125;
-    float bottom = 0.f;//0.875f;
+    float bottom = 0.875f;
     float top = 1.f;
 
 	left += CORRECTION;
@@ -312,15 +309,12 @@ void VBOChunk::render(imp::Uint32 passID)
 
         if(passID == 0)
         {
-            m_shadowModelMat = getModelMatrix();
-            ShadowBufferShader::instance->setMatrix4Parameter("u_model", m_shadowModelMat);
+            ShadowBufferShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
         }
         else if(passID == 3)
         {
             imp::DeferredShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
-            imp::DeferredShader::instance->setMatrix4Parameter("u_normal", getModelMatrix()); // /!\ scaling
-            imp::DeferredShader::instance->setFloatParameter("u_chunkLevel", position.getZ());
-			imp::DeferredShader::instance->setMatrix4Parameter("u_shadowModelMat", m_shadowModelMat);
+            imp::DeferredShader::instance->setMatrix4Parameter("u_normal", getNormalMatrix());
         }
 
         int count = m_normalOffset/sizeof(float);

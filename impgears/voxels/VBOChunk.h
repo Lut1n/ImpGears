@@ -72,9 +72,6 @@ public:
     void render(imp::Uint32 passID);
 
     imp::Uint64 m_texCoordOffset, m_normalOffset;
-
-    imp::Matrix4 m_shadowModelMat, m_mMat, m_nMat;
-
 };
 
 IMPGEARS_END

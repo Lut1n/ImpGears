@@ -16,6 +16,7 @@ State::State()
     key_shift = key_ctrl = false;
     zoomUp_down = zoomDown_down = false;
     save_down = false;
+    setDebugMode(1);
     xdep = ydep = 0.0f;
 
     if(m_singleton != IMP_NULL)
@@ -84,6 +85,30 @@ void State::onEvent(const imp::Event& event)
         {
             save_down = true;
         }
+        if(event.getKeyboard().keyCode == imp::Event::F1)
+            debugMode = 1;
+        if(event.getKeyboard().keyCode == imp::Event::F2)
+            debugMode = 2;
+        if(event.getKeyboard().keyCode == imp::Event::F3)
+            debugMode = 3;
+        if(event.getKeyboard().keyCode == imp::Event::F4)
+            debugMode = 4;
+        if(event.getKeyboard().keyCode == imp::Event::F5)
+            debugMode = 5;
+        if(event.getKeyboard().keyCode == imp::Event::F6)
+            debugMode = 6;
+        if(event.getKeyboard().keyCode == imp::Event::F7)
+            debugMode = 7;
+        if(event.getKeyboard().keyCode == imp::Event::F8)
+            debugMode = 8;
+        if(event.getKeyboard().keyCode == imp::Event::F9)
+            debugMode = 9;
+        if(event.getKeyboard().keyCode == imp::Event::F10)
+            debugMode = 10;
+        if(event.getKeyboard().keyCode == imp::Event::F11)
+            debugMode = 11;
+        if(event.getKeyboard().keyCode == imp::Event::F12)
+            debugMode = 12;
     }
     if(event.getType() == imp::Event::Type_KeyReleased){
         if(event.getKeyboard().keyCode == imp::Event::Q){

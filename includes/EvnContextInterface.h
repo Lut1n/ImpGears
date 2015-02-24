@@ -26,7 +26,9 @@ class IMP_API Event
     enum MouseButton
     {
         Mouse_LeftButton,
-        Mouse_RightButton
+        Mouse_RightButton,
+
+	Mouse_ButtonCount // Get the enum size
     };
 
     struct Mouse
@@ -139,7 +141,9 @@ class IMP_API Event
         F13,
         F14,
         F15,
-        Pause
+        Pause,
+
+	KeyCount // Get the enum size
     };
 
     struct Keyboard

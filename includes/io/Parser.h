@@ -12,6 +12,7 @@ Currently works only with binary files. Next step is to add support for xml file
 #include "cstdio"
 
 #include "base/impBase.h"
+#include "base/String.h"
 
 IMPGEARS_BEGIN
 
@@ -46,6 +47,9 @@ public:
     IMP_PARSER_READWRITE_DEC(imp::Uint8)
 
     IMP_PARSER_READWRITE_DEC(float)
+
+	const String readLine();
+	bool isEnd() const;
 
 private:
 

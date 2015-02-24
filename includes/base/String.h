@@ -10,12 +10,17 @@ class IMP_API String
 	public:
 		String();
 		String(const char* value);
+		String(const String& other);
 		virtual ~String();
+
+		const String& operator=(const String& other);
 
 		void setValue(const char* value);
 		const char* getValue() const;
 
 		Uint32 getSize() const;
+
+		void removeSpaces();
 
 	protected:
 	private:

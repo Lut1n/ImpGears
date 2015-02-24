@@ -1,5 +1,7 @@
 #include "io/Parser.h"
 
+#include <cstdlib>
+
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
@@ -30,7 +32,7 @@ Parser::Parser(const char* _filename, FileType _type, AccessMode _mode)
     else if( _type == FileType_Binary )
         ftype = 'b';
 
-    char fmode[2];
+    char fmode[3];
     sprintf(fmode, "%c%c", faccess, ftype);
 
     stream = fopen(_filename, fmode);
@@ -47,6 +49,25 @@ Parser::~Parser()
             fflush(stream);
 
     fclose(stream);
+}
+
+//--------------------------------------------------------------
+const String Parser::readLine()
+{
+	char* line = IMP_NULL;
+	size_t lsize = 0;
+	getline(&line, &lsize, stream);
+
+	String strline(line);
+	free(line);
+
+	return strline;
+}
+
+//--------------------------------------------------------------
+bool Parser::isEnd() const
+{
+	return (feof(stream) != 0);
 }
 
 //--------------------------------------------------------------

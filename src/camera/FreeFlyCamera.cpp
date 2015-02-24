@@ -18,6 +18,7 @@ FreeFlyCamera::FreeFlyCamera(float xref, float yref, const imp::Vector3& positio
     this->yref = yref;
 
     setPosition(imp::Vector3(100.f, 100.f, 100.f)); //temp
+	setDefaultKeyBinding();
 
     m_cursorTimer.reset();
 }
@@ -56,13 +57,13 @@ void FreeFlyCamera::update(){
         state->xdep = state->ydep = 0.0;
 
         float speed = SPEED;
-        if(state->key_shift)speed *= 2;
-        else if(state->key_ctrl)speed *= 0.2f;
+        if(state->m_pressedKeys[m_accelerateKey])speed *= 2;
+        else if(state->m_pressedKeys[m_decelerateKey])speed *= 0.2f;
 
-        if(state->key_down)move(getForwardVector() * -speed * (elapsed/TIME_UPDATE));
-        if(state->key_up)move(getForwardVector() * speed * (elapsed/TIME_UPDATE));
-        if(state->key_left)move(getLateralVector() * -speed * (elapsed/TIME_UPDATE));
-        if(state->key_right)move(getLateralVector() * speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_backKey])move(getForwardVector() * -speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_forwardKey])move(getForwardVector() * speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_leftKey])move(getLateralVector() * -speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_rightKey])move(getLateralVector() * speed * (elapsed/TIME_UPDATE));
 
         updateFov();
 
@@ -70,6 +71,28 @@ void FreeFlyCamera::update(){
 
         m_cursorTimer.reset();
     }
+}
+
+//--------------------------------------------------------------
+void FreeFlyCamera::setKeyBindingConfig(const KeyBindingConfig& binding)
+{
+	m_forwardKey = binding.getKey("forward");
+	m_backKey = binding.getKey("back");
+	m_leftKey = binding.getKey("left");
+	m_rightKey = binding.getKey("right");
+	m_accelerateKey = binding.getKey("accelerate");
+	m_decelerateKey = binding.getKey("decelerate");
+}
+
+//--------------------------------------------------------------
+void FreeFlyCamera::setDefaultKeyBinding()
+{
+	m_forwardKey = Event::Z;
+	m_backKey = Event::S;
+	m_leftKey = Event::Q;
+	m_rightKey = Event::D;
+	m_accelerateKey = Event::LShift;
+	m_decelerateKey = Event::LControl;
 }
 
 IMPGEARS_END

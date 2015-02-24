@@ -40,22 +40,14 @@
 #include "SFMLContextInterface.h"
 
 #define FPS_LIMIT 60
-
 #define IS_FULLSCREEN false
-
-/**
-optimisations:
-- subdiviser vbo par cubeface + face culling
-
-amelioration:
-- reduction des faces
-- gui
-*/
 
 imp::FreeFlyCamera cam(WIN_W/2, WIN_H/2);
 //imp::StrategicCamera cam;
 imp::Camera sunCamera;
 imp::VoxelWorld* world;
+
+imp::Uint32 debugMode;
 
 void onEvent(imp::EvnContextInterface& evnContext){
 
@@ -64,16 +56,28 @@ void onEvent(imp::EvnContextInterface& evnContext){
     imp::Event event;
     while (evnContext.nextEvent(event))
         imp::State::getInstance()->onEvent(event);
+
+	imp::State* state = imp::State::getInstance();
+
+	if(state->m_pressedKeys[imp::Event::Escape])
+		exit(0);
+
+	for(imp::Uint32 f=1; f<9; ++f)
+	{
+		if(state->m_pressedKeys[imp::Event::F1+(f-1)])
+		{
+			debugMode = f;
+			break;
+		}
+	}
 }
 
-float impAbs(float v)
+void loadCameraKeyBinding(const char* filename)
 {
-    return v > 0.f ? v : -v;
-}
-
-float impMax(float a, float b)
-{
-    return a > b ? a : b;
+	imp::Parser file(filename, imp::Parser::FileType_Text, imp::Parser::AccessMode_Read);
+	imp::KeyBindingConfig binding;
+	binding.Load(&file);
+	cam.setKeyBindingConfig(binding);
 }
 
 int main(void)
@@ -83,16 +87,16 @@ int main(void)
 
     imp::Timer timer, fpsTimer;
     int fps = 0, nbFrames = 0;
+	debugMode = 1;
 
     imp::EvnContextInterface* evnContext = new imp::SFMLContextInterface();
     evnContext->createWindow(WIN_W, WIN_H);
     evnContext->setCursorVisible(0, false);
 
-    //cam.activate();
+	// sun camera for shadow
     sunCamera.setPosition(imp::Vector3(150.f, 150.f, 300.f));
     sunCamera.setTarget(imp::Vector3(64.f, 64.f, 64.f));
     imp::GraphicRenderer renderer(0, &sunCamera);
-    //renderer.setOrthographicProjection(-130.f, 130.f, -130.f, 130.f);
     renderer.setCenterCursor(true);
 
 
@@ -131,30 +135,26 @@ int main(void)
 
     imp::EntityManager entityManager;
 
+	// default render parameters
     imp::RenderParameters defaultParameters;
     defaultParameters.setPerspectiveProjection(FRUSTUM_FOVY, 4.f/3.f, FRUSTUM_NEAR, FRUSTUM_FAR);
 
+	// screen render parameters
     imp::RenderParameters screenParameters;
     screenParameters.setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-    //defaultParameters.setFaceCullingMode(imp::RenderParameters::FaceCullingMode_None);
 
-    //ParticleSystem particles(ParticleSystem::RenderType_POINTS);
-
-    fprintf(stdout, "shadow shader\n");
+	// shadow shaders
     imp::ShadowBufferShader shadowBufferShader;
     imp::ShadowShader shadowShader;
     imp::RenderParameters shadowParameters;
     shadowParameters.setFaceCullingMode(imp::RenderParameters::FaceCullingMode_Back);
     shadowParameters.setOrthographicProjection(-130.f, 130.f, -130.f, 130.f, 0.1, 512.f);
 
-    imp::Matrix4 shadow_pMat, shadow_vMat;
-
+	// world generation
     world = new imp::VoxelWorld(128,128,64);
-
 	fprintf(stdout, "world generation...\t");
     imp::VoxelWordGenerator::GetInstance()->Generate(world);
 	fprintf(stdout, "OK\n");
-
 	fprintf(stdout, "update chunk vbo...\t");
     world->UpdateAll();
     fprintf(stdout, "gpu memory used : %dMo\n", imp::VBOManager::getInstance()->getMemoryUsed()/1000000);
@@ -163,22 +163,27 @@ int main(void)
     entityManager.addEntity(&cam);
     sunCamera.initFrustum(WIN_W, WIN_H, FRUSTUM_FOVY*3.14159f/180.f, 0.1, 512.f);
 
+	// render target for shadow sun depth buffer
     imp::RenderTarget shadowBuffer;
     shadowBuffer.createBufferTarget(WIN_W, WIN_H, 0, true);
     const imp::Texture* shadowBufferTex = shadowBuffer.getDepthTexture();
 
+	// render target for shadows buffer
     imp::RenderTarget shadows;
     shadows.createBufferTarget(WIN_W, WIN_H, 1, false);
     const imp::Texture* shadowsTex = shadows.getTexture(0);
 
+	// render target for background
     imp::RenderTarget backgroundTarget;
     backgroundTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
     const imp::Texture* backgroundTex = backgroundTarget.getTexture(0);
 
+	// render target for self-illumination
     imp::RenderTarget selfiTarget;
     selfiTarget.createBufferTarget(WIN_W/4.f, WIN_H/4.f, 1, false);
     const imp::Texture* selfiTex = selfiTarget.getTexture(0);
 
+	// render target for light effect
     imp::RenderTarget blinnPhongTarget;
     blinnPhongTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
     const imp::Texture* blinnPhongBuffer = blinnPhongTarget.getTexture(0);
@@ -186,6 +191,7 @@ int main(void)
 
     imp::FinalRenderShader finalShader;
 
+	// render target for deffered rendering
     imp::RenderTarget deferredBuffers;
     deferredBuffers.createBufferTarget(WIN_W, WIN_H, 4, true);
     const imp::Texture* colorBuffer = deferredBuffers.getTexture(0);
@@ -195,21 +201,23 @@ int main(void)
     const imp::Texture* depthBuffer = deferredBuffers.getDepthTexture();
     imp::DeferredShader deferredShader;
 
-    fprintf(stdout, "ssao shader\n");
-    imp::SSAOShader ssaoShader;
+	// SSAO shader
+	imp::SSAOShader ssaoShader;
     imp::RenderTarget ssaoBuffer;
     ssaoBuffer.createBufferTarget(WIN_W, WIN_H, 1, false);
     const imp::Texture* ssaoTex = ssaoBuffer.getTexture(0);
 
+	// blur shader
     imp::BlurShader blurShader;
     imp::RenderTarget ssaoBlurTarget;
     ssaoBlurTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
     const imp::Texture* ssaoBlurTex = ssaoBlurTarget.getTexture(0);
 
+	// screen render target
     imp::RenderTarget screenTarget;
     screenTarget.createScreenTarget(0);
 
-
+	// textures for skybox
     imp::Texture* skyLeft = PngLoader::loadFromFile("data/sky/box/left.png"); skyLeft->synchronize();
     imp::Texture* skyRight = PngLoader::loadFromFile("data/sky/box/right.png"); skyRight->synchronize();
     imp::Texture* skyFront = PngLoader::loadFromFile("data/sky/box/front.png"); skyFront->synchronize();
@@ -217,16 +225,12 @@ int main(void)
     imp::Texture* skyTop = PngLoader::loadFromFile("data/sky/box/top.png"); skyTop->synchronize();
     imp::Texture* skyBottom = PngLoader::loadFromFile("data/sky/box/bottom.png"); skyBottom->synchronize();
 
-    fprintf(stdout, "skybox shader\n");
+	// skybox entity
 	imp::SkyBox skyBox(skyLeft, skyRight, skyFront, skyBack, skyTop, skyBottom, FRUSTUM_FAR/2.f);
     renderer.getScene()->addSceneComponent(&skyBox);
     entityManager.addEntity(&skyBox);
 
     imp::DefaultShader defaultShader;
-
-    float sunR = 0.f;
-    imp::Timer sunRotationTimer;
-    sunRotationTimer.reset();
 
     float mapLevel = 128.f;
 
@@ -239,6 +243,13 @@ int main(void)
 
     const imp::Texture* texToDisplay = colorBuffer;
 
+	// Local key binding
+	imp::Uint32 m_levelDownKey = imp::Event::PageDown;
+	imp::Uint32 m_levelUpKey = imp::Event::PageUp;
+
+	// Camera key binding
+	loadCameraKeyBinding("camera-key-binding.conf");
+
     while (evnContext->isOpen(0))
     {
 
@@ -249,17 +260,15 @@ int main(void)
 
             /// change level
             imp::State* state = imp::State::getInstance();
-            if(state->mapUp_down)
+            if(state->m_pressedKeys[m_levelUpKey])
             {
                 mapLevel += 0.5f;
                 fprintf(stdout, "level : %f\n", mapLevel);
-                state->mapUp_down = false;
             }
-            else if(state->mapDown_down)
+            else if(state->m_pressedKeys[m_levelDownKey])
             {
                 mapLevel -= 0.5f;
                 fprintf(stdout, "level : %f\n", mapLevel);
-                state->mapDown_down = false;
             }
 
             entityManager.updateAll();
@@ -276,8 +285,6 @@ int main(void)
             shadowBufferShader.setMatrix4Parameter("u_projection", renderer.getProjectionMatrix());
             shadowBufferShader.setMatrix4Parameter("u_view", imp::Camera::getActiveCamera()->getViewMatrix());
             renderer.renderScene(0);
-            shadow_pMat = renderer.getProjectionMatrix();
-            shadow_vMat = imp::Camera::getActiveCamera()->getViewMatrix();
             world->render(0);
             shadowBufferShader.disable();
             shadowBuffer.unbind();
@@ -391,7 +398,7 @@ int main(void)
 			blinnPhongTarget.unbind();
             /// ////////////////////////////////////////////////////
 
-            if(state->debugMode == 1)
+            if(debugMode == 1)
             {
                 /// (pass ?) Screen rendering
                 renderer.setCamera(IMP_NULL);
@@ -410,7 +417,7 @@ int main(void)
             }
             else
             {
-                switch(state->debugMode)
+                switch(debugMode)
                 {
                     case 2:
                         texToDisplay = colorBuffer;

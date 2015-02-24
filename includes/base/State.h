@@ -29,16 +29,9 @@ class IMP_API State
                 return m_singleton;
         }
 
-        bool key_up, key_down, key_left, key_right, key_shift, key_ctrl;
+	bool m_pressedKeys[Event::KeyCount];
 
-        float xdep, ydep;
-
-        bool mapUp_down, mapDown_down;
-        bool zoomUp_down, zoomDown_down;
-        bool save_down;
-        Uint32 debugMode;
-
-        void setDebugMode(Uint32 _debugMode) {debugMode = _debugMode;}
+	float xdep, ydep;
 
     protected:
     private:

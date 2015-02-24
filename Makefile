@@ -36,7 +36,7 @@ $(OBJDIR):
 .PHONY : clean mrproper
 
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf "$(OBJDIR)"
 
 mrproper: clean
-	rm -rf $(OUTPUT)
+	rm -rf "$(OUTPUT)"

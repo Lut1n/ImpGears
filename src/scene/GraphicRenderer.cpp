@@ -28,12 +28,6 @@ GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
 	fprintf(stdout, "ogl version %d.%d\n", major, minor);
 	fprintf(stdout, "OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
-	if(!sf::Shader::isAvailable())
-    {
-        fprintf(stderr, "[impError] shader not supported. Exit...\n");
-        exit(0);
-    }
-
     setInstance(this);
 }
 

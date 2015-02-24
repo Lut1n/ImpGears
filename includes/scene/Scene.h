@@ -4,8 +4,6 @@
 #include "base/impBase.h"
 #include "SceneNode.h"
 //#include "lights/LightManager.h"
-#include "terrain/TerrainNode.h"
-#include "sky/Sky.h"
 
 IMPGEARS_BEGIN
 

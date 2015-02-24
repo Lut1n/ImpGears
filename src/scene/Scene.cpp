@@ -3,7 +3,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-Scene* Scene::instance = NULL;
+Scene* Scene::instance = IMP_NULL;
 
 //--------------------------------------------------------------
 Scene::Scene()

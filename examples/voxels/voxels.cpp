@@ -100,9 +100,8 @@ int main(void)
     renderer.setCenterCursor(true);
 
 
-    imp::MeshNode mesh(imp::OBJMeshLoader::loadFromFile("tractor.obj"));
+    imp::MeshNode mesh(imp::OBJMeshLoader::loadFromFile("data/obj-models/simple-monkey.c.obj"));
     mesh.setPosition(imp::Vector3(100.f, 100.f, 80.f));
-    //mesh.setScale(imp::Vector3(2.f, 2.f, 2.f));
 
 
     /// atlas - color
@@ -286,6 +285,7 @@ int main(void)
             shadowBufferShader.setMatrix4Parameter("u_view", imp::Camera::getActiveCamera()->getViewMatrix());
             renderer.renderScene(0);
             world->render(0);
+            mesh.renderAll(0);
             shadowBufferShader.disable();
             shadowBuffer.unbind();
             /// ///////////////////////////////////////////
@@ -307,8 +307,7 @@ int main(void)
             deferredShader.setTextureParameter("u_selfTexture", atlasSelf, 3);
 			deferredShader.setFloatParameter("u_far", FRUSTUM_FAR);
 			world->render(3);
-			//mesh.renderAll(3);
-            //particles.draw();
+			mesh.renderAll(3);
 			deferredShader.disable();
 			deferredBuffers.unbind();
             /// ////////////////////////////////////////////////////
@@ -349,6 +348,7 @@ int main(void)
             ssaoShader.setMatrix4Parameter("pMat", defaultParameters.getProjectionMatrix());
             ssaoShader.setMatrix4Parameter("vMat", cam.getViewMatrix());
             ssaoShader.setVector3ArrayParameter("sampleKernel", ssaoShader.getSampleKernel(), IMP_SSAO_SAMPLE_KERNEL_SIZE);
+            ssaoShader.setFloatParameter("u_sampleCount", 16.f);
 			ssaoShader.setTextureParameter("depthTex", depthBuffer, 0);
 			ssaoShader.setTextureParameter("normalTex", normalBuffer, 1);
 			ssaoShader.setTextureParameter("noiseTex", ssaoShader.getNoiseTexture(), 2);

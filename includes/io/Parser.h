@@ -49,6 +49,8 @@ public:
     IMP_PARSER_READWRITE_DEC(float)
 
 	const String readLine();
+	void writeLine(const String& line);
+
 	bool isEnd() const;
 
 private:

@@ -22,6 +22,12 @@ class IMP_API String
 
 		void removeSpaces();
 
+		Uint32 countOccurrence(char c) const;
+		void split(char sep, String** array, Uint32& count) const;
+
+		char getChar(Uint32 position) const;
+		Uint32 find(char c) const;
+
 	protected:
 	private:
 

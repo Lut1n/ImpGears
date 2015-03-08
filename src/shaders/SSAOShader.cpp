@@ -81,12 +81,13 @@ const char* SSAOShader::fragmentCodeSource = IMP_GLSL_SRC(
 uniform sampler2D depthTex;
 uniform sampler2D noiseTex;
 uniform sampler2D normalTex;
-uniform vec3 sampleKernel[16];
 uniform mat4 pMat;
 uniform mat4 vMat;
 uniform mat4 ivMat;
 uniform float u_near;
 uniform float u_far;
+uniform vec3 sampleKernel[16];
+uniform float u_sampleCount;
 
 varying vec2 v_texCoord;
 
@@ -129,7 +130,7 @@ void main(){
     float sampleRadius = 3.f;
 
     float occlusion = 0.0f;
-    for(int i=0; i<16; ++i)
+    for(int i=0; i<int(u_sampleCount); ++i)
     {
         // get sample position
         vec3 sample = tbn * sampleKernel[i];
@@ -151,7 +152,7 @@ void main(){
 
     }
 
-    occlusion = 1.f - (occlusion/16.f);
+    occlusion = 1.f - (occlusion/u_sampleCount);
 
     gl_FragData[0] = vec4(occlusion, occlusion, occlusion, 1.f);
 }

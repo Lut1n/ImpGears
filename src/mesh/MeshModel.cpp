@@ -174,7 +174,7 @@ void MeshModel::render()
             break;
     }
 
-    Uint32 count = m_vertexBufferSize/m_vertexSize;
+    Uint32 count = m_vertexBufferSize/3;
 
     glDrawArrays(mode, 0, count);
 

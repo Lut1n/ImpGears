@@ -1,6 +1,7 @@
 #include "io/Parser.h"
 
 #include <cstdlib>
+#include <cstring>
 
 IMPGEARS_BEGIN
 
@@ -58,10 +59,20 @@ const String Parser::readLine()
 	size_t lsize = 0;
 	getline(&line, &lsize, stream);
 
+	lsize = strlen(line);
+	line[lsize-1] = '\0'; // remove '\n'
+
 	String strline(line);
 	free(line);
 
 	return strline;
+}
+
+//--------------------------------------------------------------
+void Parser::writeLine(const String& line)
+{
+	Write(line.getValue(), line.getSize());
+	Write("\n", 1);
 }
 
 //--------------------------------------------------------------

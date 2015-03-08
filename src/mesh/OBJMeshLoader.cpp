@@ -68,131 +68,68 @@ void getVertex(std::string& buff, std::vector<float>& vertices)
     vertices.push_back(z);
 }
 
+imp::Uint32 parseIndices(const char* buff, std::vector<imp::Uint32>& vArr, std::vector<imp::Uint32>& vtArr,std::vector<imp::Uint32>& vnArr)
+{
+    imp::Uint32 nbIndices = 0;
+
+    std::string strBuff(buff), sub;
+    strBuff = strBuff.substr(strBuff.find(" ")+1); // remove "f "
+
+    while(strBuff.size() > 0)
+    {
+        imp::Int32 spaceIt = strBuff.find(" ");
+
+		if(spaceIt == -1)
+		{
+			sub = strBuff.c_str();
+			strBuff = "";
+		}
+        else
+		{
+			sub = strBuff.substr(0, spaceIt);
+			strBuff = strBuff.substr(spaceIt+1);
+		}
+
+        normalizeIndicesString(sub);
+
+        imp::Uint32 v=0, vt=0, vn=0;
+        std::sscanf(sub.c_str(), "%u/%u/%u", &v, &vt, &vn);
+
+        vArr.push_back(v); vtArr.push_back(vt); vnArr.push_back(vn);
+        ++nbIndices;
+    }
+
+    return nbIndices;
+}
+
 void getIndices(std::string& buff, std::vector<float>& vertices, std::vector<float>& texCoords, std::vector<float>& normals,
                 std::vector<float>& vertexBuffer, std::vector<float>& texCoordBuffer, std::vector<float>& normalBuffer, bool& isQuad)
 {
     isQuad = false;
-
-    char p1[64], p2[64], p3[64], p4[64];
-
     int nbInd = occurrenceOf(buff.c_str(), ' ');
-
-    if(nbInd == 3)
-    {
-        std::sscanf(buff.c_str(), "f %s %s %s", p1, p2, p3);
-        p4[0] = '\0';
-    }
-    else if(nbInd == 4)
-    {
-        std::sscanf(buff.c_str(), "f %s %s %s %s", p1, p2, p3, p4);
+    if(nbInd == 4)
         isQuad = true;
-    }
 
-    std::string p1str(p1), p2str(p2), p3str(p3), p4str(p4);
-
-    normalizeIndicesString(p1str);
-    normalizeIndicesString(p2str);
-    normalizeIndicesString(p3str);
-
-    float v1, vt1, vn1, v2, vt2, vn2, v3, vt3, vn3, v4, vt4, vn4;
-    std::sscanf(p1str.c_str(), "%f/%f/%f", &v1, &vt1, &vn1);
-    std::sscanf(p2str.c_str(), "%f/%f/%f", &v2, &vt2, &vn2);
-    std::sscanf(p3str.c_str(), "%f/%f/%f", &v3, &vt3, &vn3);
-
-    --v1;
-    --vt1;
-    --vn1;
-    --v2;
-    --vt2;
-    --vn2;
-    --v3;
-    --vt3;
-    --vn3;
-
-    vertexBuffer.push_back(vertices[v1*3]);
-    vertexBuffer.push_back(vertices[v1*3+1]);
-    vertexBuffer.push_back(vertices[v1*3+2]);
-    vertexBuffer.push_back(vertices[v2*3]);
-    vertexBuffer.push_back(vertices[v2*3+1]);
-    vertexBuffer.push_back(vertices[v2*3+2]);
-    vertexBuffer.push_back(vertices[v3*3]);
-    vertexBuffer.push_back(vertices[v3*3+1]);
-    vertexBuffer.push_back(vertices[v3*3+2]);
-
-    if(texCoords.size() > 0)
+    std::vector<imp::Uint32> vIndices;
+    std::vector<imp::Uint32> vtIndices;
+    std::vector<imp::Uint32> vnIndices;
+    imp::Uint32 nbIndices = parseIndices(buff.c_str(), vIndices, vtIndices, vnIndices);
+    for(imp::Uint32 i=0; i<nbIndices; ++i)
     {
-        texCoordBuffer.push_back(texCoords[vt1*2]);
-        texCoordBuffer.push_back(texCoords[vt1*2+1]);
-        texCoordBuffer.push_back(texCoords[vt2*2]);
-        texCoordBuffer.push_back(texCoords[vt2*2+1]);
-        texCoordBuffer.push_back(texCoords[vt3*2]);
-        texCoordBuffer.push_back(texCoords[vt3*2+1]);
-    }
-    else
-    {
-        texCoordBuffer.push_back(0.f);
-        texCoordBuffer.push_back(0.f);
-        texCoordBuffer.push_back(1.f);
-        texCoordBuffer.push_back(0.f);
-        texCoordBuffer.push_back(1.f);
-        texCoordBuffer.push_back(1.f);
-    }
+        imp::Uint32 v = vIndices[i] - 1;
+        imp::Uint32 vt = vtIndices[i] - 1;
+        imp::Uint32 vn = vnIndices[i] - 1;
 
-    if(normals.size() > 0)
-    {
-        normalBuffer.push_back(normals[vn1*3]);
-        normalBuffer.push_back(normals[vn1*3+1]);
-        normalBuffer.push_back(normals[vn1*3+2]);
-        normalBuffer.push_back(normals[vn2*3]);
-        normalBuffer.push_back(normals[vn2*3+1]);
-        normalBuffer.push_back(normals[vn2*3+2]);
-        normalBuffer.push_back(normals[vn3*3]);
-        normalBuffer.push_back(normals[vn3*3+1]);
-        normalBuffer.push_back(normals[vn3*3+2]);
-    }
-    else
-    {
-        normalBuffer.push_back(0.f);
-        normalBuffer.push_back(0.f);
-        normalBuffer.push_back(1.f);
-    }
+        vertexBuffer.push_back(vertices[v*3]);
+        vertexBuffer.push_back(vertices[v*3+1]);
+        vertexBuffer.push_back(vertices[v*3+2]);
 
-    if(isQuad)
-    {
-        normalizeIndicesString(p4str);
-        std::sscanf(p4str.c_str(), "%f/%f/%f", &v4, &vt4, &vn4);
+        texCoordBuffer.push_back(texCoords[vt*2]);
+        texCoordBuffer.push_back(texCoords[vt*2+1]);
 
-        --v4;
-        --vt4;
-        --vn4;
-
-        vertexBuffer.push_back(vertices[v4*3]);
-        vertexBuffer.push_back(vertices[v4*3+1]);
-        vertexBuffer.push_back(vertices[v4*3+2]);
-
-        if(texCoords.size() > 0)
-        {
-            texCoordBuffer.push_back(texCoords[vt4*2]);
-            texCoordBuffer.push_back(texCoords[vt4*2+1]);
-        }
-        else
-        {
-            texCoordBuffer.push_back(0.f);
-            texCoordBuffer.push_back(1.f);
-        }
-
-        if(normals.size() > 0)
-        {
-            normalBuffer.push_back(normals[vn4*3]);
-            normalBuffer.push_back(normals[vn4*3+1]);
-            normalBuffer.push_back(normals[vn4*3+2]);
-        }
-        else
-        {
-            normalBuffer.push_back(0.f);
-            normalBuffer.push_back(0.f);
-            normalBuffer.push_back(1.f);
-        }
+        normalBuffer.push_back(normals[vn*3]);
+        normalBuffer.push_back(normals[vn*3+1]);
+        normalBuffer.push_back(normals[vn*3+2]);
     }
 }
 

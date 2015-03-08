@@ -73,8 +73,7 @@ void SceneNode::commitTransformation()
             * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ());
 
         m_localNormalMatrix =
-            Matrix4::getTranslationMat(position.getX(), position.getY(), position.getZ())
-            * Matrix4::getRotationMat(rx, 0.f, 0.f)
+            Matrix4::getRotationMat(rx, 0.f, 0.f)
             * Matrix4::getRotationMat(0.f, ry, 0.f)
             * Matrix4::getRotationMat(0.f, 0.f, rz)
             * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ()).getInverse();

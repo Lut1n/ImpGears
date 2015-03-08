@@ -13,8 +13,10 @@ Interesting points :
 - Dynamic shadows
 - Blinn-Phong lighting
 
+In progress :
+- MeshModel loading and rendering.
+
 Further work :
-- Continue work on MeshModel loading and rendering.
 - Add a material system.
 - Add an optimised système of Skybox/Skydome
 - Work with advanced particles system

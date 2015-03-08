@@ -8,13 +8,14 @@ Interesting points :
 - Render target can be used for Deferred rendering.
 - VBO Manager ensures the correct using of the GPU memory.
 - Texture manager is able to get textures already loaded.
+- Mesh models can be loaded (with OBJ files)
 - Random terrain can be generated with Perlin noise technic (2D example [here](https://www.dropbox.com/s/wchzmdgojrvp1mz/infinite-perlin.avi?dl=0)).
 - Using of a Crysis inspired technic of SSAO (Screen Space Ambient Occlusion)
 - Dynamic shadows
 - Blinn-Phong lighting
 
 In progress :
-- MeshModel loading and rendering.
+- Optimized bloom effect on sky and self-illumination
 
 Further work :
 - Add a material system.

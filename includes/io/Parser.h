@@ -48,7 +48,7 @@ public:
 
     IMP_PARSER_READWRITE_DEC(float)
 
-	const String readLine();
+	bool readLine(String& line, Uint32 maxLineLength = 256);
 	void writeLine(const String& line);
 
 	bool isEnd() const;

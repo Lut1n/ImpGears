@@ -39,12 +39,12 @@ void KeyBindingConfig::Load(Parser* _parser)
 	char name[512];
 	Uint32 keycode;
 
-	while(!_parser->isEnd())
+	String line;
+	while(!_parser->isEnd() && _parser->readLine(line))
 	{
-		String line = _parser->readLine();
 		line.removeSpaces();
 
-		if(line.getSize() > 0)
+		if(line.getSize() > 3)
 		{
 			parseKeyMap(line.getValue(), name, &keycode);
 			m_keysMap[name] = keycode;

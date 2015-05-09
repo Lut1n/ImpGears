@@ -53,19 +53,36 @@ Parser::~Parser()
 }
 
 //--------------------------------------------------------------
-const String Parser::readLine()
+bool Parser::readLine(String& line, Uint32 maxLineLength)
 {
-	char* line = IMP_NULL;
-	size_t lsize = 0;
-	getline(&line, &lsize, stream);
+	Int32 pos0 = ftell(stream);
+	char buffer[maxLineLength+1];
+	Int32 read = Read(buffer, maxLineLength);
 
-	lsize = strlen(line);
-	line[lsize-1] = '\0'; // remove '\n'
+	if( read == 0 || buffer[0] == '\0' )
+	{
+		line = "";
+		return false;
+	}
 
-	String strline(line);
-	free(line);
+	/// find '\n' character
+	for(Int32 c=0; c<read; ++c)
+	{
+		if(buffer[c] == '\n')
+		{
+			buffer[c] = '\0';
+			Int32 pos1 = (pos0+1) + c + 1;
+			fseek(stream, pos1, SEEK_SET);
+			line = buffer;
+			return true;
+		}
+	}
 
-	return strline;
+	Int32 pos1 = (pos0+1) + read+  1;
+	fseek(stream, pos1, SEEK_SET);
+	buffer[read] = '\0';
+	line = buffer;
+	return true;
 }
 
 //--------------------------------------------------------------

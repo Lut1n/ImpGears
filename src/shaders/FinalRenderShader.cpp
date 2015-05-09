@@ -47,9 +47,11 @@ void main(){
     vec4 selfColor = texture2D(u_selfTexture, texCoord);
     vec4 shadow = texture2D(u_shadows, texCoord);
 
-    vec4 foregroundColor = texColor*shadow + vec4(selfColor.xyz, 0.f);
+    vec4 foregroundColor = texColor*shadow;
 
     vec3 resultColor = backColor.xyz*(1.f-foregroundColor.w) + (foregroundColor.xyz)*foregroundColor.w;
+
+	resultColor += selfColor.xyz * 0.5f;
 
     gl_FragData[0] = gl_Color * vec4(resultColor, 1.f);
 }

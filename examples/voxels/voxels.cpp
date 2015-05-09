@@ -15,6 +15,8 @@
 #include "shaders/ShadowShader.h"
 #include "shaders/DeferredShader.h"
 #include "shaders/BlurShader.h"
+#include "shaders/PreBloomShader.h"
+#include "shaders/BloomShader.h"
 #include "shaders/BlinnPhongShader.h"
 #include "shaders/SSAOShader.h"
 #include "graphics/VBOManager.h"
@@ -137,6 +139,7 @@ int main(void)
 	// default render parameters
     imp::RenderParameters defaultParameters;
     defaultParameters.setPerspectiveProjection(FRUSTUM_FOVY, 4.f/3.f, FRUSTUM_NEAR, FRUSTUM_FAR);
+	defaultParameters.setClearColor(imp::Vector3(0.f, 0.f, 0.f));
 
 	// screen render parameters
     imp::RenderParameters screenParameters;
@@ -150,7 +153,7 @@ int main(void)
     shadowParameters.setOrthographicProjection(-130.f, 130.f, -130.f, 130.f, 0.1, 512.f);
 
 	// world generation
-    world = new imp::VoxelWorld(128,128,64);
+    world = new imp::VoxelWorld(128,128,32);
 	fprintf(stdout, "world generation...\t");
     imp::VoxelWordGenerator::GetInstance()->Generate(world);
 	fprintf(stdout, "OK\n");
@@ -211,6 +214,24 @@ int main(void)
     imp::RenderTarget ssaoBlurTarget;
     ssaoBlurTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
     const imp::Texture* ssaoBlurTex = ssaoBlurTarget.getTexture(0);
+
+	// pre bloom gauss shader
+    imp::PreBloomShader prebloomShader;
+    imp::RenderTarget prebloomTarget16, prebloomTarget32, prebloomTarget64, prebloomTarget128;
+    prebloomTarget16.createBufferTarget(16, 16, 1, false);
+    prebloomTarget32.createBufferTarget(32, 32, 1, false);
+    prebloomTarget64.createBufferTarget(64, 64, 1, false);
+    prebloomTarget128.createBufferTarget(128, 128, 1, false);
+    imp::Texture* bloomGauss16 = prebloomTarget16.getTexture(0);
+    imp::Texture* bloomGauss32 = prebloomTarget32.getTexture(0);
+    imp::Texture* bloomGauss64 = prebloomTarget64.getTexture(0);
+    imp::Texture* bloomGauss128 = prebloomTarget128.getTexture(0);
+
+	// bloom gauss shader
+    imp::BloomShader bloomShader;
+    imp::RenderTarget bloomTarget;
+    bloomTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
+    const imp::Texture* bloomTex = bloomTarget.getTexture(0);
 
 	// screen render target
     imp::RenderTarget screenTarget;
@@ -398,6 +419,56 @@ int main(void)
 			blinnPhongTarget.unbind();
             /// ////////////////////////////////////////////////////
 
+			// (pass ?) prebloom shader
+			renderer.setCamera(IMP_NULL);
+			renderer.setRenderParameters(screenParameters);
+			// 16
+			prebloomTarget16.bind();
+			prebloomShader.enable();
+			prebloomShader.setMatrix4Parameter("u_projection", screenParameters.getProjectionMatrix());
+			prebloomShader.setTextureParameter("u_inTexture", selfBuffer, 0);
+			renderer.renderScene(-1);
+			screen.render(0);
+			prebloomShader.disable();
+			prebloomTarget16.unbind();
+			// 32
+			prebloomTarget32.bind();
+			prebloomShader.enable();
+			renderer.renderScene(-1);
+			screen.render(0);
+			prebloomShader.disable();
+			prebloomTarget32.unbind();
+			// 64
+			prebloomTarget64.bind();
+			prebloomShader.enable();
+			renderer.renderScene(-1);
+			screen.render(0);
+			prebloomShader.disable();
+			prebloomTarget64.unbind();
+			// 128
+			prebloomTarget128.bind();
+			prebloomShader.enable();
+			renderer.renderScene(-1);
+			screen.render(0);
+			prebloomShader.disable();
+			prebloomTarget128.unbind();
+
+			// (pass ?) bloom shader
+			renderer.setCamera(IMP_NULL);
+			renderer.setRenderParameters(screenParameters);
+			bloomTarget.bind();
+			bloomShader.enable();
+			bloomShader.setMatrix4Parameter("u_projection", screenParameters.getProjectionMatrix());
+			bloomShader.setTextureParameter("u_inTextureOrigin", selfBuffer, 0);
+			bloomShader.setTextureParameter("u_inTexture16", bloomGauss16, 1);
+			bloomShader.setTextureParameter("u_inTexture32", bloomGauss32, 2);
+			bloomShader.setTextureParameter("u_inTexture64", bloomGauss64, 3);
+			bloomShader.setTextureParameter("u_inTexture128", bloomGauss128, 4);
+			renderer.renderScene(-1);
+			screen.render(0);
+			bloomShader.disable();
+			bloomTarget.unbind();
+			
             if(debugMode == 1)
             {
                 /// (pass ?) Screen rendering
@@ -408,7 +479,7 @@ int main(void)
                 finalShader.setMatrix4Parameter("u_projection", renderer.getProjectionMatrix());
                 finalShader.setTextureParameter("u_colorTexture", blinnPhongBuffer, 0);
                 finalShader.setTextureParameter("u_backgroundTexture", backgroundTex, 1);
-                finalShader.setTextureParameter("u_selfTexture", selfBuffer, 2);
+                finalShader.setTextureParameter("u_selfTexture", bloomTex, 2);
                 finalShader.setTextureParameter("u_shadows", shadowsTex, 3);
                 renderer.renderScene(-1);
                 screen.render(0);
@@ -438,7 +509,7 @@ int main(void)
                         texToDisplay = specBuffer;
                     break;
                     case 8:
-                        texToDisplay = selfBuffer;
+                        texToDisplay = bloomTex;
                     break;
                     case 9:
                         texToDisplay = blinnPhongBuffer;

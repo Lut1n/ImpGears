@@ -13,8 +13,6 @@ Interesting points :
 - Using of a Crysis inspired technic of SSAO (Screen Space Ambient Occlusion)
 - Dynamic shadows
 - Blinn-Phong lighting
-
-In progress :
 - Optimized bloom effect on sky and self-illumination
 
 Further work :
@@ -26,7 +24,8 @@ Further work :
 
 Sorry for the lack of comments. There are still some major code changes that could be made, the comments will come after ;)
 
-Some screenshots of the result with a voxel terrain and dynamic shadow, SSAO and light system :
+Some screenshots of the result with a voxel terrain and dynamic shadow, SSAO, bloom and light system :
+![screenshot](http://uprapide.com/images/Lut1n/impgears-5-2015.png "Screenshot of the result")
 ![screenshot](http://uprapide.com/images/Lut1n/impgears-2-2015-b.png "Screenshot of the result")
 ![screenshot](http://uprapide.com/images/Lut1n/impgears-2-2015-a.png "Screenshot of the result")
 

@@ -108,7 +108,7 @@ void PixelData::setPixel(Uint32 x, Uint32 y, Pixel pixel)
 //--------------------------------------------------------------
 void PixelData::getPixels(Uint32 x, Uint32 y, Uint32 w, Uint32 h, Pixel* data) const
 {
-    Uint32 index;
+    Uint32 index = 0;
 
 	for(Uint32 j=0; j<h; ++j)
 	for(Uint32 i=0; i<w; ++i)

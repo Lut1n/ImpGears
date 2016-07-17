@@ -1,6 +1,8 @@
 #ifndef PARTICLESYSTEM_H
 #define PARTICLESYSTEM_H
 
+#include "base/impBase.h"
+
 #include <GL/glew.h>
 #include <vector>
 #include <ctime>

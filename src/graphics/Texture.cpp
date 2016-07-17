@@ -90,8 +90,8 @@ void Texture::synchronize()
 //--------------------------------------------------------------
 void Texture::updateVideoMemory()
 {
-    Int32 glInternalFormat;
-    Int32 glDataFormat;
+    Int32 glInternalFormat = 0;
+    Int32 glDataFormat = 0;
     Int32 glDataType = GL_UNSIGNED_BYTE;
 
     switch(m_data.getFormat())

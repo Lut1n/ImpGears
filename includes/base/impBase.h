@@ -3,6 +3,9 @@
 
 #include "impBuildConfig.h"
 
+// Hack (avoid a compilation bug with mingw...)
+#define __NO_INLINE__
+
 /// Impgears namespace
 #define IMPGEARS_BEGIN namespace imp{
 #define IMPGEARS_END };

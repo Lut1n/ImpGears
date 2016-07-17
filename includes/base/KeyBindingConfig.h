@@ -5,6 +5,7 @@
 #include "io/Streamable.h"
 
 #include <map>
+#include <string>
 
 IMPGEARS_BEGIN
 

@@ -2,6 +2,8 @@
 #include "graphics/GLcommon.h"
 #include "base/frustumParams.h"
 
+#include <cstdlib>
+
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------

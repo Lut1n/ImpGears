@@ -1,4 +1,4 @@
-#include "graphics/PixelData.h"
+#include "Graphics/PixelData.h"
 
 #include <cstdlib>
 #include <cstring>

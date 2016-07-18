@@ -1,5 +1,5 @@
-#include "graphics/VBOData.h"
-#include "graphics/GLcommon.h"
+#include "Graphics/VBOData.h"
+#include "Graphics/GLcommon.h"
 
 #include <cstdio>
 

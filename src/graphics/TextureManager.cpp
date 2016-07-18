@@ -1,5 +1,5 @@
-#include "graphics/TextureManager.h"
-#include "graphics/png/PngLoader.h"
+#include "Graphics/TextureManager.h"
+#include "Graphics/PngLoader.h"
 
 IMPGEARS_BEGIN
 

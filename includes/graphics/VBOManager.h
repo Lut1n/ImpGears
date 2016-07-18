@@ -1,5 +1,5 @@
 /*
-graphics/VBOManager.h
+Graphics/VBOManager.h
 
 Define a manager for using VBOs. VBOManager keeps id and size of VBO created. It's useful for detecting unfree video memory.
 */
@@ -7,7 +7,7 @@ Define a manager for using VBOs. VBOManager keeps id and size of VBO created. It
 #ifndef VBOMANAGER_H
 #define VBOMANAGER_H
 
-#include "../base/impBase.h"
+#include "../Core/impBase.h"
 
 #define VBO_MAX 500
 

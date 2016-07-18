@@ -1,9 +1,9 @@
 #ifndef IMP_RENDERTARGET_H
 #define IMP_RENDERTARGET_H
 
-#include "base/impBase.h"
-#include "graphics/GLcommon.h"
-#include "graphics/Texture.h"
+#include "Core/impBase.h"
+#include "Graphics/GLcommon.h"
+#include "Graphics/Texture.h"
 
 IMPGEARS_BEGIN
 

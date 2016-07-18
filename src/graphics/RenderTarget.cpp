@@ -1,8 +1,8 @@
-#include "graphics/RenderTarget.h"
-#include "EvnContextInterface.h"
+#include "Graphics/RenderTarget.h"
+#include "System/EvnContextInterface.h"
 #include <cstdio>
 
-#include "camera/Camera.h"
+#include "Graphics/Camera.h"
 
 IMPGEARS_BEGIN
 

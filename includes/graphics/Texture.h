@@ -1,8 +1,8 @@
 #ifndef IMP_TEXTURE_H
 #define IMP_TEXTURE_H
 
-#include "base/impBase.h"
-#include "graphics/PixelData.h"
+#include "Core/impBase.h"
+#include "Graphics/PixelData.h"
 
 IMPGEARS_BEGIN
 

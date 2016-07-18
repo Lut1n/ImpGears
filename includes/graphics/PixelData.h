@@ -1,7 +1,7 @@
 #ifndef IMP_PIXELDATA_H
 #define IMP_PIXELDATA_H
 
-#include "base/impBase.h"
+#include "Core/impBase.h"
 
 IMPGEARS_BEGIN
 

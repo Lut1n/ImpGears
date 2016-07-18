@@ -1,5 +1,5 @@
-#include "graphics/VBOManager.h"
-#include "graphics/GLcommon.h"
+#include "Graphics/VBOManager.h"
+#include "Graphics/GLcommon.h"
 
 #include <stdio.h>
 

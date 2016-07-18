@@ -9,7 +9,13 @@ else
 	MACROS=-DIMPGEARS_BUILD_DLL
 endif
 
-LDFLAGS=-pthread -lpng -lGL -lGLU -lGLEW -lsfml-graphics -lsfml-window -lsfml-system
+### old flags
+#LDFLAGS=-pthread -lpng -lGL -lGLU -lGLEW -lsfml-graphics -lsfml-window -lsfml-system
+
+### mingw64
+
+### linux
+#LDFLAGS=-pthread -lGL -lGLEW -lglfw3
 
 SRCDIR=src
 INCDIR=includes
@@ -38,5 +44,5 @@ $(OBJDIR):
 clean:
 	rm -rf "$(OBJDIR)"
 
-mrproper: clean
-	rm -rf "$(OUTPUT)"
+#mrproper: clean
+#rm -rf "$(OUTPUT)"

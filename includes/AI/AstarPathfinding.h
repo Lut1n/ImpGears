@@ -1,7 +1,7 @@
 #ifndef ASTARPATHFINDING_H
 #define ASTARPATHFINDING_H
 
-#include "base/impBase.h"
+#include "Core/impBase.h"
 
 #include <list>
 #include <cstdlib>

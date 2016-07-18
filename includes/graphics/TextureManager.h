@@ -1,7 +1,7 @@
 #ifndef IMP_TEXTUREMANAGER_H
 #define IMP_TEXTUREMANAGER_H
 
-#include "../base/impBase.h"
+#include "../Core/impBase.h"
 #include <map>
 #include "Texture.h"
 

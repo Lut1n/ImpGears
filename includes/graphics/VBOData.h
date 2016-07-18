@@ -1,5 +1,5 @@
 /*
-graphics/VBOData.h
+Graphics/VBOData.h
 
 Define an interface for using VBO. VBOData keeps memory size used after request.
 */

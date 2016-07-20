@@ -1,4 +1,4 @@
-#include "Core/Math.h"
+#include "Math/Math.h"
 
 #include <cstdlib>
 #include <ctime>

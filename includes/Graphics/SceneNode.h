@@ -3,8 +3,8 @@
 
 #include "Core/impBase.h"
 #include <list>
-#include "Core/Vector3.h"
-#include "Core/Matrix4.h"
+#include "Math/Vector3.h"
+#include "Math/Matrix4.h"
 #include "System/EvnContextInterface.h"
 
 IMPGEARS_BEGIN

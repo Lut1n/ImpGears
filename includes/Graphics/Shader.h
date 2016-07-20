@@ -2,7 +2,7 @@
 #define IMP_SHADER_H
 
 #include "Core/impBase.h"
-#include "Core/Matrix4.h"
+#include "Math/Matrix4.h"
 #include "Graphics/Texture.h"
 
 IMPGEARS_BEGIN

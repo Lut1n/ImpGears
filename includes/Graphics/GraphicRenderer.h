@@ -2,7 +2,7 @@
 #define IMP_GRAPHICRENDERER_H
 
 #include "Core/impBase.h"
-#include "Core/Matrix4.h"
+#include "Math/Matrix4.h"
 #include "System/EvnContextInterface.h"
 #include "Graphics/Scene.h"
 #include "Graphics/Camera.h"

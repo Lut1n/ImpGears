@@ -1,8 +1,8 @@
 #ifndef IMP_MATRIX3_H
 #define IMP_MATRIX3_H
 
-#include "impBase.h"
-#include "../Core/Vector3.h"
+#include "Core/impBase.h"
+#include "../Math/Vector3.h"
 
 IMPGEARS_BEGIN
 

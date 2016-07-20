@@ -1,7 +1,7 @@
 #include "Graphics/SSAOShader.h"
 
-#include "Core/Vector3.h"
-#include "Core/Math.h"
+#include "Math/Vector3.h"
+#include "Math/Math.h"
 
 #include "Core/State.h"
 

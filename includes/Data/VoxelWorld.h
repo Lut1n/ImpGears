@@ -3,7 +3,7 @@
 
 #include "../Core/Lock.h"
 #include "../Core/impBase.h"
-#include "../Core/Vector3.h"
+#include "../Math/Vector3.h"
 #include "System/Streamable.h"
 #include "Graphics/SceneNode.h"
 #include "ChunkData.h"

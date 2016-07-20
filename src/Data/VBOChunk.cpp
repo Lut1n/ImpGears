@@ -6,7 +6,7 @@
 #include "Graphics/ShadowBufferShader.h"
 #include "Graphics/GraphicRenderer.h"
 
-#include "Core/Matrix3.h"
+#include "Math/Matrix3.h"
 
 IMPGEARS_BEGIN
 

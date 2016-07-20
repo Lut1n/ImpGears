@@ -2,8 +2,8 @@
 #define IMP_CAMERA_H
 
 #include "System/EvnContextInterface.h"
-#include "Core/Vector3.h"
-#include "Core/Matrix4.h"
+#include "Math/Vector3.h"
+#include "Math/Matrix4.h"
 #include "Core/impBase.h"
 #include "System/Entity.h"
 

@@ -95,7 +95,11 @@ void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, Uin
     glUniform3fv(location, count, vector3Array);
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
-        fprintf(stderr, "impError : Send vector3 array(%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
+	{
+		std::string strErr;
+		glErrToString(errorState, strErr);
+		fprintf(stderr, "impError : Send vector3 array(%s) to shader (error %d : %s)\n", name, errorState, strErr.c_str() );
+	}
 }
 
 //--------------------------------------------------------------
@@ -105,7 +109,11 @@ void Shader::setFloatParameter(const char* name, float value)
     glUniform1f(glGetUniformLocation(m_programID, name), static_cast<GLfloat>(value));
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
-        fprintf(stderr, "impError : Send float(%s (value : %f)) to shader (error %d : %s)\n", name, value, errorState, gluErrorString(errorState));
+	{
+		std::string strErr;
+		glErrToString(errorState, strErr);
+		fprintf(stderr, "impError : Send float(%s (value : %f)) to shader (error %d : %s)\n", name, value, errorState, strErr.c_str() );
+	}
 }
 
 //--------------------------------------------------------------
@@ -119,7 +127,11 @@ void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
     glUniformMatrix4fv(location, 1, false, Matrix4.getData());
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
-        fprintf(stderr, "impError : Send Matrix4(%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
+	{
+		std::string strErr;
+		glErrToString(errorState, strErr);
+		fprintf(stderr, "impError : Send Matrix4(%s) to shader (error %d : %s)\n", name, errorState, strErr.c_str() );
+	}
 }
 
 //--------------------------------------------------------------
@@ -134,7 +146,11 @@ void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
     glUniform3f(location, vec3.getX(), vec3.getY(), vec3.getZ());
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
-        fprintf(stderr, "impError : Send vector3 (%s) to shader (error %d : %s)\n", name, errorState, gluErrorString(errorState));
+	{
+		std::string strErr;
+		glErrToString(errorState, strErr);
+		fprintf(stderr, "impError : Send vector3 (%s) to shader (error %d : %s)\n", name, errorState, strErr.c_str() );
+	}
 }
 
 //--------------------------------------------------------------

@@ -13,7 +13,7 @@ endif
 #LDFLAGS=-pthread -lpng -lGL -lGLU -lGLEW -lsfml-graphics -lsfml-window -lsfml-system
 
 ### mingw64
-LDFLAGS=-pthread -lglew32 -lopengl32 -lglfw3
+LDFLAGS= -lglfw3 -lglew32 -lopengl32 -pthread
 
 ### linux
 #LDFLAGS=-pthread -lGL -lGLEW -lglfw3
@@ -30,7 +30,7 @@ MKDIR=mkdir -p
 all: $(OUTPUT)
 
 $(OUTPUT): $(OBJ)
-	$(CXX) -shared $(LDFLAGS) $^ -o $@
+	$(CXX) -o $@ -shared $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(OBJDIR)
 	$(MKDIR) "$(@D)"

@@ -216,13 +216,14 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
     GLdouble projection[16];
     GLint viewport[4];
 
-    GLdouble vx, vy, vz;
+    GLdouble vx = 0.0, vy = 0.0, vz = 0.0;
 
     glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
     glGetDoublev(GL_PROJECTION_MATRIX, projection);
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint result = gluUnProject(x, viewport[3]-y, 0, modelview, projection, viewport, &vx, &vy, &vz);
+	// need an equivalent function without glu
+    GLint result = GL_FALSE; // gluUnProject(x, viewport[3]-y, 0, modelview, projection, viewport, &vx, &vy, &vz);
 
 
     ///espace camera

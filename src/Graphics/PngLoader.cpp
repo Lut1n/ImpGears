@@ -11,7 +11,7 @@ PngLoader::~PngLoader()
 }
 
 
-imp::PixelData* PngLoader::loadPixelDataFromFile(const char* filename)
+imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
 {
 /*       FILE *fp = fopen(filename, "rb");
     if (!fp)
@@ -115,7 +115,7 @@ imp::PixelData* PngLoader::loadPixelDataFromFile(const char* filename)
     //delete[] (png_bytep)rowPtrs;
     png_destroy_read_struct(&png_ptr, &info_ptr,(png_infopp)0);
 
-    imp::PixelData* image = new imp::PixelData();
+    imp::ImageData* image = new imp::ImageData();
     imp::PixelFormat format = imp::PixelFormat_RGBA8;
     if(channels == 3)
         format = imp::PixelFormat_RGB8;
@@ -126,18 +126,20 @@ imp::PixelData* PngLoader::loadPixelDataFromFile(const char* filename)
     return image;*/
 	
 	fprintf(stderr, "impError : png image not supported anymore.\n");
-	return IMP_NULL;
+	imp::ImageData* data = new imp::ImageData();
+	data->create(512, 512, 32, imp::PixelFormat_RGBA8);
+	return data;
 }
 
 imp::Texture* PngLoader::loadFromFile(const char* filename)
 {
-    imp::PixelData* data = loadPixelDataFromFile(filename);
+    imp::ImageData* data = loadImageDataFromFile(filename);
 
     if(data == IMP_NULL)
         fprintf(stderr, "impError : cannot load pixel data from file %s\n", filename);
 
     imp::Texture* tex = new imp::Texture();
-    tex->loadFromPixelData(data);
+    tex->loadFromImageData(data);
     delete data;
 
     return tex;

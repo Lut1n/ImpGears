@@ -33,22 +33,22 @@ Texture::~Texture()
 //--------------------------------------------------------------
 void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, PixelFormat format)
 {
-    m_data.loadFromMemory(data, width, height, format);
+    m_data.create(width, height, 32, format, reinterpret_cast<Uint8*>(data) );
     updateVideoParams();
     updateVideoMemory();
 }
 
-void Texture::loadFromPixelData(const PixelData* data)
+void Texture::loadFromImageData(const ImageData* data)
 {
     create(data->getWidth(), data->getHeight(), data->getFormat());
-    m_data.copy(data);
+    m_data.clone(*data);
     updateVideoMemory();
 }
 
 //--------------------------------------------------------------
 void Texture::create(Uint32 width, Uint32 height, PixelFormat format)
 {
-    m_data.create(width, height, format);
+    m_data.create(width, height, 32, format);
 
     updateVideoParams();
     updateVideoMemory();
@@ -61,12 +61,12 @@ void Texture::destroy()
 }
 
 //--------------------------------------------------------------
-void Texture::getPixelData(PixelData* data) const
+void Texture::getImageData(ImageData* data) const
 {
     if(data == IMP_NULL)
         return;
 
-    data->copy(&m_data);
+    data->clone(m_data);
 }
 
 //--------------------------------------------------------------
@@ -101,6 +101,7 @@ void Texture::updateVideoMemory()
             glInternalFormat = GL_RGBA8;
         break;
         case PixelFormat_RGB8 :
+        case PixelFormat_BGR8 :
             glDataFormat = GL_RGB;
             glInternalFormat = GL_RGB8;
         break;
@@ -110,13 +111,14 @@ void Texture::updateVideoMemory()
             //glDataType = GL_UNSIGNED_BYTE;
         break;
         default:
-            fprintf(stderr, "impError : texture format error\n");
+            fprintf(stderr, "impError : texture format error (%d)\n", m_data.getFormat());
         break;
     }
 
     bind();
     glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, m_data.getWidth(), m_data.getHeight(),
                  0, glDataFormat, glDataType, m_data.getBuffer());
+    GL_CHECKERROR("texture update gpu Texture");
     unbind();
 }
 
@@ -138,14 +140,16 @@ void Texture::updateVideoParams()
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapMode);
+    GL_CHECKERROR("texture update 1");
     if(m_hasMipmap)
     {
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, m_mipmapMaxLevel);
+    GL_CHECKERROR("texture update 2");
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilterMagValue);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
-    GL_CHECKERROR("texture update");
+    GL_CHECKERROR("texture update 3");
 
     unbind();
 }

@@ -33,8 +33,8 @@ SSAOShader::SSAOShader():
     }
 
     m_noise.create(4, 4);
-    PixelData pixels;
-    m_noise.getPixelData(&pixels);
+    ImageData pixels;
+    m_noise.getImageData(&pixels);
     for(Uint32 i=0; i<4; ++i)
     {
         for(Uint32 j=0; j<4; ++j)
@@ -49,7 +49,7 @@ SSAOShader::SSAOShader():
             pixels.setPixel(i,j, pix);
         }
     }
-    m_noise.loadFromPixelData(&pixels);
+    m_noise.loadFromImageData(&pixels);
 }
 
 //--------------------------------------------------------------

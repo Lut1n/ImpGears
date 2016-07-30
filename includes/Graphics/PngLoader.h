@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "Graphics/Texture.h"
-#include "Graphics/PixelData.h"
+#include "Graphics/ImageData.h"
 
 
 typedef struct IMP_API
@@ -32,7 +32,7 @@ class IMP_API PngLoader
     //static void readData(png_structp png_ptr, png_bytep png_data, png_size_t length);
 
         static pngimage_t loadFrom(const char* filename);
-        static imp::PixelData* loadPixelDataFromFile(const char* filename);
+        static imp::ImageData* loadImageDataFromFile(const char* filename);
         static imp::Texture* loadFromFile(const char* filename);
 
         /// Source : http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example

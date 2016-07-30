@@ -66,7 +66,7 @@ void VoxelWordGenerator::Generate(VoxelWorld* _world)
 }
 
 //--------------------------------------------------------------
-void VoxelWordGenerator::Generate(VoxelWorld* _world, const imp::PixelData* _heightmap)
+void VoxelWordGenerator::Generate(VoxelWorld* _world, const imp::ImageData* _heightmap)
 {
 	    imp::Uint32 height = _world->GetSizeZ();
 

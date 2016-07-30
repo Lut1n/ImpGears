@@ -2,7 +2,7 @@
 #define IMP_TEXTURE_H
 
 #include "Core/impBase.h"
-#include "Graphics/PixelData.h"
+#include "Graphics/ImageData.h"
 
 IMPGEARS_BEGIN
 
@@ -34,7 +34,7 @@ class IMP_API Texture
         /// \brief Loads the texture from pixel buffer.
         /// \param data - A pointer to the data buffer.
         /// \param memoryMode - The memory mode.
-        void loadFromPixelData(const PixelData* data);
+        void loadFromImageData(const ImageData* data);
 
         /// \brief Creates a texture.
         /// \param width - The width of the texture.
@@ -46,7 +46,7 @@ class IMP_API Texture
 		/// \brief Destroy a texture
 		void destroy();
 
-        void getPixelData(PixelData* data) const;
+        void getImageData(ImageData* data) const;
 
         void notifyTextureRendering(){m_videoMemLastModified = true;}
 		void synchronize();
@@ -77,7 +77,7 @@ class IMP_API Texture
         void updateVideoParams();
 		void updateLocalMemory();
 
-        PixelData m_data;
+        ImageData m_data;
 
         Uint32 m_videoID;
 

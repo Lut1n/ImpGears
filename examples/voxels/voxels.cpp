@@ -4,42 +4,43 @@
 #include <cstdio>
 #include <cmath>
 
-#include "EntityManager.h"
-#include "graphics/png/PngLoader.h"
-#include "base/Timer.h"
-#include "camera/StrategicCamera.h"
-#include "camera/FreeFlyCamera.h"
-#include "shaders/DefaultShader.h"
-#include "shaders/FinalRenderShader.h"
-#include "shaders/ShadowBufferShader.h"
-#include "shaders/ShadowShader.h"
-#include "shaders/DeferredShader.h"
-#include "shaders/BlurShader.h"
-#include "shaders/PreBloomShader.h"
-#include "shaders/BloomShader.h"
-#include "shaders/BlinnPhongShader.h"
-#include "shaders/SSAOShader.h"
-#include "graphics/VBOManager.h"
-#include "scene/GraphicRenderer.h"
-#include "graphics/RenderTarget.h"
-#include "ScreenVertex.h"
+#include "System/EntityManager.h"
+// #include "Graphics/BmpLoader.h"
+#include "Graphics/BmpLoader.h"
+#include "Core/Timer.h"
+#include "Graphics/StrategicCamera.h"
+#include "Graphics/FreeFlyCamera.h"
+#include "Graphics/DefaultShader.h"
+#include "Graphics/FinalRenderShader.h"
+#include "Graphics/ShadowBufferShader.h"
+#include "Graphics/ShadowShader.h"
+#include "Graphics/DeferredShader.h"
+#include "Graphics/BlurShader.h"
+#include "Graphics/PreBloomShader.h"
+#include "Graphics/BloomShader.h"
+#include "Graphics/BlinnPhongShader.h"
+#include "Graphics/SSAOShader.h"
+#include "Graphics/VBOManager.h"
+#include "Graphics/GraphicRenderer.h"
+#include "Graphics/RenderTarget.h"
 
-#include "particles/ParticleSystem.h"
+#include "Graphics/ParticleSystem.h"
 
-#include "base/frustumParams.h"
-#include "voxels/VBOChunk.h"
-#include "voxels/VoxelWorld.h"
-#include "voxels/VoxelWordGenerator.h"
+#include "Core/frustumParams.h"
+#include "Data/VBOChunk.h"
+#include "Data/VoxelWorld.h"
+#include "Data/VoxelWordGenerator.h"
 
-#include "mesh/OBJMeshLoader.h"
-#include "mesh/MeshNode.h"
+#include "Data/OBJMeshLoader.h"
+#include "Data/MeshNode.h"
 
-#include "base/impBase.h"
-#include "base/State.h"
+#include "Core/impBase.h"
+#include "Core/State.h"
 
-#include "sky/SkyBox.h"
+#include "Graphics/SkyBox.h"
 
 #include "SFMLContextInterface.h"
+#include "ScreenVertex.h"
 
 #define FPS_LIMIT 60
 #define IS_FULLSCREEN false
@@ -107,28 +108,28 @@ int main(void)
 
 
     /// atlas - color
-    imp::Texture* atlasColor = PngLoader::loadFromFile("data/atlas-color.png");
+    imp::Texture* atlasColor = BmpLoader::loadFromFile("data/atlas-color.bmp");
     atlasColor->setSmooth(true);
     atlasColor->setRepeated(false);
     atlasColor->setMipmap(true, 9);
     atlasColor->synchronize();
 
     /// atlas - specular
-    imp::Texture* atlasSpec = PngLoader::loadFromFile("data/atlas-specular.png");
+    imp::Texture* atlasSpec = BmpLoader::loadFromFile("data/atlas-specular.bmp");
     atlasSpec->setSmooth(true);
     atlasSpec->setRepeated(false);
     atlasSpec->setMipmap(true, 9);
     atlasSpec->synchronize();
 
     /// atlas - normal
-    imp::Texture* atlasNormal = PngLoader::loadFromFile("data/atlas-normal.png");
+    imp::Texture* atlasNormal = BmpLoader::loadFromFile("data/atlas-normal.bmp");
     atlasNormal->setSmooth(true);
     atlasNormal->setRepeated(false);
     atlasNormal->setMipmap(true, 9);
     atlasNormal->synchronize();
 
     /// atlas - self illumination
-    imp::Texture* atlasSelf = PngLoader::loadFromFile("data/atlas-selfillu.png");
+    imp::Texture* atlasSelf = BmpLoader::loadFromFile("data/atlas-selfillu.bmp");
     atlasSelf->setSmooth(true);
     atlasSelf->setRepeated(false);
     atlasSelf->setMipmap(true, 9);
@@ -238,12 +239,12 @@ int main(void)
     screenTarget.createScreenTarget(0);
 
 	// textures for skybox
-    imp::Texture* skyLeft = PngLoader::loadFromFile("data/sky/box/left.png"); skyLeft->synchronize();
-    imp::Texture* skyRight = PngLoader::loadFromFile("data/sky/box/right.png"); skyRight->synchronize();
-    imp::Texture* skyFront = PngLoader::loadFromFile("data/sky/box/front.png"); skyFront->synchronize();
-    imp::Texture* skyBack = PngLoader::loadFromFile("data/sky/box/back.png"); skyBack->synchronize();
-    imp::Texture* skyTop = PngLoader::loadFromFile("data/sky/box/top.png"); skyTop->synchronize();
-    imp::Texture* skyBottom = PngLoader::loadFromFile("data/sky/box/bottom.png"); skyBottom->synchronize();
+    imp::Texture* skyLeft = BmpLoader::loadFromFile("data/sky/box/left.bmp"); skyLeft->synchronize();
+    imp::Texture* skyRight = BmpLoader::loadFromFile("data/sky/box/right.bmp"); skyRight->synchronize();
+    imp::Texture* skyFront = BmpLoader::loadFromFile("data/sky/box/front.bmp"); skyFront->synchronize();
+    imp::Texture* skyBack = BmpLoader::loadFromFile("data/sky/box/back.bmp"); skyBack->synchronize();
+    imp::Texture* skyTop = BmpLoader::loadFromFile("data/sky/box/top.bmp"); skyTop->synchronize();
+    imp::Texture* skyBottom = BmpLoader::loadFromFile("data/sky/box/bottom.bmp"); skyBottom->synchronize();
 
 	// skybox entity
 	imp::SkyBox skyBox(skyLeft, skyRight, skyFront, skyBack, skyTop, skyBottom, FRUSTUM_FAR/2.f);

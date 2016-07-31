@@ -7,7 +7,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-Texture::Texture():
+Texture::Texture(const std::string& name):
     m_videoID(0),
     m_syncMode(MemorySyncMode_None),
     m_videoMemLastModified(false),
@@ -15,6 +15,7 @@ Texture::Texture():
     m_isRepeated(false),
     m_hasMipmap(false),
     m_mipmapMaxLevel(1000)
+	, m_name(name)
 {
     glGenTextures(1, &m_videoID);
     GL_CHECKERROR("gen texture");
@@ -33,13 +34,22 @@ Texture::~Texture()
 //--------------------------------------------------------------
 void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, PixelFormat format)
 {
-    m_data.create(width, height, 32, format, reinterpret_cast<Uint8*>(data) );
+	std::cout << m_name << " - load from mem\n";
+	Uint32 bpp = 32;
+	if( format == PixelFormat_BGR8 || format == PixelFormat_RGB8 )
+		bpp = 24;
+	else if(format == PixelFormat_RGBA8 || format == PixelFormat_BGRA8)
+		bpp = 32;
+	
+    m_data.create(width, height, bpp, format, reinterpret_cast<Uint8*>(data) );
     updateVideoParams();
     updateVideoMemory();
 }
 
+//--------------------------------------------------------------
 void Texture::loadFromImageData(const ImageData* data)
 {
+	std::cout << m_name << " - load from image data\n";
     create(data->getWidth(), data->getHeight(), data->getFormat());
     m_data.clone(*data);
     updateVideoMemory();
@@ -48,7 +58,13 @@ void Texture::loadFromImageData(const ImageData* data)
 //--------------------------------------------------------------
 void Texture::create(Uint32 width, Uint32 height, PixelFormat format)
 {
-    m_data.create(width, height, 32, format);
+	Uint32 bpp = 32;
+	if( format == PixelFormat_BGR8 || format == PixelFormat_RGB8 )
+		bpp = 24;
+	else if(format == PixelFormat_RGBA8 || format == PixelFormat_BGRA8)
+		bpp = 32;
+	
+    m_data.create(width, height, bpp, format);
 
     updateVideoParams();
     updateVideoMemory();
@@ -100,10 +116,17 @@ void Texture::updateVideoMemory()
             glDataFormat = GL_RGBA;
             glInternalFormat = GL_RGBA8;
         break;
+        case PixelFormat_BGRA8 :
+            glDataFormat = GL_BGRA;
+            glInternalFormat = GL_RGBA8;
+        break;
         case PixelFormat_RGB8 :
-        case PixelFormat_BGR8 :
             glDataFormat = GL_RGB;
             glInternalFormat = GL_RGB8;
+		break;
+        case PixelFormat_BGR8 :
+				glDataFormat = GL_BGR;
+				glInternalFormat = GL_RGB8;
         break;
         case PixelFormat_R16 :
             glDataFormat = GL_DEPTH_COMPONENT;
@@ -111,7 +134,7 @@ void Texture::updateVideoMemory()
             //glDataType = GL_UNSIGNED_BYTE;
         break;
         default:
-            fprintf(stderr, "impError : texture format error (%d)\n", m_data.getFormat());
+            fprintf(stderr, "impError : %s texture format error (%d)\n", m_name.c_str(), m_data.getFormat());
         break;
     }
 

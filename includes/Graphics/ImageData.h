@@ -18,6 +18,7 @@ enum IMP_API PixelFormat
 {
     PixelFormat_Unknown = 0,
     PixelFormat_RGBA8,
+    PixelFormat_BGRA8,
     PixelFormat_RGB8,
     PixelFormat_BGR8,
     PixelFormat_RG16,

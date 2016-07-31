@@ -4,6 +4,8 @@
 #include "Core/impBase.h"
 #include "Graphics/ImageData.h"
 
+#include <string>
+
 IMPGEARS_BEGIN
 
 /// \brief Defines a texture.
@@ -19,7 +21,7 @@ class IMP_API Texture
             MemorySyncMode_Bidirectional
         };
 
-        Texture();
+        Texture(const std::string& name = "");
 
         virtual ~Texture();
 
@@ -89,6 +91,8 @@ class IMP_API Texture
 		bool m_hasMipmap;
 
 		Uint32 m_mipmapMaxLevel;
+		
+		std::string m_name;
 };
 
 

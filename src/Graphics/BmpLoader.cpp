@@ -3,17 +3,20 @@
 #include <cstdlib>
 #include <cstring>
 
+//--------------------------------------------------------------
 Bitmap::Bitmap()
     : dib(0)
 {
     _internalImageData = new imp::ImageData();
 }
 
+//--------------------------------------------------------------
 Bitmap::~Bitmap()
 {
     delete _internalImageData;
 }
 
+//--------------------------------------------------------------
 void Bitmap::create(int width, int height, ColorRGB initialColor)
 {
     dib = DIB_BITMAPINFOHEADER;
@@ -44,6 +47,7 @@ void Bitmap::create(int width, int height, ColorRGB initialColor)
     _internalImageData->fill( pix );
 }
 
+//--------------------------------------------------------------
 void Bitmap::saveToFile(std::string filename)
 {
     int rawSize = (int)( (dibHeader.bitmapInfoHeader.bpp * dibHeader.bitmapInfoHeader.width + 31)/32 ) * 4;
@@ -92,6 +96,7 @@ void Bitmap::saveToFile(std::string filename)
     }
 }
 
+//--------------------------------------------------------------
 void Bitmap::loadFromFile(std::string filename)
 {
     std::ifstream is(filename.c_str(), std::ifstream::binary);
@@ -117,7 +122,9 @@ void Bitmap::loadFromFile(std::string filename)
         fileHeader.dataOffset = read<unsigned int>(is);
 
         dib = read<int>(is);
-        if(dib == DIB_BITMAPINFOHEADER)
+        if(dib == DIB_BITMAPINFOHEADER
+			|| dib == DIB_BITMAPV4HEADER
+			|| dib == DIB_BITMAPV5HEADER)
         {
             BitmapInfoHeader_Struct& header = dibHeader.bitmapInfoHeader;
             header.dib = dib;
@@ -135,7 +142,16 @@ void Bitmap::loadFromFile(std::string filename)
             unsigned int rawSize = (unsigned int)( (header.bpp * header.width + 31)/32 ) * 4; // take floor of [(bpp*width+31)/32]
             // unsigned int bufferSize = rawSize * header.height; // should take absolute value of height
 
-            _internalImageData->create(header.width, header.height, header.bpp, imp::PixelFormat_RGBA8);
+			imp::PixelFormat format = imp::PixelFormat_Unknown;
+			if(header.bpp == 24)
+				format = imp::PixelFormat_BGR8;
+			else if(header.bpp == 32)
+				format = imp::PixelFormat_BGRA8;
+			
+			// go to pixel data
+			seek(is, fileHeader.dataOffset);
+			
+            _internalImageData->create(header.width, header.height, header.bpp, format);
             unsigned char buffer[rawSize];
             for(int i=0; i<header.height; ++i)
             {
@@ -143,6 +159,10 @@ void Bitmap::loadFromFile(std::string filename)
                 memcpy(&(_internalImageData->getData()[i*_internalImageData->getDataRawSize()]), buffer, _internalImageData->getDataRawSize());
             }
         }
+		else
+		{
+			std::cout << "DIB not supported : " << dib << "\n";
+		}
 
         is.close();
     }
@@ -152,6 +172,7 @@ void Bitmap::loadFromFile(std::string filename)
     }
 }
 
+//--------------------------------------------------------------
 void Bitmap::printInfoLog()
 {
     std::cout << "file size = " << (fileHeader.fileSize) << std::endl;
@@ -160,10 +181,16 @@ void Bitmap::printInfoLog()
         std::cout << "dib = " << "bitmapCoreHeader" << std::endl;
     else if(dib == DIB_BITMAPINFOHEADER)
         std::cout << "dib = " << "bitmapInfoHeader" << std::endl;
+    else if(dib == DIB_BITMAPV4HEADER)
+        std::cout << "dib = " << "bitmap V4 header" << std::endl;
+    else if(dib == DIB_BITMAPV5HEADER)
+        std::cout << "dib = " << "bitmap V5 header" << std::endl;
     else
         std::cout << "dib = " << "unsupported" << std::endl;
 
-    if(dib == DIB_BITMAPINFOHEADER)
+    if(dib == DIB_BITMAPINFOHEADER
+		|| dib == DIB_BITMAPV4HEADER
+		|| dib == DIB_BITMAPV5HEADER)
     {
         BitmapInfoHeader_Struct& header = dibHeader.bitmapInfoHeader;
 
@@ -182,6 +209,7 @@ void Bitmap::printInfoLog()
     }
 }
 
+//--------------------------------------------------------------
 void Bitmap::getPixelColor(int x, int y, ColorRGB& color)
 {
 	imp::Pixel pix = _internalImageData->getPixel(x,y);
@@ -190,6 +218,7 @@ void Bitmap::getPixelColor(int x, int y, ColorRGB& color)
 	color.b = pix.blue;
 }
 
+//--------------------------------------------------------------
 void Bitmap::setPixelColor(int x, int y, ColorRGB& color)
 {
 	imp::Pixel pix;
@@ -200,11 +229,13 @@ void Bitmap::setPixelColor(int x, int y, ColorRGB& color)
     _internalImageData->setPixel(x,y,pix);
 }
 
+//--------------------------------------------------------------
 void Bitmap::resize(int w, int h, ColorRGB& color, int xrel, int yrel)
 {
     
 }
 
+//--------------------------------------------------------------
 void Bitmap::clone(Bitmap& other)
 {
     fileHeader = other.fileHeader;
@@ -215,6 +246,7 @@ void Bitmap::clone(Bitmap& other)
     _internalImageData->clone(data);
 }
 
+//--------------------------------------------------------------
 void Bitmap::copyFrom(Bitmap& src, int xsrc, int ysrc, int xdest, int ydest, int w, int h)
 {
     imp::Rect rs, rd;
@@ -232,19 +264,22 @@ void Bitmap::copyFrom(Bitmap& src, int xsrc, int ysrc, int xdest, int ydest, int
     _internalImageData->draw(data, rs, rd);
 }
 
-
-
-
-
+//--------------------------------------------------------------
 imp::Texture* BmpLoader::loadFromFile(const char* filename)
 {
 	Bitmap bmp;
 	bmp.loadFromFile( filename );
 	bmp.printInfoLog();
-	std::cout << "test : format = " << bmp.getInternalImageData()->getFormat() << "\n";
+	imp::ImageData* data = bmp.getInternalImageData();
 	
-	imp::Texture* tex = new imp::Texture();
-	tex->loadFromImageData( bmp.getInternalImageData() );
+	imp::Texture* tex = new imp::Texture( filename );
+	
+	if(data == IMP_NULL)
+		std::cout << "no image data\n";
+	else
+	{
+		std::cout << "test : format = " << data->getFormat() << "\n";
+	}
 	return tex;
 }
 

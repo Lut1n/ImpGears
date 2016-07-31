@@ -82,6 +82,11 @@ void write(std::ofstream & stream, T value)
 {
     stream.write( (char*)&value, sizeof(T) );
 }
+void seek(std::ifstream& stream, long offset)
+{
+	stream.seekg(offset);
+}
+
 
 struct ColorRGB
 {

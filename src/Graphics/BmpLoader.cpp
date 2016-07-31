@@ -279,6 +279,7 @@ imp::Texture* BmpLoader::loadFromFile(const char* filename)
 	else
 	{
 		std::cout << "test : format = " << data->getFormat() << "\n";
+		tex->loadFromImageData( data );
 	}
 	return tex;
 }

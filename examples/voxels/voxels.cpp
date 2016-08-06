@@ -1,4 +1,4 @@
-#include "graphics/GLcommon.h"
+#include "Graphics/GLcommon.h"
 
 #include <cstdlib>
 #include <cstdio>

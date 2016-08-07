@@ -68,17 +68,19 @@ bool Parser::readLine(String& line, Uint32 maxLineLength)
 	/// find '\n' character
 	for(Int32 c=0; c<read; ++c)
 	{
-		if(buffer[c] == '\n')
+		if(buffer[c] == '\n' || buffer[c] == '\r')
 		{
 			buffer[c] = '\0';
-			Int32 pos1 = (pos0+1) + c + 1;
+			Int32 pos1 = (pos0+1) + c;
+			if( c+1<read && (buffer[c+1] == '\r' || buffer[c+1] == '\n') )
+				pos1 += 1;
 			fseek(stream, pos1, SEEK_SET);
 			line = buffer;
 			return true;
 		}
 	}
 
-	Int32 pos1 = (pos0+1) + read+  1;
+	Int32 pos1 = (pos0+1) + read;
 	fseek(stream, pos1, SEEK_SET);
 	buffer[read] = '\0';
 	line = buffer;

@@ -52,6 +52,7 @@ void Texture::loadFromImageData(const ImageData* data)
 	std::cout << m_name << " - load from image data\n";
     create(data->getWidth(), data->getHeight(), data->getFormat());
     m_data.clone(*data);
+	updateVideoParams();
     updateVideoMemory();
 }
 

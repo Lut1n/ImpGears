@@ -17,7 +17,7 @@ Bitmap::~Bitmap()
 }
 
 //--------------------------------------------------------------
-void Bitmap::create(int width, int height, ColorRGB initialColor)
+void Bitmap::create(int width, int height, const imp::Pixel& initialColor)
 {
     dib = DIB_BITMAPINFOHEADER;
 
@@ -38,13 +38,8 @@ void Bitmap::create(int width, int height, ColorRGB initialColor)
     // int rawSize = (int)( (header.bpp * header.width + 31)/32 ) * 4;
     // int bufferSize = rawSize * header.height;
 
-    _internalImageData->create(width, height, 24, imp::PixelFormat_BGR8);
-	imp::Pixel pix;
-	pix.red = initialColor.r;
-	pix.green = initialColor.g;
-	pix.blue = initialColor.b;
-	pix.alpha = 255;
-    _internalImageData->fill( pix );
+    _internalImageData->create(width, height, imp::PixelFormat_BGR8);
+    _internalImageData->fill( initialColor );
 }
 
 //--------------------------------------------------------------
@@ -85,14 +80,19 @@ void Bitmap::saveToFile(std::string filename)
         write<int>(os, header.importantColorUsedNumber);
 
         char buffer[rawSize];
+		int sizeToWrite = _internalImageData->getDataRawSize();
         for(int i=0; i<header.height; ++i)
         {
-            memcpy(buffer, &(_internalImageData->getData()[i*_internalImageData->getDataRawSize()]), _internalImageData->getDataRawSize());
-            memset(&(buffer[_internalImageData->getDataRawSize()]), 0, rawSize-_internalImageData->getDataRawSize() );
+			unsigned char* dataPtr = &(_internalImageData->getData()[i*sizeToWrite]);
+			memset(buffer, 0, rawSize);
+            memcpy(buffer, dataPtr, sizeToWrite);
             os.write((char*)buffer, rawSize); 
         }
         os.flush();
         os.close();
+
+		printInfoLog();
+		// dumpData();
     }
 }
 
@@ -176,6 +176,7 @@ void Bitmap::loadFromFile(std::string filename)
 void Bitmap::printInfoLog()
 {
     std::cout << "file size = " << (fileHeader.fileSize) << std::endl;
+	std::cout << "dataOffset = " << fileHeader.dataOffset << std::endl;
 
     if(dib == DIB_BITMAPCOREHEADER)
         std::cout << "dib = " << "bitmapCoreHeader" << std::endl;
@@ -210,27 +211,34 @@ void Bitmap::printInfoLog()
 }
 
 //--------------------------------------------------------------
-void Bitmap::getPixelColor(int x, int y, ColorRGB& color)
+void Bitmap::dumpData()
 {
-	imp::Pixel pix = _internalImageData->getPixel(x,y);
-	color.r = pix.red;
-	color.g = pix.green;
-	color.b = pix.blue;
+	BitmapInfoHeader_Struct& header = dibHeader.bitmapInfoHeader;
+	for(int j=0; j<header.height; ++j)
+	{
+		for(int i=0; i<header.width; i+=3)
+		{
+			unsigned char* ptr = &(_internalImageData->getData()[j*_internalImageData->getDataRawSize()+i]);
+			std::cout << "{" << (unsigned int)ptr[0] << ";" << (unsigned int)ptr[1] << ";" << (unsigned int)ptr[2] << "} ";
+		}
+		std::cout << "\n";
+	}
 }
 
 //--------------------------------------------------------------
-void Bitmap::setPixelColor(int x, int y, ColorRGB& color)
+void Bitmap::getPixelColor(int x, int y, imp::Pixel& color)
 {
-	imp::Pixel pix;
-	pix.red = color.r;
-	pix.green = color.g;
-	pix.blue = color.b;
-	pix.alpha = 255;
-    _internalImageData->setPixel(x,y,pix);
+	color = _internalImageData->getPixel(x,y);
 }
 
 //--------------------------------------------------------------
-void Bitmap::resize(int w, int h, ColorRGB& color, int xrel, int yrel)
+void Bitmap::setPixelColor(int x, int y, imp::Pixel& color)
+{
+    _internalImageData->setPixel(x,y,color);
+}
+
+//--------------------------------------------------------------
+void Bitmap::resize(int w, int h, imp::Pixel& color, int xrel, int yrel)
 {
     
 }
@@ -278,9 +286,34 @@ imp::Texture* BmpLoader::loadFromFile(const char* filename)
 		std::cout << "no image data\n";
 	else
 	{
-		std::cout << "test : format = " << data->getFormat() << "\n";
 		tex->loadFromImageData( data );
 	}
 	return tex;
 }
+void BmpLoader::loadFromFile(const char* filename, imp::ImageData** image)
+{
+	Bitmap bmp;
+	bmp.loadFromFile( filename );
+	bmp.printInfoLog();
+	imp::ImageData* data = bmp.getInternalImageData();
+	
+	(*image) = NULL;
 
+	if(data == IMP_NULL)
+		std::cout << "no image data\n";
+	else
+	{
+		(*image) = new imp::ImageData();
+		(*image)->clone(*data);
+	}
+}
+
+void BmpLoader::saveToFile(const imp::ImageData* image, const char* filename)
+{
+	imp::Pixel initColor = {255, 255, 255, 255};
+
+	Bitmap bitmap;
+	bitmap.create(image->getWidth(), image->getHeight(), initColor);
+	bitmap.getInternalImageData()->clone(*image);
+	bitmap.saveToFile(filename);
+}

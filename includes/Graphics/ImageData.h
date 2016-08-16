@@ -6,12 +6,11 @@
 IMPGEARS_BEGIN
 
 /// \struct Pixel - Defines a RGBA pixel.
-struct IMP_API Pixel
+union IMP_API Pixel
 {
-	imp::Uint32 red;
-	imp::Uint32 green;
-	imp::Uint32 blue;
-	imp::Uint32 alpha;
+	struct { imp::Uint32 red, green, blue, alpha; };
+	struct { imp::Uint32 x, y, z, w; };
+	struct { imp::Uint32 r, g, b, a; };
 };
 
 enum IMP_API PixelFormat
@@ -22,6 +21,7 @@ enum IMP_API PixelFormat
     PixelFormat_RGB8,
     PixelFormat_BGR8,
     PixelFormat_RG16,
+	PixelFormat_R8,
     PixelFormat_R16
 };
 
@@ -50,6 +50,7 @@ class IMP_API ImageData
 	virtual ~ImageData();
 
 	void create(Uint32 w, Uint32 h, Uint32 bpp, PixelFormat format, Uint8* srcBuffer = IMP_NULL);
+	void create(Uint32 w, Uint32 h, PixelFormat format, Uint8* srcBuffer = IMP_NULL);
 	void destroy();
 
 	const Uint8* getBuffer() const{return m_buffer; }

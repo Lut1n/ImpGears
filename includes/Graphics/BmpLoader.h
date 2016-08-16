@@ -1,6 +1,7 @@
 #ifndef IMP_BMPLOADER_H
 #define IMP_BMPLOADER_H
 
+#include <Core/impBase.h>
 #include <Graphics/ImageData.h>
 #include "Graphics/Texture.h"
 
@@ -86,23 +87,19 @@ void seek(std::ifstream& stream, long offset)
 {
 	stream.seekg(offset);
 }
-
-
-struct ColorRGB
+long pos(std::ofstream& stream)
 {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-};
+	return stream.tellp();
+}
 
-class Bitmap
+class IMP_API Bitmap
 {
 public:
     Bitmap();
 
     ~Bitmap();
 
-    void create(int width, int height, ColorRGB initialColor);
+    void create(int width, int height, const imp::Pixel& initialColor);
 
     void saveToFile(std::string filename);
 
@@ -110,11 +107,13 @@ public:
 
     void printInfoLog();
 
-    void getPixelColor(int x, int y, ColorRGB& color);
+	void dumpData();
 
-    void setPixelColor(int x, int y, ColorRGB& color);
+    void getPixelColor(int x, int y, imp::Pixel& color);
 
-    void resize(int w, int h, ColorRGB& color, int xrel=0, int yrel=0);
+    void setPixelColor(int x, int y, imp::Pixel& color);
+
+    void resize(int w, int h, imp::Pixel& color, int xrel=0, int yrel=0);
 
     void clone(Bitmap& other);
 
@@ -138,6 +137,8 @@ class IMP_API BmpLoader
 {
 public:
 	static imp::Texture* loadFromFile(const char* filename);
+	static void loadFromFile(const char* filename, imp::ImageData**);
+	static void saveToFile(const imp::ImageData* image, const char* filename);
 };
 
 #endif // IMP_BMPLOADER_H

@@ -2,50 +2,104 @@
 #define PERLIN_H
 
 #include "Core/impBase.h"
+#include <Graphics/ImageData.h>
 
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 #define PERLIN_OCTAVE_COUNT 6
 
 #define INDEX_XY(x,y,w,h) ((int)(x*h+y))
 
-struct IMP_API t_perlinMap
-{
-    int width;
-    int height;
-    float* data;
-};
-
-
 class IMP_API Perlin
 {
     public:
-        Perlin(int w, int h, int vmin, int vmax);
+
+		enum GenMethod
+		{
+			GenMethod_Undefined = 0,
+			GenMethod_Scalar,
+			GenMethod_Gradient
+		};
+
+		enum RandMethod
+		{
+			RandMethod_Undefined = 0,
+			RandMethod_System,
+			RandMethod_HugoElias,
+			RandMethod_PermTable_System,
+			RandMethod_PermTable_HugoElias
+		};
+
+		enum Interpo
+		{
+			Interpo_Undefined = 0,
+			Interpo_Linear,
+			Interpo_Cosinus,
+			Interpo_Cubic,
+			Interpo_Hermite,
+			INterpo_Polynomial5
+		};
+
+		class Filter
+		{
+			public:
+			int order;
+			double frequency;
+			double persistance;
+		};
+
+		class Config
+		{
+			public:
+
+			GenMethod _genMethod;
+			RandMethod _randMethod;
+			Interpo _interpo;
+
+			double valueMin;
+			double valueMax;
+			double resolutionX;
+			double resolutionY;
+
+			int octaveCount;
+			std::vector<Filter> _octaves;
+		};
+
+		Perlin();
+		Perlin(const Config& config);
+
+		void setConfig(const Config& config);
+
         virtual ~Perlin();
 
         void generateSeedMap();
         void smoothSeedMap();
-        float smoothPoint(int x, int y);
+        float smoothPoint(unsigned int x, unsigned int y);
         void generateOctaveMap(int i);
         void compileResult();
 
-        t_perlinMap getSeedMap();
-        t_perlinMap getOctave(int i);
-        t_perlinMap getResult();
+		void apply();
+
+        imp::ImageData& getSeedMap();
+        imp::ImageData& getOctave(int i);
+        imp::ImageData& getResult();
     protected:
 
         float interpolate(float a, float b, float x);
         float interpolatedSeed(float x, float y, float freq);
     private:
 
+		Config _config;
         int vmin, vmax;
 
-        t_perlinMap seedmap;
-        t_perlinMap octavemap[PERLIN_OCTAVE_COUNT];
-        t_perlinMap resultmap;
+		int _mapSize;
+        imp::ImageData seedmap;
+        std::vector<imp::ImageData> octavemap;
+        imp::ImageData resultmap;
 };
 
 #endif // PERLIN_H

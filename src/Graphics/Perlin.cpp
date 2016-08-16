@@ -1,25 +1,35 @@
 #include "Graphics/Perlin.h"
 
-Perlin::Perlin(int w, int h, int vmin, int vmax)
-{
-    //ctor
-    seedmap.width = w;
-    seedmap.height = h;
-    seedmap.data = new float[w*h];
+using namespace imp;
 
-    for(int i=0; i<PERLIN_OCTAVE_COUNT; ++i)
+Perlin::Perlin()
+{
+
+}
+
+Perlin::Perlin(const Config& config)
+{
+	setConfig(config);
+}
+
+void Perlin::setConfig(const Config& config)
+{
+	_config = config;
+
+	    //ctor
+	seedmap.create(config.resolutionX, config.resolutionY, 24, PixelFormat_RGB8);
+
+	octavemap.resize(config.octaveCount);
+
+    for(unsigned int i=0; i<octavemap.size(); ++i)
     {
-        octavemap[i].width = w;
-        octavemap[i].height = h;
-        octavemap[i].data = new float[w*h];
+        octavemap[i].create(config.resolutionX, config.resolutionY, 24, PixelFormat_RGB8);
     }
 
-    resultmap.width = w;
-    resultmap.height = h;
-    resultmap.data = new float[w*h];
+    resultmap.create(config.resolutionX, config.resolutionY, 24, PixelFormat_RGB8);
 
-    this->vmin = vmin;
-    this->vmax = vmax;
+    this->vmin = config.valueMin;
+    this->vmax = config.valueMax;
 
     srand(time(NULL));
 }
@@ -27,67 +37,86 @@ Perlin::Perlin(int w, int h, int vmin, int vmax)
 Perlin::~Perlin()
 {
     //dtor
-    delete [] seedmap.data;
+	seedmap.destroy();
 
-    for(int i=0; i<PERLIN_OCTAVE_COUNT; ++i)
-        delete [] octavemap[i].data;
+    for(unsigned int i=0; i<octavemap.size(); ++i)
+        octavemap[i].destroy();
 
-    delete [] resultmap.data;
+    resultmap.destroy();
 }
 
 void Perlin::generateSeedMap()
 {
-    for(int x=0; x<seedmap.width; ++x)
+    for(unsigned int x=0; x<seedmap.getWidth(); ++x)
     {
-        for(int y=0; y<seedmap.height; ++y)
+        for(unsigned int y=0; y<seedmap.getHeight(); ++y)
         {
-            seedmap.data[INDEX_XY(x,y, seedmap.width, seedmap.height)] = rand()%(vmax - vmin) + vmin;
+			double val = rand()%(vmax - vmin) + vmin;
+			Pixel pix;
+			pix.red = val * 255;
+			pix.green = val * 255;
+			pix.blue = val * 255;
+            seedmap.setPixel(x,y,pix);
         }
     }
 }
 
 void Perlin::smoothSeedMap()
 {
-    int w = seedmap.width;
-    int h = seedmap.height;
 
-    float* smoothdata = new float[w*h];
+    imp::ImageData smoothdata;
+	smoothdata.create(seedmap.getWidth(), seedmap.getHeight(), 24, imp::PixelFormat_BGR8);
 
-    for(int x=0;x<w; ++x)
+    for(unsigned int x=0;x<seedmap.getWidth(); ++x)
     {
-        for(int y=0; y<h; ++y)
+        for(unsigned int y=0; y<seedmap.getHeight(); ++y)
         {
-            smoothdata[INDEX_XY(x,y,w,h)] = smoothPoint(x,y);
+			Pixel px;
+			px.red = smoothPoint(x,y) * 255;
+			px.green = px.red;
+			px.blue = px.red;
+			smoothdata.setPixel(x,y,px);
         }
     }
 
-    delete [] seedmap.data;
-    seedmap.data = smoothdata;
+    seedmap.destroy();
+    seedmap.clone(smoothdata);
 }
 
-float Perlin::smoothPoint(int x, int y)
+float Perlin::smoothPoint(unsigned int x, unsigned int y)
 {
     float total = 0.f;
 
-    int i2,j2;
+unsigned int i2,j2;
 
-    for(int i=x; i<x+3; ++i)
+    for(unsigned int i=x; i<x+3; ++i)
     {
         i2 = i;
-        if(i2 >= seedmap.width)
-            i2 -= seedmap.width;
+        if(i2 >= seedmap.getWidth())
+            i2 -= seedmap.getWidth();
 
-        for(int j=y; j<y+3; ++j)
+        for(unsigned int j=y; j<y+3; ++j)
         {
             j2 = j;
-            if(j2 >= seedmap.height)
-                j2 -= seedmap.height;
+            if(j2 >= seedmap.getHeight())
+                j2 -= seedmap.getHeight();
 
-            total += seedmap.data[INDEX_XY(i2,j2, seedmap.width, seedmap.height)];
+			Pixel px = seedmap.getPixel(i2,j2);
+            total += (float)(px.red)/255.0;
         }
     }
 
     return total/9;
+}
+
+void Perlin::apply()
+{
+	generateSeedMap();
+	smoothSeedMap();
+	for(unsigned int octave=0; octave<octavemap.size(); ++octave)
+		generateOctaveMap(octave);
+
+	compileResult();
 }
 
 void Perlin::generateOctaveMap(int i)
@@ -96,11 +125,15 @@ void Perlin::generateOctaveMap(int i)
     float persistence = 0.75f;
     float amplitude = pow(persistence, (float)i);
 
-    for(int x=0; x<octavemap[i].width; ++x)
+    for(unsigned int x=0; x<octavemap[i].getWidth(); ++x)
     {
-        for(int y=0; y<octavemap[i].height; ++y)
+        for(unsigned int y=0; y<octavemap[i].getHeight(); ++y)
         {
-            octavemap[i].data[INDEX_XY(x,y,octavemap[i].width,octavemap[i].height)] = interpolatedSeed(x,y,freq) * amplitude;
+			Pixel pix;
+			pix.red = interpolatedSeed(x,y,freq) * amplitude * 255;
+			pix.green = pix.red;
+			pix.blue = pix.red;
+            octavemap[i].setPixel(x,y,pix);
         }
     }
 }
@@ -110,45 +143,54 @@ void Perlin::compileResult()
     float maxvalue = 0;
     float minvalue = 255;
 
-    for(int x=0; x<resultmap.width; ++x)
+    for(unsigned int x=0; x<resultmap.getWidth(); ++x)
     {
-        for(int y=0; y<resultmap.height; ++y)
+        for(unsigned int y=0; y<resultmap.getHeight(); ++y)
         {
             float total = 0;
-            for(int i=0; i<PERLIN_OCTAVE_COUNT; ++i)
+            for(unsigned int i=0; i<octavemap.size(); ++i)
             {
-                total += octavemap[i].data[INDEX_XY(x,y,resultmap.width, resultmap.height)];
+                total += octavemap[i].getPixel(x,y).red;
             }
 
             if(total > maxvalue)maxvalue = total;
             if(total < minvalue)minvalue = total;
 
-            resultmap.data[INDEX_XY(x,y,resultmap.width, resultmap.height)] = total;
+			Pixel pixel;
+			pixel.red = total;
+			pixel.green = total;
+			pixel.blue = total;
+            resultmap.setPixel(x,y,pixel);
         }
     }
 
-    for(int i=0; i<resultmap.width*resultmap.height; ++i)
+    for(unsigned int x=0; x<resultmap.getWidth(); ++x)
+	for(unsigned int y=0; y<resultmap.getHeight(); ++y)
     {
-        float currentvalue = resultmap.data[i];
+        float currentvalue = resultmap.getPixel(x,y).red;
 
         currentvalue = (currentvalue-minvalue)/(maxvalue - minvalue);
         currentvalue = currentvalue * (vmax - vmin) + vmin;
 
-        resultmap.data[i] = currentvalue;
+		Pixel px;
+		px.red = currentvalue;
+		px.green = currentvalue;
+		px.blue = currentvalue;
+        resultmap.setPixel(x,y,px);
     }
 }
 
-t_perlinMap Perlin::getSeedMap()
+ImageData& Perlin::getSeedMap()
 {
     return seedmap;
 }
 
-t_perlinMap Perlin::getOctave(int i)
+ImageData& Perlin::getOctave(int i)
 {
     return octavemap[i];
 }
 
-t_perlinMap Perlin::getResult()
+ImageData& Perlin::getResult()
 {
     return resultmap;
 }
@@ -169,8 +211,8 @@ float Perlin::interpolate(float a, float b, float x)
 
 float Perlin::interpolatedSeed(float x, float y, float freq)
 {
-    float w = seedmap.width;
-    float h = seedmap.height;
+    float w = seedmap.getWidth();
+    float h = seedmap.getHeight();
 
     float x1, x2, y1, y2;
 
@@ -181,18 +223,18 @@ float Perlin::interpolatedSeed(float x, float y, float freq)
     y1 = trunc(y/pasy) * pasy;
 
     x2 = (x1+pasx);
-    if(x2 >= seedmap.width)
-        x2 -= seedmap.width;
+    if(x2 >= w)
+        x2 -= w;
     y2 = (y1+pasy);
-    if(y2 >= seedmap.height)
-        y2 -= seedmap.height;
+    if(y2 >= h)
+        y2 -= h;
 
     //fprintf(stdout, "%f;%f;%f;%f\n", x1, y1, x2, y2);
 
-    float v11 = seedmap.data[INDEX_XY(x1,y1,w,h)];
-    float v21 = seedmap.data[INDEX_XY(x2,y1,w,h)];
-    float v12 = seedmap.data[INDEX_XY(x1,y2,w,h)];
-    float v22 = seedmap.data[INDEX_XY(x2,y2,w,h)];
+    float v11 = seedmap.getPixel(x1,y1).red;
+    float v21 = seedmap.getPixel(x2,y1).red;
+    float v12 = seedmap.getPixel(x1,y2).red;
+    float v22 = seedmap.getPixel(x2,y2).red;
 
     //fprintf(stdout, "%f;%f;%f;%f\n", v11, v12, v21, v22);
 

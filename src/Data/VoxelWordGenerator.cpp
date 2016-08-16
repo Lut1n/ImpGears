@@ -33,21 +33,21 @@ VoxelWordGenerator* VoxelWordGenerator::GetInstance()
 //--------------------------------------------------------------
 void VoxelWordGenerator::Generate(VoxelWorld* _world)
 {
-    imp::Int32 height = _world->GetSizeZ();
+	Perlin::Config pConfig;
+	pConfig.valueMin = 0;
+	pConfig.valueMax = _world->GetSizeZ();
+	pConfig.resolutionX = _world->GetSizeX();
+	pConfig.resolutionY = _world->GetSizeY();
+	pConfig.octaveCount = 6;
 
-    Perlin perlin((float)_world->GetSizeX(), (float)_world->GetSizeY(), 0, (float)height);
-    perlin.generateSeedMap();
-    perlin.smoothSeedMap();
-    for(int octave=0; octave<PERLIN_OCTAVE_COUNT; ++octave)
-        perlin.generateOctaveMap(octave);
-
-    perlin.compileResult();
-    t_perlinMap seed = perlin.getResult();
+    Perlin perlin(pConfig);
+	perlin.apply();
+   	ImageData& seed = perlin.getResult();
 
     for(imp::Uint32 x = 0; x<_world->GetSizeX(); ++x)
     for(imp::Uint32 y = 0; y<_world->GetSizeY(); ++y)
     {
-        int value = (int)seed.data[INDEX_XY((int)x,(int)y,(int)seed.width, (int)seed.height)];
+        int value = seed.getPixel(x,y).red;
 
         imp::Int32 localElevation = (imp::Int32)value;//Rand(height*3/4,height);
 
@@ -58,6 +58,7 @@ void VoxelWordGenerator::Generate(VoxelWorld* _world)
 		for(;z<localElevation; ++z)
 			_world->SetValue(x,y,(imp::Uint32)z,1);
 
+		imp::Int32 height = _world->GetSizeZ();
         for(; z<height; ++z)
             _world->SetValue(x,y,(imp::Uint32)z,0);
     }

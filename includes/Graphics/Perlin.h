@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstring>
 
 #define PERLIN_OCTAVE_COUNT 6
 
@@ -17,6 +18,19 @@
 class IMP_API Perlin
 {
     public:
+
+		class FloatMap
+		{
+			public:
+			FloatMap(int w, int h) { _buff = new float[w*h]; raw=w; size=w*h; }
+			~FloatMap() {delete [] _buff;}
+			float get(int x, int y) { return _buff[y*raw+x]; }
+			void set(int x, int y, float v) { _buff[y*raw+x] = v; }
+			float* _buff;
+			int raw;
+			int size;
+			void clone(FloatMap& other){memcpy(_buff, other._buff, size*sizeof(float));}
+		};
 
 		enum GenMethod
 		{
@@ -84,8 +98,8 @@ class IMP_API Perlin
 
 		void apply();
 
-        imp::ImageData& getSeedMap();
-        imp::ImageData& getOctave(int i);
+        FloatMap* getSeedMap();
+        FloatMap* getOctave(int i);
         imp::ImageData& getResult();
     protected:
 
@@ -97,8 +111,8 @@ class IMP_API Perlin
         int vmin, vmax;
 
 		int _mapSize;
-        imp::ImageData seedmap;
-        std::vector<imp::ImageData> octavemap;
+        FloatMap* seedmap;
+        std::vector<FloatMap*> octavemap;
         imp::ImageData resultmap;
 };
 

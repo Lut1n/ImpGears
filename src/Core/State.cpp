@@ -21,6 +21,9 @@ State::State()
         delete m_singleton;
 
     m_singleton = this;
+
+	_windowWidth = 800;
+	_windowHeight = 600;
 }
 
 //--------------------------------------------------------------
@@ -60,8 +63,8 @@ void State::onEvent(const imp::Event& event)
 
     if(event.getType() == imp::Event::Type_MouseMoved)
     {
-        double nxdep = (event.getMouse().x - WIN_W/2.0) * SENSIBILITY;
-        double nydep = (event.getMouse().y - WIN_H/2.0) * SENSIBILITY;
+        double nxdep = (event.getMouse().x - _windowWidth/2.0) * SENSIBILITY;
+        double nydep = (event.getMouse().y - _windowHeight/2.0) * SENSIBILITY;
 
         if( (nxdep < 0.0 && nxdep<xdep)
         || (nxdep > 0.0 && nxdep>xdep) )xdep = nxdep;

@@ -4,6 +4,8 @@
 
 #include "Graphics/Camera.h"
 
+#include <iostream>
+
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------

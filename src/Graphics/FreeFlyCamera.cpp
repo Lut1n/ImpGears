@@ -67,7 +67,7 @@ void FreeFlyCamera::update(){
 
         updateFov();
 
-        imp::EvnContextInterface::getInstance()->setCursorPosition(0, WIN_W/2.f, WIN_H/2.f);
+        imp::EvnContextInterface::getInstance()->setCursorPosition(0, xref, yref);
 
         m_cursorTimer.reset();
     }

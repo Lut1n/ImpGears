@@ -4,9 +4,6 @@
 #include "Core/impBase.h"
 #include "System/EvnContextInterface.h"
 
-#define WIN_W  800
-#define WIN_H 600
-
 #define SENSIBILITY 0.002f
 
 IMPGEARS_BEGIN
@@ -33,10 +30,18 @@ class IMP_API State
 
 	float xdep, ydep;
 
+	void setWindowDim(unsigned int w, unsigned int h)
+{
+	_windowWidth = w;
+	_windowHeight = h;
+}
+
     protected:
     private:
 
         static State* m_singleton;
+		unsigned int _windowWidth;
+		unsigned int _windowHeight;
 };
 
 IMPGEARS_END

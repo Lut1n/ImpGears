@@ -4,6 +4,7 @@
 IMPGEARS_BEGIN
 
 SFMLContextInterface::SFMLContextInterface()
+	:EvnContextInterface()
 {
     //ctor
 }
@@ -30,6 +31,16 @@ void SFMLContextInterface::destroyWindow(Uint32 windowID)
 {
     delete m_windows[windowID];
     m_windows[windowID] = IMP_NULL;
+}
+
+void SFMLContextInterface::resizeWindow(Uint32 windowID, Uint32 width, Uint32 height)
+{
+	m_windows[windowID]->setSize(sf::Vector2u(width, height));
+}
+
+void SFMLContextInterface::setWindowTitle(Uint32 windowID, const char* title)
+{
+	m_windows[windowID]->setTitle(title);
 }
 
 void SFMLContextInterface::setCursorVisible(Uint32 windowID, bool visible)

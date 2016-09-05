@@ -45,12 +45,8 @@
 #define FPS_LIMIT 60
 #define IS_FULLSCREEN false
 
-imp::FreeFlyCamera cam(WIN_W/2, WIN_H/2);
-//imp::StrategicCamera cam;
-imp::Camera sunCamera;
-imp::VoxelWorld* world;
+	imp::Uint32 debugMode;
 
-imp::Uint32 debugMode;
 
 void onEvent(imp::EvnContextInterface& evnContext){
 
@@ -75,7 +71,7 @@ void onEvent(imp::EvnContextInterface& evnContext){
 	}
 }
 
-void loadCameraKeyBinding(const char* filename)
+void loadCameraKeyBinding(imp::FreeFlyCamera& cam, const char* filename)
 {
 	imp::Parser file(filename, imp::Parser::FileType_Text, imp::Parser::AccessMode_Read);
 	imp::KeyBindingConfig binding;
@@ -85,16 +81,26 @@ void loadCameraKeyBinding(const char* filename)
 
 int main(void)
 {
+	const unsigned int winW = 800;
+	const unsigned int winH = 600;
+
+
+	imp::FreeFlyCamera cam(winW/2, winH/2);
+	//imp::StrategicCamera cam;
+	imp::Camera sunCamera;
+	imp::VoxelWorld* world;
 
     imp::State state;
+	state.setWindowDim(winW,winH);
 
     imp::Timer timer, fpsTimer;
     int fps = 0, nbFrames = 0;
 	debugMode = 1;
 
     imp::EvnContextInterface* evnContext = new imp::SFMLContextInterface();
-    evnContext->createWindow(WIN_W, WIN_H);
+    evnContext->createWindow(winW, winH);
     evnContext->setCursorVisible(0, false);
+	evnContext->setWindowTitle(0, "voxel propotype");
 
 	// sun camera for shadow
     sunCamera.setPosition(imp::Vector3(150.f, 150.f, 300.f));
@@ -162,33 +168,33 @@ int main(void)
     world->UpdateAll();
     fprintf(stdout, "gpu memory used : %dMo\n", imp::VBOManager::getInstance()->getMemoryUsed()/1000000);
 
-    cam.initFrustum(WIN_W, WIN_H, FRUSTUM_FOVY*3.14159f/180.f, FRUSTUM_NEAR, FRUSTUM_FAR);
+    cam.initFrustum(winW, winH, FRUSTUM_FOVY*3.14159f/180.f, FRUSTUM_NEAR, FRUSTUM_FAR);
     entityManager.addEntity(&cam);
-    sunCamera.initFrustum(WIN_W, WIN_H, FRUSTUM_FOVY*3.14159f/180.f, 0.1, 512.f);
+    sunCamera.initFrustum(winW, winH, FRUSTUM_FOVY*3.14159f/180.f, 0.1, 512.f);
 
 	// render target for shadow sun depth buffer
     imp::RenderTarget shadowBuffer;
-    shadowBuffer.createBufferTarget(WIN_W, WIN_H, 0, true);
+    shadowBuffer.createBufferTarget(winW, winH, 0, true);
     const imp::Texture* shadowBufferTex = shadowBuffer.getDepthTexture();
 
 	// render target for shadows buffer
     imp::RenderTarget shadows;
-    shadows.createBufferTarget(WIN_W, WIN_H, 1, false);
+    shadows.createBufferTarget(winW, winH, 1, false);
     const imp::Texture* shadowsTex = shadows.getTexture(0);
 
 	// render target for background
     imp::RenderTarget backgroundTarget;
-    backgroundTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
+    backgroundTarget.createBufferTarget(winW, winH, 1, false);
     const imp::Texture* backgroundTex = backgroundTarget.getTexture(0);
 
 	// render target for self-illumination
     imp::RenderTarget selfiTarget;
-    selfiTarget.createBufferTarget(WIN_W/4.f, WIN_H/4.f, 1, false);
+    selfiTarget.createBufferTarget(winW/4.f, winH/4.f, 1, false);
     const imp::Texture* selfiTex = selfiTarget.getTexture(0);
 
 	// render target for light effect
     imp::RenderTarget blinnPhongTarget;
-    blinnPhongTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
+    blinnPhongTarget.createBufferTarget(winW, winH, 1, false);
     const imp::Texture* blinnPhongBuffer = blinnPhongTarget.getTexture(0);
     imp::BlinnPhongShader blinnPhong;
 
@@ -196,7 +202,7 @@ int main(void)
 
 	// render target for deffered rendering
     imp::RenderTarget deferredBuffers;
-    deferredBuffers.createBufferTarget(WIN_W, WIN_H, 4, true);
+    deferredBuffers.createBufferTarget(winW, winH, 4, true);
     const imp::Texture* colorBuffer = deferredBuffers.getTexture(0);
     const imp::Texture* normalBuffer = deferredBuffers.getTexture(1);
     imp::Texture* specBuffer = deferredBuffers.getTexture(2);
@@ -207,13 +213,13 @@ int main(void)
 	// SSAO shader
 	imp::SSAOShader ssaoShader;
     imp::RenderTarget ssaoBuffer;
-    ssaoBuffer.createBufferTarget(WIN_W, WIN_H, 1, false);
+    ssaoBuffer.createBufferTarget(winW, winH, 1, false);
     const imp::Texture* ssaoTex = ssaoBuffer.getTexture(0);
 
 	// blur shader
     imp::BlurShader blurShader;
     imp::RenderTarget ssaoBlurTarget;
-    ssaoBlurTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
+    ssaoBlurTarget.createBufferTarget(winW, winH, 1, false);
     const imp::Texture* ssaoBlurTex = ssaoBlurTarget.getTexture(0);
 
 	// pre bloom gauss shader
@@ -231,7 +237,7 @@ int main(void)
 	// bloom gauss shader
     imp::BloomShader bloomShader;
     imp::RenderTarget bloomTarget;
-    bloomTarget.createBufferTarget(WIN_W, WIN_H, 1, false);
+    bloomTarget.createBufferTarget(winW, winH, 1, false);
     const imp::Texture* bloomTex = bloomTarget.getTexture(0);
 
 	// screen render target
@@ -269,7 +275,7 @@ int main(void)
 	imp::Uint32 m_levelUpKey = imp::Event::PageUp;
 
 	// Camera key binding
-	loadCameraKeyBinding("camera-key-binding.conf");
+	loadCameraKeyBinding(cam, "camera-key-binding.conf");
 
     while (evnContext->isOpen(0))
     {
@@ -421,7 +427,7 @@ int main(void)
             /// ////////////////////////////////////////////////////
 
 			// (pass ?) prebloom shader
-			renderer.setCamera(IMP_NULL);
+			/*renderer.setCamera(IMP_NULL);
 			renderer.setRenderParameters(screenParameters);
 			// 16
 			prebloomTarget16.bind();
@@ -468,7 +474,7 @@ int main(void)
 			renderer.renderScene(-1);
 			screen.render(0);
 			bloomShader.disable();
-			bloomTarget.unbind();
+			bloomTarget.unbind();*/
 			
             if(debugMode == 1)
             {

@@ -18,6 +18,9 @@ class IMP_API SFMLContextInterface : public EvnContextInterface
         virtual Uint32 createWindow(Uint32 width, Uint32 height);
         virtual void destroyWindow(Uint32 windowID);
 
+		virtual void resizeWindow(Uint32 windowID, Uint32 width, Uint32 height);
+		virtual void setWindowTitle(Uint32 windowID, const char* title);
+
         virtual void setCursorVisible(Uint32 windowID, bool visible);
         virtual bool isOpen(Uint32 windowID);
 

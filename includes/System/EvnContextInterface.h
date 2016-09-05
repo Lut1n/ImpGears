@@ -224,6 +224,9 @@ class IMP_API EvnContextInterface
         virtual Uint32 createWindow(Uint32 width, Uint32 height) = 0;
         virtual void destroyWindow(Uint32 windowID) = 0;
 
+		virtual void resizeWindow(Uint32 windowID, Uint32 width, Uint32 height) = 0;
+		virtual void setWindowTitle(Uint32 windowID, const char* title) = 0;
+
         virtual void setCursorVisible(Uint32 windowID, bool visible) = 0;
         virtual bool isOpen(Uint32 windowID) = 0;
 

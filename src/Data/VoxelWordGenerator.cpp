@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "Data/VoxelWordGenerator.h"
-#include "Graphics/Perlin.h"
+#include <Math/Perlin.h>
 
 IMPGEARS_BEGIN
 
@@ -33,27 +33,21 @@ VoxelWordGenerator* VoxelWordGenerator::GetInstance()
 //--------------------------------------------------------------
 void VoxelWordGenerator::Generate(VoxelWorld* _world)
 {
-	Perlin::Config pConfig;
-	pConfig.valueMin = 0;
-	pConfig.valueMax = _world->GetSizeZ();
-	pConfig.resolutionX = _world->GetSizeX();
-	pConfig.resolutionY = _world->GetSizeY();
-	pConfig.octaveCount = 6;
-
-    Perlin perlin(pConfig);
-	perlin.apply();
-   	ImageData& seed = perlin.getResult();
-
     for(imp::Uint32 x = 0; x<_world->GetSizeX(); ++x)
     for(imp::Uint32 y = 0; y<_world->GetSizeY(); ++y)
     {
-        int value = seed.getPixel(x,y).red;
 
-        imp::Int32 localElevation = (imp::Int32)value;//Rand(height*3/4,height);
+        imp::Int32 localElevation = ((perlinOctave(x/4.0, y/4.0, 0.5, 6, 0.2)+1.0)/2.0)*_world->GetSizeZ();
 
         imp::Int32 z = 0;
         for(; z<localElevation-1; ++z)
-            _world->SetValue(x,y,(imp::Uint32)z, 4);
+		{
+			double caveValue = perlinOctave(x/4.0,y/4.0,z/4.0, 6, 0.2);
+			if(caveValue < 0.0)
+				_world->SetValue(x,y,(imp::Uint32)z, 0);
+			else 
+            	_world->SetValue(x,y,(imp::Uint32)z, 4);
+		}
 
 		for(;z<localElevation; ++z)
 			_world->SetValue(x,y,(imp::Uint32)z,1);

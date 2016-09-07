@@ -1,21 +1,37 @@
-#ifndef PERLIN_H
-#define PERLIN_H
+#ifndef IMP_TEXTURE_GENERATION_H
+#define IMP_TEXTURE_GENERATION_H
 
-#include "Core/impBase.h"
-#include <Graphics/ImageData.h>
+#include <Core/impBase.h>
+#include <Math/Perlin.h>
 
-#include <ctime>
-#include <cstdlib>
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <cstring>
 
-#define PERLIN_OCTAVE_COUNT 6
+IMPGEARS_BEGIN
 
-#define INDEX_XY(x,y,w,h) ((int)(x*h+y))
 
-class IMP_API Perlin
+class Interpolator
+{
+public:
+	Interpolator() {}
+	virtual ~Interpolator() {}
+
+	virtual float operator() (float a, float b, float t) = 0;
+};
+
+class Coserp : public Interpolator
+{
+public:
+	Coserp() {}
+	virtual ~Coserp() {}
+
+	virtual float operator() (float a, float b, float t)
+	{
+		float ft = t * 3.1415927f;
+		float f = (1.f - cos(ft)) * .5f;
+		return  a*(1.f-f) + b*f;
+	}
+};
+
+class IMP_API NoiseGenerator
 {
     public:
 
@@ -83,12 +99,12 @@ class IMP_API Perlin
 			std::vector<Filter> _octaves;
 		};
 
-		Perlin();
-		Perlin(const Config& config);
+		NoiseGenerator();
+		NoiseGenerator(const Config& config);
 
 		void setConfig(const Config& config);
 
-        virtual ~Perlin();
+        virtual ~NoiseGenerator();
 
         void generateSeedMap();
         void smoothSeedMap();
@@ -103,7 +119,6 @@ class IMP_API Perlin
         imp::ImageData& getResult();
     protected:
 
-        float interpolate(float a, float b, float x);
         float interpolatedSeed(float x, float y, float freq);
     private:
 
@@ -114,6 +129,10 @@ class IMP_API Perlin
         FloatMap* seedmap;
         std::vector<FloatMap*> octavemap;
         imp::ImageData resultmap;
+
+		Interpolator* _interpolator;
 };
 
-#endif // PERLIN_H
+IMPGEARS_END
+
+#endif // IMP_TEXTURE_GENERATION_H

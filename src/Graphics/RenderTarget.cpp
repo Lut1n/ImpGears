@@ -33,6 +33,7 @@ void RenderTarget::createScreenTarget(Uint32 windowID)
 {
     destroy();
     m_type = TargetType_Screen;
+	m_windowID = windowID;
 
     EvnContextInterface* evn = EvnContextInterface::getInstance();
     m_width = evn->getWidth(windowID);
@@ -146,6 +147,13 @@ void RenderTarget::bind()
         glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
     else
         unbind();
+
+	if(m_type == TargetType_Screen)
+	{
+		EvnContextInterface* evn = EvnContextInterface::getInstance();
+		m_width = evn->getWidth(m_windowID);
+		m_height = evn->getHeight(m_windowID);
+	}
 
     glViewport(0, 0, m_width, m_height);
 }

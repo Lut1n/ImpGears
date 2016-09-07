@@ -57,6 +57,7 @@ class IMP_API RenderTarget
     Texture* m_colorTextures[5];
     Texture* m_depthTexture;
     GLuint m_frameBufferID;
+	Uint32 m_windowID;
 };
 
 IMPGEARS_END

@@ -83,6 +83,10 @@ public:
 	JsonValue* getValue(const JsonKey& key);
 
 	JsonObject* getObject(const JsonKey& key);
+	JsonArray* getArray(const JsonKey& key);
+	JsonBoolean* getBoolean(const JsonKey& key);
+	JsonNumeric* getNumeric(const JsonKey& key);
+	JsonString* getString(const JsonKey& key);
 };
 
 std::string IMP_API removeSpace(const std::string& str);

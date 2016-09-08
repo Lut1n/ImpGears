@@ -52,7 +52,25 @@ JsonObject* JsonObject::getObject(const JsonKey& key)
 	return dynamic_cast<JsonObject*>(getValue(key));
 }
 
+JsonArray* JsonObject::getArray(const JsonKey& key)
+{
+	return dynamic_cast<JsonArray*>(getValue(key));
+}
 
+JsonBoolean* JsonObject::getBoolean(const JsonKey& key)
+{
+	return dynamic_cast<JsonBoolean*>(getValue(key));
+}
+
+JsonNumeric* JsonObject::getNumeric(const JsonKey& key)
+{
+	return dynamic_cast<JsonNumeric*>(getValue(key));
+}
+
+JsonString* JsonObject::getString(const JsonKey& key)
+{
+	return dynamic_cast<JsonString*>(getValue(key));
+}
 
 int getEndOf(const std::string& str, int beginPos);
 

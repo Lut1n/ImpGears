@@ -179,42 +179,47 @@ inline imp::Pixel mirGet(imp::ImageData& img, unsigned int x, unsigned int y)
 	return img.getPixel(x,y);
 }
 
-
-void drawCosL(imp::ImageData& img, float frq, float ampl, double perturb)
+void drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl,
+	const imp::ImageData* perturbation, float perturbIntensity)
 {
 	float diag = sqrtf(img.getHeight()/2.0*img.getHeight()/2.0 + img.getWidth()/2.0*img.getWidth()/2.0);
+
+	float dirLength = sqrtf(dirX*dirX + dirY*dirY);
+	dirX /= dirLength;
+	dirY /= dirLength;
 
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		float x = (i-img.getWidth()/2.0);
-		float y = (j-img.getHeight()/2.0);
+		float dirDot = (i*dirX + j*dirY);
+		float t = dirDot;
 
-		float t = x-y;
-		t += perturb * imp::perlinMain(x/64,y/64,perturb/64);
+		if(perturbation != NULL)
+			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
 
-		float v = sin(t/diag * 3.141592 * frq);
+		float v = sin(t/diag * 3.141592 * freq);
 		unsigned int comp = (v+1.0)/2.0 * ampl;
 		imp::Pixel px = {comp,comp,comp,255};
 		img.setPixel(i,j,px);
 	}}
 }
 
-
-
-void drawCos(imp::ImageData& img, float frq, float ampl, double perturb)
+void drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl,
+	const imp::ImageData* perturbation, float perturbIntensity)
 {
 	float diag = sqrtf(img.getHeight()/2.0*img.getHeight()/2.0 + img.getWidth()/2.0*img.getWidth()/2.0);
 
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		float x = (i-img.getWidth()/2.0);
-		float y = (j-img.getHeight()/2.0);
-		float radius =  sqrtf(x*x + y*y);
-		radius += perturb * imp::perlinMain(x/32,y/32,perturb/32);
+		float distX = abs(i - posX);
+		float distY = abs(j - posY);
+		float t = sqrtf(distX*distX + distY*distY);
 
-		float v = sin(radius/diag * 3.141592 * frq);
+		if(perturbation != NULL)
+			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
+
+		float v = sin(t/diag * 3.141592 * freq);
 		unsigned int comp = (v+1.0)/2.0 * ampl;
 		imp::Pixel px = {comp,comp,comp,255};
 		img.setPixel(i,j,px);

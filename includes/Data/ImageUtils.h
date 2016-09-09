@@ -64,9 +64,9 @@ void IMP_API applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY);
 
 inline imp::Pixel IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned int y);
 
-void IMP_API drawCosL(imp::ImageData& img, float frq, float ampl, double perturb);
+void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
 
-void IMP_API drawCos(imp::ImageData& img, float frq, float ampl, double perturb);
+void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
 
 void IMP_API applyPerturbation(imp::ImageData& img, const imp::ImageData& normals, float intensity);
 

@@ -1,15 +1,58 @@
 #ifndef IMP_IMAGE_UTILS_H
 #define IMP_IMAGE_UTILS_H
 
+#include <vector>
 
 #include "Core/impBase.h"
 #include "Graphics/ImageData.h"
+#include <Math/BasicFunctions.h>
 
 #include <ctime>
 #include <cmath>
 #include <cstdlib>
 
 IMPGEARS_BEGIN
+
+class Distribution
+{
+	public:
+
+	struct KV
+	{
+		double first;
+		double second;
+	};
+
+	typedef std::vector<KV> KVVector;
+
+	Distribution()
+	{
+	}
+
+	double operator()(double t)
+	{
+		for(unsigned int i=0; i<_values.size(); ++i)
+		{
+			if(_values[i].first <= t && i+1 <_values.size())
+			{
+				double local = t - _values[i].first;
+				double length = _values[i+1].first - _values[i].first;
+				return imp::Lerp(_values[i].second, _values[i+1].second, local/length);
+			}
+			else
+			{
+				return _values[i].second;
+			}
+		}
+		return 0.0;
+	}
+
+	~Distribution()
+	{
+	}
+
+	KVVector _values;
+};
 
 class IMP_API Randomizer
 {
@@ -64,13 +107,15 @@ void IMP_API applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY);
 
 inline imp::Pixel IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned int y);
 
-void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
+void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
 
-void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
+void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
 
 void IMP_API applyPerturbation(imp::ImageData& img, const imp::ImageData& normals, float intensity);
 
 void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2);
+
+void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2, Distribution& distrib);
 
 IMPGEARS_END
 

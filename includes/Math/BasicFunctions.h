@@ -23,6 +23,12 @@ double IMP_API Quintic(double t);
 
 double IMP_API Lerp(double a, double b, double t);
 
+double IMP_API Sin(double t, double maxPeriodRatio = 0.5);
+
+double IMP_API SquareSignal(double t, double maxPeriodRatio = 0.5);
+
+double IMP_API TriangleSignal(double t, double maxPeriodRatio = 0.5);
+
 IMPGEARS_END
 
 #endif // IMP_BASIC_FUNCTION_H

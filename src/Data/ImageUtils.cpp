@@ -179,7 +179,7 @@ inline imp::Pixel mirGet(imp::ImageData& img, unsigned int x, unsigned int y)
 	return img.getPixel(x,y);
 }
 
-void drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl,
+void drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio,
 	const imp::ImageData* perturbation, float perturbIntensity)
 {
 	float diag = sqrtf(img.getHeight()/2.0*img.getHeight()/2.0 + img.getWidth()/2.0*img.getWidth()/2.0);
@@ -197,14 +197,14 @@ void drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float 
 		if(perturbation != NULL)
 			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
 
-		float v = sin(t/diag * 3.141592 * freq);
+		float v = imp::Sin(t/diag * 3.141592 * freq, maxPeriodRatio);
 		unsigned int comp = (v+1.0)/2.0 * ampl;
 		imp::Pixel px = {comp,comp,comp,255};
 		img.setPixel(i,j,px);
 	}}
 }
 
-void drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl,
+void drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, float maxPeriodRatio,
 	const imp::ImageData* perturbation, float perturbIntensity)
 {
 	float diag = sqrtf(img.getHeight()/2.0*img.getHeight()/2.0 + img.getWidth()/2.0*img.getWidth()/2.0);
@@ -219,7 +219,7 @@ void drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, 
 		if(perturbation != NULL)
 			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
 
-		float v = sin(t/diag * 3.141592 * freq);
+		float v = imp::Sin(t/diag * 3.141592 * freq, maxPeriodRatio);
 		unsigned int comp = (v+1.0)/2.0 * ampl;
 		imp::Pixel px = {comp,comp,comp,255};
 		img.setPixel(i,j,px);
@@ -257,6 +257,29 @@ void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp:
 		px.r = (unsigned char)((px.r/255.0) * (color2.r-color1.r) + color1.r);
 		px.g = (unsigned char)((px.g/255.0) * (color2.g-color1.g) + color1.g);
 		px.b = (unsigned char)((px.b/255.0) * (color2.b-color1.b) + color1.b);
+
+		img.setPixel(i,j,px);
+	}}
+}
+
+void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2, Distribution& distrib)
+{
+	for(unsigned int i=0; i<img.getWidth(); ++i)
+	{for(unsigned int j=0; j<img.getHeight(); ++j)
+	{
+		imp::Pixel px = img.getPixel(i,j);
+
+		double t1 = (px.r/255.0);
+		double t2 = (px.g/255.0);
+		double t3 = (px.b/255.0);
+
+		t1 = distrib(t1);
+		t2 = distrib(t2);
+		t3 = distrib(t3);
+
+		px.r = (unsigned char)(t1 * (color2.r-color1.r) + color1.r);
+		px.g = (unsigned char)(t2 * (color2.g-color1.g) + color1.g);
+		px.b = (unsigned char)(t3 * (color2.b-color1.b) + color1.b);
 
 		img.setPixel(i,j,px);
 	}}

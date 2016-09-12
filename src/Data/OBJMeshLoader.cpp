@@ -1,4 +1,5 @@
 #include "Data/OBJMeshLoader.h"
+#include <System/Parser.h>
 #include <vector>
 #include <fstream>
 #include <string>
@@ -219,5 +220,20 @@ MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
 
     return model;
 }
+
+bool OBJMeshLoader::saveToFile(const MeshModel* meshModel, const char* filename)
+{
+    //imp::Parser file(filename, imp::Parser::FileType_Text, imp::Parser::AccessMode_Write);
+
+    //const char* head="test save model file";
+    //file.Write(head, 19);
+
+    std::ofstream f(filename, std::ofstream::out);
+    f << "test save model file";
+    f.close();
+
+    return true;
+}
+
 
 IMPGEARS_END

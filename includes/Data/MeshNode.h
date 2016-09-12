@@ -14,6 +14,9 @@ class IMP_API MeshNode : public SceneNode
         virtual ~MeshNode();
 
         virtual void render(imp::Uint32 passID);
+
+		const MeshModel* getModel() const {return m_model;}
+
     protected:
     private:
 

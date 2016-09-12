@@ -14,6 +14,8 @@ class IMP_API OBJMeshLoader
 
         static MeshModel* loadFromFile(const char* filename);
 
+		static bool saveToFile(const MeshModel* meshModel, const char* filename);
+
     protected:
 
     private:

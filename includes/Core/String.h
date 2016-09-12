@@ -19,6 +19,7 @@ class IMP_API String
 		const char* getValue() const;
 
 		Uint32 getSize() const;
+		void resize(Uint32);
 
 		void removeSpaces();
 
@@ -27,6 +28,9 @@ class IMP_API String
 
 		char getChar(Uint32 position) const;
 		Uint32 find(char c) const;
+		Uint32 findLast(char c) const;
+
+		String substring(Uint32 begin, Uint32 end);
 
 	protected:
 	private:

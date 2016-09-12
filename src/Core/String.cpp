@@ -37,6 +37,19 @@ const String& String::operator=(const String& other)
 }
 
 //--------------------------------------------------------------
+void String::resize(Uint32 size)
+{
+	Uint32 currentSize = getSize();
+
+	char* buffer = new char[size+1];
+
+	strncpy(buffer, m_value, (currentSize<size ? currentSize : size)+1);
+
+	delete m_value;
+	m_value = buffer;
+}
+
+//--------------------------------------------------------------
 void String::setValue(const char* value)
 {
 	if(m_value != IMP_NULL)
@@ -135,5 +148,25 @@ Uint32 String::find(char c) const
 
 	return 0;
 }
+
+//--------------------------------------------------------------
+Uint32 String::findLast(char c) const
+{
+	for(Uint32 i=getSize()-1; i>=0; --i)
+	{
+		if(m_value[i] == c)
+			return i;
+	}
+	return getSize();
+}
+
+//--------------------------------------------------------------
+String String::substring(Uint32 begin, Uint32 end)
+{
+	String result( &(getValue()[begin]) );
+	result.resize(end - begin);
+	return result;
+}
+
 
 IMPGEARS_END

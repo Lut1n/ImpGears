@@ -25,7 +25,7 @@ class IMP_API Event
 
     enum MouseButton
     {
-        Mouse_LeftButton,
+        Mouse_LeftButton = 0,
         Mouse_RightButton,
 
 	Mouse_ButtonCount // Get the enum size

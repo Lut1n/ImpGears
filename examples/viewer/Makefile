@@ -1,4 +1,4 @@
-DEBUG=no
+DEBUG=yes
 CXX=g++
 
 ifeq ($(DEBUG),yes)
@@ -9,15 +9,15 @@ endif
 
 LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system libimpgears.so
 
-all: test
+all: viewer
 
-test: test.o
-	$(CXX) -o test test.o $(LDFLAGS)
+viewer: viewer.o
+	$(CXX) -o viewer viewer.o $(LDFLAGS)
 
-test.o: main.cpp
-	$(CXX) -o test.o $(CXXFLAGS) -I ../../includes -c main.cpp
+viewer.o: viewer.cpp
+	$(CXX) $(CXXFLAGS) -I ../../includes -c viewer.cpp -o viewer.o
 
 .PHONY : clean
 
 clean:
-	rm -rf test.o test
+	rm -rf viewer.o viewer

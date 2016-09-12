@@ -39,8 +39,8 @@
 
 #include "Graphics/SkyBox.h"
 
-#include "SFMLContextInterface.h"
-#include "ScreenVertex.h"
+#include "System/SFMLContextInterface.h"
+#include "Graphics/ScreenVertex.h"
 
 #define FPS_LIMIT 60
 #define IS_FULLSCREEN false

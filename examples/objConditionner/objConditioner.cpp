@@ -1,4 +1,4 @@
-#include "io/Parser.h"
+#include <System/Parser.h>
 
 using namespace imp;
 
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 	imp::String line;
 	while(!inputFile.isEnd())
 	{
-		line = inputFile.readLine();
+		inputFile.readLine(line);
 		if(line.getValue()[0] != 'f')
 			outputFile.writeLine(line);
 		else

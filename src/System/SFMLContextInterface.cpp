@@ -1,10 +1,9 @@
-#include "SFMLContextInterface.h"
+#include <System/SFMLContextInterface.h>
 #include <iostream>
 
 IMPGEARS_BEGIN
 
 SFMLContextInterface::SFMLContextInterface()
-	:EvnContextInterface()
 {
     //ctor
 }

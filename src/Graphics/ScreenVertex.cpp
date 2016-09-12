@@ -1,4 +1,4 @@
-#include "ScreenVertex.h"
+#include <Graphics/ScreenVertex.h>
 
 #include "Graphics/GLcommon.h"
 

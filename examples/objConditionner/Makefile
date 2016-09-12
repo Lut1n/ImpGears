@@ -7,7 +7,7 @@ else
 	CXXFLAGS=-Wall -std=c++11
 endif
 
-LDFLAGS=-limpgears
+LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system libimpgears.so
 
 all: objConditioner
 

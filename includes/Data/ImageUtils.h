@@ -13,6 +13,14 @@
 
 IMPGEARS_BEGIN
 
+enum SignalType
+{
+	SignalType_Unknown = 0,
+	SignalType_Sinus,
+	SignalType_Square,
+	SignalType_Triangle,
+};
+
 class Distribution
 {
 	public:
@@ -31,20 +39,22 @@ class Distribution
 
 	double operator()(double t)
 	{
+		double result = 0.0;
 		for(unsigned int i=0; i<_values.size(); ++i)
 		{
-			if(_values[i].first <= t && i+1 <_values.size())
+			if(i+1 <_values.size() && _values[i].first <= t && _values[i+1].first > t)
 			{
 				double local = t - _values[i].first;
 				double length = _values[i+1].first - _values[i].first;
-				return imp::Lerp(_values[i].second, _values[i+1].second, local/length);
+				result = imp::Lerp(_values[i].second, _values[i+1].second, local/length);
+				break;
 			}
 			else
 			{
-				return _values[i].second;
+				result = _values[i].second;
 			}
 		}
-		return 0.0;
+		return result;
 	}
 
 	~Distribution()
@@ -109,6 +119,8 @@ inline imp::Pixel IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned i
 
 void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
 
+void IMP_API drawDirectionnalSignal(imp::ImageData& img, SignalType signaltype, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
+
 void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
 
 void IMP_API applyPerturbation(imp::ImageData& img, const imp::ImageData& normals, float intensity);
@@ -116,6 +128,8 @@ void IMP_API applyPerturbation(imp::ImageData& img, const imp::ImageData& normal
 void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2);
 
 void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2, Distribution& distrib);
+
+void IMP_API applyMaximization(imp::ImageData& img);
 
 IMPGEARS_END
 

@@ -204,6 +204,38 @@ void drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float 
 	}}
 }
 
+void drawDirectionnalSignal(imp::ImageData& img, SignalType signalType, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio,
+	const imp::ImageData* perturbation, float perturbIntensity)
+{
+	float diag = sqrtf(img.getHeight()/2.0*img.getHeight()/2.0 + img.getWidth()/2.0*img.getWidth()/2.0);
+
+	float dirLength = sqrtf(dirX*dirX + dirY*dirY);
+	dirX /= dirLength;
+	dirY /= dirLength;
+
+	for(unsigned int i=0; i<img.getWidth(); ++i)
+	{for(unsigned int j=0; j<img.getHeight(); ++j)
+	{
+		float dirDot = (i*dirX + j*dirY);
+		float t = dirDot;
+
+		if(perturbation != NULL)
+			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
+
+		float v = 0;
+		if(signalType == SignalType_Sinus)
+			v = imp::Sin(t/diag * 3.141592 * freq, maxPeriodRatio);
+		else if(signalType == SignalType_Square)
+			v = imp::SquareSignal(t/diag * 3.141592 * freq, maxPeriodRatio);
+		else if(signalType == SignalType_Triangle)
+			v = imp::TriangleSignal(t/diag * 3.141592 * freq, maxPeriodRatio);
+
+		unsigned int comp = (v+1.0)/2.0 * ampl;
+		imp::Pixel px = {comp,comp,comp,255};
+		img.setPixel(i,j,px);
+	}}
+}
+
 void drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, float maxPeriodRatio,
 	const imp::ImageData* perturbation, float perturbIntensity)
 {
@@ -281,6 +313,33 @@ void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp:
 		px.g = (unsigned char)(t2 * (color2.g-color1.g) + color1.g);
 		px.b = (unsigned char)(t3 * (color2.b-color1.b) + color1.b);
 
+		img.setPixel(i,j,px);
+	}}
+}
+
+void applyMaximization(imp::ImageData& img)
+{
+	Uint8 maxR = 0;
+	Uint8 minR = 255;
+
+	// scan
+	for(unsigned int i=0; i<img.getWidth(); ++i)
+	{for(unsigned int j=0; j<img.getHeight(); ++j)
+	{
+		Uint8 r = img.getPixel(i,j).r;
+		if(r < minR)
+			minR = r;
+		else if(r > maxR)
+			maxR = r;
+	}}
+
+	// maximize
+	for(unsigned int i=0; i<img.getWidth(); ++i)
+	{for(unsigned int j=0; j<img.getHeight(); ++j)
+	{
+		double t = double(img.getPixel(i,j).r);
+		Uint8 newt = (Uint8)Lerp( 0.0, 255.0, (t-minR)/(maxR-minR) );
+		Pixel px = {newt,newt,newt, 255};
 		img.setPixel(i,j,px);
 	}}
 }

@@ -127,6 +127,48 @@ void makeFilter(Filter* filter)
 		drawDirectionnalSinus(img, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
 		filter->ready = true;
 	}
+	else if( json->getString("type")->value == "square" )
+	{
+		bool perturbReady = false;
+		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
+
+		if( perturbation && !perturbReady )
+			return;
+
+		double dirX = json->getNumeric("dirX")->value;
+		double dirY = json->getNumeric("dirY")->value;
+		double freq = json->getNumeric("freq")->value;
+		double ampl = json->getNumeric("ampl")->value;
+		double perturbIntensity = json->getNumeric("perturb")->value;
+
+		double ratio = 1.0;
+		if( json->getNumeric("ratio") )
+			ratio = json->getNumeric("ratio")->value;
+
+		drawDirectionnalSignal(img, imp::SignalType_Square, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
+		filter->ready = true;
+	}
+	else if( json->getString("type")->value == "triangle" )
+	{
+		bool perturbReady = false;
+		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
+
+		if( perturbation && !perturbReady )
+			return;
+
+		double dirX = json->getNumeric("dirX")->value;
+		double dirY = json->getNumeric("dirY")->value;
+		double freq = json->getNumeric("freq")->value;
+		double ampl = json->getNumeric("ampl")->value;
+		double perturbIntensity = json->getNumeric("perturb")->value;
+
+		double ratio = 1.0;
+		if( json->getNumeric("ratio") )
+			ratio = json->getNumeric("ratio")->value;
+
+		drawDirectionnalSignal(img, imp::SignalType_Triangle, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
+		filter->ready = true;
+	}
 	else if(json->getString("type")->value == "noise")
 	{
 		double ampl = json->getNumeric("ampl")->value;
@@ -215,6 +257,18 @@ void makeFilter(Filter* filter)
 			img.clone(*dst);
 			double alpha = json->getNumeric("alpha")->value;
 			imp::blend(img, *src, alpha);
+			filter->ready = true;
+		}
+	}
+	else if(json->getString("type")->value == "maximization")
+	{
+		bool ready = false;
+		imp::ImageData* grey = getImage(json, "greymapID", ready);
+
+		if(grey && ready)
+		{
+			img.clone(*grey);
+			imp::applyMaximization(img);
 			filter->ready = true;
 		}
 	}

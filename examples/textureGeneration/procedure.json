@@ -1,16 +1,23 @@
 {
 	"filters":
 	[
-		{"id":"sin1", "type":"sinus", "dirX":8, "dirY":3, "freq":16.0, "ampl":255, "ratio":0.8, "perturbMapID":"noise1", "perturb":2},
-		{"id":"noise1", "type":"noise", "octaves":6, "persistence":0.7, "ampl":255},
-		{"id":"noise2", "type":"noise", "octaves":5, "persistence":0.4, "ampl":255},
+		{"id":"sin1", "type":"sinus", "dirX":8, "dirY":3, "freq":8.0, "ampl":255, "ratio":0.8, "perturbMapID":"noise1", "perturb":1},
+		{"id":"noise1_pre", "type":"noise", "octaves":6, "persistence":0.7, "ampl":255},
+		{"id":"noise2_pre", "type":"noise", "octaves":5, "persistence":0.4, "ampl":255},
 		{"id":"norm1", "type":"heightToNormal", "heightmapID":"noise1", "force":100.0, "prec":1.0},
-		{"id":"sin2", "type":"radSinus", "posX":200, "posY":300, "freq":16.0, "ampl":255, "ratio":0.5, "perturbMapID":"noise2", "perturb":2},
+		{"id":"sin2", "type":"radSinus", "posX":200, "posY":300, "freq":16.0, "ampl":255, "ratio":0.5, "perturbMapID":"noise2", "perturb":1},
 		{"id":"cloud", "type":"colorization", "color1":[50,50,255,255], "color2":[255,255,255,255], "greymapID":"noise1"},
-		{"id":"noise3", "type":"noise", "octaves":10, "persistence":1.0, "ampl":255},
-		{"id":"sand", "type":"colorization", "color1":[50,50,50,255], "color2":[255,255,100,255], "greymapID":"noise3", "distribID":"moreColor1"},
+		{"id":"noise3_pre", "type":"noise", "octaves":8, "persistence":1.0, "ampl":255},
+		{"id":"sand", "type":"colorization", "color1":[50,50,50,255], "color2":[255,255,100,255], "greymapID":"noise3", "distribID":"moreColor2"},
 		{"id":"wood", "type":"colorization", "color1":[0,50,0,255], "color2":[100,255,100,255], "greymapID":"sin2"},
 		{"id":"blend1", "type":"blend", "srcID":"sin1", "dstID":"wood", "alpha":0.35},
+		{"id":"noise1", "type":"maximization", "greymapID":"noise1_pre"},
+		{"id":"noise2", "type":"maximization", "greymapID":"noise2_pre"},
+		{"id":"noise3", "type":"maximization", "greymapID":"noise3_pre"},
+		{"id":"brickH", "type":"square", "dirX":1, "dirY":0, "freq":4.0, "ampl":255, "ratio":0.95, "perturbMapID":"noise1", "perturb":0.2},
+		{"id":"brickV", "type":"square", "dirX":0, "dirY":1, "freq":8.0, "ampl":255, "ratio":0.95, "perturbMapID":"noise1", "perturb":0.2},
+		{"id":"brick1", "type":"blend", "srcID":"brickH", "dstID":"brickV", "alpha":0.5},
+		{"id":"brick2", "type":"blend", "srcID":"brick1", "dstID":"noise3", "alpha":0.4},
 	],
 	"utils":
 	[

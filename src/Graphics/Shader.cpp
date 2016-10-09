@@ -8,6 +8,132 @@ IMPGEARS_BEGIN
 
 Shader* Shader::m_instance = IMP_NULL;
 
+
+//--------------------------------------------------------------
+Shader::Parameter::Parameter(const std::string& id, Type type)
+{
+	this->id = id;
+	this->type = type;
+}
+
+//--------------------------------------------------------------
+Shader::Parameter::~Parameter()
+{
+	
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(float float1)
+{
+	this->type = Type_1f;
+	value.value_1f = float1;
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(Vector3* vec3)
+{
+	this->type = Type_3f;
+	value.value_3f = vec3;
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(int int1)
+{
+	this->type = Type_1i;
+	value.value_1i = int1;
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(float* float1Array, int count)
+{
+	this->type = Type_1fv;
+	value.value_1fv = float1Array;
+	this->count = count;
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(Vector3* vec3Array, int count)
+{
+	this->type = Type_3fv;
+	value.value_3fv = vec3Array;
+	this->count = count;
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(int* int1Array, int count)
+{
+	this->type = Type_1iv;
+	value.value_1iv = int1Array;
+	this->count = count;
+}
+
+//--------------------------------------------------------------
+/*void Shader::Parameter::set(Matrix3* mat3Array, int count)
+{
+	this->type = Type_Mat3v;
+	value.value_mat3v = mat3Array;
+	this->count = count;
+}*/
+
+//--------------------------------------------------------------
+void Shader::Parameter::set(Matrix4* mat4Array, int count)
+{
+	this->type = Type_Mat4v;
+	value.value_mat4v = mat4Array;
+	this->count = count;
+}
+
+//--------------------------------------------------------------
+void Shader::Parameter::updateUniform(const Shader& program) const
+{
+	Int32 uniformLocation = program.getParameterLocation( this->getID() );
+	
+	if(type == Type_1f)
+	{
+		glUniform1f(uniformLocation, value.value_1f);
+	}
+	else if(type == Type_3f)
+	{
+		glUniform3f(uniformLocation, value.value_3f->getX(), value.value_3f->getY(), value.value_3f->getZ());
+	}
+	else if(type == Type_1i)
+	{
+		glUniform1i(uniformLocation, value.value_1i);
+	}
+	else if(type == Type_1fv)
+	{
+		glUniform1fv(uniformLocation, count, value.value_1fv);
+	}
+	else if(type == Type_3fv)
+	{
+		// glUniform3f(uniformLocation, value.value_3f->getX(), value.value_3f->getY(), value.value_3f->getZ());
+	}
+	else if(type == Type_1iv)
+	{
+		glUniform1iv(uniformLocation, count, value.value_1iv);
+	}
+	/*else if(type == Type_Mat3v)
+	{
+		// 
+	}*/
+	else if(type == Type_Mat4v)
+	{
+		glUniformMatrix4fv(uniformLocation, 1, false, value.value_mat4v->getData());
+	}
+	else
+	{
+		// 
+	}
+	
+	GLenum errorState = glGetError();
+	if(errorState != GL_NO_ERROR)
+	{
+		std::string strErr;
+		glErrToString(errorState, strErr);
+		fprintf(stderr, "impError : Send param (%s) to shader (error %d : %s)\n", id.c_str(), errorState, strErr.c_str() );
+	}
+}
+
 //--------------------------------------------------------------
 Shader::Shader(const char* vertexShader, const char* fragmentShader)
 {
@@ -154,6 +280,12 @@ void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
 }
 
 //--------------------------------------------------------------
+void Shader::setParameter(const Parameter& param)
+{
+	param.updateUniform( *this );
+}
+
+//--------------------------------------------------------------
 void Shader::setProjection(const Matrix4& projection)
 {
     setMatrix4Parameter("u_projection", projection);
@@ -203,10 +335,80 @@ void Shader::enable()
 }
 
 //--------------------------------------------------------------
+Int32 Shader::getParameterLocation(const std::string& id) const
+{
+	Int32 location = glGetUniformLocation(m_programID, id.c_str());
+    if(location == -1)
+        fprintf(stderr, "impError : location of uniform (%s) failed\n", id.c_str());
+    GL_CHECKERROR("parameter location");
+	
+	return location;
+}
+		
+//--------------------------------------------------------------
 void Shader::disable()
 {
     glUseProgram (0) ;
     m_instance = IMP_NULL;
+}
+
+//--------------------------------------------------------------
+void Shader::addParameter(Parameter* param)
+{
+	_parameters.push_back(param);
+}
+
+//--------------------------------------------------------------
+void Shader::removeParameter(Parameter* param)
+{
+	bool found = false;
+	Uint32 index = -1;
+	for(Uint32 i=0; i<_parameters.size(); ++i)
+		if(_parameters[i]->getID() == param->getID())
+		{
+			index = i;
+			found = true;
+			break;
+		}
+	
+	if(found)
+	{
+		for(Uint32 i=index+1; i<_parameters.size(); ++i)
+			_parameters[i-1] = _parameters[i];
+		
+		_parameters.resize(_parameters.size()-1);
+	}
+}
+
+//--------------------------------------------------------------
+void Shader::clearParameter()
+{
+	_parameters.clear();
+}
+
+//--------------------------------------------------------------
+Shader::Parameter* Shader::getParameter(const std::string& name)
+{
+	for(Uint32 i=0; i<_parameters.size(); ++i)
+		if(_parameters[i]->getID() == name)
+			return _parameters[i];
+		
+	return IMP_NULL;
+}
+
+//--------------------------------------------------------------
+void Shader::updateAllParameters()
+{
+	for(Uint32 i=0; i<_parameters.size(); ++i)
+	{
+		_parameters[i]->updateUniform( *this );
+	}
+}
+
+//--------------------------------------------------------------
+void Shader::updateParameter(const std::string& name)
+{
+	getParameter(name)->updateUniform( *this );
 }
 
 IMPGEARS_END

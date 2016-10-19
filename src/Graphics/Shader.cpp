@@ -30,7 +30,7 @@ void Shader::Parameter::set(float float1)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(Vector3* vec3)
+void Shader::Parameter::set(const Vector3* vec3)
 {
 	this->type = Type_3f;
 	value.value_3f = vec3;
@@ -44,7 +44,7 @@ void Shader::Parameter::set(int int1)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(float* float1Array, int count)
+void Shader::Parameter::set(const float* float1Array, int count)
 {
 	this->type = Type_1fv;
 	value.value_1fv = float1Array;
@@ -52,7 +52,7 @@ void Shader::Parameter::set(float* float1Array, int count)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(Vector3* vec3Array, int count)
+void Shader::Parameter::set(const Vector3* vec3Array, int count)
 {
 	this->type = Type_3fv;
 	value.value_3fv = vec3Array;
@@ -60,7 +60,7 @@ void Shader::Parameter::set(Vector3* vec3Array, int count)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(int* int1Array, int count)
+void Shader::Parameter::set(const int* int1Array, int count)
 {
 	this->type = Type_1iv;
 	value.value_1iv = int1Array;
@@ -68,7 +68,7 @@ void Shader::Parameter::set(int* int1Array, int count)
 }
 
 //--------------------------------------------------------------
-/*void Shader::Parameter::set(Matrix3* mat3Array, int count)
+/*void Shader::Parameter::set(const Matrix3* mat3Array, int count)
 {
 	this->type = Type_Mat3v;
 	value.value_mat3v = mat3Array;
@@ -76,7 +76,7 @@ void Shader::Parameter::set(int* int1Array, int count)
 }*/
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(Matrix4* mat4Array, int count)
+void Shader::Parameter::set(const Matrix4* mat4Array, int count)
 {
 	this->type = Type_Mat4v;
 	value.value_mat4v = mat4Array;

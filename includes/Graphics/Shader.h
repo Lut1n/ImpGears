@@ -62,13 +62,13 @@ class IMP_API Shader
 			union Value
 			{
 				float	 value_1f;
-				Vector3* value_3f;
+				const Vector3* value_3f;
 				int		 value_1i;
-				float*	 value_1fv;
-				Vector3* value_3fv;
-				int*	 value_1iv;
-				// Matrix3* value_mat3v;
-				Matrix4* value_mat4v;
+				const float*	 value_1fv;
+				const Vector3* value_3fv;
+				const int*	 value_1iv;
+				// const Matrix3* value_mat3v;
+				const Matrix4* value_mat4v;
 			};
 			
 			Parameter(const std::string& id, Type type);
@@ -77,19 +77,19 @@ class IMP_API Shader
 			
 			void set(float float1);
 			
-			void set(Vector3* vec3);
+			void set(const Vector3* vec3);
 			
 			void set(int int1);
 			
-			void set(float* float1Array, int count);
+			void set(const float* float1Array, int count = 1);
 			
-			void set(Vector3* vec3Array, int count);
+			void set(const Vector3* vec3Array, int count);
 			
-			void set(int* int1Array, int count);
+			void set(const int* int1Array, int count = 1);
 			
-			// void set(Matrix3* mat3Array, int count);
+			// void set(const Matrix3* mat3Array, int count);
 			
-			void set(Matrix4* mat4Array, int count);
+			void set(const Matrix4* mat4Array, int count = 1);
 			
 			const std::string& getID() const {return id;}
 			

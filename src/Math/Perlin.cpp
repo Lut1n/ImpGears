@@ -119,10 +119,11 @@ double perlinDot(int* vec, double x, double y, double z)
 	return vec[0]*x + vec[1]*y + vec[2]*z;
 }
 
-double perlinMain(double x, double y, double z)
+double perlinMain(double x, double y, double z, int tileSize)
 {
 	PermutationTable::getInstance()->init(0);
-
+	
+	
 	int X, Y, Z;
 	double fx, fy, fz;
 	// get integer value into X, Y and Z
@@ -135,22 +136,22 @@ double perlinMain(double x, double y, double z)
 	X &= 255;
 	Y &= 255;
 	Z &= 255;
-
-const  double g000 = perlinDot(randomGrad(X, Y, Z),
+	
+const  double g000 = perlinDot(randomGrad(X%tileSize, Y%tileSize, Z%tileSize),
 fx, fy, fz);
-const double g001 = perlinDot(randomGrad(X, Y, Z + 1),
+const double g001 = perlinDot(randomGrad(X%tileSize, Y%tileSize, (Z + 1)%tileSize),
 fx, fy, fz - 1.);
-const double g010 = perlinDot(randomGrad(X, Y + 1, Z),
+const double g010 = perlinDot(randomGrad(X%tileSize, (Y + 1)%tileSize, Z%tileSize),
 fx, fy - 1., fz);
-const double g011 = perlinDot(randomGrad(X, Y + 1, Z + 1),
+const double g011 = perlinDot(randomGrad(X%tileSize, (Y + 1)%tileSize, (Z + 1)%tileSize),
 fx, fy - 1., fz - 1.);
-const double g100 = perlinDot(randomGrad(X + 1, Y, Z),
+const double g100 = perlinDot(randomGrad((X + 1)%tileSize, Y%tileSize, Z%tileSize),
 fx - 1., fy, fz);
-const double g101 = perlinDot(randomGrad(X + 1, Y, Z + 1),
+const double g101 = perlinDot(randomGrad((X + 1)%tileSize, Y%tileSize, (Z + 1)%tileSize),
 fx - 1., fy, fz - 1.);
-const double g110 = perlinDot(randomGrad(X + 1, Y + 1, Z),
+const double g110 = perlinDot(randomGrad((X + 1)%tileSize, (Y + 1)%tileSize, Z%tileSize),
 fx - 1., fy - 1., fz);
-const double g111 = perlinDot(randomGrad(X + 1, Y + 1, Z + 1),
+const double g111 = perlinDot(randomGrad((X + 1)%tileSize, (Y + 1)%tileSize, (Z + 1)%tileSize),
 fx - 1., fy - 1., fz - 1.);
 
 	double u = Quintic(fx);
@@ -170,14 +171,17 @@ fx - 1., fy - 1., fz - 1.);
 	return xyz;
 }
 
-double perlinOctave(double x, double y, double z, unsigned int octaveCount, double persistence)
+double perlinOctave(double x, double y, double z, unsigned int octaveCount, double persistence, double freq, double tiles)
 {
     double total = 0;
-    double frequency = 1;
+    double frequency = freq;
     double amplitude = 1;
     double maxValue = 0;  // Used for normalizing result to 0.0 - 1.0
     for(unsigned int oct=0;oct<octaveCount;oct++) {
-        total += perlinMain(x * frequency, y * frequency, z * frequency) * amplitude;
+		
+		int tileSize = frequency*tiles;
+		if(tileSize <= 0)tileSize = 1;
+        total += perlinMain(x * frequency, y * frequency, z * frequency, tileSize) * amplitude;
         
         maxValue += amplitude;
         

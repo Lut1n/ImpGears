@@ -10,9 +10,10 @@
 
 IMPGEARS_BEGIN
 
-double IMP_API perlinMain(double x, double y, double z);
 
-double IMP_API perlinOctave(double x, double y, double z, unsigned int octaveCount, double persistence);
+double IMP_API perlinMain(double x, double y, double z, int tileSize);
+
+double IMP_API perlinOctave(double x, double y, double z, unsigned int octaveCount, double persistence, double freq = 1.0, double tiles = 1.0);
 
 IMPGEARS_END
 

@@ -2,12 +2,12 @@
 	"filters":
 	[
 		{"id":"sin1", "type":"sinus", "dirX":8, "dirY":3, "freq":8.0, "ampl":255, "ratio":0.8, "perturbMapID":"noise1", "perturb":1},
-		{"id":"noise1_pre", "type":"noise", "octaves":6, "persistence":0.7, "ampl":255},
-		{"id":"noise2_pre", "type":"noise", "octaves":5, "persistence":0.4, "ampl":255},
+		{"id":"noise1_pre", "type":"noise", "octaves":6, "persistence":0.7, "freq":20.0, "ampl":255},
+		{"id":"noise2_pre", "type":"noise", "octaves":5, "persistence":0.4, "freq":4.0, "ampl":255},
 		{"id":"norm1", "type":"heightToNormal", "heightmapID":"noise1", "force":100.0, "prec":1.0},
-		{"id":"sin2", "type":"radSinus", "posX":200, "posY":300, "freq":16.0, "ampl":255, "ratio":0.5, "perturbMapID":"noise2", "perturb":1},
+		{"id":"sin2", "type":"radSinus", "posX":200, "posY":300, "freq":16.0, "ampl":255, "ratio":0.5, "perturbMapID":"noise2", "perturb":0.2},
 		{"id":"cloud", "type":"colorization", "color1":[50,50,255,255], "color2":[255,255,255,255], "greymapID":"noise1"},
-		{"id":"noise3_pre", "type":"noise", "octaves":8, "persistence":1.0, "ampl":255},
+		{"id":"noise3_pre", "type":"noise", "octaves":8, "persistence":1.0, "freq":4.0, "ampl":255, "tiles":1},
 		{"id":"sand", "type":"colorization", "color1":[50,50,50,255], "color2":[255,255,100,255], "greymapID":"noise3", "distribID":"moreColor2"},
 		{"id":"wood", "type":"colorization", "color1":[0,50,0,255], "color2":[100,255,100,255], "greymapID":"sin2"},
 		{"id":"blend1", "type":"blend", "srcID":"sin1", "dstID":"wood", "alpha":0.35},

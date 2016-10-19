@@ -171,15 +171,22 @@ void makeFilter(Filter* filter)
 	}
 	else if(json->getString("type")->value == "noise")
 	{
+		double frequency = json->getNumeric("freq")->value;
 		double ampl = json->getNumeric("ampl")->value;
 		double octaveCount = json->getNumeric("octaves")->value;
 		double persistence = json->getNumeric("persistence")->value;
+		
+		double tiles = 1.0;
+		if(json->getNumeric("tiles"))
+		{
+			tiles = json->getNumeric("tiles")->value;
+		}
 
 		for(unsigned int i=0; i<img.getWidth(); ++i)
 		{
 			for(unsigned int j=0; j<img.getHeight(); ++j)
 			{
-				double v = imp::perlinOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence);
+				double v = imp::perlinOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence, frequency, 1.0/tiles);
 				imp::Uint8 comp = (v+1.0)/2.0 * ampl;
 				imp::Pixel px = {comp,comp,comp,255};
 				img.setPixel(i,j,px);

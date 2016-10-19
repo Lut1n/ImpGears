@@ -36,13 +36,12 @@ void VoxelWordGenerator::Generate(VoxelWorld* _world)
     for(imp::Uint32 x = 0; x<_world->GetSizeX(); ++x)
     for(imp::Uint32 y = 0; y<_world->GetSizeY(); ++y)
     {
-
-        imp::Int32 localElevation = ((perlinOctave(x/4.0, y/4.0, 0.5, 6, 0.2)+1.0)/2.0)*_world->GetSizeZ();
-
+        imp::Int32 localElevation = ((perlinOctave((double)x/_world->GetSizeX(), (double)y/_world->GetSizeY(), 0.0, 6, 0.7, 4.0)+1.0)/2.0)*(_world->GetSizeZ());
+		
         imp::Int32 z = 0;
         for(; z<localElevation-1; ++z)
 		{
-			double caveValue = perlinOctave(x/4.0,y/4.0,z/4.0, 6, 0.2);
+			double caveValue = perlinOctave((double)x/_world->GetSizeX(),(double)y/_world->GetSizeY(),(double)z/_world->GetSizeZ(), 6, 0.3, 7.0);
 			if(caveValue < 0.0)
 				_world->SetValue(x,y,(imp::Uint32)z, 0);
 			else 

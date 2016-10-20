@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-static const char* BM = "BM"; 
+// static const char* BM = "BM"; 
 
 struct BitmapFileHeader_Struct
 {

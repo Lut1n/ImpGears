@@ -182,11 +182,22 @@ void makeFilter(Filter* filter)
 			tiles = json->getNumeric("tiles")->value;
 		}
 
+		std::string method = "perlin";
+		if(json->getString("method"))
+		{
+			method = json->getString("method")->value;
+		}
+		
 		for(unsigned int i=0; i<img.getWidth(); ++i)
 		{
 			for(unsigned int j=0; j<img.getHeight(); ++j)
 			{
-				double v = imp::perlinOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence, frequency, 1.0/tiles);
+				double v = 0.0;
+				if(method == "perlin")
+					v = imp::perlinOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence, frequency, 1.0/tiles);
+				else if(method == "simplex")
+					v = imp::simplexOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence, frequency, 1.0/tiles);
+				
 				imp::Uint8 comp = (v+1.0)/2.0 * ampl;
 				imp::Pixel px = {comp,comp,comp,255};
 				img.setPixel(i,j,px);

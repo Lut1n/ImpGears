@@ -16,6 +16,7 @@ struct Filter
 	imp::ImageData* data;
 	imp::JsonObject* json;
 	bool ready;
+	std::vector<Filter*> dependanced;
 
 	Filter(imp::ImageData* img, imp::JsonObject* json)
 	{
@@ -25,6 +26,27 @@ struct Filter
 	}
 
 	~Filter(){}
+
+	void addDependanced(Filter* filter)
+	{
+		for(unsigned int i=0; i<dependanced.size(); ++i)
+		{
+			if(dependanced[i] == filter)
+				return;
+		}
+
+		dependanced.push_back(filter);
+	}
+
+	bool alldependancedReady()
+	{
+		for(unsigned int i=0; i<dependanced.size(); ++i)
+		{
+			if( !dependanced[i]->ready )
+				return false;
+		}
+		return true;
+	}
 };
 
 typedef std::map<std::string, Filter*> FilterMap;
@@ -53,8 +75,9 @@ void loadDistrib(imp::JsonObject* json)
 	distribs[id] = d;
 }
 
-imp::Pixel toPixel(imp::JsonArray* arr)
+imp::Pixel getPixel(imp::JsonObject* json, std::string id)
 {
+	imp::JsonArray* arr = json->getArray(id);
 	imp::Uint8 b = arr->getNumeric(0)->value;
 	imp::Uint8 g = arr->getNumeric(1)->value;
 	imp::Uint8 r = arr->getNumeric(2)->value;
@@ -69,7 +92,9 @@ imp::ImageData* getImage(imp::JsonObject* json, const char* keyname, bool& isRea
 	if(string != NULL)
 	{
 		std::string id = string->value;
+		std::string actionID = json->getString("id")->value;
 		isReady = filters[id]->ready;
+		filters[id]->addDependanced( filters[actionID] );
 		return filters[id]->data;
 	}
 	else
@@ -100,153 +125,239 @@ std::string loadJson(const char* filename)
 	return buffer;
 }
 
-void makeFilter(Filter* filter)
+bool tryGetString(imp::JsonObject* json, const std::string& id, std::string& str)
 {
-	imp::JsonObject* json = filter->json;
-	imp::ImageData& img = *(filter->data);
-	std::cout << "make filter " << json->getString("id")->value << "\n";
-
-	if( json->getString("type")->value == "sinus" )
+	if( json->getString(id) )
 	{
-		bool perturbReady = false;
-		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
-
-		if( perturbation && !perturbReady )
-			return;
-
-		double dirX = json->getNumeric("dirX")->value;
-		double dirY = json->getNumeric("dirY")->value;
-		double freq = json->getNumeric("freq")->value;
-		double ampl = json->getNumeric("ampl")->value;
-		double perturbIntensity = json->getNumeric("perturb")->value;
-
-		double ratio = 1.0;
-		if( json->getNumeric("ratio") )
-			ratio = json->getNumeric("ratio")->value;
-
-		drawDirectionnalSinus(img, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
-		filter->ready = true;
+		str = json->getString(id)->value;
+		return true;
 	}
-	else if( json->getString("type")->value == "square" )
+	return false;	
+}
+
+bool tryGetNumeric(imp::JsonObject* json, const std::string& id, double& num)
+{
+	if( json->getNumeric(id) )
 	{
-		bool perturbReady = false;
-		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
-
-		if( perturbation && !perturbReady )
-			return;
-
-		double dirX = json->getNumeric("dirX")->value;
-		double dirY = json->getNumeric("dirY")->value;
-		double freq = json->getNumeric("freq")->value;
-		double ampl = json->getNumeric("ampl")->value;
-		double perturbIntensity = json->getNumeric("perturb")->value;
-
-		double ratio = 1.0;
-		if( json->getNumeric("ratio") )
-			ratio = json->getNumeric("ratio")->value;
-
-		drawDirectionnalSignal(img, imp::SignalType_Square, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
-		filter->ready = true;
+		num = json->getNumeric(id)->value;
+		return true;
 	}
-	else if( json->getString("type")->value == "triangle" )
+	return false;	
+}
+
+
+class Functor
+{
+	public:
+
+	Functor(FilterMap* filters, DistribMap* distrib)
+		: filters(filters)
+		, distrib(distrib)
+	{}
+	virtual ~Functor(){}
+
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img){return false;}
+	
+	bool operator()(imp::JsonObject* json, imp::ImageData& img)
 	{
-		bool perturbReady = false;
-		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
-
-		if( perturbation && !perturbReady )
-			return;
-
-		double dirX = json->getNumeric("dirX")->value;
-		double dirY = json->getNumeric("dirY")->value;
-		double freq = json->getNumeric("freq")->value;
-		double ampl = json->getNumeric("ampl")->value;
-		double perturbIntensity = json->getNumeric("perturb")->value;
-
-		double ratio = 1.0;
-		if( json->getNumeric("ratio") )
-			ratio = json->getNumeric("ratio")->value;
-
-		drawDirectionnalSignal(img, imp::SignalType_Triangle, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
-		filter->ready = true;
+		return apply(json, img);
 	}
-	else if(json->getString("type")->value == "noise")
+
+	private:	
+
+	FilterMap* filters;
+	DistribMap* distrib;
+};
+
+class NoiseFunctor : public Functor
+{
+	public:
+	NoiseFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
 	{
 		double frequency = json->getNumeric("freq")->value;
 		double ampl = json->getNumeric("ampl")->value;
 		double octaveCount = json->getNumeric("octaves")->value;
 		double persistence = json->getNumeric("persistence")->value;
-		
+
 		double tiles = 1.0;
-		if(json->getNumeric("tiles"))
-		{
-			tiles = json->getNumeric("tiles")->value;
-		}
+		tryGetNumeric(json, "tiles", tiles);
 
 		std::string method = "perlin";
-		if(json->getString("method"))
-		{
-			method = json->getString("method")->value;
-		}
-		
+		tryGetString(json, "method", method);
+
 		for(unsigned int i=0; i<img.getWidth(); ++i)
 		{
 			for(unsigned int j=0; j<img.getHeight(); ++j)
 			{
+				double nX = ((double)i)/img.getWidth();
+				double nY = ((double)j)/img.getHeight();
 				double v = 0.0;
 				if(method == "perlin")
-					v = imp::perlinOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence, frequency, 1.0/tiles);
+					v = imp::perlinOctave(nX, nY, 0, octaveCount, persistence, frequency, 1.0/tiles);
 				else if(method == "simplex")
-					v = imp::simplexOctave(((double)i)/img.getWidth(), ((double)j)/img.getHeight(), 0, octaveCount, persistence, frequency, 1.0/tiles);
+					v = imp::simplexOctave(nX, nY, 0, octaveCount, persistence, frequency, 1.0/tiles);
 				
 				imp::Uint8 comp = (v+1.0)/2.0 * ampl;
 				imp::Pixel px = {comp,comp,comp,255};
 				img.setPixel(i,j,px);
 			}
 		}
-		filter->ready = true;
+		return true;
 	}
-	else if(json->getString("type")->value == "heightToNormal")
-	{
-		bool perturbReady = false;
-		imp::ImageData* height = getImage(json, "heightmapID", perturbReady);
+};
 
-		if(height && perturbReady)
-		{
-			double force = json->getNumeric("force")->value;
-			double prec = json->getNumeric("prec")->value;
-			imp::heightToNormal(*height, img, force, prec);
-			filter->ready = true;
-		}
-	}
-	else if(json->getString("type")->value == "colorization")
-	{
-		bool perturbReady = false;
-		imp::ImageData* grey = getImage(json, "greymapID", perturbReady);
-
-		if(grey && perturbReady)
-		{
-			bool hasDistrib = json->getString("distribID") != NULL;
-
-			img.clone(*grey);
-
-			imp::Pixel color1 = toPixel(json->getArray("color1"));
-			imp::Pixel color2 = toPixel(json->getArray("color2"));
-
-			if(hasDistrib)
-				applyColorization(img, color1, color2, getDistrib(json, "distribID"));
-			else
-				applyColorization(img, color1, color2);
-
-			filter->ready = true;
-		}
-	}
-	else if(json->getString("type")->value == "radSinus")
+class SinusFunctor : public Functor
+{
+	public:
+	SinusFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
 	{
 		bool perturbReady = false;
 		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
 
 		if( perturbation && !perturbReady )
-			return;
+			return false;
+
+		double dirX = json->getNumeric("dirX")->value;
+		double dirY = json->getNumeric("dirY")->value;
+		double freq = json->getNumeric("freq")->value;
+		double ampl = json->getNumeric("ampl")->value;
+		double perturbIntensity = json->getNumeric("perturb")->value;
+
+		double ratio = 1.0;
+		tryGetNumeric(json, "ratio", ratio);
+
+		drawDirectionnalSinus(img, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
+		return true;
+	}
+};
+
+class SquareFunctor : public Functor
+{
+	public:
+	SquareFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool perturbReady = false;
+		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
+
+		if( perturbation && !perturbReady )
+			return false;
+
+		double dirX = json->getNumeric("dirX")->value;
+		double dirY = json->getNumeric("dirY")->value;
+		double freq = json->getNumeric("freq")->value;
+		double ampl = json->getNumeric("ampl")->value;
+		double perturbIntensity = json->getNumeric("perturb")->value;
+
+		double ratio = 1.0;
+		tryGetNumeric(json, "ratio", ratio);
+
+		drawDirectionnalSignal(img, imp::SignalType_Square, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
+		return true;
+	}
+};
+
+class TriangleFunctor : public Functor
+{
+	public:
+	TriangleFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool perturbReady = false;
+		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
+
+		if( perturbation && !perturbReady )
+			return false;
+
+		double dirX = json->getNumeric("dirX")->value;
+		double dirY = json->getNumeric("dirY")->value;
+		double freq = json->getNumeric("freq")->value;
+		double ampl = json->getNumeric("ampl")->value;
+		double perturbIntensity = json->getNumeric("perturb")->value;
+
+		double ratio = 1.0;
+		tryGetNumeric(json, "ratio", ratio);
+
+		drawDirectionnalSignal(img, imp::SignalType_Triangle, dirX, dirY, freq, ampl, ratio, perturbation, perturbIntensity);
+		return true;
+	}
+};
+
+class NormalMapFunctor : public Functor
+{
+	public:
+	NormalMapFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool perturbReady = false;
+		imp::ImageData* height = getImage(json, "heightmapID", perturbReady);
+
+		if( height && !perturbReady ) return false;
+
+		double force = json->getNumeric("force")->value;
+		double prec = json->getNumeric("prec")->value;
+		imp::heightToNormal(*height, img, force, prec);
+		return true;
+	}
+};
+
+class ColorizationFunctor : public Functor
+{
+	public:
+	ColorizationFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool perturbReady = false;
+		imp::ImageData* grey = getImage(json, "greymapID", perturbReady);
+
+		if( grey && !perturbReady )
+			return false;
+
+		bool hasDistrib = json->getString("distribID") != NULL;
+		img.clone(*grey);
+
+		imp::Pixel color1 = getPixel(json, "color1");
+		imp::Pixel color2 = getPixel(json, "color2");
+
+		if(hasDistrib)
+			applyColorization(img, color1, color2, getDistrib(json, "distribID"));
+		else
+			applyColorization(img, color1, color2);
+
+		return true;
+	}
+};
+
+class MaximizationFunctor : public Functor
+{
+	public:
+	MaximizationFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool ready = false;
+		imp::ImageData* grey = getImage(json, "greymapID", ready);
+
+		if( grey && !ready )return false;
+		
+		img.clone(*grey);
+		imp::applyMaximization(img);
+		return true;
+	}
+};
+
+class RadialSinusFunctor : public Functor
+{
+	public:
+	RadialSinusFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool perturbReady = false;
+		imp::ImageData* perturbation = getImage(json, "perturbMapID", perturbReady);
+
+		if( perturbation && !perturbReady )
+			return false;
 
 		double posX = json->getNumeric("posX")->value;
 		double posY = json->getNumeric("posY")->value;
@@ -255,56 +366,139 @@ void makeFilter(Filter* filter)
 		double perturbIntensity = json->getNumeric("perturb")->value;
 
 		double ratio = 1.0;
-		if( json->getNumeric("ratio") )
-			ratio = json->getNumeric("ratio")->value;
+		tryGetNumeric(json, "ratio", ratio);
 
 		imp::drawRadialSinus(img, posX, posY, freq, ampl, ratio, perturbation, perturbIntensity);
-		filter->ready = true;
-
+		return true;
 	}
-	else if(json->getString("type")->value == "blend")
+};
+
+class BlendFunctor : public Functor
+{
+	public:
+	BlendFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
 	{
 		bool srcReady = false;
 		imp::ImageData* src = getImage(json, "srcID", srcReady);
 		bool dstReady = false;
 		imp::ImageData* dst = getImage(json, "dstID", dstReady);
+		if( src && dst && (!srcReady || !dstReady) ) return false;
 
-
-		if(src && dst && srcReady && dstReady)
-		{
-			img.clone(*dst);
-			double alpha = json->getNumeric("alpha")->value;
-			imp::blend(img, *src, alpha);
-			filter->ready = true;
-		}
+		img.clone(*dst);
+		double alpha = json->getNumeric("alpha")->value;
+		imp::blend(img, *src, alpha);
+		return true;
 	}
-	else if(json->getString("type")->value == "maximization")
+};
+
+class SaveFunctor : public Functor
+{
+	public:
+	SaveFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
 	{
 		bool ready = false;
-		imp::ImageData* grey = getImage(json, "greymapID", ready);
+		imp::ImageData* target = getImage(json, "targetID", ready);
+		std::string url = json->getString("url")->value;
 
-		if(grey && ready)
+		if( target && !ready ) return false;
+	
+		std::cout << "test\n";
+		img.clone(*target);
+		BmpLoader::saveToFile(&img, url.c_str());
+		return true;
+	
+	}
+};
+
+class CreateFunctor : public Functor
+{
+	public:
+	CreateFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		double width = json->getNumeric("width")->value;
+		double height = json->getNumeric("height")->value;
+		imp::Pixel color = getPixel(json, "color");
+		img.create(width, height, imp::PixelFormat_RGB8);
+		img.fill(color);
+		return true;
+	
+	}
+};
+
+class DrawFunctor : public Functor
+{
+	public:
+	DrawFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		unsigned int offsetx = (unsigned int)json->getNumeric("offsetx")->value;
+		unsigned int offsety = (unsigned int)json->getNumeric("offsety")->value;
+	
+		bool targetReady = false;
+		imp::ImageData* targetImg = getImage(json, "targetID", targetReady);
+		bool srcReady = false;
+		imp::ImageData* srcImg = getImage(json, "srcID", srcReady);
+		if( srcReady && targetReady)
 		{
-			img.clone(*grey);
-			imp::applyMaximization(img);
-			filter->ready = true;
+			img.clone(*targetImg);
+			imp::Rect srcRect = {0, 0, srcImg->getWidth(), srcImg->getHeight()};
+			imp::Rect dstRect = {offsetx, offsety, srcImg->getWidth(), srcImg->getHeight()};
+			img.draw(*srcImg, srcRect, dstRect);
+			return true;
 		}
+		else
+		{
+			return false;
+		}
+	
+	}
+};
+
+typedef std::map<std::string, Functor*> FunctorMap;
+FunctorMap functors;
+
+void doAction(Filter* filter)
+{
+	imp::JsonObject* json = filter->json;
+	imp::ImageData& img = *(filter->data);
+	std::cout << "do action " << json->getString("id")->value << "\n";
+	std::string action = json->getString("type")->value;
+	if( functors.find( action ) != functors.end() )
+	{
+		filter->ready = functors[action]->apply(json, img);
 	}
 	else
 	{
-		std::cout << "impError : type unsupported - " << json->getString("type")->value << "\n";
+		std::cout << "impError : action type unsupported - " << json->getString("type")->value << "\n";
 	}
 }
 
 void generateFilters(const std::string& json)
 {
+	functors["sinus"] = new SinusFunctor(&filters, &distribs);
+	functors["square"] = new SquareFunctor(&filters, &distribs);
+	functors["triangle"] = new TriangleFunctor(&filters, &distribs);
+	functors["noise"] = new NoiseFunctor(&filters, &distribs);
+	functors["heightToNormal"] = new NormalMapFunctor(&filters, &distribs);
+	functors["colorization"] = new ColorizationFunctor(&filters, &distribs);
+	functors["maximization"] = new MaximizationFunctor(&filters, &distribs);
+	functors["radSinus"] = new RadialSinusFunctor(&filters, &distribs);
+	functors["blend"] = new BlendFunctor(&filters, &distribs);
+	functors["save"] = new SaveFunctor(&filters, &distribs);
+	functors["create"] = new CreateFunctor(&filters, &distribs);
+	functors["draw"] = new DrawFunctor(&filters, &distribs);
+
 	std::string jsonWithoutSpace = imp::removeSpace(json);
 	imp::JsonObject* root = dynamic_cast<imp::JsonObject*>( imp::parse(jsonWithoutSpace) );
-	imp::JsonArray* array = root->getArray("filters");
+	imp::JsonArray* array = root->getArray("actions");
 	imp::JsonArray* distribArr = root->getArray("utils");
 
-	double width = root->getNumeric("resolutionX")->value;
-	double height = root->getNumeric("resolutionY")->value;
+	imp::JsonObject* config = root->getObject("config");
+	double width = config->getNumeric("defaultWidth")->value;
+	double height = config->getNumeric("defaultHeight")->value;
 	
 	for(unsigned int i=0; i<distribArr->value.size(); ++i)
 	{
@@ -333,9 +527,20 @@ void generateFilters(const std::string& json)
 			std::string id = filter->getString("id")->value;
 			if(filters[id]->ready == false)
 			{
-				makeFilter(filters[id]);
+				doAction(filters[id]);
 				if(filters[id]->ready)
 					readyCount++;
+			}
+		}
+
+		// free image not used anymore
+		for(unsigned int i=0; i<array->value.size(); ++i)
+		{
+			imp::JsonObject* filter = array->getObject(i);
+			std::string id = filter->getString("id")->value;
+			if( filters[id]->ready && filters[id]->alldependancedReady() )
+			{
+				filters[id]->data->destroy();
 			}
 		}
 	}
@@ -345,18 +550,21 @@ void generateFilters(const std::string& json)
 		std::cout << "impError : loop detected. One or more filter is not ready\n";
 	}
 
-	for(unsigned int i=0; i<array->value.size(); ++i)
+	// debug generated images
+	/*for(unsigned int i=0; i<filters.size(); ++i)
 	{
 		imp::JsonObject* filter = array->getObject(i);
 		std::string id = filter->getString("id")->value;
-		BmpLoader::saveToFile(filters[id]->data, (id+".bmp").c_str());
-	}
+		BmpLoader::saveToFile(filters[id]->data, (id + ".bmp").c_str());
+	}*/
 }
-
-// void test();
 
 int main(int argc, char* argv[])
 {
-	generateFilters( loadJson("procedure.json") );
+	std::string filename = "procedure.json";
+	if(argc > 1)
+		filename = argv[1];
+
+	generateFilters( loadJson(filename.c_str()) );
 	return 0;
 }

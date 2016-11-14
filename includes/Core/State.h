@@ -29,6 +29,7 @@ class IMP_API State
 	bool m_pressedKeys[Event::KeyCount];
 	bool m_pressedMouseButtons[Event::Mouse_ButtonCount];
 
+	float xMouse, yMouse;
 	float xdep, ydep;
 
 	void setWindowDim(unsigned int w, unsigned int h)

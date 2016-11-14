@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
 
 IMPGEARS_BEGIN
 
@@ -18,6 +19,7 @@ State::State()
 	for(Uint32 b=0; b<Event::Mouse_ButtonCount; ++b)
 	        m_pressedMouseButtons[b] = false;
 
+	xMouse = yMouse = 0.0f;
     xdep = ydep = 0.0f;
 
     if(m_singleton != IMP_NULL)
@@ -84,9 +86,11 @@ void State::onEvent(const imp::Event& event)
 
     if(event.getType() == imp::Event::Type_MouseMoved)
     {
+		xMouse = event.getMouse().x;
+		yMouse = event.getMouse().y;
         double nxdep = (event.getMouse().x - _windowWidth/2.0) * SENSIBILITY;
         double nydep = (event.getMouse().y - _windowHeight/2.0) * SENSIBILITY;
-
+		
         if( (nxdep < 0.0 && nxdep<xdep)
         || (nxdep > 0.0 && nxdep>xdep) )xdep = nxdep;
 

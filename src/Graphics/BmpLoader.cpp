@@ -3,6 +3,15 @@
 #include <cstdlib>
 #include <cstring>
 
+void seek(std::ifstream& stream, long offset)
+{
+	stream.seekg(offset);
+}
+long pos(std::ofstream& stream)
+{
+	return stream.tellp();
+}
+
 //--------------------------------------------------------------
 Bitmap::Bitmap()
     : dib(0)
@@ -103,7 +112,7 @@ void Bitmap::loadFromFile(std::string filename)
     if (is) {
 
         // check bmp file
-        if(read<char>(is) == BM[0] && read<char>(is) == BM[1])
+        if(read<char>(is) == 'B' && read<char>(is) == 'M')
         {
             std::cout << "bmp magic number OK" << std::endl;
         }

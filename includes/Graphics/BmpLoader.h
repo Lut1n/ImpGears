@@ -83,14 +83,6 @@ void write(std::ofstream & stream, T value)
 {
     stream.write( (char*)&value, sizeof(T) );
 }
-void seek(std::ifstream& stream, long offset)
-{
-	stream.seekg(offset);
-}
-long pos(std::ofstream& stream)
-{
-	return stream.tellp();
-}
 
 class IMP_API Bitmap
 {

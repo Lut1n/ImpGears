@@ -352,6 +352,19 @@ void ImageData::draw(const ImageData& srcData, const Rect& srcRect, const Rect& 
 }
 
 //--------------------------------------------------------------
+void ImageData::convert(const ImageData& srcData, PixelFormat targetFormat)
+{
+	create(srcData.m_width, srcData.m_height, targetFormat);
+	for(Uint32 i = 0; i<m_width; ++i)
+	{
+		for(Uint32 j = 0; j<m_height; ++j)
+		{
+			setPixel( i, j, srcData.getPixel(i,j) );
+		}
+	}
+}
+
+//--------------------------------------------------------------
 void ImageData::fill(const Pixel& color)
 {
 	std::cout << "fill : size=" << m_bufferSize << "; chanl=" << m_channels << "; format=" << m_format << "\n";

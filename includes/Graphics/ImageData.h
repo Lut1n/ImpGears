@@ -57,7 +57,10 @@ class IMP_API ImageData
 
 	void clone(const ImageData& other);
 	void resize(Int32 w, Int32 h, Int32 xrel=0, Int32 yrel=0);
+	void rescale(Int32 w, Int32 h);
 	void draw(const ImageData& srcData, const Rect& srcRect, const Rect& dstRect);
+	
+	void convert(const ImageData& srcData, PixelFormat targetFormat);
 
 	void fill(const Pixel& color);
 

@@ -10,6 +10,11 @@ VBOData::VBOData()
 {
     vboID = 0;
     vboSize = 0;
+	_verticesCount = 0;
+	_primitive = Primitive_Quads;
+	#ifdef GRID_DEBUG
+		_primitive = Primitive_Lines;
+	#endif
 }
 
 //--------------------------------------------------------------
@@ -17,6 +22,44 @@ VBOData::~VBOData()
 {
     if(vboID != 0)
         releaseVBO();
+}
+
+//--------------------------------------------------------------
+void VBOData::drawVBO()
+{
+    bindVBO(*this);
+
+    ///vertex
+    enableVertexArray(0);
+    GL_CHECKERROR("[impErr] VBOData::drawVBO - vertex pointer");
+
+    ///texture coord
+	imp::Uint32 texcoordOffset = _verticesCount * (3 * sizeof(float) );
+    enableTexCoordArray(texcoordOffset);
+
+	unsigned int glPrimitive = GL_QUADS;
+	switch(_primitive)
+	{
+	case Primitive_Points:
+		glPrimitive = GL_POINTS;
+		break;
+	case Primitive_Lines:
+		glPrimitive = GL_LINES;
+		break;
+	case Primitive_Triangles:
+		glPrimitive = GL_TRIANGLES;
+		break;
+	case Primitive_Quads:
+		glPrimitive = GL_QUADS;
+		break;
+	default:
+		glPrimitive = GL_QUADS;
+		break;
+	};
+
+    glDrawArrays(glPrimitive, 0, _verticesCount);
+
+    unbindVBO();
 }
 
 //--------------------------------------------------------------
@@ -42,6 +85,15 @@ void VBOData::releaseVBO()
 void VBOData::resizeVBO(imp::Uint32 _size)
 {
     VBOManager::getInstance()->resize(vboID, _size, usage);
+}
+
+//--------------------------------------------------------------
+void VBOData::setVertices(const float* buffer, imp::Uint32 size)
+{
+	Uint32 vertexSize = (sizeof(float) * 3.0);
+	_verticesCount = size / vertexSize;
+
+	setData((const void*)buffer, size, 0);
 }
 
 //--------------------------------------------------------------

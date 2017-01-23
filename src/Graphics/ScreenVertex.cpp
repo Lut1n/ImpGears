@@ -1,7 +1,5 @@
 #include <Graphics/ScreenVertex.h>
 
-#include "Graphics/GLcommon.h"
-
 IMPGEARS_BEGIN
 
 ScreenVertex::ScreenVertex()
@@ -28,7 +26,8 @@ ScreenVertex::ScreenVertex()
     m_texCoordOffset = vertexBuffSize;
 
     requestVBO(vertexBuffSize+texCoordSize);
-    setData(vertex, vertexBuffSize, 0);
+	setVertices(vertex, vertexBuffSize);
+//    setData(vertex, vertexBuffSize, 0);
     setData(texCoord, texCoordSize, m_texCoordOffset);
 }
 
@@ -39,18 +38,7 @@ ScreenVertex::~ScreenVertex()
 
 void ScreenVertex::render(imp::Uint32 passID)
 {
-    bindVBO(*this);
-
-    ///vertex
-    enableVertexArray(0);
-    GL_CHECKERROR("vertex pointer");
-
-    ///texture coord
-    enableTexCoordArray(m_texCoordOffset);
-
-    glDrawArrays(GL_QUADS, 0, 4);
-
-    unbindVBO();
+	drawVBO();
 }
 
 IMPGEARS_END

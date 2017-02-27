@@ -39,10 +39,16 @@ const char* DefaultShader::fragmentCodeSource = IMP_GLSL_SRC(
 
 varying vec2 v_texCoord;
 uniform sampler2D u_colorTexture;
+uniform vec3 u_color;
+uniform float u_type;
 
 void main(){
 
-    vec4 texColor = texture2D(u_colorTexture, v_texCoord);
+	vec4 texColor = vec4(u_color, 1.0);
+	
+	if(u_type == 0.0)
+		texColor *= texture2D(u_colorTexture, v_texCoord);
+	
     gl_FragData[0] = texColor * gl_Color;
 }
 

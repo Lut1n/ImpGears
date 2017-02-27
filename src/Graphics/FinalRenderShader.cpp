@@ -39,6 +39,7 @@ uniform sampler2D u_colorTexture;
 uniform sampler2D u_backgroundTexture;
 uniform sampler2D u_selfTexture;
 uniform sampler2D u_shadows;
+uniform sampler2D u_gui;
 
 void main(){
 
@@ -46,12 +47,16 @@ void main(){
     vec4 backColor = texture2D(u_backgroundTexture, texCoord);
     vec4 selfColor = texture2D(u_selfTexture, texCoord);
     vec4 shadow = texture2D(u_shadows, texCoord);
+	vec4 guiColor = texture2D(u_gui, texCoord);
 
     vec4 foregroundColor = texColor*shadow;
 
     vec3 resultColor = backColor.xyz*(1.f-foregroundColor.w) + (foregroundColor.xyz)*foregroundColor.w;
 
 	resultColor += selfColor.xyz * 0.5f;
+	
+	if(guiColor.w > 0.0)
+		resultColor = guiColor.xyz * guiColor.w + resultColor * (1.0 - guiColor.w);
 
     gl_FragData[0] = gl_Color * vec4(resultColor, 1.f);
 }

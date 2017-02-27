@@ -31,6 +31,10 @@ class IMP_API State
 
 	float xMouse, yMouse;
 	float xdep, ydep;
+		
+	Event::Key _lastPressedKey;
+	Event::Key _lastReleasedKey;
+	char _keyValue;
 
 	void setWindowDim(unsigned int w, unsigned int h)
 {

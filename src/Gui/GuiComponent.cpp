@@ -1,7 +1,10 @@
 #include <Gui/GuiComponent.h>
 
+
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
+Shader* GuiComponent::_guiComponentShader = IMP_NULL;
 
 //--------------------------------------------------------------
 GuiComponent::GuiComponent(float x, float y, float w, float h)
@@ -111,7 +114,6 @@ void GuiComponent::renderComponent(imp::Uint32 passID, float parentX, float pare
 	_absolutePositionX = parentX+getPositionX();
 	_absolutePositionY = parentY+getPositionY();
 	_quad.setPosition(_absolutePositionX, _absolutePositionY);
-	_quad.draw();
 
 	_layout.resetFreePosition();
 	_layout.setParentSurface( Rectangle(getPositionX(), getPositionY(), getPositionX()+getSizeX(), getPositionY()+getSizeY()) );

@@ -6,6 +6,7 @@
 #include "System/EvnContextInterface.h"
 
 #include "Graphics/SceneNode.h"
+#include "Graphics/Shader.h"
 
 #include "Math/Rectangle.h"
 
@@ -91,6 +92,10 @@ class IMP_API GuiComponent
 	float _positionY;
 	float _absolutePositionX;
 	float _absolutePositionY;
+
+	public:
+
+	static Shader* _guiComponentShader;
 
 };
 

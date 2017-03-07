@@ -1,5 +1,5 @@
 #include <Gui/GuiComponent.h>
-
+#include <iostream>
 
 IMPGEARS_BEGIN
 
@@ -259,6 +259,31 @@ void GuiComponent::computeBounds(Rectangle& bounds) const
 void GuiComponent::compose(GuiComponent* comp)
 {
 	_components.push_back(comp);
+}
+
+//--------------------------------------------------------------
+void GuiComponent::decompose(GuiComponent** comp)
+{
+	bool found = false;
+
+	for(unsigned int i=0; i<_components.size(); ++i)
+	{
+		if(found || _components[i] == *comp )
+		{
+			found = true;
+			if( (i+1)<_components.size() )
+			{
+				_components[i] = _components[i+1];
+			}
+		}
+	}
+
+	if(found)
+	{
+		_components.resize( _components.size()-1 );
+		delete *comp;
+		*comp = IMP_NULL;
+	}
 }
 
 IMPGEARS_END

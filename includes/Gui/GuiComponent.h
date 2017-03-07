@@ -75,6 +75,7 @@ class IMP_API GuiComponent
 	virtual void computeBounds(Rectangle& bounds) const;
 
 	void compose(GuiComponent* comp);
+	void decompose(GuiComponent** comp);
 
 	protected:
 

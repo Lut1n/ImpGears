@@ -242,16 +242,21 @@ bool GuiComponent::event(imp::State* state, float x, float y)
 //--------------------------------------------------------------
 void GuiComponent::computeBounds(Rectangle& bounds) const
 {
-	/*for(unsigned int i=0; i<_components.size(); ++i)
+	for(unsigned int i=0; i<_components.size(); ++i)
 	{
 		if( _components[i]->isVisible() )
 		{
-			Rectangle cbounds;
-			_components[i]->computeBounds(cbounds);
+			Rectangle cbounds(
+				_components[i]->getPositionX(),
+				_components[i]->getPositionY(),
+				_components[i]->getPositionX() + _components[i]->getSizeX(),
+				_components[i]->getPositionY() + _components[i]->getSizeY() );
+
 			bounds.expendBy(cbounds);
 		}
-	}*/
+	}
 
+	// parent space
 	bounds = Rectangle(getPositionX(),getPositionY(),getPositionX(),getPositionY()) + bounds;
 }
 

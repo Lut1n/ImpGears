@@ -46,10 +46,74 @@ uniform float u_sizeY;
 uniform float u_outlineWidth;
 uniform vec3 u_outlineColor;
 uniform float u_opacity;
+uniform float u_cornerRadius;
+
+vec4 makeCorner()
+{
+	float outline = 0.0;
+	float alpha = 1.0;
+	vec2 pxCoord = v_texCoord.xy*vec2(u_sizeX,u_sizeY);
+	
+	// top left
+	if( pxCoord.x < u_cornerRadius && pxCoord.y < u_cornerRadius )
+	{
+		float d = distance(pxCoord, vec2(u_cornerRadius) );
+		if(d > u_cornerRadius)
+		{
+			alpha = 0.0;
+		}
+		else if( d > u_cornerRadius-u_outlineWidth )
+		{
+			outline = 1.0;
+		}
+	}
+	// top right
+	else if( pxCoord.x > u_sizeX-u_cornerRadius && pxCoord.y < u_cornerRadius )
+	{
+		float d = distance(pxCoord, vec2(u_sizeX-u_cornerRadius, u_cornerRadius) );
+		if(d > u_cornerRadius)
+		{
+			alpha = 0.0;
+		}
+		else if( d > u_cornerRadius-u_outlineWidth )
+		{
+			outline = 1.0;
+		}
+	}
+	// bottom left
+	if( pxCoord.x < u_cornerRadius && pxCoord.y > u_sizeY-u_cornerRadius )
+	{
+		float d = distance(pxCoord, vec2(u_cornerRadius, u_sizeY-u_cornerRadius) );
+		if(d > u_cornerRadius)
+		{
+			alpha = 0.0;
+		}
+		else if( d > u_cornerRadius-u_outlineWidth )
+		{
+			outline = 1.0;
+		}
+	}
+	// bottom right
+	else if( pxCoord.x > u_sizeX-u_cornerRadius && pxCoord.y > u_sizeY-u_cornerRadius )
+	{
+		float d = distance(pxCoord, vec2(u_sizeX-u_cornerRadius, u_sizeY-u_cornerRadius) );
+		if(d > u_cornerRadius)
+		{
+			alpha = 0.0;
+		}
+		else if( d > u_cornerRadius-u_outlineWidth )
+		{
+			outline = 1.0;
+		}
+	}
+	
+	return vec4(outline, outline, outline, alpha);
+}
 
 void main(){
 
-	vec4 texColor = vec4(u_color, u_opacity);
+	vec4 texColor = vec4( u_color, u_opacity );
+	vec4 corner = makeCorner();
 	
 	if(u_type == 0.0)
 	{
@@ -58,9 +122,12 @@ void main(){
 	else
 	{
 		if(v_texCoord.x < u_outlineWidth/u_sizeX || v_texCoord.y < u_outlineWidth/u_sizeY
-			|| v_texCoord.x > 1.0-u_outlineWidth/u_sizeX || v_texCoord.y > 1.0-u_outlineWidth/u_sizeY)
+			|| v_texCoord.x > 1.0-u_outlineWidth/u_sizeX || v_texCoord.y > 1.0-u_outlineWidth/u_sizeY
+			|| corner.x == 1.0)
 			texColor.xyz = u_outlineColor;
 	}
+	
+	texColor.w *= corner.w;
 	
     gl_FragData[0] = texColor * gl_Color;
 }

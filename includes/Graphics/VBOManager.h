@@ -9,7 +9,7 @@ Define a manager for using VBOs. VBOManager keeps id and size of VBO created. It
 
 #include "../Core/impBase.h"
 
-#define VBO_MAX 500
+#define VBO_MAX 100000
 
 IMPGEARS_BEGIN
 

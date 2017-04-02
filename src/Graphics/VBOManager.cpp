@@ -1,7 +1,7 @@
 #include "Graphics/VBOManager.h"
 #include "Graphics/GLcommon.h"
 
-#include <stdio.h>
+#include <iostream>
 
 IMPGEARS_BEGIN
 
@@ -28,7 +28,7 @@ VBOManager::VBOManager():
 VBOManager::~VBOManager()
 {
     if( memoryUsed != 0 )
-        fprintf(stderr, "impError : GPU memory unfree : %d bytes (%d vbo)\n", memoryUsed, nbVbo);
+		std::cout << "impError : GPU memory unfree : " << memoryUsed << " bytes (" << nbVbo << " vbo)" << std::endl;
 
     for(imp::Uint32 index = 0; index<nbVbo; ++index)
         release(vboInfos[index].videoID);
@@ -40,10 +40,14 @@ VBOManager::~VBOManager()
 imp::Uint32 VBOManager::request(imp::Uint32 _size, UsageMode _usage)
 {
     if(nbVbo >= VBO_MAX)
-        return 0;
+    {
+		std::cout << "impError : Maximum number of VBO has been reached (" << VBO_MAX << ").\n" << std::endl;
+		return 0;
+	}
 
     GLuint id;
     glGenBuffers(1, &id);
+    GL_CHECKERROR("request VBO");
 
     VBO_Info info;
     info.videoID = static_cast<imp::Uint32>(id);
@@ -75,6 +79,7 @@ void VBOManager::release(imp::Uint32 _id)
     id[0] = (GLuint)_id;
 
     glDeleteBuffers(1, id);
+    GL_CHECKERROR("delete VBO");
 }
 
 //--------------------------------------------------------------
@@ -89,8 +94,9 @@ void VBOManager::resize(imp::Uint32 _id, imp::Uint32 _size, UsageMode _usage)
     GLint glUsage = _usage == UsageMode_Dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
     glBindBuffer(GL_ARRAY_BUFFER, id[0]);
+    GL_CHECKERROR("VBO resize");
     glBufferData(GL_ARRAY_BUFFER, _size, 0, glUsage);
-
+    GL_CHECKERROR("VBO set data");
 
     imp::Uint32 index = findVideoID(_id);
     memoryUsed -= vboInfos[index].size;

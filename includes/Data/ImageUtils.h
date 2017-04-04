@@ -131,6 +131,8 @@ void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, co
 
 void IMP_API applyMaximization(imp::ImageData& img);
 
+void IMP_API drawCellularNoise(imp::ImageData& img, unsigned int cellcount, const imp::ImageData* noisemap);
+
 IMPGEARS_END
 
 #endif // IMP_IMAGE_UTILS_H

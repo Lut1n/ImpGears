@@ -1,6 +1,8 @@
 #include <Data/ImageUtils.h>
 #include <Math/Perlin.h>
 
+#include <iostream>
+
 IMPGEARS_BEGIN
 
 float min(float a, float b)
@@ -342,6 +344,57 @@ void applyMaximization(imp::ImageData& img)
 		Pixel px = {newt,newt,newt, 255};
 		img.setPixel(i,j,px);
 	}}
+}
+
+void drawCellularNoise(imp::ImageData& img, unsigned int cellcount, const imp::ImageData* noisemap)
+{
+    double xcell[cellcount*cellcount];
+    double ycell[cellcount*cellcount];
+
+    double fieldW = (noisemap->getWidth()/cellcount);
+    double fieldH = (noisemap->getHeight()/cellcount);
+    
+    // initialize cell centers
+    for(unsigned int i=0; i<cellcount; ++i)
+    for(unsigned int j=0; j<cellcount; ++j)
+    {
+        
+        double x = (double)i * fieldW;
+        double y = (double)j * fieldH;
+        
+        xcell[j*cellcount+i] = x + double(noisemap->getPixel(x,y).r)/255.0 * fieldW;
+        ycell[j*cellcount+i] = y + double(noisemap->getPixel(x,y).r)/255.0 * fieldH;
+        
+        std::cout << "x=" << xcell[j*cellcount+i] << "; y=" << ycell[j*cellcount+i] << std::endl;
+    }
+    
+    // draw
+    for(unsigned int i=0; i<img.getWidth(); ++i)
+    {
+        for(unsigned int j=0; j<img.getHeight(); ++j)
+        {
+            // find closest cell center
+            double d = -1.0;
+            for(unsigned int cell=0; cell<cellcount*cellcount; ++cell)
+            {
+                
+                double dx = xcell[cell] - (double)i;
+                double dy = ycell[cell] - (double)j;
+                double d2 = dx*dx + dy*dy;
+                if(d<0.0 || d2 < d)
+                {
+                    d = d2;
+                }
+            }
+            
+            // apply new value
+            const double maxR = (fieldW*3.0)*(fieldW*3.0);
+            Uint8 newt = (Uint8)Lerp( 0.0, 255.0, d/maxR);
+            Pixel px = {newt,newt,newt, 255};
+            img.setPixel(i,j,px);
+        }
+    }
+    
 }
 
 IMPGEARS_END

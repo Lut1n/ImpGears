@@ -68,6 +68,9 @@ class IMP_API ImageData
 	Pixel getPixel(Uint32 x, Uint32 y) const;
 	void setPixel(Uint32 x, Uint32 y, Pixel pixel);
 
+	Pixel getRepeatPixel(Uint32 x, Uint32 y) const;
+	void setRepeatPixel(Uint32 x, Uint32 y, Pixel pixel);
+
 	Uint32 getWidth() const{return m_width;}
 	Uint32 getHeight() const{return m_height;}
 	Uint32 getBpp() const{return m_bpp;}

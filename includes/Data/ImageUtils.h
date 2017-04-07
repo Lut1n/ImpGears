@@ -113,6 +113,8 @@ void IMP_API heightToNormal(ImageData& in, ImageData& out, float force, float pr
 
 void IMP_API blend(ImageData& dst, ImageData& src, float alpha);
 
+void IMP_API blend(ImageData& dst, ImageData& src, ImageData& alphaMap, double threshold);
+
 void IMP_API applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY);
 
 inline imp::Pixel IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned int y);

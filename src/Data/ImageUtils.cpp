@@ -34,7 +34,7 @@ float frac(float v)
 void normalize(Vec3& v)
 {
 	float ln = v.x*v.x + v.y*v.y + v.z*v.z;
-	ln = sqrt(ln);
+	ln = sqrtf(ln);
 
 	v.x /= ln;
 	v.y /= ln;
@@ -122,9 +122,30 @@ void blend(ImageData& dst, ImageData& src, float alpha)
 	}
 }
 
+void blend(ImageData& dst, ImageData& src, ImageData& alphaMap, double threshold)
+{
+   	for(Uint32 i=0; i<dst.getWidth(); ++i)
+	{
+		for(Uint32 j=0; j<dst.getHeight(); ++j)
+		{
+			Pixel srcColor, dstColor;
+			srcColor = src.getPixel(i,j);
+			dstColor = dst.getPixel(i,j);
+            
+            double alpha = (double)(alphaMap.getPixel(i,j).r) / 255.0;
+            /*if(alpha > threshold)
+                dstColor = srcColor;*/
+            
+			dstColor = lerp(dstColor, srcColor, alpha);
+			dst.setPixel(i,j,dstColor);
+		}
+	}
+}
+
 void heightToNormal(ImageData& in, ImageData& out, float force, float prec)
 {
-	int dist = prec * 1.0;
+	int dist = 1.0;// prec * 1.0;
+    force = 1.0;
 
 	out.clone(in); 
 
@@ -132,28 +153,21 @@ void heightToNormal(ImageData& in, ImageData& out, float force, float prec)
 	{
 		for(Uint32 j=0; j<in.getHeight(); ++j)
 		{
-			Pixel x0, x1, y0, y1;
-			x0 = in.getPixel(i-dist,j);
-			x1 = in.getPixel(i+dist,j);
-			y0 = in.getPixel(i,j-dist);
-			y1 = in.getPixel(i,j+dist);
 
-			float vx0 = (float)(x0.red)/255.0;
-			float vx1 = (float)(x1.red)/255.0;
-			float vy0 = (float)(y0.red)/255.0;
-			float vy1 = (float)(y1.red)/255.0;
+			float h1 = (float)(in.getPixel(i-dist,j).red)/255.0;
+			float h2 = (float)(in.getPixel(i+dist,j).red)/255.0;
+			float h3 = (float)(in.getPixel(i,j-dist).red)/255.0;
+			float h4 = (float)(in.getPixel(i,j+dist).red)/255.0;
 
 			Vec3 nx, ny, normal;
 
-			nx.x = 2.0 * dist;
-			nx.y = 0.0 * dist;
-			nx.z = (vx1-vx0) * force;
-			normalize(nx);
+			nx.x = 2.0;
+			nx.y = 0.0;
+			nx.z = (h2-h1) * force;
 
-			ny.x = 0.0 * dist;
-			ny.y = 2.0 * dist;
-			ny.z = (vy1-vy0) * force;
-			normalize(ny);
+			ny.x = 0.0;
+			ny.y = 2.0;
+			ny.z = (h4-h3) * force;
 
 			cross(nx, ny, normal);
 			normalize(normal);
@@ -163,9 +177,10 @@ void heightToNormal(ImageData& in, ImageData& out, float force, float prec)
 			normal.z += 1.0; normal.z /= 2.0;
 
 			Pixel pixel;
-			pixel.red = (unsigned char)(normal.x * 255);
-			pixel.green = (unsigned char)(normal.y * 255);
-			pixel.blue = (unsigned char)(normal.z * 255);
+			pixel.blue = (unsigned char)(normal.x * 255); // red
+			pixel.green = (unsigned char)(normal.y * 255); //green
+			pixel.red = (unsigned char)(normal.z * 255); // blue
+            pixel.alpha = 255;
 			out.setPixel(i,j,pixel);
 		}
 	}
@@ -288,9 +303,9 @@ void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp:
 	{
 		imp::Pixel px = img.getPixel(i,j);
 
-		px.r = (unsigned char)((px.r/255.0) * (color2.r-color1.r) + color1.r);
-		px.g = (unsigned char)((px.g/255.0) * (color2.g-color1.g) + color1.g);
-		px.b = (unsigned char)((px.b/255.0) * (color2.b-color1.b) + color1.b);
+		px.r = (unsigned char)((px.r/255.0) * ((double)color2.r-(double)color1.r) + (double)color1.r);
+		px.g = (unsigned char)((px.g/255.0) * ((double)color2.g-(double)color1.g) + (double)color1.g);
+		px.b = (unsigned char)((px.b/255.0) * ((double)color2.b-(double)color1.b) + (double)color1.b);
 
 		img.setPixel(i,j,px);
 	}}
@@ -311,9 +326,9 @@ void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp:
 		t2 = distrib(t2);
 		t3 = distrib(t3);
 
-		px.r = (unsigned char)(t1 * (color2.r-color1.r) + color1.r);
-		px.g = (unsigned char)(t2 * (color2.g-color1.g) + color1.g);
-		px.b = (unsigned char)(t3 * (color2.b-color1.b) + color1.b);
+		px.r = (unsigned char)(t1 * ((double)color2.r-(double)color1.r) + (double)color1.r);
+		px.g = (unsigned char)(t2 * ((double)color2.g-(double)color1.g) + (double)color1.g);
+		px.b = (unsigned char)(t3 * ((double)color2.b-(double)color1.b) + (double)color1.b);
 
 		img.setPixel(i,j,px);
 	}}
@@ -385,10 +400,41 @@ void drawCellularNoise(imp::ImageData& img, unsigned int cellcount, const imp::I
                 {
                     d = d2;
                 }
+                
+                // ---- tiling effect -----
+                dx = (xcell[cell]-img.getWidth()) - (double)i;
+                dy = (ycell[cell]-img.getHeight()) - (double)j; 
+                d2 = dx*dx + dy*dy;
+                if(d<0.0 || d2 < d)
+                {
+                    d = d2;
+                }
+                dx = (xcell[cell]+img.getWidth()) - (double)i;
+                dy = (ycell[cell]-img.getHeight()) - (double)j; 
+                d2 = dx*dx + dy*dy;
+                if(d<0.0 || d2 < d)
+                {
+                    d = d2;
+                }
+                dx = (xcell[cell]-img.getWidth()) - (double)i;
+                dy = (ycell[cell]+img.getHeight()) - (double)j; 
+                d2 = dx*dx + dy*dy;
+                if(d<0.0 || d2 < d)
+                {
+                    d = d2;
+                }
+                dx = (xcell[cell]+img.getWidth()) - (double)i;
+                dy = (ycell[cell]+img.getHeight()) - (double)j; 
+                d2 = dx*dx + dy*dy;
+                if(d<0.0 || d2 < d)
+                {
+                    d = d2;
+                }
+                // -------------------
             }
             
             // apply new value
-            const double maxR = (fieldW*3.0)*(fieldW*3.0);
+            const double maxR = (fieldW)*(fieldW);
             Uint8 newt = (Uint8)Lerp( 0.0, 255.0, d/maxR);
             Pixel px = {newt,newt,newt, 255};
             img.setPixel(i,j,px);

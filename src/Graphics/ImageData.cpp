@@ -282,6 +282,38 @@ void ImageData::setPixel(Uint32 x, Uint32 y, Pixel pixel)
 	}
 }
 
+//--------------------------------------------------------------
+Pixel ImageData::getRepeatPixel(Uint32 x, Uint32 y) const
+{
+    if(x < 0.0)
+        x = getWidth()+x;
+    else if(x>=getWidth())
+        x -= getWidth();
+    
+    if(y < 0.0)
+        y = getHeight()+y;
+    else if(y>=getHeight())
+        y-= getHeight();
+    
+    return getPixel(x,y);
+}
+
+//--------------------------------------------------------------
+void ImageData::setRepeatPixel(Uint32 x, Uint32 y, Pixel pixel)
+{
+    if(x < 0.0)
+        x = getWidth()+x;
+    else if(x>=getWidth())
+        x -= getWidth();
+    
+    if(y < 0.0)
+        y = getHeight()+y;
+    else if(y>=getHeight())
+        y-= getHeight();
+    
+    setPixel(x,y, pixel);
+}
+
 /*
 //--------------------------------------------------------------
 void ImageData::getPixels(Uint32 x, Uint32 y, Uint32 w, Uint32 h, Pixel* data) const

@@ -1,29 +1,53 @@
 {
 	"actions":
 	[
-		{"id":"atlas0", "type":"create", "width":2048, "height":512, "color":[0,0,255,255]},
+		{"id":"atlas0", "type":"create", "width":2560, "height":512, "color":[0,0,255,255]},
 		{"id":"sin1", "type":"sinus", "dirX":8, "dirY":3, "freq":8.0, "ampl":255, "ratio":0.8, "perturbMapID":"noise1", "perturb":1},
+        {"id":"nsin1", "type":"heightToNormal", "heightmapID":"sin1", "prec":1, "force":1},
 		{"id":"noise1_pre", "type":"noise", "method":"simplex", "octaves":6, "persistence":0.7, "freq":4.0, "ampl":255},
 		{"id":"noise2_pre", "type":"noise", "method":"perlin", "octaves":5, "persistence":0.5, "freq":4.0, "ampl":255},
 		{"id":"norm1", "type":"heightToNormal", "heightmapID":"noise1", "force":100.0, "prec":1.0},
-		{"id":"sin2", "type":"radSinus", "posX":200, "posY":300, "freq":16.0, "ampl":255, "ratio":0.5, "perturbMapID":"noise2", "perturb":0.2},
+		{"id":"sin2", "type":"radSinus", "posX":200, "posY":300, "freq":30.0, "ampl":255, "ratio":0.5, "perturbMapID":"noise2", "perturb":0.2},
+		{"id":"sin3", "type":"radSinus", "posX":200, "posY":300, "freq":150.0, "ampl":150, "ratio":0.5, "perturbMapID":"noise2", "perturb":0.2},
+		{"id":"sin23", "type":"blend", "srcID":"sin2", "dstID":"sin3", "alpha":0.7},
 		{"id":"cloud", "type":"colorization", "color1":[50,50,255,255], "color2":[255,255,255,255], "greymapID":"noise1"},
-		{"id":"noise3_pre", "type":"noise", "method":"simplex", "octaves":8, "persistence":1.0, "freq":6.0, "ampl":255, "tiles":4},
-		{"id":"sand", "type":"colorization", "color1":[50,50,50,255], "color2":[255,255,100,255], "greymapID":"noise3", "distribID":"moreColor2"},
-		{"id":"wood", "type":"colorization", "color1":[0,50,0,255], "color2":[100,255,100,255], "greymapID":"sin2"},
+		{"id":"noise3_pre", "type":"noise", "method":"simplex", "octaves":8, "persistence":1.0, "freq":14.0, "ampl":255, "tiles":1},
+		{"id":"sand", "type":"colorization", "color1":[116,106,76,255], "color2":[255,255,230,255], "greymapID":"noise3", "distribID":"moreColor2"},
+		{"id":"wood", "type":"colorization", "color1":[80,30,17,255], "color2":[200,150,30,255], "greymapID":"sin2"},
+        
+        {"id":"cell", "type":"cellularnoise", "noiseMapID":"noise1", "count":10},
+		{"id":"cellx", "type":"maximization", "greymapID":"cell"},
+		{"id":"cellxx", "type":"colorization", "color1":[0,0,0,255], "color2":[255,255,255,255], "greymapID":"cellx", "distribID":"moreColor1"},
+        {"id":"hpcell", "type":"highpass", "inputID":"cell"},
+        {"id":"hpcell2", "type":"highpass", "inputID":"hpcell"},
+        
+		{"id":"invsin1", "type":"colorization", "color1":[255,255,255,255], "color2":[0,0,0,255], "greymapID":"sin1"},
+		{"id":"celly", "type":"blend", "srcID":"hpcell2", "dstID":"invsin1", "alpha":0.8},
+		{"id":"maxcelly", "type":"maximization", "greymapID":"celly"},
+        {"id":"colcell", "type":"colorization", "color1":[255,255,255,255], "color2":[80,80,80,255], "greymapID":"maxcelly"},
+        
+		{"id":"stone", "type":"blendmap", "srcID":"maxcelly", "dstID":"sand", "alphaID":"colcell", "threshold":0.5},
+        {"id":"nstone", "type":"heightToNormal", "heightmapID":"stone", "prec":1, "force":1},
+        {"id":"hpstone", "type":"highpass", "inputID":"stone"},
+        {"id":"nhpstone", "type":"heightToNormal", "heightmapID":"hpstone", "prec":1, "force":1},
+        
+        {"id":"cellxxx", "type":"colorization", "color1":[255,255,255,255], "color2":[0,0,0,255], "greymapID":"celly"},
 		{"id":"blend1", "type":"blend", "srcID":"sin1", "dstID":"wood", "alpha":0.35},
 		{"id":"noise1", "type":"maximization", "greymapID":"noise1_pre"},
 		{"id":"noise2", "type":"maximization", "greymapID":"noise2_pre"},
 		{"id":"noise3", "type":"maximization", "greymapID":"noise3_pre"},
+        
 		{"id":"brickH", "type":"square", "dirX":1, "dirY":0, "freq":4.0, "ampl":255, "ratio":0.95, "perturbMapID":"noise1", "perturb":0.2},
 		{"id":"brickV", "type":"square", "dirX":0, "dirY":1, "freq":8.0, "ampl":255, "ratio":0.95, "perturbMapID":"noise1", "perturb":0.2},
 		{"id":"brick1", "type":"blend", "srcID":"brickH", "dstID":"brickV", "alpha":0.5},
 		{"id":"brick2", "type":"blend", "srcID":"brick1", "dstID":"noise3", "alpha":0.4},
-		{"id":"atlas1", "type":"draw", "targetID":"atlas0", "srcID":"sin1", "offsetx":0, "offsety":0},
-		{"id":"atlas2", "type":"draw", "targetID":"atlas1", "srcID":"wood", "offsetx":512, "offsety":0},
-		{"id":"atlas3", "type":"draw", "targetID":"atlas2", "srcID":"sand", "offsetx":1024, "offsety":0},
-		{"id":"atlas4", "type":"draw", "targetID":"atlas3", "srcID":"cloud", "offsetx":1536, "offsety":0},
-		{"id":"output", "type":"save", "targetID":"atlas4", "url":"atlas.bmp"},
+        
+		{"id":"atlas1", "type":"draw", "targetID":"atlas0", "srcID":"nsin1", "offsetx":0, "offsety":0},
+		{"id":"atlas2", "type":"draw", "targetID":"atlas1", "srcID":"stone", "offsetx":512, "offsety":0},
+		{"id":"atlas3", "type":"draw", "targetID":"atlas2", "srcID":"nstone", "offsetx":1024, "offsety":0},
+		{"id":"atlas4", "type":"draw", "targetID":"atlas3", "srcID":"sand", "offsetx":1536, "offsety":0},
+		{"id":"atlas5", "type":"draw", "targetID":"atlas4", "srcID":"cloud", "offsetx":2048, "offsety":0},
+		{"id":"output", "type":"save", "targetID":"atlas5", "url":"atlas.bmp"},
 	],
 	"utils":
 	[

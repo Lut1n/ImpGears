@@ -259,6 +259,25 @@ class SquareFunctor : public Functor
 	}
 };
 
+class CellularNoiseFunctor : public Functor
+{
+	public:
+	CellularNoiseFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool perturbReady = false;
+		imp::ImageData* perturbation = getImage(json, "noiseMapID", perturbReady);
+
+		if( perturbation && !perturbReady )
+			return false;
+
+		double cellcount = json->getNumeric("count")->value;
+
+        drawCellularNoise(img, cellcount, perturbation);
+		return true;
+	}
+};
+
 class TriangleFunctor : public Functor
 {
 	public:
@@ -299,6 +318,63 @@ class NormalMapFunctor : public Functor
 		double force = json->getNumeric("force")->value;
 		double prec = json->getNumeric("prec")->value;
 		imp::heightToNormal(*height, img, force, prec);
+		return true;
+	}
+};
+
+class HighPassFunctor : public Functor
+{
+	public:
+	HighPassFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+        /*
+        const double  hpfilter[3][3] = 
+        {
+            { 0.0,      -0.25,      0.0 },
+            { -0.25,    2.0,        -0.25 },
+            { 0.0,      -0.25,      0.0 }
+        };
+        */
+        const double  hpfilter[3][3] = 
+        {
+            { -1.0,      -1.0,      -1.0 },
+            { -1.0,     9.0,        -1.0 },
+            { -1.0,      -1.0,      -1.0 }
+        };
+        
+        
+		bool inputReady = false;
+		imp::ImageData* input = getImage(json, "inputID", inputReady);
+		if( input && !inputReady ) return false;
+        
+        
+        for(unsigned int i = 1; i<img.getWidth()-1; ++i)
+        {
+            for(unsigned int j=1; j<img.getHeight()-1; ++j)
+            {
+                
+                double v=  0.0;
+                
+                for(int fi = -1; fi<=1; ++fi)
+                {
+                    for(int fj=-1; fj<=1; ++fj)
+                    {
+                        v += input->getPixel(i+fi,j+fj).red/255.0 * hpfilter[fi+1][fj+1] ;
+                    }
+                }
+                
+                if(v<0.0)v = 0.0;
+                else if(v>1.0)v = 1.0;
+                
+                imp::Pixel pixel;
+                pixel.red = (unsigned char)(v * 255);
+                pixel.green = (unsigned char)(v * 255);
+                pixel.blue = (unsigned char)(v * 255);
+                img.setPixel(i,j,pixel);
+            }
+        }
+        
 		return true;
 	}
 };
@@ -392,6 +468,29 @@ class BlendFunctor : public Functor
 	}
 };
 
+class BlendMapFunctor : public Functor
+{
+	public:
+	BlendMapFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool srcReady = false;
+		imp::ImageData* src = getImage(json, "srcID", srcReady);
+		bool dstReady = false;
+		imp::ImageData* dst = getImage(json, "dstID", dstReady);
+        bool alphaReady = false;
+		imp::ImageData* alpha = getImage(json, "alphaID", alphaReady);
+		if( src && dst &&  alpha && (!srcReady || !dstReady || !alphaReady) ) return false;
+
+        double threshold = json->getNumeric("threshold")->value;
+        
+		img.clone(*dst);
+		imp::blend(img, *src, *alpha, threshold);
+		return true;
+	}
+};
+
+
 class SaveFunctor : public Functor
 {
 	public:
@@ -481,12 +580,15 @@ void generateFilters(const std::string& json)
 	functors["sinus"] = new SinusFunctor(&filters, &distribs);
 	functors["square"] = new SquareFunctor(&filters, &distribs);
 	functors["triangle"] = new TriangleFunctor(&filters, &distribs);
+	functors["cellularnoise"] = new CellularNoiseFunctor(&filters, &distribs);
 	functors["noise"] = new NoiseFunctor(&filters, &distribs);
 	functors["heightToNormal"] = new NormalMapFunctor(&filters, &distribs);
 	functors["colorization"] = new ColorizationFunctor(&filters, &distribs);
+    functors["highpass"] = new HighPassFunctor(&filters, &distribs);
 	functors["maximization"] = new MaximizationFunctor(&filters, &distribs);
 	functors["radSinus"] = new RadialSinusFunctor(&filters, &distribs);
 	functors["blend"] = new BlendFunctor(&filters, &distribs);
+	functors["blendmap"] = new BlendMapFunctor(&filters, &distribs);
 	functors["save"] = new SaveFunctor(&filters, &distribs);
 	functors["create"] = new CreateFunctor(&filters, &distribs);
 	functors["draw"] = new DrawFunctor(&filters, &distribs);

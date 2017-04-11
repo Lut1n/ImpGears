@@ -1,6 +1,20 @@
 {
 	"actions":
 	[
+		{"id":"ct_noise", "type":"noise", "method":"simplex", "octaves":6, "persistence":0.7, "freq":10.0, "ampl":255},
+        {"id":"ct_cell", "type":"cellularnoise", "noiseMapID":"noise1", "count":6},
+		{"id":"ct_cell2", "type":"blend", "srcID":"ct_cell", "dstID":"ct_noise", "alpha":0.5},
+		{"id":"ct_mxcell2", "type":"maximization", "greymapID":"ct_dcell2"},
+        {"id":"ct_dcell2", "type":"dilation", "inputID":"ct_cell2", "force":0.2},
+        {"id":"ct_bincell", "type":"binarization", "inputID":"ct_dcell2", "threshold":0.6},
+		{"id":"ct_blend", "type":"blend", "srcID":"ct_bincell", "dstID":"ct_mxcell2", "alpha":0.5},
+		{"id":"ct_iblend", "type":"colorization", "color1":[255,255,255,255], "color2":[0,0,0,255], "greymapID":"ct_blend"},
+		{"id":"ct_stone", "type":"blendmap", "srcID":"sin1", "dstID":"sand", "alphaID":"ct_iblend", "threshold":0.5},
+        {"id":"ct_nstone", "type":"heightToNormal", "heightmapID":"ct_iadj", "prec":1, "force":1},
+        {"id":"ct_adj", "type":"adjustments", "contrast":5.0, "brightness":0.5, "inputID":"ct_cell2"},
+        {"id":"ct_iadj", "type":"colorization", "color1":[255,255,255,255], "color2":[0,0,0,255], "greymapID":"ct_adj"},
+    
+    
 		{"id":"atlas0", "type":"create", "width":2560, "height":512, "color":[0,0,255,255]},
 		{"id":"sin1", "type":"sinus", "dirX":8, "dirY":3, "freq":8.0, "ampl":255, "ratio":0.8, "perturbMapID":"noise1", "perturb":1},
         {"id":"nsin1", "type":"heightToNormal", "heightmapID":"sin1", "prec":1, "force":1},
@@ -20,6 +34,12 @@
 		{"id":"cellxx", "type":"colorization", "color1":[0,0,0,255], "color2":[255,255,255,255], "greymapID":"cellx", "distribID":"moreColor1"},
         {"id":"hpcell", "type":"highpass", "inputID":"cell"},
         {"id":"hpcell2", "type":"highpass", "inputID":"hpcell"},
+        {"id":"dilcell", "type":"dilation", "inputID":"cellxx", "force":0.6},
+        {"id":"bincell", "type":"binarization", "inputID":"dilcell", "threshold":0.95},
+        {"id":"dilbincell", "type":"dilation", "inputID":"bincell", "force":0.5},
+        
+        {"id":"sobsin1", "type":"sobel", "inputID":"sin1"},
+        {"id":"dilsin1", "type":"dilation", "inputID":"sin1", "force":1},
         
 		{"id":"invsin1", "type":"colorization", "color1":[255,255,255,255], "color2":[0,0,0,255], "greymapID":"sin1"},
 		{"id":"celly", "type":"blend", "srcID":"hpcell2", "dstID":"invsin1", "alpha":0.8},
@@ -30,6 +50,7 @@
         {"id":"nstone", "type":"heightToNormal", "heightmapID":"stone", "prec":1, "force":1},
         {"id":"hpstone", "type":"highpass", "inputID":"stone"},
         {"id":"nhpstone", "type":"heightToNormal", "heightmapID":"hpstone", "prec":1, "force":1},
+        {"id":"dilstone", "type":"dilation", "inputID":"stone", "force":1},
         
         {"id":"cellxxx", "type":"colorization", "color1":[255,255,255,255], "color2":[0,0,0,255], "greymapID":"celly"},
 		{"id":"blend1", "type":"blend", "srcID":"sin1", "dstID":"wood", "alpha":0.35},
@@ -42,11 +63,11 @@
 		{"id":"brick1", "type":"blend", "srcID":"brickH", "dstID":"brickV", "alpha":0.5},
 		{"id":"brick2", "type":"blend", "srcID":"brick1", "dstID":"noise3", "alpha":0.4},
         
-		{"id":"atlas1", "type":"draw", "targetID":"atlas0", "srcID":"nsin1", "offsetx":0, "offsety":0},
-		{"id":"atlas2", "type":"draw", "targetID":"atlas1", "srcID":"stone", "offsetx":512, "offsety":0},
-		{"id":"atlas3", "type":"draw", "targetID":"atlas2", "srcID":"nstone", "offsetx":1024, "offsety":0},
-		{"id":"atlas4", "type":"draw", "targetID":"atlas3", "srcID":"sand", "offsetx":1536, "offsety":0},
-		{"id":"atlas5", "type":"draw", "targetID":"atlas4", "srcID":"cloud", "offsetx":2048, "offsety":0},
+		{"id":"atlas1", "type":"draw", "targetID":"atlas0", "srcID":"ct_cell", "offsetx":0, "offsety":0},
+		{"id":"atlas2", "type":"draw", "targetID":"atlas1", "srcID":"ct_adj", "offsetx":512, "offsety":0},
+		{"id":"atlas3", "type":"draw", "targetID":"atlas2", "srcID":"ct_iblend", "offsetx":1024, "offsety":0},
+		{"id":"atlas4", "type":"draw", "targetID":"atlas3", "srcID":"ct_stone", "offsetx":1536, "offsety":0},
+		{"id":"atlas5", "type":"draw", "targetID":"atlas4", "srcID":"ct_nstone", "offsetx":2048, "offsety":0},
 		{"id":"output", "type":"save", "targetID":"atlas5", "url":"atlas.bmp"},
 	],
 	"utils":

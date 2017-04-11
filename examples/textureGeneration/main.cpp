@@ -379,6 +379,216 @@ class HighPassFunctor : public Functor
 	}
 };
 
+class DilationFunctor : public Functor
+{
+	public:
+	DilationFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+        /*
+        const double  hpfilter[3][3] = 
+        {
+            { 0.0,      -0.25,      0.0 },
+            { -0.25,    2.0,        -0.25 },
+            { 0.0,      -0.25,      0.0 }
+        };
+        */
+        const double  hpfilter[3][3] = 
+        {
+            { 1.0,      1.0,      1.0 },
+            { 1.0,      1.0,      1.0 },
+            { 1.0,      1.0,      1.0 }
+        };
+        
+        
+		bool inputReady = false;
+		imp::ImageData* input = getImage(json, "inputID", inputReady);
+		if( input && !inputReady ) return false;
+        
+		double force = json->getNumeric("force")->value;
+        
+        for(unsigned int i = 0; i<img.getWidth(); ++i)
+        {
+            for(unsigned int j=0; j<img.getHeight(); ++j)
+            {
+                
+                double v=  0.0;
+                
+                for(int fi = -1; fi<=1; ++fi)
+                {
+                    for(int fj=-1; fj<=1; ++fj)
+                    {
+                        v += input->getRepeatPixel((int)i+fi,(int)j+fj).red/255.0 * (hpfilter[fi+1][fj+1] *force);
+                    }
+                }
+                
+                if(v<0.0)v = 0.0;
+                else if(v>1.0)v = 1.0;
+                
+                imp::Pixel pixel;
+                pixel.red = (unsigned char)(v * 255);
+                pixel.green = (unsigned char)(v * 255);
+                pixel.blue = (unsigned char)(v * 255);
+                img.setPixel(i,j,pixel);
+            }
+        }
+        
+		return true;
+	}
+};
+
+class BinarizationFunctor : public Functor
+{
+	public:
+	BinarizationFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool inputReady = false;
+		imp::ImageData* input = getImage(json, "inputID", inputReady);
+		if( input && !inputReady ) return false;
+        
+		double threshold = json->getNumeric("threshold")->value;
+        
+        for(unsigned int i = 0; i<img.getWidth(); ++i)
+        {
+            for(unsigned int j=0; j<img.getHeight(); ++j)
+            {
+                
+                double v=  input->getRepeatPixel(i,j).red/255.0;
+                
+                if(v<threshold)
+                    v = 0.0;
+                else
+                    v = 1.0;
+                
+                imp::Pixel pixel;
+                pixel.red = (unsigned char)(v * 255);
+                pixel.green = (unsigned char)(v * 255);
+                pixel.blue = (unsigned char)(v * 255);
+                img.setPixel(i,j,pixel);
+            }
+        }
+        
+		return true;
+	}
+};
+
+class AdjustmentsFunctor : public Functor
+{
+	public:
+	AdjustmentsFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool inputReady = false;
+		imp::ImageData* input = getImage(json, "inputID", inputReady);
+		if( input && !inputReady ) return false;
+        
+		double contrast = json->getNumeric("contrast")->value;
+		double brightness = json->getNumeric("brightness")->value;
+        
+        for(unsigned int i = 0; i<img.getWidth(); ++i)
+        {
+            for(unsigned int j=0; j<img.getHeight(); ++j)
+            {
+                
+                double r=  input->getRepeatPixel(i,j).red/255.0;
+                double g=  input->getRepeatPixel(i,j).green/255.0;
+                double b=  input->getRepeatPixel(i,j).blue/255.0;
+                
+                r = contrast*(r-0.5) + 0.5 + brightness;
+                g = contrast*(g-0.5) + 0.5 + brightness;
+                b = contrast*(b-0.5) + 0.5 + brightness;
+                
+                if(r<0.0) r = 0.0; else if(r>1.0) r = 1.0;
+                if(g<0.0) g = 0.0; else if(g>1.0) g = 1.0;
+                if(b<0.0) b = 0.0; else if(b>1.0) b = 1.0;
+                
+                imp::Pixel pixel;
+                pixel.red = (unsigned char)(r * 255);
+                pixel.green = (unsigned char)(g * 255);
+                pixel.blue = (unsigned char)(b * 255);
+                img.setPixel(i,j,pixel);
+            }
+        }
+        
+		return true;
+	}
+};
+
+class SobelFunctor : public Functor
+{
+	public:
+	SobelFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+        /*
+        const double  hpfilter[3][3] = 
+        {
+            { 0.0,      -0.25,      0.0 },
+            { -0.25,    2.0,        -0.25 },
+            { 0.0,      -0.25,      0.0 }
+        };
+        */
+        /*const double  hpfilter[3][3] = 
+        {
+            { -1.0,      -1.0,      -1.0 },
+            { -1.0,     9.0,        -1.0 },
+            { -1.0,      -1.0,      -1.0 }
+        };*/
+        
+        const double  vfilter[3][3] = 
+        {
+            { -1.0,     0.0,      1.0 },
+            { -2.0,     0.0,      2.0 },
+            { -1.0,     0.0,      1.0 }
+        };
+        const double  hfilter[3][3] = 
+        {
+            { -1.0,     -2.0,      1.0 },
+            { 0.0,     0.0,      0.0 },
+            { 1.0,     2.0,      1.0 }
+        };
+        
+        
+		bool inputReady = false;
+		imp::ImageData* input = getImage(json, "inputID", inputReady);
+		if( input && !inputReady ) return false;
+        
+        
+        for(unsigned int i = 1; i<img.getWidth()-1; ++i)
+        {
+            for(unsigned int j=1; j<img.getHeight()-1; ++j)
+            {
+                
+                double v=  0.0;
+                double h=  0.0;
+                
+                for(int fi = -1; fi<=1; ++fi)
+                {
+                    for(int fj=-1; fj<=1; ++fj)
+                    {
+                        v += input->getPixel(i+fi,j+fj).red/255.0 * vfilter[fi+1][fj+1] ;
+                        h += input->getPixel(i+fi,j+fj).red/255.0 * hfilter[fi+1][fj+1] ;
+                    }
+                }
+                
+                v = (v+h)/2.0;
+                
+                if(v<0.0)v = 0.0;
+                else if(v>1.0)v = 1.0;
+                
+                imp::Pixel pixel;
+                pixel.red = (unsigned char)(v * 255);
+                pixel.green = (unsigned char)(v * 255);
+                pixel.blue = (unsigned char)(v * 255);
+                img.setPixel(i,j,pixel);
+            }
+        }
+        
+		return true;
+	}
+};
+
 class ColorizationFunctor : public Functor
 {
 	public:
@@ -592,6 +802,10 @@ void generateFilters(const std::string& json)
 	functors["save"] = new SaveFunctor(&filters, &distribs);
 	functors["create"] = new CreateFunctor(&filters, &distribs);
 	functors["draw"] = new DrawFunctor(&filters, &distribs);
+    functors["sobel"] = new SobelFunctor(&filters, &distribs);
+    functors["dilation"] = new DilationFunctor(&filters, &distribs);
+    functors["binarization"] = new BinarizationFunctor(&filters, &distribs);
+    functors["adjustments"] = new AdjustmentsFunctor(&filters, &distribs);
 
 	std::string jsonWithoutSpace = imp::removeSpace(json);
 	imp::JsonObject* root = dynamic_cast<imp::JsonObject*>( imp::parse(jsonWithoutSpace) );

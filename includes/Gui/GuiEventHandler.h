@@ -25,9 +25,9 @@ class IMP_API GuiEventHandler
 	GuiEventHandler();
 	virtual ~GuiEventHandler();
 	
-	virtual bool onMousePressed(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y);
+	virtual bool onMousePressed(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y, bool action = false);
 	
-	virtual bool onMouseReleased(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y);
+	virtual bool onMouseReleased(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y, bool action = false);
 	
 	virtual bool onMouseMoved(GuiEventSource* evnSrc, float x, float y);
 	

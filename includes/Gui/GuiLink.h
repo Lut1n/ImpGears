@@ -61,6 +61,20 @@ class IMP_API GuiLinkRenderer
 };
 
 //--------------------------------------------------------------
+class IMP_API GuiLinkHandler
+{
+	public:
+	
+	GuiLinkHandler(){}
+	
+	virtual ~GuiLinkHandler(){}
+	
+	virtual bool onLinkCreate(GuiEventSource* c1, int id1, GuiEventSource* c2, int id2) {return false;}
+	
+	virtual bool onLinkDelete(GuiEventSource* c1, int id1) {return false;}
+};
+
+//--------------------------------------------------------------
 class GuiLinkAnchor
 	: public GuiComponent
 	, public GuiLinkRenderer::Anchor
@@ -75,7 +89,7 @@ public:
 		Side_Right
 	};
 	
-	GuiLinkAnchor();
+	GuiLinkAnchor(GuiComponent* parent, int id);
 	virtual ~GuiLinkAnchor();
 	
 	void setSide(Side side);
@@ -88,12 +102,20 @@ public:
 	void setLink(GuiLinkAnchor* other);
 	void unsetLink();
 	
+	void setParent(GuiComponent* parent, int id);
+	GuiComponent* getParent() const {return _parentComponent;}
+	int getID() const {return _id;}
+	
+	void setText(const std::string& text);
+	
 	static	GuiLinkAnchor* _currentPressed;
 
 protected:
 
 	Side _side;
 	GuiLinkAnchor* _linkedAnchor;
+	GuiComponent* _parentComponent;
+	int _id;
 	float _absPosX;
 	float _absPosY;
 	GuiButton* _button;
@@ -110,8 +132,14 @@ class GuiLinkedBox : public GuiBox
 
 	void setupAnchorCount(GuiLinkAnchor::Side side, unsigned int count);
 	void setAnchorText(GuiLinkAnchor::Side side, int id, const std::string& text);
+	
+	void onLinkChanged(bool created, GuiLinkAnchor* anchor1, GuiLinkAnchor* anchor2);
+	
+	void setLinkHandler(GuiLinkHandler* linkHandler) { _linkHandler = linkHandler; }
 
 	protected:
+	GuiLinkHandler* _linkHandler;
+	
 	GuiComponent* _leftSide;
 	GuiComponent* _rightSide;
 	

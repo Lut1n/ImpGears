@@ -82,7 +82,7 @@ void Layout::applyParameters(const Layout::Parameters& params, Rectangle& surfac
 			positionY = 0.0;
 		break;
 		case Alignement_End:
-			positionY = psizeX-sizeY;
+			positionY = psizeY-sizeY;
 		break;
 		case Alignement_Center:
 			positionY = (psizeY-sizeY) / 2.0;

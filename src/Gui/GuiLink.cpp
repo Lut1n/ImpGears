@@ -81,54 +81,59 @@ void GuiLinkRenderer::draw()
 GuiLinkAnchor* GuiLinkAnchor::_currentPressed = NULL;
 
 //--------------------------------------------------------------
-GuiLinkAnchor::GuiLinkAnchor()
+GuiLinkAnchor::GuiLinkAnchor(GuiComponent* parent, int id)
 	: GuiComponent(0.0,0.0,20.0,20.0)
 	, _side(Side_Left)
+	, _parentComponent(parent)
+	, _id(id)
 {
 	//--------------------------------------------------------------
 	class LinkAnchorAction : public GuiEventHandler
 	{
 	public:
 
-		LinkAnchorAction(GuiLinkAnchor* anchor)
+		LinkAnchorAction(GuiLinkAnchor* anchor, GuiLinkedBox* parent)
 			: _anchor(anchor)
+			, _parent(parent)
 		{
 		}
 	
 		//--------------------------------------------------------------
-		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			if(over)
 			{
-				std::cout << "[debug] anchor pressed" << std::endl;
+				//std::cout << "[debug] anchor pressed" << std::endl;
 				GuiLinkAnchor::_currentPressed = _anchor;
 				return true;
 			}
 			return false;
 		}
 		//--------------------------------------------------------------
-		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
-				std::cout << "[debug] mouse released called" << std::endl;
+			//std::cout << "[debug] mouse released called" << std::endl;
 			if(GuiLinkAnchor::_currentPressed)
 			{
-				std::cout << "[debug] link no null !" << std::endl;
+				//std::cout << "[debug] link no null !" << std::endl;
 				if(over)
 				{
 					
-				std::cout << "[debug] release over !" << std::endl;
+					//std::cout << "[debug] release over !" << std::endl;
 					if(_anchor != GuiLinkAnchor::_currentPressed)
 					{
-				std::cout << "[debug] anchor released" << std::endl;
+						//std::cout << "[debug] anchor released" << std::endl;
 						GuiLinkRenderer::instance()->removeLink( _anchor );
 						GuiLinkRenderer::instance()->removeLink( GuiLinkAnchor::_currentPressed );
 						GuiLinkRenderer::instance()->addLink(_anchor, GuiLinkAnchor::_currentPressed);
+						_parent->onLinkChanged(true, _anchor, GuiLinkAnchor::_currentPressed);
 						return true;
 					}
 					else
 					{
-				std::cout << "[debug] anchor destroyed" << std::endl;
+						//std::cout << "[debug] anchor destroyed" << std::endl;
 						GuiLinkRenderer::instance()->removeLink(GuiLinkAnchor::_currentPressed);
+						_parent->onLinkChanged(false, GuiLinkAnchor::_currentPressed, IMP_NULL);
 					}
 					GuiLinkAnchor::_currentPressed = NULL;
 				}
@@ -140,6 +145,7 @@ GuiLinkAnchor::GuiLinkAnchor()
 		protected:
 		
 		GuiLinkAnchor* _anchor;
+		GuiLinkedBox* _parent;
 	};
 	
 	Layout::Parameters bparam;
@@ -151,7 +157,7 @@ GuiLinkAnchor::GuiLinkAnchor()
 	_button = new GuiButton();
 	_button->setLayoutParameters(bparam);
 	
-	_button->addEventHandler( new LinkAnchorAction(this) );
+	_button->addEventHandler( new LinkAnchorAction(this, static_cast<GuiLinkedBox*>(parent) ) );
 	
 	_text = new GuiText();
 	_text->setText("in/out");
@@ -210,6 +216,19 @@ void GuiLinkAnchor::renderComponent(imp::Uint32 passID, float parentX, float par
 }
 
 //--------------------------------------------------------------
+void GuiLinkAnchor::setParent(GuiComponent* parent, int id)
+{
+	_parentComponent = parent;
+	_id = id;
+}
+
+//--------------------------------------------------------------
+void GuiLinkAnchor::setText(const std::string& text)
+{
+	_text->setText(text);
+}
+
+//--------------------------------------------------------------
 GuiLinkedBox::GuiLinkedBox()
 	: GuiBox("Node 1")
 	, _leftSide(IMP_NULL)
@@ -245,7 +264,10 @@ void GuiLinkedBox::setupAnchorCount(GuiLinkAnchor::Side side, unsigned int count
 	// re-compose
 	for(unsigned int i=0; i<count; ++i)
 	{
-		GuiLinkAnchor* anchor = new GuiLinkAnchor();
+		int id = i+1;
+		if(side == GuiLinkAnchor::Side_Left)id = -id;
+		
+		GuiLinkAnchor* anchor = new GuiLinkAnchor(this, id);
 		anchor->setSide(side);
 		Layout::Parameters param;
 		param.setPositionningY(Layout::Positionning_Auto);
@@ -269,11 +291,23 @@ void GuiLinkedBox::setAnchorText(GuiLinkAnchor::Side side, int id, const std::st
 {
 	if(side == GuiLinkAnchor::Side_Left)
 	{
-		//_leftAnchors[id]->setText(text);
+		_leftAnchors[id-1]->setText(text);
 	}
 	else if(side == GuiLinkAnchor::Side_Right)
 	{
-		//_rightAnchors[id]->setText(text);
+		_rightAnchors[id-1]->setText(text);
+	}
+}
+
+//--------------------------------------------------------------
+void GuiLinkedBox::onLinkChanged(bool created, GuiLinkAnchor* anchor1, GuiLinkAnchor* anchor2)
+{
+	if(_linkHandler)
+	{
+		if(created)
+			_linkHandler->onLinkCreate(anchor1->getParent(), anchor1->getID(), anchor2->getParent(), anchor2->getID());
+		else
+			_linkHandler->onLinkDelete(anchor1->getParent(), anchor1->getID());
 	}
 }
 

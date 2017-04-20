@@ -22,9 +22,9 @@ GuiButton::GuiButton()
 		{}
 		~ButtonBehaviour(){}
 		
-		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
-			if(over)
+			if(over && action)
 			{
 				_pressed = true;
 				_button->getBackground()->setBackgroundColor(_pressedColor);
@@ -33,7 +33,7 @@ GuiButton::GuiButton()
 			return false;
 		}
 		
-		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			_pressed = false;
 			if(over)

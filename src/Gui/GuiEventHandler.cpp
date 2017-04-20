@@ -14,13 +14,13 @@ GuiEventHandler::~GuiEventHandler()
 }
 
 //--------------------------------------------------------------
-bool GuiEventHandler::onMousePressed(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y)
+bool GuiEventHandler::onMousePressed(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y, bool action)
 {
 	return false;
 }
 
 //--------------------------------------------------------------
-bool GuiEventHandler::onMouseReleased(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y)
+bool GuiEventHandler::onMouseReleased(GuiEventSource* evnSrc, bool over, int buttonID, float x, float y, bool action)
 {
 	return false;
 }

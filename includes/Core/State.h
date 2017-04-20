@@ -25,9 +25,17 @@ class IMP_API State
         {
                 return m_singleton;
         }
+		
+		enum ActionState
+		{
+			ActionState_False = 0,
+			ActionState_Pressed,
+			ActionState_True,
+			ActionState_Released
+		};
 
-	bool m_pressedKeys[Event::KeyCount];
-	bool m_pressedMouseButtons[Event::Mouse_ButtonCount];
+	ActionState m_pressedKeys[Event::KeyCount];
+	ActionState m_pressedMouseButtons[Event::Mouse_ButtonCount];
 
 	float xMouse, yMouse;
 	float xdep, ydep;
@@ -48,6 +56,7 @@ class IMP_API State
         static State* m_singleton;
 		unsigned int _windowWidth;
 		unsigned int _windowHeight;
+		bool _mouseOverWindows;
 };
 
 IMPGEARS_END

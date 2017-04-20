@@ -30,7 +30,7 @@ GuiComboBox::GuiComboBox()
 		{
 		}
 		
-		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			if(over)
 			{
@@ -40,7 +40,7 @@ GuiComboBox::GuiComboBox()
 			return false;
 		}
 		
-		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			if(over && _pressed)
 			{
@@ -126,7 +126,7 @@ void GuiComboBox::addList(const char* text)
 		{
 		}
 		
-		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			if(over)
 			{
@@ -136,7 +136,7 @@ void GuiComboBox::addList(const char* text)
 			return false;
 		}
 		
-		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			if(over && _pressed)
 			{

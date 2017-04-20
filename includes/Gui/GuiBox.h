@@ -26,6 +26,7 @@ class IMP_API GuiBox
 	GuiPanel* _background;
 	GuiButton* _header;
 	GuiScrollbar* _scrollBar;
+	GuiScrollbar* _bottomScrollBar;
 };
 
 

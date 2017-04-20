@@ -33,7 +33,7 @@ GuiEditText::GuiEditText()
 		{}
 		~GuiTextBehaviour(){}
 		
-		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			_itext->setFocused(over);
 			return false;

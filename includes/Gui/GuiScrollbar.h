@@ -27,6 +27,10 @@ class IMP_API GuiScrollbar : public GuiSlider
 	
 	private:
 	GuiContainer* _box;
+	
+	float _windowSize;
+	float _windowPosition;
+	float _containedSize;
 };
 
 IMPGEARS_END

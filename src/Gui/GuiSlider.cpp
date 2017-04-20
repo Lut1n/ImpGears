@@ -22,7 +22,7 @@ GuiSlider::GuiSlider()
 		}
 		~SliderBarBehaviour(){}
 		
-		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMousePressed(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			if(over)
 			{
@@ -35,7 +35,7 @@ GuiSlider::GuiSlider()
 			return false;
 		}
 		
-		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y)
+		bool onMouseReleased(GuiEventSource* component, bool over, int buttonID, float x, float y, bool action)
 		{
 			_drag = false;
 			return false;
@@ -68,7 +68,7 @@ GuiSlider::GuiSlider()
 	
 	_barButton = new GuiButton();
 	_barButton->addEventHandler(new SliderBarBehaviour(this));
-	_barButton->setLayoutParameters(_barParam);
+	//_barButton->setLayoutParameters(_barParam);
 	compose(_barButton);
 	
 	// force update of bar params
@@ -84,6 +84,7 @@ GuiSlider::~GuiSlider()
 void GuiSlider::renderComponent(imp::Uint32 passID, float parentX, float parentY)
 {
 	float normalized = _value / (_max-_min);
+	if(normalized < 0.0)normalized=0.0; else if(normalized>1.0)normalized=1.0;
 	
 	if(_orientation == Orientation_Vertical)
 	{
@@ -104,7 +105,7 @@ void GuiSlider::renderComponent(imp::Uint32 passID, float parentX, float parentY
 //--------------------------------------------------------------
 void GuiSlider::slideAction(float moving)
 {
-	float movingRange = getSizeY() - _barButton->getSizeY();
+	float movingRange = (_orientation == Orientation_Vertical) ? (getSizeY() - _barButton->getSizeY()) : (getSizeX() - _barButton->getSizeX());
 	if(movingRange != 0.0)
 	{
 		if(_orientation == Orientation_Vertical)
@@ -136,14 +137,10 @@ void GuiSlider::setOrientation(Orientation ori)
 	if(_orientation == GuiSlider::Orientation_Vertical)
 	{
 		_barButton->setSize(10.0, _barSize);
-		_barParam.setResizingX(Layout::Resizing_Fill);
-		_barParam.setResizingY(Layout::Resizing_None);
 	}
 	else if(_orientation == GuiSlider::Orientation_Horizontal)
 	{
 		_barButton->setSize(_barSize, 10.0);
-		_barParam.setResizingX(Layout::Resizing_None);
-		_barParam.setResizingY(Layout::Resizing_Fill);
 	}
 }
 

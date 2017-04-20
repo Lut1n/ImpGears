@@ -87,10 +87,10 @@ State::State()
 {
 
 	for(Uint32 k=0; k<Event::KeyCount; ++k)
-		m_pressedKeys[k] = false;
+		m_pressedKeys[k] = ActionState_False;
 
 	for(Uint32 b=0; b<Event::Mouse_ButtonCount; ++b)
-	        m_pressedMouseButtons[b] = false;
+	        m_pressedMouseButtons[b] = ActionState_False;
 
 	xMouse = yMouse = 0.0f;
     xdep = ydep = 0.0f;
@@ -104,6 +104,7 @@ State::State()
 	_windowHeight = 600;
 	_lastPressedKey = Event::Unknown;
 	_lastReleasedKey = Event::Unknown;
+	_mouseOverWindows = true;
 }
 
 //--------------------------------------------------------------
@@ -134,7 +135,7 @@ void State::onEvent(const imp::Event& event)
 		{
 			_lastPressedKey = event.getKeyboard().keyCode;
 			_keyValue = getKeyValue(_lastPressedKey, event.getKeyboard().shiftPressed);
-			m_pressedKeys[event.getKeyboard().keyCode] = true;
+			m_pressedKeys[event.getKeyboard().keyCode] = ActionState_Pressed;
 		}
 	}
 	else if(event.getType() == imp::Event::Type_KeyReleased)
@@ -144,30 +145,37 @@ void State::onEvent(const imp::Event& event)
 		{
 			_lastReleasedKey = event.getKeyboard().keyCode;
 			_keyValue = getKeyValue(_lastReleasedKey, event.getKeyboard().shiftPressed);
-			m_pressedKeys[event.getKeyboard().keyCode] = false;
+			m_pressedKeys[event.getKeyboard().keyCode] = ActionState_Released;
 		}
 	}
 	
 	if(event.getType() == imp::Event::Type_MousePressed)
 	{
-	fprintf(stdout, "m pressed\n");
 		if(event.getMouse().button >= 0
 				&& event.getMouse().button < imp::Event::Mouse_ButtonCount)
 		{
-				m_pressedMouseButtons[event.getMouse().button] = true;
+				m_pressedMouseButtons[event.getMouse().button] = ActionState_Pressed;
 		}
 	}
 	else if(event.getType() == imp::Event::Type_MouseReleased)
 	{
-	fprintf(stdout, "m released\n");
 		if(event.getMouse().button >= 0
 				&& event.getMouse().button < imp::Event::Mouse_ButtonCount)
 		{
-			m_pressedMouseButtons[event.getMouse().button] = false;
+			m_pressedMouseButtons[event.getMouse().button] = ActionState_Released;
 		}
 	}
+	
+	if(event.getType() == imp::Event::Type_MouseEntered)
+	{
+		_mouseOverWindows = true;
+	}
+	else if(event.getType() == imp::Event::Type_MouseLeft)
+	{
+		_mouseOverWindows = false;
+	}
 
-    if(event.getType() == imp::Event::Type_MouseMoved)
+    if(event.getType() == imp::Event::Type_MouseMoved && _mouseOverWindows)
     {
 		xMouse = event.getMouse().x;
 		yMouse = event.getMouse().y;

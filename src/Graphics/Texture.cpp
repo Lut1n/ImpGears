@@ -34,7 +34,7 @@ Texture::~Texture()
 //--------------------------------------------------------------
 void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, PixelFormat format)
 {
-	std::cout << m_name << " - load from mem\n";
+	// std::cout << m_name << " - load from mem\n";
 	Uint32 bpp = 32;
 	if( format == PixelFormat_BGR8 || format == PixelFormat_RGB8 )
 		bpp = 24;
@@ -49,7 +49,7 @@ void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, PixelForma
 //--------------------------------------------------------------
 void Texture::loadFromImageData(const ImageData* data)
 {
-	std::cout << m_name << " - load from image data\n";
+	// std::cout << m_name << " - load from image data\n";
     create(data->getWidth(), data->getHeight(), data->getFormat());
     m_data.clone(*data);
 	updateVideoParams();

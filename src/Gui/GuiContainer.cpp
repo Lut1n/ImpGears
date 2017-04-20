@@ -75,7 +75,7 @@ bool GuiContainer::event(imp::State* state, float x, float y)
 	_content->setPosition(compsurface.getX1(), compsurface.getY1());
 	_content->setSize(compsurface.getX2() - compsurface.getX1(), compsurface.getY2() - compsurface.getY1());
 	
-	if( _content->isVisible() )
+	if( result == false && _content->isVisible() )
 	{
 		result |= _content->event(state, x+getPositionX(), y+getPositionY());
 	}

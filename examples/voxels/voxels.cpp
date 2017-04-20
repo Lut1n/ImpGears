@@ -1,13 +1,24 @@
-#include "Graphics/GLcommon.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <iostream>
 
-#include "System/EntityManager.h"
-// #include "Graphics/BmpLoader.h"
-#include "Graphics/BmpLoader.h"
+#include "Core/impBase.h"
+#include "Core/State.h"
+#include "Core/frustumParams.h"
 #include "Core/Timer.h"
+
+#include "System/EvnContextInterface.h"
+#include "System/SFMLContextInterface.h"
+#include "System/EntityManager.h"
+
+#include "Data/VBOChunk.h"
+#include "Data/VoxelWorld.h"
+#include "Data/VoxelWordGenerator.h"
+#include "Data/OBJMeshLoader.h"
+#include "Data/MeshNode.h"
+
+#include "Graphics/BmpLoader.h"
 #include "Graphics/StrategicCamera.h"
 #include "Graphics/FreeFlyCamera.h"
 #include "Graphics/DefaultShader.h"
@@ -23,29 +34,131 @@
 #include "Graphics/VBOManager.h"
 #include "Graphics/GraphicRenderer.h"
 #include "Graphics/RenderTarget.h"
-
+#include "Graphics/TextRenderer.h"
+#include "Graphics/SkyBox.h"
+#include "Graphics/ScreenVertex.h"
+#include "Graphics/GLcommon.h"
 #include "Graphics/ParticleSystem.h"
 
-#include "Core/frustumParams.h"
-#include "Data/VBOChunk.h"
-#include "Data/VoxelWorld.h"
-#include "Data/VoxelWordGenerator.h"
-
-#include "Data/OBJMeshLoader.h"
-#include "Data/MeshNode.h"
-
-#include "Core/impBase.h"
-#include "Core/State.h"
-
-#include "Graphics/SkyBox.h"
-
-#include "System/SFMLContextInterface.h"
-#include "Graphics/ScreenVertex.h"
+#include "Gui/GuiImage.h"
+#include "Gui/GuiText.h"
+#include "Gui/GuiButton.h"
+#include "Gui/Line2DGeometry.h"
+#include "Gui/GuiContainer.h"
+#include "Gui/GuiSlider.h"
+#include "Gui/GuiScrollbar.h"
+#include "Gui/GuiBox.h"
+#include "Gui/GuiCheckBox.h"
+#include "Gui/GuiList.h"
+#include "Gui/GuiLink.h"
+#include "Gui/GuiEditText.h"
+#include "Gui/GuiComboBox.h"
+#include "Gui/GuiState.h"
+#include "Gui/GuiShader.h"
 
 #define FPS_LIMIT 60
 #define IS_FULLSCREEN false
 
+using namespace imp;
+
 	imp::Uint32 debugMode;
+	
+	
+
+static GuiComponent* s_guiRoot = IMP_NULL;
+
+//--------------------------------------------------------------
+void GuiOnEvent()
+{
+	imp::State* state = imp::State::getInstance();
+	if(s_guiRoot != IMP_NULL)
+	{
+		s_guiRoot->event(state);
+	}
+}
+
+//--------------------------------------------------------------
+void GuiUpdate()
+{
+	
+}
+
+//--------------------------------------------------------------
+GuiComponent* buildBox()
+{
+	Layout::Parameters param;
+	param.setAlignementX(Layout::Alignement_Center);
+	param.setPositionningY(Layout::Positionning_Auto);
+	
+	GuiContainer* root = new GuiContainer();
+	root->setPosition(0.0,0.0);
+	root->setSize(200.0,40.0);
+
+	GuiText* i = new GuiText();
+	i->setText("Voxel example project.");
+	i->setLayoutParameters(param);
+	root->addComponent(i);
+	
+
+	GuiText* i2 = new GuiText();
+	i2->setText("With ImpGears");
+	i2->setLayoutParameters(param);
+	root->addComponent(i2);
+	
+	return root;
+}
+
+//--------------------------------------------------------------
+GuiComponent* buildGui()
+{
+	GuiComponent* root = new GuiComponent(0.0,0.0,800.0,600.0);
+	GuiComponent* box1 = buildBox();
+	
+	Layout::Parameters param;
+	param.setAlignementY(Layout::Alignement_End);
+	box1->setLayoutParameters(param);
+	
+	root->compose(box1);
+	return root;
+}
+
+//Texture* tex = IMP_NULL;
+
+//--------------------------------------------------------------
+void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, imp::RenderParameters& screenParameters)
+{
+//	GuiStateSingleton::getInstance()->defaultShader = &defaultShader;
+	if(s_guiRoot == IMP_NULL)
+	{
+		GuiState::getInstance()->setResolution(800.0,600.0);
+		s_guiRoot = buildGui();
+		GuiComponent::_guiComponentShader = new imp::GuiShader();
+//		GuiComponent::_guiComponentShader->setFloatParameter("u_resolutionX", 800.0);
+//		GuiComponent::_guiComponentShader->setFloatParameter("u_resolutionY", 600.0);
+		GuiComponent::_guiComponentShader->setFloatParameter("u_outlineWidth", 1.0);
+		GuiComponent::_guiComponentShader->setFloatParameter("u_cornerRadius", 5.0);
+		GuiComponent::_guiComponentShader->setVector3Parameter("u_outlineColor", imp::Vector3(1.0,1.0,1.0));
+	}
+	
+	renderer.setCamera(IMP_NULL);
+	renderer.setRenderParameters(screenParameters);
+	target.bind();
+	GuiComponent::_guiComponentShader->enable();
+	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_projection", screenParameters.getProjectionMatrix());
+	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_view", imp::Matrix4::getIdentityMat());
+	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_model", imp::Matrix4::getIdentityMat());
+	GuiComponent::_guiComponentShader->setFloatParameter("u_cornerRadius", 3.0);
+	renderer.renderScene(-1);
+	
+	s_guiRoot->render(0);
+	
+	GuiLinkRenderer::instance()->updateBuffer();
+	GuiComponent::_guiComponentShader->setVector3Parameter( "u_color", Vector3(1.0,1.0,1.0) );
+	GuiComponent::_guiComponentShader->setFloatParameter( "u_type", 1.0 );
+	GuiComponent::_guiComponentShader->setFloatParameter("u_cornerRadius", 0.0);
+	GuiLinkRenderer::instance()->draw();
+	GuiComponent::_guiComponentShader->disable();
+}
 
 
 void onEvent(imp::EvnContextInterface& evnContext){
@@ -79,14 +192,28 @@ void loadCameraKeyBinding(imp::FreeFlyCamera& cam, const char* filename)
 	cam.setKeyBindingConfig(binding);
 }
 
+/*
+void renderKernel(imp::GraphicRenderer& renderer, imp::RenderParameters& parameters, imp::Camera& cam, imp::Shader& shader, imp::RenderTarget& target)
+{
+	renderer.setCamera(&cam);
+	renderer.setRenderParameters(parameters);
+	target.bind();
+	shader.enable();
+	renderer.renderScene(-1);
+	screen.render(0);
+	shader.disable();
+	target.unbind();
+}
+*/
+
 int main(void)
 {
 	const unsigned int winW = 800;
 	const unsigned int winH = 600;
 
 
-	imp::FreeFlyCamera cam(winW/2, winH/2);
-	//imp::StrategicCamera cam;
+	//imp::FreeFlyCamera cam(winW/2, winH/2);
+	imp::StrategicCamera cam; cam.move(imp::Vector3(-32.0,-56.0,0.0));
 	imp::Camera sunCamera;
 	imp::VoxelWorld* world;
 
@@ -99,14 +226,14 @@ int main(void)
 
     imp::EvnContextInterface* evnContext = new imp::SFMLContextInterface();
     evnContext->createWindow(winW, winH);
-    evnContext->setCursorVisible(0, false);
+    evnContext->setCursorVisible(0, true);
 	evnContext->setWindowTitle(0, "voxel propotype");
 
 	// sun camera for shadow
     sunCamera.setPosition(imp::Vector3(150.f, 150.f, 300.f));
     sunCamera.setTarget(imp::Vector3(64.f, 64.f, 64.f));
     imp::GraphicRenderer renderer(0, &sunCamera);
-    renderer.setCenterCursor(true);
+    renderer.setCenterCursor(false);
 
 
     imp::MeshNode mesh(imp::OBJMeshLoader::loadFromFile("data/obj-models/simple-monkey.c.obj"));
@@ -151,6 +278,11 @@ int main(void)
 	// screen render parameters
     imp::RenderParameters screenParameters;
     screenParameters.setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+	
+	// gui render parameters
+    imp::RenderParameters guiRenderParameters;
+//    guiRenderParameters.setOrthographicProjection(0.f, 1.0, 0.f, 1.0, 0.f, 1.f);
+     guiRenderParameters.setOrthographicProjection(0.f, winW, 0.f, winH, 0.f, 1.f);
 
 	// shadow shaders
     imp::ShadowBufferShader shadowBufferShader;
@@ -160,7 +292,7 @@ int main(void)
     shadowParameters.setOrthographicProjection(-130.f, 130.f, -130.f, 130.f, 0.1, 512.f);
 
 	// world generation
-    world = new imp::VoxelWorld(128,128,32);
+    world = new imp::VoxelWorld(128,128,64);
 	fprintf(stdout, "world generation...\t");
     imp::VoxelWordGenerator::GetInstance()->Generate(world);
 	fprintf(stdout, "OK\n");
@@ -188,9 +320,9 @@ int main(void)
     const imp::Texture* backgroundTex = backgroundTarget.getTexture(0);
 
 	// render target for self-illumination
-    imp::RenderTarget selfiTarget;
+    /*imp::RenderTarget selfiTarget;
     selfiTarget.createBufferTarget(winW/4.f, winH/4.f, 1, false);
-    const imp::Texture* selfiTex = selfiTarget.getTexture(0);
+    const imp::Texture* selfiTex = selfiTarget.getTexture(0);*/
 
 	// render target for light effect
     imp::RenderTarget blinnPhongTarget;
@@ -206,7 +338,7 @@ int main(void)
     const imp::Texture* colorBuffer = deferredBuffers.getTexture(0);
     const imp::Texture* normalBuffer = deferredBuffers.getTexture(1);
     imp::Texture* specBuffer = deferredBuffers.getTexture(2);
-    const imp::Texture* selfBuffer = deferredBuffers.getTexture(3);
+    // const imp::Texture* selfBuffer = deferredBuffers.getTexture(3);
     const imp::Texture* depthBuffer = deferredBuffers.getDepthTexture();
     imp::DeferredShader deferredShader;
 
@@ -229,10 +361,10 @@ int main(void)
     prebloomTarget32.createBufferTarget(32, 32, 1, false);
     prebloomTarget64.createBufferTarget(64, 64, 1, false);
     prebloomTarget128.createBufferTarget(128, 128, 1, false);
-    imp::Texture* bloomGauss16 = prebloomTarget16.getTexture(0);
+    /*imp::Texture* bloomGauss16 = prebloomTarget16.getTexture(0);
     imp::Texture* bloomGauss32 = prebloomTarget32.getTexture(0);
     imp::Texture* bloomGauss64 = prebloomTarget64.getTexture(0);
-    imp::Texture* bloomGauss128 = prebloomTarget128.getTexture(0);
+    imp::Texture* bloomGauss128 = prebloomTarget128.getTexture(0);*/
 
 	// bloom gauss shader
     imp::BloomShader bloomShader;
@@ -243,6 +375,10 @@ int main(void)
 	// screen render target
     imp::RenderTarget screenTarget;
     screenTarget.createScreenTarget(0);
+	
+	imp::RenderTarget guiTarget;
+	guiTarget.createBufferTarget(winW, winH, 1, false);
+	imp::Texture* guiTexture = guiTarget.getTexture(0);
 
 	// textures for skybox
     imp::Texture* skyLeft = BmpLoader::loadFromFile("data/sky/box/left.bmp"); skyLeft->synchronize();
@@ -275,8 +411,18 @@ int main(void)
 	imp::Uint32 m_levelUpKey = imp::Event::PageUp;
 
 	// Camera key binding
-	loadCameraKeyBinding(cam, "camera-key-binding.conf");
-
+	//loadCameraKeyBinding(cam, "camera-key-binding.conf");
+	
+	// Uniforms
+	//imp::Shader::Parameter* u_projection = 
+	new imp::Shader::Parameter("u_projection", imp::Shader::Parameter::Type_Mat4v);
+	//u_projection->set( &renderer.getProjectionMatrix() );
+	/*imp::Shader::Parameter* u_view = new imp::Shader::Parameter("u_view", imp::Shader::Parameter::Type_Mat4v);
+	u_view->set( &cam.getViewMatrix() );
+	imp::Shader::Parameter* u_model = new imp::Shader::Parameter("u_model", imp::Shader::Parameter::Type_Mat4v);
+	
+	shadowBufferShader.addParameter(u_projection);
+*/
     while (evnContext->isOpen(0))
     {
 
@@ -287,6 +433,8 @@ int main(void)
 
             /// change level
             imp::State* state = imp::State::getInstance();
+			GuiOnEvent();
+			
             if(state->m_pressedKeys[m_levelUpKey])
             {
                 mapLevel += 0.5f;
@@ -297,9 +445,13 @@ int main(void)
                 mapLevel -= 0.5f;
                 fprintf(stdout, "level : %f\n", mapLevel);
             }
+			
+			// state->_lastPressedKey = imp::Event::Unknown;
+			// state->_lastReleasedKey = imp::Event::Unknown;
 
             entityManager.updateAll();
             //particles.update();
+			GuiUpdate();
 
 			nbFrames++;
 
@@ -425,6 +577,9 @@ int main(void)
 			blinnPhong.disable();
 			blinnPhongTarget.unbind();
             /// ////////////////////////////////////////////////////
+			
+			
+			GuiRender(guiTarget, renderer, guiRenderParameters);
 
 			// (pass ?) prebloom shader
 			/*renderer.setCamera(IMP_NULL);
@@ -488,6 +643,8 @@ int main(void)
                 finalShader.setTextureParameter("u_backgroundTexture", backgroundTex, 1);
                 finalShader.setTextureParameter("u_selfTexture", bloomTex, 2);
                 finalShader.setTextureParameter("u_shadows", shadowsTex, 3);
+                finalShader.setTextureParameter("u_gui", guiTexture, 4);
+				
                 renderer.renderScene(-1);
                 screen.render(0);
                 finalShader.disable();
@@ -516,7 +673,7 @@ int main(void)
                         texToDisplay = specBuffer;
                     break;
                     case 8:
-                        texToDisplay = bloomTex;
+                        texToDisplay = guiTexture;
                     break;
                     case 9:
                         texToDisplay = blinnPhongBuffer;
@@ -533,7 +690,9 @@ int main(void)
                 defaultShader.setMatrix4Parameter("u_projection", renderer.getProjectionMatrix());
                 defaultShader.setMatrix4Parameter("u_view", i4);
                 defaultShader.setMatrix4Parameter("u_model", i4);
+				defaultShader.setVector3Parameter( "u_color", Vector3(1.0,1.0,1.0) );
                 defaultShader.setTextureParameter("u_colorTexture", texToDisplay, 0);
+                defaultShader.setFloatParameter("u_type", 0.0);
                 renderer.renderScene(-1);
                 screen.render(0);
                 defaultShader.disable();

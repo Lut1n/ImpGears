@@ -11,6 +11,55 @@
 
 #include <map>
 
+using namespace imp;
+
+void initCells(double* xcell, double* ycell, int size, const imp::ImageData* noise)
+{
+    double fieldW = (noise->getWidth()/size);
+    double fieldH = (noise->getHeight()/size);
+    
+    // initialize cell centers
+    for(int i=0; i<size; ++i)
+    for(int j=0; j<size; ++j)
+    {
+        
+        double x = (double)i * fieldW;
+        double y = (double)j * fieldH;
+        
+        xcell[j*size+i] = x + double(noise->getPixel(x+fieldW/2.0,y).r)/255.0 * fieldW;
+        ycell[j*size+i] = y + double(noise->getPixel(x,y+fieldH/2.0).r)/255.0 * fieldH;
+        
+        std::cout << "x=" << xcell[j*size+i] << "; y=" << ycell[j*size+i] << std::endl;
+    }
+}
+
+double voronoi(double* xcell, double* ycell, int count, double x, double y);
+
+void drawCellularNoise_local(imp::ImageData& img, unsigned int cellcount, const imp::ImageData* noisemap)
+{
+    double xcell[cellcount*cellcount];
+    double ycell[cellcount*cellcount];
+    initCells(xcell, ycell, cellcount, noisemap);
+    
+    // draw
+    for(unsigned int i=0; i<img.getWidth(); ++i)
+    {
+        for(unsigned int j=0; j<img.getHeight(); ++j)
+        {
+            double i2 = i + (double(noisemap->getPixel(i,j).r)/255.0 - 0.5) * 20.0;
+            double j2 = j + (double(noisemap->getPixel(img.getWidth()-1-i,j).r)/255.0 - 0.5) * 20.0;
+            
+            double value = voronoi(xcell, ycell, cellcount*cellcount, i2, j2);
+            
+            // apply new value
+            Uint8 newt = (Uint8)Lerp( 0.0, 255.0, value);
+            Pixel px = {newt,newt,newt, 255};
+            img.setPixel(i,j,px);
+        }
+    }
+    
+}
+
 struct Filter
 {
 	imp::ImageData* data;
@@ -92,13 +141,23 @@ imp::ImageData* getImage(imp::JsonObject* json, const char* keyname, bool& isRea
 	if(string != NULL)
 	{
 		std::string id = string->value;
-		std::string actionID = json->getString("id")->value;
-		isReady = filters[id]->ready;
-		filters[id]->addDependanced( filters[actionID] );
-		return filters[id]->data;
+		std::string actionID = "";
+        if(json->getString("id"))
+        {
+            actionID = json->getString("id")->value;
+            isReady = filters[id]->ready;
+            filters[id]->addDependanced( filters[actionID] );
+            return filters[id]->data;
+        }
+        else
+        {
+            std::cout << "[texgen error] cannot found the image " <<  string->value << std::endl;
+            return IMP_NULL;
+        }
 	}
 	else
 	{
+           std::cout << "[texgen error] cannot found the image " <<  keyname << std::endl;
 		isReady = false;
 		return IMP_NULL;
 	}
@@ -273,7 +332,39 @@ class CellularNoiseFunctor : public Functor
 
 		double cellcount = json->getNumeric("count")->value;
 
-        drawCellularNoise(img, cellcount, perturbation);
+        drawCellularNoise_local(img, cellcount, perturbation);
+		return true;
+	}
+};
+
+class AddFunctor : public Functor
+{
+	public:
+	AddFunctor(FilterMap* filters, DistribMap* distribs) : Functor(filters, distribs){}
+	virtual bool apply(imp::JsonObject* json, imp::ImageData& img)
+	{
+		bool srcReady = false;
+		imp::ImageData* src = getImage(json, "srcID", srcReady);
+		bool dstReady = false;
+		imp::ImageData* dst = getImage(json, "dstID", dstReady);
+		if( src && dst && (!srcReady || !dstReady) ) return false;
+
+        for(unsigned int i=0; i<img.getWidth(); ++i)
+		{
+			for(unsigned int j=0; j<img.getHeight(); ++j)
+			{
+                double r = src->getPixel(i,j).red/255.0 + dst->getPixel(i,j).red/255.0;
+                double g = src->getPixel(i,j).green/255.0 + dst->getPixel(i,j).green/255.0;
+                double b= src->getPixel(i,j).blue/255.0 + dst->getPixel(i,j).blue/255.0;
+				
+                if(r<0.0) r=0.0; else if(r>1.0)r=1.0;
+                if(g<0.0) g=0.0; else if(g>1.0)g=1.0;
+                if(b<0.0) b=0.0; else if(b>1.0)b=1.0;
+                
+				imp::Pixel px = {(unsigned int)(r*255),(unsigned int)(g*255),(unsigned int)(b*255),255};
+				img.setPixel(i,j,px);
+			}
+		}
 		return true;
 	}
 };
@@ -806,6 +897,7 @@ void generateFilters(const std::string& json)
     functors["dilation"] = new DilationFunctor(&filters, &distribs);
     functors["binarization"] = new BinarizationFunctor(&filters, &distribs);
     functors["adjustments"] = new AdjustmentsFunctor(&filters, &distribs);
+    functors["add"] = new AddFunctor(&filters, &distribs);
 
 	std::string jsonWithoutSpace = imp::removeSpace(json);
 	imp::JsonObject* root = dynamic_cast<imp::JsonObject*>( imp::parse(jsonWithoutSpace) );
@@ -884,3 +976,86 @@ int main(int argc, char* argv[])
 	generateFilters( loadJson(filename.c_str()) );
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -----------------------
+double distance2(double x, double y, double x2, double y2)
+{
+    double dx = (x2 - x);
+    double dy = (y2 - y);
+    return dx*dx + dy*dy;
+}
+
+
+
+// -----------------------
+void find2Closest(double* xcell, double* ycell, int count, double x, double y, double& fx, double& fy, double& fx2, double& fy2)
+{
+    double d1 = -1.0;
+    double d2 = -1.0;
+    
+    for(int cell=0; cell<count; ++cell)
+    {
+        
+        double dx = xcell[cell];
+        double dy = ycell[cell];
+        double d = distance2(dx, dy,x,y);
+        
+        if(d1<0.0 || d < d1)
+        {
+            d2 = d1;
+            fx2 = fx;
+            fy2 = fy;
+            
+            d1 = d;
+            fx = dx;
+            fy = dy;
+        }
+        else if(d2<0.0 || d < d2)
+        {
+            d2 = d;
+            fx2 = dx;
+            fy2 = dy;
+        }
+    }
+}
+
+// -----------------------
+double voronoi(double* xcell, double* ycell, int count, double x, double y)
+{
+    double dx1 = 0.0;
+    double dy1 = 0.0;
+    double dx2 = 0.0;
+    double dy2 = 0.0;
+    find2Closest(xcell, ycell, count, x, y,
+                        dx1, dy1,
+                        dx2, dy2);
+    
+    double f1 = sqrt(distance2(dx1,dy1,x,y));
+    double f2 = sqrt(distance2(dx2,dy2,x,y));
+    
+    double result = f1/(f2+f1);
+    
+    return result;//>0.4?1.0:0.0;
+}
+
+
+
+
+
+
+

@@ -1,5 +1,9 @@
 # ImpGears
 
-This is my C++ project of 3D Engine using OpenGL.
+Little personal engine for 3D and image processing.
 
-Lot of changes are currently made. A new Readme is planned ;)
+Current and future improvements of this project are oriented to enable the procedural generation of a large amount of pseudo-random textures and models. And with the able to do it by two ways :
+- In real-time, using the GPU and shaders.
+- By offline rendering, with the CPU only.
+
+Key words : C++, OpenGL, pseudo-random, procedural, texture, image processing, 3D

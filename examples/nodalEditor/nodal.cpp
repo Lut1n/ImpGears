@@ -571,6 +571,9 @@ class SelectorAction : public GuiEventHandler
 //--------------------------------------------------------------
 GuiComponent* buildSelector()
 {
+	float winW, winH;
+	GuiState::getInstance()->getResolution(winW,winH);
+	
 	Layout::Parameters param;
 	param.setAlignementX(Layout::Alignement_Center);
 	param.setPositionningY(Layout::Positionning_Auto);
@@ -600,7 +603,7 @@ GuiComponent* buildSelector()
 	root->addComponent(button);
 	
 	root->setTitle("Node list");
-	root->setPosition((800-200)/2.0, (600-300)/2.0);
+	root->setPosition((winW-200)/2.0, (winH-300)/2.0);
 	root->setSize(200.0, 300.0);
 	root->enableScrollbar(true);
 	
@@ -651,8 +654,11 @@ GuiComponent* buildViewer(GuiImage** i)
 //--------------------------------------------------------------
 GuiBox* buildGui()
 {
+	float winW, winH;
+	GuiState::getInstance()->getResolution(winW,winH);
+	
 	GuiBox* root = new GuiBox();
-	root->setSize(800.0-10.0, 600.0-10.0);
+	root->setSize(winW-10.0, winH-10.0);
 	root->enableScrollbar(true);
 	
 	return root;
@@ -1080,6 +1086,9 @@ void GuiUpdate()
 }
 
 //Texture* tex = IMP_NULL;
+static imp::RenderParameters guiRenderParameters;
+static imp::RenderTarget guiTarget;
+static imp::Texture* guiTexture;
 
 //--------------------------------------------------------------
 void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, imp::RenderParameters& screenParameters)
@@ -1117,6 +1126,9 @@ void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, imp::R
 	GuiComponent::_guiComponentShader->disable();
 }
 
+
+void onWindowResize(double w, double h);
+
 //--------------------------------------------------------------
 void onEvent(imp::EvnContextInterface& evnContext)
 {
@@ -1140,7 +1152,12 @@ void onEvent(imp::EvnContextInterface& evnContext)
 
 	imp::Event event;
 	while (evnContext.nextEvent(event))
-		imp::State::getInstance()->onEvent(event);
+	{
+		if(event.getType() == imp::Event::Type_WindowResized)
+			onWindowResize(event.getSize()._width, event.getSize()._height);
+		else
+			imp::State::getInstance()->onEvent(event);
+	}
 
 	if(state->m_pressedKeys[imp::Event::Escape])
 		exit(0);
@@ -1192,11 +1209,9 @@ int main(int argc, char* argv[])
 	imp::ScreenVertex screen;
 	
 		// gui render parameters
-    imp::RenderParameters guiRenderParameters;
     guiRenderParameters.setOrthographicProjection(0.f, winw, 0.f, winh, 0.f, 1.f);
-	imp::RenderTarget guiTarget;
 	guiTarget.createBufferTarget(winw, winh, 1, false);
-	imp::Texture* guiTexture = guiTarget.getTexture(0);
+	guiTexture = guiTarget.getTexture(0);
 
 	// int c = 0;
 	
@@ -1422,4 +1437,18 @@ GuiLinkedBox* buildBox(const std::string& name, GuiImage** i, GuiButton** params
 	content->addComponent(*paramsButton);
 	
 	return root;
+}
+
+
+void onWindowResize(double w, double h)
+{
+	State::getInstance()->setWindowDim(w,h);
+	EvnContextInterface::getInstance()->resizeWindow(0, w, h);
+	guiRenderParameters.setOrthographicProjection(0.f, w, 0.f, h, 0.f, 1.f);
+	guiTarget.createBufferTarget(w, h, 1, false);
+	guiTexture = guiTarget.getTexture(0);
+	GuiState::getInstance()->setResolution(w,h);
+	EditorGraph::getInstance()->_guiGraph->setSize(w-10.0, h-10.0);
+	if(s_guiRoot != IMP_NULL)
+		s_guiRoot->setClippingRect(imp::Rectangle(0.0,0.0,w,h));
 }

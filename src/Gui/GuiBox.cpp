@@ -76,14 +76,6 @@ GuiBox::GuiBox(const std::string& title)
 		//bool _over;
 	};
 	
-	_background = new GuiPanel();
-	_background->setBackgroundColor(imp::Vector3(0.0,0.0,0.1));
-	Layout::Parameters backParam;
-	backParam.setResizingX(Layout::Resizing::Resizing_Fill);
-	backParam.setResizingY(Layout::Resizing::Resizing_Fill);
-	_background->setLayoutParameters(backParam);
-	compose(_background);
-	
 	_header = new GuiButton();
 	_header->setPosition(0.0, -_header->getSizeY());
 	Layout::Parameters headerParam;

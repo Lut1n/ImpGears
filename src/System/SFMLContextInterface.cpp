@@ -155,6 +155,16 @@ void SFMLContextInterface::pushSFMLEvent(const sf::Event& event)
             pushEvent(imp::Event(imp::Event::Type_KeyReleased, keyboard));
             break;
         }
+		
+        case sf::Event::Resized:
+        {
+            imp::Event::Size size;
+            size._width = event.size.width;
+            size._height = event.size.height;
+
+            pushEvent(imp::Event(imp::Event::Type_WindowResized, size));
+            break;
+        }
         default:
             // fprintf(stdout, "impError : SFML Event not supported\n");
         break;

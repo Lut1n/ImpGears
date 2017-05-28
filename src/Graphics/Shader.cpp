@@ -164,7 +164,7 @@ Shader::Shader(const char* vertexShader, const char* fragmentShader)
         glGetShaderiv(m_vertexID, GL_INFO_LOG_LENGTH, &length);
         log = new char[length];
         glGetShaderInfoLog(m_vertexID, length, &result, log);
-        fprintf(stderr, "[impError] Shader compilation failed.\n%s", log);
+        fprintf(stderr, "[impError] Vertex shader compilation failed.\n%s", log);
         delete [] log;
     }
 
@@ -177,7 +177,7 @@ Shader::Shader(const char* vertexShader, const char* fragmentShader)
         glGetShaderiv(m_fragmentID, GL_INFO_LOG_LENGTH, &length);
         log = new char[length];
         glGetShaderInfoLog(m_fragmentID, length, &result, log);
-        fprintf(stderr, "[impError] Shader compilation failed.\n%s", log);
+        fprintf(stderr, "[impError] Fragment shader compilation failed.\n%s", log);
         delete [] log;
     }
 

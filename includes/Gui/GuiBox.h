@@ -23,7 +23,6 @@ class IMP_API GuiBox
 	void enableScrollbar(bool enable);
 	
 	private:
-	GuiPanel* _background;
 	GuiButton* _header;
 	GuiScrollbar* _scrollBar;
 	GuiScrollbar* _bottomScrollBar;

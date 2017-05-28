@@ -20,7 +20,8 @@ class IMP_API Event
         Type_MouseReleased,
         Type_KeyPressed,
         Type_KeyReleased,
-        Type_WindowClose
+        Type_WindowClose,
+		Type_WindowResized
     };
 
     enum MouseButton
@@ -153,11 +154,18 @@ class IMP_API Event
         bool altPressed;
         bool shiftPressed;
     };
+	
+    struct Size
+    {
+        int _width;
+		int _height;
+    };
 
     union Value
     {
         Mouse mouse;
         Keyboard keyboard;
+		Size size;
     };
 
     Event(){}
@@ -187,6 +195,13 @@ class IMP_API Event
         m_value.mouse = value;
     }
 
+
+    Event(Type type, Size value)
+    {
+        m_type = type;
+        m_value.size = value;
+    }
+
     virtual ~Event(){}
 
     const Event& operator=(const Event& other)
@@ -205,6 +220,9 @@ class IMP_API Event
 
     Keyboard getKeyboard() const{return m_value.keyboard;}
     void setKeyboard(Keyboard keyboard){m_value.keyboard = keyboard;}
+
+    Size getSize() const{return m_value.size;}
+    void setSize(Size size){m_value.size = size;}
 
   protected:
 

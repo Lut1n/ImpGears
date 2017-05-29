@@ -57,13 +57,19 @@ void FreeFlyCamera::update(){
         state->xdep = state->ydep = 0.0;
 
         float speed = SPEED;
-        if(state->m_pressedKeys[m_accelerateKey])speed *= 2;
-        else if(state->m_pressedKeys[m_decelerateKey])speed *= 0.2f;
+        if(state->m_pressedKeys[m_accelerateKey] == imp::State::ActionState_True)
+			speed *= 2;
+        else if(state->m_pressedKeys[m_decelerateKey] == imp::State::ActionState_True)
+			speed *= 0.2f;
 
-        if(state->m_pressedKeys[m_backKey])move(getForwardVector() * -speed * (elapsed/TIME_UPDATE));
-        if(state->m_pressedKeys[m_forwardKey])move(getForwardVector() * speed * (elapsed/TIME_UPDATE));
-        if(state->m_pressedKeys[m_leftKey])move(getLateralVector() * -speed * (elapsed/TIME_UPDATE));
-        if(state->m_pressedKeys[m_rightKey])move(getLateralVector() * speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_backKey] == imp::State::ActionState_True)
+			move(getForwardVector() * -speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_forwardKey] == imp::State::ActionState_True)
+			move(getForwardVector() * speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_leftKey] == imp::State::ActionState_True)
+			move(getLateralVector() * -speed * (elapsed/TIME_UPDATE));
+        if(state->m_pressedKeys[m_rightKey] == imp::State::ActionState_True)
+			move(getLateralVector() * speed * (elapsed/TIME_UPDATE));
 
         updateFov();
 

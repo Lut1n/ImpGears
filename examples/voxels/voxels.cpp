@@ -165,11 +165,26 @@ void onEvent(imp::EvnContextInterface& evnContext){
 
     evnContext.getEvents(0);
 
+	imp::State* state = imp::State::getInstance();
+	
+	for(unsigned int i=0; i<Event::Mouse_ButtonCount ; ++i)
+	{
+		if(state->m_pressedMouseButtons[i] == State::ActionState_Pressed)
+			state->m_pressedMouseButtons[i] = State::ActionState_True;
+		else if(state->m_pressedMouseButtons[i] == State::ActionState_Released)
+			state->m_pressedMouseButtons[i] = State::ActionState_False;
+	}
+	for(unsigned int i=0; i<Event::KeyCount ; ++i)
+	{
+		if(state->m_pressedKeys[i] == State::ActionState_Pressed)
+			state->m_pressedKeys[i] = State::ActionState_True;
+		else if(state->m_pressedKeys[i] == State::ActionState_Released)
+			state->m_pressedKeys[i] = State::ActionState_False;
+	}
+
     imp::Event event;
     while (evnContext.nextEvent(event))
         imp::State::getInstance()->onEvent(event);
-
-	imp::State* state = imp::State::getInstance();
 
 	if(state->m_pressedKeys[imp::Event::Escape])
 		exit(0);
@@ -212,8 +227,9 @@ int main(void)
 	const unsigned int winH = 600;
 
 
-	//imp::FreeFlyCamera cam(winW/2, winH/2);
-	imp::StrategicCamera cam; cam.move(imp::Vector3(-32.0,-56.0,0.0));
+	// imp::FreeFlyCamera cam(winW/2, winH/2);
+	imp::StrategicCamera cam;
+	cam.move(imp::Vector3(-32.0,-56.0,0.0));
 	imp::Camera sunCamera;
 	imp::VoxelWorld* world;
 
@@ -435,12 +451,12 @@ int main(void)
             imp::State* state = imp::State::getInstance();
 			GuiOnEvent();
 			
-            if(state->m_pressedKeys[m_levelUpKey])
+            if(state->m_pressedKeys[m_levelUpKey] == imp::State::ActionState_True)
             {
                 mapLevel += 0.5f;
                 fprintf(stdout, "level : %f\n", mapLevel);
             }
-            else if(state->m_pressedKeys[m_levelDownKey])
+            else if(state->m_pressedKeys[m_levelDownKey] == imp::State::ActionState_True)
             {
                 mapLevel -= 0.5f;
                 fprintf(stdout, "level : %f\n", mapLevel);

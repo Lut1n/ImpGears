@@ -32,25 +32,25 @@ void StrategicCamera::update(){
 
     State* state = State::getInstance();
 
-    if(state->m_pressedKeys[m_forwardKey] && !state->m_pressedKeys[m_backKey]){
+    if(state->m_pressedKeys[m_forwardKey] == imp::State::ActionState_True && state->m_pressedKeys[m_backKey] !=  imp::State::ActionState_True){
         move(imp::Vector3(0.f, speed, 0.f));
     }
-    else if(state->m_pressedKeys[m_backKey] && !state->m_pressedKeys[m_forwardKey]){
+    else if(state->m_pressedKeys[m_backKey] == imp::State::ActionState_True && state->m_pressedKeys[m_forwardKey] !=  imp::State::ActionState_True){
         move(imp::Vector3(0.f, -speed, 0.f));
     }
 
-    if(state->m_pressedKeys[m_leftKey] && !state->m_pressedKeys[m_rightKey]){
+    if(state->m_pressedKeys[m_leftKey] == imp::State::ActionState_True && state->m_pressedKeys[m_rightKey] != imp::State::ActionState_True){
         move(imp::Vector3(-speed, 0.f, 0.f));
     }
-    else if(state->m_pressedKeys[m_rightKey] && !state->m_pressedKeys[m_leftKey]){
+    else if(state->m_pressedKeys[m_rightKey] == imp::State::ActionState_True && state->m_pressedKeys[m_leftKey] != imp::State::ActionState_True){
         move(imp::Vector3(speed, 0.f, 0.f));
     }
 
-    if(state->m_pressedKeys[m_zoomOutKey])
+    if(state->m_pressedKeys[m_zoomOutKey] == imp::State::ActionState_True)
     {
         move(imp::Vector3(0.f, 0.f, 1.f));
     }
-    else if(state->m_pressedKeys[m_zoomInKey])
+    else if(state->m_pressedKeys[m_zoomInKey] == imp::State::ActionState_True)
     {
         move(imp::Vector3(0.f, 0.f, -1.f));
     }

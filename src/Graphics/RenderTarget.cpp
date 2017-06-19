@@ -144,9 +144,12 @@ Texture* RenderTarget::getDepthTexture()
 void RenderTarget::bind()
 {
     if(m_type == TargetType_Buffer)
+    { 
         glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
-    else
+    }
+    else{
         unbind();
+    }
 
 	if(m_type == TargetType_Screen)
 	{

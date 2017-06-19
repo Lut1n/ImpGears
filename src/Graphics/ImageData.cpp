@@ -428,6 +428,15 @@ void ImageData::fill(const Pixel& color)
 			pixel[3] = color.a;
 			memcpy(&(m_buffer[i]), pixel, 4);
 		}
+		else if(m_format == PixelFormat_BGRA8)
+		{
+			Uint8 pixel[4];
+			pixel[0] = color.b;
+			pixel[1] = color.g;
+			pixel[2] = color.r;
+			pixel[3] = color.a;
+			memcpy(&(m_buffer[i]), pixel, 4);
+		}
 		else
 		{
 			std::cout << "impError : pixel format not supported by the fill() function.\n";

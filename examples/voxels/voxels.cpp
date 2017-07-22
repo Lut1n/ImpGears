@@ -406,7 +406,7 @@ int main(void)
 
 	// skybox entity
 	imp::SkyBox skyBox(skyLeft, skyRight, skyFront, skyBack, skyTop, skyBottom, FRUSTUM_FAR/2.f);
-    renderer.getScene()->addSceneComponent(&skyBox);
+    renderer.setSceneRoot( &skyBox );
     entityManager.addEntity(&skyBox);
 
     imp::DefaultShader defaultShader;

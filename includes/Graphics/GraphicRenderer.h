@@ -4,7 +4,7 @@
 #include "Core/impBase.h"
 #include "Math/Matrix4.h"
 #include "System/EvnContextInterface.h"
-#include "Graphics/Scene.h"
+#include "Graphics/SceneNode.h"
 #include "Graphics/Camera.h"
 #include "Graphics/RenderParameters.h"
 
@@ -29,7 +29,8 @@ class IMP_API GraphicRenderer
 
         void setCenterCursor(bool center){centerCursor = center;}
 
-        Scene* getScene(){return &scene;}
+		void setSceneRoot(SceneNode* root){_root = std::shared_ptr<SceneNode>(root); }
+        SceneNode* getSceneRoot(){return _root.get();}
 
         //void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
         const Matrix4& getProjectionMatrix() const {return m_parameters.getProjectionMatrix();}
@@ -40,7 +41,7 @@ class IMP_API GraphicRenderer
 
         RenderParameters m_parameters;
         Uint32 windowID;
-        Scene scene;
+        std::shared_ptr<SceneNode> _root;
         Camera* camera;
 
         static void setInstance(GraphicRenderer* inst){instance = inst;}

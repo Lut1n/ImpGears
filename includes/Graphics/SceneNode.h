@@ -3,15 +3,17 @@
 
 #include "Core/impBase.h"
 #include <list>
+#include <memory>
 #include "Math/Vector3.h"
 #include "Math/Matrix4.h"
 #include "System/EvnContextInterface.h"
+#include "Graphics/GraphicState.h"
 
 IMPGEARS_BEGIN
 
 class SceneNode;
 
-typedef std::list<SceneNode*> SceneNodeList;
+typedef std::list< std::shared_ptr<SceneNode> > SceneNodeList;
 typedef SceneNodeList::iterator SceneNodeIt;
 
 /// \brief Defines a scene node. Has to be added to a scene for rendering.
@@ -38,6 +40,9 @@ class IMP_API SceneNode
         void setOrientation(imp::Vector3 orientation){
             this->orientation = orientation;
         }
+		
+        void addSubNode(SceneNode* sceneNode);
+        void removeSubNode(SceneNode* sceneNode);
 
         float getRx() const{return rx;}
         float getRy() const{return ry;}
@@ -64,6 +69,8 @@ class IMP_API SceneNode
             scale = _scale;
             m_localMatrixHasChanged = true;
         }
+		
+		virtual GraphicState* getGraphicState();
 
         void commitTransformation();
 
@@ -71,9 +78,9 @@ class IMP_API SceneNode
 
     protected:
 
-        void addSubNode(SceneNode* sceneNode);
-        void removeSubNode(SceneNode* sceneNode);
         void calculateRotation();
+		
+		std::shared_ptr<GraphicState> _state;
 
     private:
         SceneNodeList subSceneNodes;

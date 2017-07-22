@@ -1,3 +1,4 @@
+#include "Graphics/GraphicRenderer.h"
 #include "Graphics/SceneNode.h"
 #include "Graphics/GLcommon.h"
 
@@ -10,6 +11,7 @@ int SceneNode::nbDisplayed = 0;
 
 //--------------------------------------------------------------
 SceneNode::SceneNode():
+	_state(IMP_NULL),
     rx(0.f),
     ry(0.f),
     rz(0.f),
@@ -32,12 +34,12 @@ SceneNode::~SceneNode(){
 
 //--------------------------------------------------------------
 void SceneNode::addSubNode(SceneNode* sceneNode){
-    subSceneNodes.push_back(sceneNode);
+    subSceneNodes.push_back( std::shared_ptr<SceneNode>(sceneNode) );
 }
 
 //--------------------------------------------------------------
 void SceneNode::removeSubNode(SceneNode* sceneNode){
-    subSceneNodes.remove(sceneNode);
+    subSceneNodes.remove( std::shared_ptr<SceneNode>(sceneNode) );
 }
 
 //--------------------------------------------------------------
@@ -49,15 +51,19 @@ void SceneNode::renderAll(imp::Uint32 passID){
 
     Matrix4 modelMat = getModelMatrix();
     Matrix4 normalMat = getNormalMatrix();
-
+	
+	GraphicRenderer::getInstance()->getStateManager().pushState( _state.get() );
+	
     render(passID);
 
     for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++)
     {
-        SceneNode* sub = *it;
+        SceneNode* sub = it->get();
         sub->setParentModelMatrices(modelMat, normalMat);
         sub->renderAll(passID);
     }
+	
+	GraphicRenderer::getInstance()->getStateManager().popState();
 }
 
 //--------------------------------------------------------------
@@ -114,6 +120,13 @@ const Matrix4 SceneNode::getNormalMatrix()
     commitTransformation();
 
     return m_parentNormalMatrix * m_localNormalMatrix;
+}
+
+//--------------------------------------------------------------
+GraphicState* SceneNode::getGraphicState()
+{
+	if(_state == nullptr)_state = std::shared_ptr<GraphicState>(new GraphicState());
+	return _state.get();
 }
 
 IMPGEARS_END

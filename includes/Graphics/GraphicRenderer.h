@@ -33,6 +33,8 @@ class IMP_API GraphicRenderer
 
         //void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
         const Matrix4& getProjectionMatrix() const {return m_parameters.getProjectionMatrix();}
+		
+		GraphicStatesManager& getStateManager() {return _stateMgr;}
 
     protected:
 
@@ -48,6 +50,7 @@ class IMP_API GraphicRenderer
         static GraphicRenderer* instance;
         bool centerCursor;
 
+		GraphicStatesManager _stateMgr;
         //Matrix4 m_projMat;
 };
 

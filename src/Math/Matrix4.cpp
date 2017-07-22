@@ -5,6 +5,15 @@
 
 IMPGEARS_BEGIN
 
+static const float IDENTITY_DATA[16] = {
+	1.f,    0.f,    0.f,    0.f,
+	0.f,    1.f,    0.f,    0.f,
+	0.f,    0.f,    1.f,    0.f,
+	0.f,    0.f,    0.f,    1.f
+};
+
+const Matrix4 Matrix4::_identity(IDENTITY_DATA);
+
 #define IDX(x,y)m_data[(y-1)*4+(x-1)]
 
 //--------------------------------------------------------------
@@ -283,16 +292,9 @@ const Matrix4 Matrix4::getViewMat(const Vector3& pos, const Vector3& target, con
 }
 
 //--------------------------------------------------------------
-const Matrix4 Matrix4::getIdentityMat()
+const Matrix4& Matrix4::getIdentityMat()
 {
-    const float data[16] = {
-        1.f,    0.f,    0.f,    0.f,
-        0.f,    1.f,    0.f,    0.f,
-        0.f,    0.f,    1.f,    0.f,
-        0.f,    0.f,    0.f,    1.f
-    };
-
-    return Matrix4(data);
+    return _identity;
 }
 
 //--------------------------------------------------------------

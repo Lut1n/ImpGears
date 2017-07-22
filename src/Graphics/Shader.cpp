@@ -2,6 +2,7 @@
 #include "Graphics/GLcommon.h"
 
 #include <cstdio>
+#include <iostream>
 
 
 IMPGEARS_BEGIN
@@ -14,6 +15,7 @@ Shader::Parameter::Parameter(const std::string& id, Type type)
 {
 	this->id = id;
 	this->type = type;
+	this->sampler = IMP_NULL;
 }
 
 //--------------------------------------------------------------
@@ -84,6 +86,14 @@ void Shader::Parameter::set(const Matrix4* mat4Array, int count)
 }
 
 //--------------------------------------------------------------
+void Shader::Parameter::set(const Texture* texture, Int32 textureUnit)
+{
+	this->type = Type_Sampler;
+	value.value_1i = textureUnit;
+	sampler = texture;
+}
+
+//--------------------------------------------------------------
 void Shader::Parameter::updateUniform(const Shader& program) const
 {
 	Int32 uniformLocation = program.getParameterLocation( this->getID() );
@@ -119,6 +129,13 @@ void Shader::Parameter::updateUniform(const Shader& program) const
 	else if(type == Type_Mat4v)
 	{
 		glUniformMatrix4fv(uniformLocation, 1, false, value.value_mat4v->getData());
+	}
+	else if(type == Type_Sampler)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0 + value.value_1i);
+		glBindTexture(GL_TEXTURE_2D, sampler->getVideoID());
+		glUniform1i(uniformLocation, value.value_1i);
 	}
 	else
 	{
@@ -355,7 +372,7 @@ void Shader::disable()
 //--------------------------------------------------------------
 void Shader::addParameter(Parameter* param)
 {
-	_parameters.push_back(param);
+	_parameters.push_back( std::shared_ptr<Parameter>(param) );
 }
 
 //--------------------------------------------------------------
@@ -391,7 +408,7 @@ Shader::Parameter* Shader::getParameter(const std::string& name)
 {
 	for(Uint32 i=0; i<_parameters.size(); ++i)
 		if(_parameters[i]->getID() == name)
-			return _parameters[i];
+			return _parameters[i].get();
 		
 	return IMP_NULL;
 }
@@ -409,6 +426,64 @@ void Shader::updateAllParameters()
 void Shader::updateParameter(const std::string& name)
 {
 	getParameter(name)->updateUniform( *this );
+}
+
+//--------------------------------------------------------------
+void Shader::addTextureParameter(const std::string& name, const Texture* texture, Int32 textureUnit)
+{
+	Parameter* param = new Parameter(name, Parameter::Type_Sampler);
+	param->set(texture, textureUnit);
+	addParameter(param);
+}
+
+//--------------------------------------------------------------
+void Shader::addFloatParameter(const std::string& name, float value)
+{
+	Parameter* param = new Parameter(name, Parameter::Type_1f);
+	param->set(value);
+	addParameter(param);
+}
+
+//--------------------------------------------------------------
+void Shader::addMatrix4Parameter(const std::string& name, const Matrix4* mat4)
+{
+	Parameter* param = new Parameter(name, Parameter::Type_Mat4v);
+	param->set(mat4);
+	addParameter(param);
+}
+
+//--------------------------------------------------------------
+void Shader::addVector3ArrayParameter(const std::string& name, float* vector3Array, Uint32 count)
+{
+	Parameter* param = new Parameter(name, Parameter::Type_3fv);
+	param->set(vector3Array,count);
+	addParameter(param);
+}
+
+//--------------------------------------------------------------
+void Shader::addVector3Parameter(const std::string& name, const Vector3* vec3)
+{
+	Parameter* param = new Parameter(name, Parameter::Type_3f);
+	param->set(vec3);
+	addParameter(param);
+}
+
+//--------------------------------------------------------------
+void Shader::addProjection(const Matrix4* projection)
+{
+	addMatrix4Parameter("u_projection", projection);
+}
+
+//--------------------------------------------------------------
+void Shader::addView(const Matrix4* view)
+{
+	addMatrix4Parameter("u_view", view);
+}
+
+//--------------------------------------------------------------
+void Shader::addModel(const Matrix4* model)
+{
+	addMatrix4Parameter("u_model", model);
 }
 
 IMPGEARS_END

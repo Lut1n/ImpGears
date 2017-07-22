@@ -2,6 +2,7 @@
 #define IMP_SHADER_H
 
 #include <vector>
+#include <memory>
 
 #include "Core/impBase.h"
 #include "Math/Matrix4.h"
@@ -56,7 +57,8 @@ class IMP_API Shader
 				
 				//Type_Mat2v,
 				// Type_Mat3v,
-				Type_Mat4v
+				Type_Mat4v,
+				Type_Sampler
 			};
 			
 			union Value
@@ -91,6 +93,8 @@ class IMP_API Shader
 			
 			void set(const Matrix4* mat4Array, int count = 1);
 			
+			void set(const Texture* texture, Int32 textureUnit = 0);
+			
 			const std::string& getID() const {return id;}
 			
 			void updateUniform(const Shader& program) const;
@@ -101,6 +105,7 @@ class IMP_API Shader
 			Uint32 count;
 			Type type;
 			Value value;
+			const Texture* sampler;
 			
 		};
 	
@@ -133,6 +138,16 @@ class IMP_API Shader
 		Parameter* getParameter(const std::string& name);
 		void updateAllParameters();
 		void updateParameter(const std::string& name);
+		
+		void addTextureParameter(const std::string& name, const Texture* texture, Int32 textureUnit = 0);
+        void addFloatParameter(const std::string& name, float value);
+        void addMatrix4Parameter(const std::string& name, const Matrix4* Matrix4);
+        void addVector3ArrayParameter(const std::string& name,  float* vector3Array, Uint32 count);
+        void addVector3Parameter(const std::string& name, const Vector3* vec3);
+		
+        void addProjection(const Matrix4* projection);
+        void addView(const Matrix4* view);
+        void addModel(const Matrix4* model);
 
     protected:
     private:
@@ -143,7 +158,7 @@ class IMP_API Shader
 
         static Shader* m_instance;
 		
-		std::vector<Parameter*> _parameters;
+		std::vector< std::shared_ptr<Parameter> > _parameters;
 };
 
 IMPGEARS_END

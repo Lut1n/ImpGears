@@ -43,8 +43,6 @@ void GraphicRenderer::renderScene(imp::Uint32 passID){
 
     m_parameters.enable();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     if(camera != IMP_NULL)
 	{
 		camera->lookAt();

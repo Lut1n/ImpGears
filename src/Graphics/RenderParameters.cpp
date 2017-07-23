@@ -169,6 +169,11 @@ void RenderParameters::apply() const
 			glHint(GL_FOG_HINT, GL_NICEST);
 		}
 	}
+	
+	if(_clearColorChanged || _clearDepthChanged)
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 }
 
 //--------------------------------------------------------------

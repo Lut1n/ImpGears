@@ -132,7 +132,7 @@ class IMP_API Shader
 
         static const Shader* getActiveShader() {return m_instance;}
 		
-		void addParameter(Parameter* param);
+		void addParameter(const std::shared_ptr<Parameter>& param);
 		void removeParameter(Parameter* param);
 		void clearParameter();
 		Parameter* getParameter(const std::string& name);

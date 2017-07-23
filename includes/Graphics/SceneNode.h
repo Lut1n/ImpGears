@@ -41,8 +41,8 @@ class IMP_API SceneNode
             this->orientation = orientation;
         }
 		
-        void addSubNode(SceneNode* sceneNode);
-        void removeSubNode(SceneNode* sceneNode);
+        void addSubNode(const std::shared_ptr<SceneNode>& sceneNode);
+        void removeSubNode(const std::shared_ptr<SceneNode>& sceneNode);
 
         float getRx() const{return rx;}
         float getRy() const{return ry;}

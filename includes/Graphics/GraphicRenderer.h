@@ -29,7 +29,7 @@ class IMP_API GraphicRenderer
 
         void setCenterCursor(bool center){centerCursor = center;}
 
-		void setSceneRoot(SceneNode* root){_root = std::shared_ptr<SceneNode>(root); }
+		void setSceneRoot(const std::shared_ptr<SceneNode>& root){_root = root; }
         SceneNode* getSceneRoot(){return _root.get();}
 
         //void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}

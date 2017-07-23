@@ -370,9 +370,9 @@ void Shader::disable()
 }
 
 //--------------------------------------------------------------
-void Shader::addParameter(Parameter* param)
+void Shader::addParameter(const std::shared_ptr<Parameter>& param)
 {
-	_parameters.push_back( std::shared_ptr<Parameter>(param) );
+	_parameters.push_back( param );
 }
 
 //--------------------------------------------------------------
@@ -431,7 +431,7 @@ void Shader::updateParameter(const std::string& name)
 //--------------------------------------------------------------
 void Shader::addTextureParameter(const std::string& name, const Texture* texture, Int32 textureUnit)
 {
-	Parameter* param = new Parameter(name, Parameter::Type_Sampler);
+	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_Sampler) );
 	param->set(texture, textureUnit);
 	addParameter(param);
 }
@@ -439,7 +439,7 @@ void Shader::addTextureParameter(const std::string& name, const Texture* texture
 //--------------------------------------------------------------
 void Shader::addFloatParameter(const std::string& name, float value)
 {
-	Parameter* param = new Parameter(name, Parameter::Type_1f);
+	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_1f) );
 	param->set(value);
 	addParameter(param);
 }
@@ -447,7 +447,7 @@ void Shader::addFloatParameter(const std::string& name, float value)
 //--------------------------------------------------------------
 void Shader::addMatrix4Parameter(const std::string& name, const Matrix4* mat4)
 {
-	Parameter* param = new Parameter(name, Parameter::Type_Mat4v);
+	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_Mat4v) );
 	param->set(mat4);
 	addParameter(param);
 }
@@ -455,7 +455,7 @@ void Shader::addMatrix4Parameter(const std::string& name, const Matrix4* mat4)
 //--------------------------------------------------------------
 void Shader::addVector3ArrayParameter(const std::string& name, float* vector3Array, Uint32 count)
 {
-	Parameter* param = new Parameter(name, Parameter::Type_3fv);
+	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_3fv) );
 	param->set(vector3Array,count);
 	addParameter(param);
 }
@@ -463,7 +463,7 @@ void Shader::addVector3ArrayParameter(const std::string& name, float* vector3Arr
 //--------------------------------------------------------------
 void Shader::addVector3Parameter(const std::string& name, const Vector3* vec3)
 {
-	Parameter* param = new Parameter(name, Parameter::Type_3f);
+	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_3f) );
 	param->set(vec3);
 	addParameter(param);
 }

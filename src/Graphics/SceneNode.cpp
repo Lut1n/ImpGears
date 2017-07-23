@@ -34,13 +34,13 @@ SceneNode::~SceneNode(){
 }
 
 //--------------------------------------------------------------
-void SceneNode::addSubNode(SceneNode* sceneNode){
-    subSceneNodes.push_back( std::shared_ptr<SceneNode>(sceneNode) );
+void SceneNode::addSubNode(const std::shared_ptr<SceneNode>& sceneNode){
+    subSceneNodes.push_back( sceneNode );
 }
 
 //--------------------------------------------------------------
-void SceneNode::removeSubNode(SceneNode* sceneNode){
-    subSceneNodes.remove( std::shared_ptr<SceneNode>(sceneNode) );
+void SceneNode::removeSubNode(const std::shared_ptr<SceneNode>& sceneNode){
+    subSceneNodes.remove( sceneNode );
 }
 
 //--------------------------------------------------------------

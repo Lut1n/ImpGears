@@ -21,7 +21,9 @@ struct IMP_API GraphicState
 	
 	GraphicState();
 	
-	GraphicState(imp::RenderTarget* target, imp::RenderParameters* params, imp::Shader* shader);
+	void setTarget(const std::shared_ptr<imp::RenderTarget>& target);
+	void setParameters(const std::shared_ptr<imp::RenderParameters>& params);
+	void setShader(const std::shared_ptr<imp::Shader>& shader);
 };
 
 
@@ -40,12 +42,14 @@ class IMP_API GraphicStatesManager
 
 	imp::Shader* getShader();
 
-	void pushState(GraphicState* st);
+	void pushState( GraphicState* st);
 
 	void popState();
+	
+	void applyCurrentState();
 	protected:
 
-	std::vector< std::shared_ptr<GraphicState> > _stack;
+	std::vector< GraphicState* > _stack;
 };
 
 IMPGEARS_END

@@ -1,6 +1,7 @@
 #include "Graphics/GraphicRenderer.h"
 #include "Graphics/SceneNode.h"
 #include "Graphics/GLcommon.h"
+#include <iostream>
 
 #include <cmath>
 
@@ -11,7 +12,7 @@ int SceneNode::nbDisplayed = 0;
 
 //--------------------------------------------------------------
 SceneNode::SceneNode():
-	_state(IMP_NULL),
+	_state(nullptr),
     rx(0.f),
     ry(0.f),
     rz(0.f),
@@ -52,7 +53,10 @@ void SceneNode::renderAll(imp::Uint32 passID){
     Matrix4 modelMat = getModelMatrix();
     Matrix4 normalMat = getNormalMatrix();
 	
-	GraphicRenderer::getInstance()->getStateManager().pushState( _state.get() );
+	GraphicRenderer* renderer = GraphicRenderer::getInstance();
+	GraphicStatesManager& states = renderer->getStateManager();
+	
+	states.pushState( _state.get() );
 	
     render(passID);
 
@@ -63,7 +67,7 @@ void SceneNode::renderAll(imp::Uint32 passID){
         sub->renderAll(passID);
     }
 	
-	GraphicRenderer::getInstance()->getStateManager().popState();
+	states.popState();
 }
 
 //--------------------------------------------------------------
@@ -123,10 +127,10 @@ const Matrix4 SceneNode::getNormalMatrix()
 }
 
 //--------------------------------------------------------------
-GraphicState* SceneNode::getGraphicState()
+std::shared_ptr<GraphicState> SceneNode::getGraphicState()
 {
 	if(_state == nullptr)_state = std::shared_ptr<GraphicState>(new GraphicState());
-	return _state.get();
+	return _state;
 }
 
 IMPGEARS_END

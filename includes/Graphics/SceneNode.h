@@ -70,7 +70,7 @@ class IMP_API SceneNode
             m_localMatrixHasChanged = true;
         }
 		
-		virtual GraphicState* getGraphicState();
+		virtual std::shared_ptr<GraphicState> getGraphicState();
 
         void commitTransformation();
 

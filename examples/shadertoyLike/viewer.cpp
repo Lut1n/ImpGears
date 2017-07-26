@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 	evnContext->createWindow(500,500);
 	evnContext->setCursorVisible(0, true);
 
-	imp::GraphicRenderer renderer(0, NULL);
+	imp::GraphicRenderer renderer;
 	renderer.setCenterCursor(false);
 
 	if(argc<2)
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     
 	while (evnContext->isOpen(0))
 	{
-		onEvent(*imp::EvnContextInterface::getInstance());
+		onEvent(*evnContext);
 
 		// reload if changed
 		time_t access, modif, status;
@@ -114,7 +114,6 @@ int main(int argc, char* argv[])
 			defaultShader = new imp::Shader(loadShader("defaultshader.vert").c_str(), loadShader(argv[1]).c_str());
 		}
 
-		renderer.setCamera(IMP_NULL);
 		renderer.setRenderParameters(screenParameters);
 		screenTarget.bind();
 		defaultShader->enable();

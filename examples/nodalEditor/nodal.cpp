@@ -1106,7 +1106,6 @@ void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, imp::R
 		GuiComponent::_guiComponentShader->setVector3Parameter("u_outlineColor", imp::Vector3(1.0,1.0,1.0));
 	}
 	
-	renderer.setCamera(IMP_NULL);
 	renderer.setRenderParameters(screenParameters);
 	target.bind();
 	GuiComponent::_guiComponentShader->enable();
@@ -1159,7 +1158,7 @@ void onEvent(imp::EvnContextInterface& evnContext)
 			imp::State::getInstance()->onEvent(event);
 	}
 
-	if(state->m_pressedKeys[imp::Event::Escape])
+	if(state->m_pressedKeys[imp::Event::Escape] == State::ActionState_Released)
 		exit(0);
 }
 
@@ -1176,7 +1175,7 @@ int main(int argc, char* argv[])
 	evnContext->createWindow(winw,winh);
 	evnContext->setCursorVisible(0, true);
 
-	imp::GraphicRenderer renderer(0, NULL);
+	imp::GraphicRenderer renderer;
 	renderer.setCenterCursor(false);
 
 	/*if(argc<2)
@@ -1224,7 +1223,6 @@ int main(int argc, char* argv[])
 		
 		GuiRender(guiTarget, renderer, guiRenderParameters);
 
-		renderer.setCamera(IMP_NULL);
 		renderer.setRenderParameters(screenParameters);
 		screenTarget.bind();
 		defaultShader.enable();

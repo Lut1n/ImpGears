@@ -1,8 +1,10 @@
 #include "Graphics/BmpLoader.h"
-#include "Graphics/DefaultShader.h"
+#include "Graphics/BasicShader.h"
 #include "Graphics/GraphicRenderer.h"
 #include "Graphics/GraphicState.h"
 #include "Graphics/RenderTarget.h"
+#include "Graphics/FreeFlyCamera.h"
+#include "Core/frustumParams.h"
 
 #include "Core/Timer.h"
 #include "Core/State.h"
@@ -12,7 +14,116 @@
 
 #include <System/FileInfo.h>
 
-imp::Texture* texture;
+class ProceduralCube : public imp::VBOData, public imp::SceneNode
+{
+    public:
+	
+		void pushVertice(float x, float y, float z)
+		{
+			_vertexBuffer.push_back(x);
+			_vertexBuffer.push_back(y);
+			_vertexBuffer.push_back(z);
+		}
+	
+        ProceduralCube()
+		{
+			// bottom
+			pushVertice(-1.f, -1.f, 1.f);
+			pushVertice(1.f, -1.f, 1.f);
+			pushVertice(1.f, 1.f, 1.f);
+			pushVertice(-1.f, 1.f, 1.f);
+
+			// up
+			pushVertice(-1.f, -1.f, -1.f);
+			pushVertice(-1.f, 1.f, -1.f);
+			pushVertice(1.f, 1.f, -1.f);
+			pushVertice(1.f, -1.f, -1.f);
+
+			// left
+			pushVertice(-1.f, -1.f, -1.f);
+			pushVertice(-1.f, -1.f, 1.f);
+			pushVertice(-1.f, 1.f, 1.f);
+			pushVertice(-1.f, 1.f, -1.f);
+
+			// right
+			pushVertice(1.f, -1.f, -1.f);
+			pushVertice(1.f, 1.f, -1.f);
+			pushVertice(1.f, 1.f, 1.f);
+			pushVertice(1.f, -1.f, 1.f);
+
+			// face
+			pushVertice(-1.f, -1.f, -1.f);
+			pushVertice(1.f, -1.f, -1.f);
+			pushVertice(1.f, -1.f, 1.f);
+			pushVertice(-1.f, -1.f, 1.f);
+			
+			// back
+			pushVertice(-1.f, 1.f, -1.f);
+			pushVertice(-1.f, 1.f, 1.f);
+			pushVertice(1.f, 1.f, 1.f);
+			pushVertice(1.f, 1.f, -1.f);
+
+			const float texCoord[6*8] =
+			{
+			  0.f, 0.f,
+			  1.f, 0.f,
+			  1.f, 1.f,
+			  0.f, 1.f,
+			  0.f, 0.f,
+			  1.f, 0.f,
+			  1.f, 1.f,
+			  0.f, 1.f,
+			  0.f, 0.f,
+			  1.f, 0.f,
+			  1.f, 1.f,
+			  0.f, 1.f,
+			  0.f, 0.f,
+			  1.f, 0.f,
+			  1.f, 1.f,
+			  0.f, 1.f,
+			  0.f, 0.f,
+			  1.f, 0.f,
+			  1.f, 1.f,
+			  0.f, 1.f,
+			  0.f, 0.f,
+			  1.f, 0.f,
+			  1.f, 1.f,
+			  0.f, 1.f
+			};
+
+			imp::Uint32 vertexBuffSize = _vertexBuffer.size()*sizeof(float);
+			imp::Uint32 texCoordSize = 6*8*sizeof(float);
+
+			m_texCoordOffset = vertexBuffSize;
+
+			requestVBO(vertexBuffSize+texCoordSize);
+			setVertices(_vertexBuffer.data(), vertexBuffSize);
+			//    setData(vertex, vertexBuffSize, 0);
+			setData(texCoord, texCoordSize, m_texCoordOffset);
+			
+			setScale(imp::Vector3(0.5,0.5,0.5));
+		}
+		
+        virtual ~ProceduralCube()
+		{
+			
+		}
+
+        virtual void render(imp::Uint32 passID)
+		{
+			setRotation(getRx()+0.03, getRy()+0.07, getRz()+0.01);
+			
+			drawVBO();
+		}
+
+    protected:
+	
+		std::vector<float> _vertexBuffer;
+	
+    private:
+
+        imp::Uint64 m_texCoordOffset;
+};
 
 struct ViewerState
 {
@@ -21,12 +132,12 @@ struct ViewerState
 	std::shared_ptr<imp::RenderParameters> screenParameters;
 	std::shared_ptr<imp::RenderTarget> screenTarget;
 
-	std::shared_ptr<imp::DefaultShader> defaultShader;
-	imp::ScreenVertex* screen;
+	std::shared_ptr<imp::BasicShader> defaultShader;
+	std::shared_ptr<ProceduralCube> screen;
 
 	imp::EvnContextInterface* evnContext;
-
-	time_t accessLast, modifLast, statusLast;
+	std::shared_ptr<imp::FreeFlyCamera> camera;
+	imp::Vector3 color;
 
 	std::string filename;
 	
@@ -37,32 +148,34 @@ struct ViewerState
 		evnContext->setCursorVisible(0, true);
 		
 		// screen render target
-		screenTarget = std::shared_ptr<imp::RenderTarget>( new imp::RenderTarget() );
+		screenTarget .reset( new imp::RenderTarget() );
 		screenTarget->createScreenTarget(0);
 		
-		renderer = std::shared_ptr<imp::GraphicRenderer>(new imp::GraphicRenderer(0,IMP_NULL) );
+		camera.reset( new imp::FreeFlyCamera(400, 300) );
+		camera->initFrustum(800, 600, FRUSTUM_FOVY*3.14159f/180.f, FRUSTUM_NEAR, FRUSTUM_FAR);
+		camera->setPosition(imp::Vector3(2.f, -3.f, 2.f));
+		camera->setTarget(imp::Vector3(0.0f, 0.0f, 0.0f));
+		
+		renderer.reset(new imp::GraphicRenderer() );
 		renderer->setCenterCursor(false);
 	
 		// screen render parameters
-		screenParameters = std::shared_ptr<imp::RenderParameters>(new imp::RenderParameters() );
-		screenParameters->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-		screenParameters->setClearColor(imp::Vector3(0.f, 0.f, 1.f));
+		screenParameters.reset(new imp::RenderParameters() );
+		screenParameters->setPerspectiveProjection(FRUSTUM_FOVY, 4.f/3.f, FRUSTUM_NEAR, FRUSTUM_FAR);
+		screenParameters->setClearColor(imp::Vector3(0.5f, 0.5f, 1.f));
 		
-		defaultShader = std::shared_ptr<imp::DefaultShader>(new imp::DefaultShader() );
+		color.setXYZ(1.0, 0.0, 0.0);
+		defaultShader.reset(new imp::BasicShader() );
 
-		const imp::Matrix4& i4 = imp::Matrix4::getIdentityMat();
-		defaultShader->addProjection( &(screenParameters->getProjectionMatrix() ));
-		defaultShader->addView(&i4);
-		defaultShader->addModel(&i4);
-		// defaultShader->addTextureParameter("u_colorTexture", texture, 0);
+		defaultShader->addVector3Parameter("u_color", &color);
 	
-	
-		screen = new imp::ScreenVertex();
-		screen->getGraphicState()->setTarget(screenTarget);
-		screen->getGraphicState()->setParameters(screenParameters);
-		screen->getGraphicState()->setShader(defaultShader);
+		screen.reset( new ProceduralCube() );
+		camera->getGraphicState()->setTarget(screenTarget);
+		camera->getGraphicState()->setParameters(screenParameters);
+		camera->getGraphicState()->setShader(defaultShader);
 		
-		renderer->setSceneRoot(screen);
+		renderer->setSceneRoot(camera);
+		camera->addSubNode(screen);
 	}
 
 };
@@ -91,56 +204,14 @@ void onEvent(imp::EvnContextInterface& evnContext)
 
 }
 
-void onUpdate(ViewerState& state)
-{
-	// reload if changed
-	time_t access, modif, status;
-	imp::getTimeInfo(const_cast<char*>(state.filename.c_str()), access, modif, status);
-
-	if(modif > state.modifLast)
-	{
-		state.modifLast = modif;
-		texture = BmpLoader::loadFromFile( state.filename.c_str() );
-		
-		state.state.setWindowDim(texture->getWidth(), texture->getHeight());
-		state.evnContext->resizeWindow(0, texture->getWidth(), texture->getHeight());
-		state.evnContext->setWindowTitle(0, state.filename.c_str());
-	}
-}
-
-void onDraw(ViewerState& state)
-{
-}
-
 int main(int argc, char* argv[])
 {
-	texture = IMP_NULL;
-	
 	ViewerState v_state;
-	
-	if(argc<2)
-	{
-		std::cout << "error : no file path given" << std::endl;
-		return 0;
-	}
-
-	v_state.filename = argv[1];
-	texture = BmpLoader::loadFromFile(v_state.filename.c_str());
-	if(texture == IMP_NULL)
-	{
-		std::cout << "error : BMP file loading has failed" << std::endl;
-		return 0;
-	}
-
-	v_state.defaultShader->addTextureParameter("u_colorTexture", texture, 0);
-	imp::getTimeInfo(const_cast<char*>(v_state.filename.c_str()), v_state.accessLast, v_state.modifLast, v_state.statusLast);
 	
 	while (v_state.evnContext->isOpen(0))
 	{
 	
 		onEvent(*imp::EvnContextInterface::getInstance());
-	
-		onUpdate(v_state);
 	
 		// rendering
 		v_state.renderer->renderScene(-1);

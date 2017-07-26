@@ -14,13 +14,10 @@ IMPGEARS_BEGIN
 class IMP_API GraphicRenderer
 {
     public:
-        GraphicRenderer(Uint32 windowID, Camera* camera);
+        GraphicRenderer();
         virtual ~GraphicRenderer();
 
         void renderScene(Uint32 passID);
-
-        void setCamera(Camera* camera){this->camera = camera; if(camera != IMP_NULL)camera->activate();}
-        Camera* getCamera(){return camera;}
 
         void setRenderParameters(const RenderParameters& parameters){m_parameters = parameters;}
         const RenderParameters& getRenderParameters() const {return m_parameters;}
@@ -40,9 +37,7 @@ class IMP_API GraphicRenderer
     protected:
 
         RenderParameters m_parameters;
-        Uint32 windowID;
         std::shared_ptr<SceneNode> _root;
-        Camera* camera;
 
         static void setInstance(GraphicRenderer* inst){instance = inst;}
 

@@ -10,11 +10,9 @@ IMPGEARS_BEGIN
 GraphicRenderer* GraphicRenderer::instance = NULL;
 
 //--------------------------------------------------------------
-GraphicRenderer::GraphicRenderer(Uint32 windowID, Camera* camera)
+GraphicRenderer::GraphicRenderer()
 {
     //ctor
-    this->windowID = windowID;
-    this->camera = camera;
     setCenterCursor(false);
 
     GLenum err = glewInit();
@@ -42,11 +40,6 @@ GraphicRenderer::~GraphicRenderer()
 void GraphicRenderer::renderScene(imp::Uint32 passID){
 
     m_parameters.enable();
-
-    if(camera != IMP_NULL)
-	{
-		camera->lookAt();
-	}
 
 	if(_root != nullptr)
 	{

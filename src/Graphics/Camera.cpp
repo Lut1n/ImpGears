@@ -1,12 +1,11 @@
 #include "Graphics/Camera.h"
 
 #include "Graphics/GLcommon.h"
+#include "Graphics/GraphicRenderer.h"
 #include <cmath>
 #include <iostream>
 
 IMPGEARS_BEGIN
-
-//#define CAMERA_DEBUG
 
 #define STRAT_CAM_HEIGHT 70.f
 
@@ -45,17 +44,6 @@ void Camera::lookAt()
 {
     imp::Vector3 pos = m_position;
     imp::Vector3 target = m_position + m_orientation;
-
-    #ifdef CAMERA_DEBUG
-    fprintf(stdout, "<debug> CAM_POS {%f; %f; %f}\n", m_position.getX(), m_position.getY(), m_position.getZ());
-    fprintf(stdout, "<debug> CAM_TARGET {%f; %f; %f}\n", target.getX(), target.getY(), target.getZ());
-    pos = m_position - m_orientation*100.f;
-    target = m_position;
-     #endif
-
-    /*gluLookAt(pos.getX(), pos.getY(), pos.getZ(),
-              target.getX(),target.getY(), target.getZ(),
-              m_upVector.getX(), m_upVector.getY(), m_upVector.getZ());*/
 
     m_viewMatrix = Matrix4::getViewMat(pos, target, m_upVector);
 }
@@ -149,21 +137,6 @@ bool Camera::testFov(float x, float y, float z, float r)
     if( dist > sumR*sumR )return false;
 
     #else
-     ///frustum culling (pyramide fovX)///
-     /*{
-        float r_local = (m_frustumConf.tanfovx*depth);
-        float dist = camDist * cam2posN.dotProduct(m_lateralVector);
-        sumR = (r_local+effectiveR);
-        if( dist*dist > sumR*sumR )return false;
-     }*/
-     ///frustum culling (pyramide fovY)///
-     /*{
-        float r_local = (m_frustumConf.tanfovy*depth);
-        float dist = camDist * cam2posN.dotProduct(m_headVector);
-        sumR = (r_local+effectiveR);
-        if( dist*dist > sumR*sumR )return false;
-     }*/
-     ///frustum culling (pyramide fovX)///
      {
         float r_local = (m_frustumConf.tanfovx*depth);
         float dist = camDist * cam2posN.dotProduct(m_lateralVector);
@@ -248,6 +221,19 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
     }
 
     return Vector3(vx, vy, vz);
+}
+
+
+void Camera::render(imp::Uint32 passID)
+{
+	activate();
+	lookAt();
+	
+	GraphicRenderer* renderer = GraphicRenderer::getInstance();
+	GraphicStatesManager& states = renderer->getStateManager();
+	
+	if(states.getShader())
+		states.getShader()->setView( getViewMatrix() );
 }
 
 IMPGEARS_END

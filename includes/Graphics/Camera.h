@@ -6,6 +6,7 @@
 #include "Math/Matrix4.h"
 #include "Core/impBase.h"
 #include "System/Entity.h"
+#include "Graphics/SceneNode.h"
 
 IMPGEARS_BEGIN
 
@@ -13,7 +14,7 @@ IMPGEARS_BEGIN
 //#define SPHERIC_FOV 1
 
 /// \brief Defines a scene camera.
-class IMP_API Camera : public Entity
+class IMP_API Camera : public Entity, public SceneNode
 {
     public:
 
@@ -32,6 +33,8 @@ class IMP_API Camera : public Entity
             float tanfovy;
         };
 
+        virtual void render(imp::Uint32 passID);
+		
         Camera(bool active = true);
         virtual ~Camera();
 

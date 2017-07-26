@@ -44,8 +44,8 @@ void SceneNode::removeSubNode(const std::shared_ptr<SceneNode>& sceneNode){
 }
 
 //--------------------------------------------------------------
-void SceneNode::renderAll(imp::Uint32 passID){
-
+void SceneNode::renderAll(imp::Uint32 passID)
+{	
     if(!renderActivated)return;
 
     SceneNode::nbDisplayed++;
@@ -57,6 +57,14 @@ void SceneNode::renderAll(imp::Uint32 passID){
 	GraphicStatesManager& states = renderer->getStateManager();
 	
 	states.pushState( _state.get() );
+	if(states.getShader())
+	{
+		states.getShader()->setModel(modelMat);
+		/*if(imp::Camera::getActiveCamera())
+			states.getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );*/
+		if(states.getParameters())
+			states.getShader()->setProjection( states.getParameters()->getProjectionMatrix() );
+	}
 	
     render(passID);
 

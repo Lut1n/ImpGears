@@ -89,7 +89,7 @@ void GraphicStatesManager::pushState(GraphicState* st)
 void GraphicStatesManager::popState()
 {
 	_stack.pop_back();
-	applyCurrentState();
+	// applyCurrentState();
 }
 
 //--------------------------------------------------------------

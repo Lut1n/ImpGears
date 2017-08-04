@@ -37,6 +37,7 @@ class IMP_API Vector3
 
         Vector3& operator*=(const float scalar);
         Vector3 operator*(const float scalar) const;
+        Vector3 operator/(const float scalar) const;
 
         Vector3& operator=(const Vector3& other);
         Vector3& operator+=(const Vector3& other);

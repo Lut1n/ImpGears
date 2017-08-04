@@ -58,6 +58,12 @@ Vector3 Vector3::operator*(const float scalar) const
 }
 
 //--------------------------------------------------------------
+Vector3 Vector3::operator/(const float scalar) const
+{
+    return Vector3(m_x/scalar, m_y/scalar, m_z/scalar);
+}
+
+//--------------------------------------------------------------
 Vector3& Vector3::operator=(const Vector3& other)
 {
     m_x = other.m_x;
@@ -119,8 +125,11 @@ void Vector3::rotationX(float rx)
             |   0         sin     cos     |
     */
 
-    m_y = m_y*cosf(rx) - m_z*sinf(rx);
-    m_z = m_y*sinf(rx) + m_z*cosf(rx);
+    float ny = m_y*cosf(rx) - m_z*sinf(rx);
+    float nz = m_y*sinf(rx) + m_z*cosf(rx);
+	
+	m_y  =ny;
+	m_z = nz;
 }
 
 //--------------------------------------------------------------
@@ -132,8 +141,11 @@ void Vector3::rotationY(float ry)
             |   -sin     0        cos     |
     */
 
-    m_x = m_x*cosf(ry) - m_z*sinf(ry);
-    m_z = m_y*sinf(ry) + m_z*cosf(ry);
+	float nx = m_x*cosf(ry) + m_z*sinf(ry);
+	float nz = -m_y*sinf(ry) + m_z*cosf(ry);
+	
+	m_x  =nx;
+	m_z = nz;
 }
 
 //--------------------------------------------------------------
@@ -145,8 +157,11 @@ void Vector3::rotationZ(float rz)
             |   0         0        1      |
     */
 
-    m_x = m_x*cosf(rz) - m_y*sinf(rz);
-    m_y = m_x*sinf(rz) + m_y*cosf(rz);
+    float nx = m_x*cosf(rz) - m_y*sinf(rz);
+    float ny = m_x*sinf(rz) + m_y*cosf(rz);
+	
+	m_x = nx;
+	m_y = ny;
 }
 
 //--------------------------------------------------------------

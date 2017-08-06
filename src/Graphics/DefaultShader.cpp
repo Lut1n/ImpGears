@@ -2,6 +2,10 @@
 
 IMPGEARS_BEGIN
 
+
+DefaultShader* DefaultShader::_instance = IMP_NULL;
+
+
 //--------------------------------------------------------------
 DefaultShader::DefaultShader():
     Shader::Shader(vertexCodeSource, fragmentCodeSource)
@@ -11,6 +15,12 @@ DefaultShader::DefaultShader():
 //--------------------------------------------------------------
 DefaultShader::~DefaultShader()
 {
+}
+
+//--------------------------------------------------------------
+DefaultShader* DefaultShader::getInstance()
+{
+	return _instance;
 }
 
 //--------------------------------------------------------------

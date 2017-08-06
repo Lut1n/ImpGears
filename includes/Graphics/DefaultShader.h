@@ -14,6 +14,10 @@ class IMP_API DefaultShader : public Shader
         DefaultShader();
         virtual ~DefaultShader();
 
+		static DefaultShader* getInstance();
+		
+		static DefaultShader* _instance;
+		
     protected:
     private:
 

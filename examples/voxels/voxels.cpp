@@ -61,7 +61,7 @@ int main(void)
 	const unsigned int winH = 600;
 
 	imp::StrategicCamera cam;
-	cam.move(imp::Vector3(-40.0,-130.0,0.0));
+	cam.move(imp::Vector3(-40.0,-100.0,-50.0));
 	imp::VoxelWorld* world;
 
     imp::State state;
@@ -86,7 +86,7 @@ int main(void)
 
 
     /// atlas - color
-    imp::Texture* atlasColor = BmpLoader::loadFromFile("data/atlas-color.bmp");
+    imp::Texture* atlasColor = BmpLoader::loadFromFile("../commun/atlas-color.bmp");
     atlasColor->setSmooth(true);
     atlasColor->setRepeated(false);
     atlasColor->setMipmap(true, 9);

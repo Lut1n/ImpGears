@@ -1,11 +1,12 @@
 #ifndef IMP_VOXELWORLD_H
 #define IMP_VOXELWORLD_H
 
-#include "../Core/Lock.h"
-#include "../Core/impBase.h"
-#include "../Math/Vector3.h"
-#include "System/Streamable.h"
-#include "Graphics/SceneNode.h"
+#include <Core/Lock.h>
+#include <Core/impBase.h>
+#include <Math/Vector3.h>
+#include <System/Streamable.h>
+#include <Graphics/SceneNode.h>
+
 #include "ChunkData.h"
 
 IMPGEARS_BEGIN

@@ -1,12 +1,10 @@
-#include "Data/VBOChunk.h"
-#include "Graphics/Camera.h"
-#include "Graphics/GLcommon.h"
+#include <Graphics/Camera.h>
+#include <Graphics/GLcommon.h>
+#include <Graphics/DefaultShader.h>
+#include <Graphics/GraphicRenderer.h>
+#include <Math/Matrix3.h>
 
-#include "Graphics/DeferredShader.h"
-#include "Graphics/ShadowBufferShader.h"
-#include "Graphics/GraphicRenderer.h"
-
-#include "Math/Matrix3.h"
+#include "VBOChunk.h"
 
 IMPGEARS_BEGIN
 
@@ -262,7 +260,6 @@ void VBOChunk::BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuf
     if(/*vboSize > 0 && */getVBOID() == 0)
     {
         requestVBO(vboSize);
-        GL_CHECKERROR("request VBO");
     }
     /*else if(vboSize == 0 && getVBOID() > 0)
     {
@@ -273,19 +270,18 @@ void VBOChunk::BuildBuffer(FloatBuffer& _vertex, FloatBuffer& _normals, FloatBuf
     if(getVBOSize() != vboSize)
     {
         resizeVBO(vboSize);
-        GL_CHECKERROR("resize VBO");
     }
 
     int vertexBuffSize = _vertex.size()*sizeof(float);
     int normalBuffSize = _normals.size()*sizeof(float);
     int texcooBuffSize = _textCoords.size()*sizeof(float);
 
-    m_normalOffset = vertexBuffSize;
-    m_texCoordOffset = vertexBuffSize + normalBuffSize;
+    m_texCoordOffset = vertexBuffSize;
+    m_normalOffset = vertexBuffSize + normalBuffSize;
 
-    setData(_vertex.data(), vertexBuffSize, 0);
-    setData(_normals.data(), normalBuffSize, m_normalOffset);
+    setVertices(_vertex.data(), vertexBuffSize);
     setData(_textCoords.data(), texcooBuffSize, m_texCoordOffset);
+    // setData(_normals.data(), normalBuffSize, m_normalOffset);
 }
 
 //--------------------------------------------------------------
@@ -299,33 +295,8 @@ void VBOChunk::render(imp::Uint32 passID)
     if(getVBOSize() > 0
        && imp::Camera::getActiveCamera()->testFov(position.getX(),position.getY(),position.getZ(),CHUNK_DIM/2) )
     {
-        bindVBO(*this);
-        ///vertex
-        enableVertexArray(0);
-        ///normals
-        enableNormalArray(m_normalOffset);
-        ///texture coord
-        enableTexCoordArray(m_texCoordOffset);
-
-        if(passID == 0)
-        {
-            ShadowBufferShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
-        }
-        else if(passID == 3)
-        {
-            imp::DeferredShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
-            imp::DeferredShader::instance->setMatrix4Parameter("u_normal", getNormalMatrix());
-        }
-
-        int count = m_normalOffset/sizeof(float);
-        count /= 3;
-		#ifdef GRID_DEBUG
-        glDrawArrays(GL_LINES, 0, count);
-        #else
-        glDrawArrays(GL_QUADS, 0, count);
-        #endif
-
-        unbindVBO();
+        imp::DefaultShader::_instance->setMatrix4Parameter("u_model", getModelMatrix());
+		drawVBO();
     }
 }
 

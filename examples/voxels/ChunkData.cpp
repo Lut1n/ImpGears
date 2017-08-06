@@ -1,4 +1,4 @@
-#include "Data/ChunkData.h"
+#include "ChunkData.h"
 
 //--------------------------------------------------------------
 #define COORD_TO_INDEX(x,y,z) (x*CHUNK_SURFACE + y*CHUNK_DIM + z)

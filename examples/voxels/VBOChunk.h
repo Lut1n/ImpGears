@@ -14,15 +14,15 @@ The next step is to reduce the number of rendered faces by choosing a simpler me
 
 #include <vector>
 
-#include "Core/impBase.h"
-#include "Math/Matrix4.h"
+#include <Core/impBase.h>
+#include <Math/Matrix4.h>
+#include <Graphics/VBOData.h>
+#include <Graphics/Texture.h>
+#include <Graphics/SceneNode.h>
 
-#include "Graphics/VBOData.h"
-#include "Graphics/Texture.h"
-#include "Data/VoxelWorld.h"
-#include "Data/ChunkData.h"
+#include "VoxelWorld.h"
+#include "ChunkData.h"
 
-#include "Graphics/SceneNode.h"
 
 #define VOXEL_RADIUS 0.5f
 

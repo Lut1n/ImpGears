@@ -1,8 +1,9 @@
 #include <ctime>
 #include <stdlib.h>
 
-#include "Data/VoxelWordGenerator.h"
 #include <Math/Perlin.h>
+
+#include "VoxelWordGenerator.h"
 
 IMPGEARS_BEGIN
 

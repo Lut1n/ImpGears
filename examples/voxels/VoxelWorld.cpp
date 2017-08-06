@@ -1,5 +1,5 @@
-#include "Data/VoxelWorld.h"
-#include "Data/VBOChunk.h"
+#include "VoxelWorld.h"
+#include "VBOChunk.h"
 
 IMPGEARS_BEGIN
 

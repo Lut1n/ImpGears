@@ -11,9 +11,10 @@ Two main functions can be used.
 #ifndef IMP_WORDGENERATOR_H
 #define IMP_WORDGENERATOR_H
 
-#include "Core/impBase.h"
-#include "Data/VoxelWorld.h"
-#include "Graphics/ImageData.h"
+#include <Core/impBase.h>
+#include <Graphics/ImageData.h>
+
+#include "VoxelWorld.h"
 
 IMPGEARS_BEGIN
 

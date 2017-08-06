@@ -1,9 +1,9 @@
 #ifndef CHUNKDATA_H
 #define CHUNKDATA_H
 
-#include "Core/impBase.h"
-#include "Math/Vector3.h"
-#include "System/Streamable.h"
+#include <Core/impBase.h>
+#include <Math/Vector3.h>
+#include <System/Streamable.h>
 
 #define CHUNK_DIM 32
 #define CHUNK_SURFACE CHUNK_DIM*CHUNK_DIM

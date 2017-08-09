@@ -1,7 +1,7 @@
 #include <ctime>
 #include <stdlib.h>
 
-#include <Math/Perlin.h>
+#include <Core/Perlin.h>
 
 #include "VoxelWordGenerator.h"
 

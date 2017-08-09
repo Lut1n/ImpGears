@@ -12,7 +12,7 @@ Two main functions can be used.
 #define IMP_WORDGENERATOR_H
 
 #include <Core/impBase.h>
-#include <Graphics/ImageData.h>
+#include <SceneGraph/ImageData.h>
 
 #include "VoxelWorld.h"
 

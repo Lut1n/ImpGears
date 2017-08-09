@@ -1,17 +1,17 @@
 #include <sstream>
 
-#include "Graphics/BmpLoader.h"
-#include "Graphics/DefaultShader.h"
-#include "Graphics/GraphicRenderer.h"
-#include "Graphics/RenderTarget.h"
+#include <SceneGraph/BmpLoader.h>
+#include <SceneGraph/DefaultShader.h>
+#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/RenderTarget.h>
 
 #include "Core/Timer.h"
 #include "Core/State.h"
 
-#include "System/SFMLContextInterface.h"
-#include "Graphics/ScreenVertex.h"
+#include "Utils/SFMLContextInterface.h"
+#include <SceneGraph/ScreenVertex.h>
 
-#include <System/FileInfo.h>
+#include <Core/FileInfo.h>
 
 #include "Gui/GuiImage.h"
 #include "Gui/GuiText.h"
@@ -30,9 +30,9 @@
 #include "Gui/GuiShader.h"
 #include "Gui/GuiEventHandler.h"
 
-#include <Data/ImageUtils.h>
-#include <Math/Perlin.h>
-#include <Math/BasicFunctions.h>
+#include <Texture/ImageUtils.h>
+#include <Core/Perlin.h>
+#include <Core/BasicFunctions.h>
 
 using namespace imp;
 

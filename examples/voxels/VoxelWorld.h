@@ -3,9 +3,9 @@
 
 #include <Core/Lock.h>
 #include <Core/impBase.h>
-#include <Math/Vector3.h>
-#include <System/Streamable.h>
-#include <Graphics/SceneNode.h>
+#include <Core/Vector3.h>
+#include <Core/Streamable.h>
+#include <SceneGraph/SceneNode.h>
 
 #include "ChunkData.h"
 

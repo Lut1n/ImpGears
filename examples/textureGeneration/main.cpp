@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
 
-#include <Graphics/ImageData.h>
-#include <Graphics/BmpLoader.h>
-#include <Data/ImageUtils.h>
-#include <Data/JsonReaderWriter.h>
-#include <Math/Perlin.h>
-#include <System/FileInfo.h>
-#include <Math/BasicFunctions.h>
+#include <SceneGraph/ImageData.h>
+#include <SceneGraph/BmpLoader.h>
+#include <Texture/ImageUtils.h>
+#include <Utils/JsonReaderWriter.h>
+#include <Core/Perlin.h>
+#include <Core/FileInfo.h>
+#include <Core/BasicFunctions.h>
 
 #include <map>
 

@@ -6,18 +6,18 @@
 #include "Core/State.h"
 #include "Core/frustumParams.h"
 
-#include "System/SFMLContextInterface.h"
-#include "System/EntityManager.h"
+#include "Utils/SFMLContextInterface.h"
+#include <Core/EntityManager.h>
 
 #include "VBOChunk.h"
 #include "VoxelWorld.h"
 #include "VoxelWordGenerator.h"
 
-#include "Graphics/BmpLoader.h"
-#include "Graphics/StrategicCamera.h"
-#include "Graphics/DefaultShader.h"
-#include "Graphics/GraphicRenderer.h"
-#include "Graphics/RenderTarget.h"
+#include <SceneGraph/BmpLoader.h>
+#include <SceneGraph/StrategicCamera.h>
+#include <SceneGraph/DefaultShader.h>
+#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/RenderTarget.h>
 
 #define FPS_LIMIT 60
 
@@ -86,7 +86,7 @@ int main(void)
 
 
     /// atlas - color
-    imp::Texture* atlasColor = BmpLoader::loadFromFile("../commun/atlas-color.bmp");
+    imp::Texture* atlasColor = BmpLoader::loadFromFile("../common/atlas-color.bmp");
     atlasColor->setSmooth(true);
     atlasColor->setRepeated(false);
     atlasColor->setMipmap(true, 9);

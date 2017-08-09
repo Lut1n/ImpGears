@@ -1,8 +1,8 @@
-#include <Graphics/Camera.h>
-#include <Graphics/GLcommon.h>
-#include <Graphics/DefaultShader.h>
-#include <Graphics/GraphicRenderer.h>
-#include <Math/Matrix3.h>
+#include <SceneGraph/Camera.h>
+#include <SceneGraph/OpenGL.h>
+#include <SceneGraph/DefaultShader.h>
+#include <SceneGraph/GraphicRenderer.h>
+#include <Core/Matrix3.h>
 
 #include "VBOChunk.h"
 

@@ -15,7 +15,7 @@ nodal: nodal.o
 	$(CXX) -g -o nodal nodal.o $(LDFLAGS)
 
 nodal.o: nodal.cpp
-	$(CXX) $(CXXFLAGS) -g -I ../../includes -c nodal.cpp -o nodal.o
+	$(CXX) $(CXXFLAGS) -g -I ../../include/ImpGears -c nodal.cpp -o nodal.o
 
 .PHONY : clean
 

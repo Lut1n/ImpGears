@@ -15,7 +15,7 @@ test: test.o
 	$(CXX) -o test test.o $(LDFLAGS)
 
 test.o: main.cpp
-	$(CXX) -o test.o $(CXXFLAGS) -I ../../includes -c main.cpp
+	$(CXX) -o test.o $(CXXFLAGS) -I ../../include/ImpGears -c main.cpp
 
 .PHONY : clean
 

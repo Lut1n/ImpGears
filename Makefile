@@ -1,4 +1,4 @@
-DEBUG=no
+DEBUG=yes
 CXX=g++
 
 ifeq ($(DEBUG),yes)
@@ -9,17 +9,14 @@ else
 	MACROS=-DIMPGEARS_BUILD_DLL
 endif
 
-### old flags
-#LDFLAGS=-pthread -lpng -lGL -lGLU -lGLEW -lsfml-graphics -lsfml-window -lsfml-system
-
 ### mingw64
-LDFLAGS= -lglfw3 -lglew32 -lopengl32 -pthread
+LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system -pthread -lpng  -lglew32 -lopengl32
 
 ### linux
-#LDFLAGS=-pthread -lGL -lGLEW -lglfw3
+#LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system -pthread -lpng  -pthread -lGLEW -lGL
 
-SRCDIR=src
-INCDIR=includes
+SRCDIR=src/ImpGears
+INCDIR=include/ImpGears
 OBJDIR=obj
 OUTPUT=libimpgears.so
 SRC=$(shell find $(SRCDIR) -type f -name '*.cpp')
@@ -30,7 +27,7 @@ MKDIR=mkdir -p
 all: $(OUTPUT)
 
 $(OUTPUT): $(OBJ)
-	$(CXX) -o $@ -shared $^ $(LDFLAGS)
+	$(CXX) -g -o $@ -shared $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(OBJDIR)
 	$(MKDIR) "$(@D)"

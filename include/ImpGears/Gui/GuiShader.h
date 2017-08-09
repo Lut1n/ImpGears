@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "Graphics/Shader.h"
+#include <SceneGraph/Shader.h>
 
 IMPGEARS_BEGIN
 

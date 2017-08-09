@@ -1,5 +1,5 @@
-#include <Math/Perlin.h>
-#include <Math/BasicFunctions.h>
+#include <Core/Perlin.h>
+#include <Core/BasicFunctions.h>
 
 #include <ctime>
 #include <cstdlib>

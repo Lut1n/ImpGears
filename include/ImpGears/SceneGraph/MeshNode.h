@@ -2,8 +2,8 @@
 #define IMP_MESHNODE_H
 
 #include "Core/impBase.h"
-#include "Graphics/SceneNode.h"
-#include "Data/MeshModel.h"
+#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/MeshModel.h>
 
 IMPGEARS_BEGIN
 

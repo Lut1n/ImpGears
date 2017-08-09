@@ -1,7 +1,7 @@
-#include "Graphics/FreeFlyCamera.h"
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/FreeFlyCamera.h>
+#include <SceneGraph/OpenGL.h>
 #include "Core/State.h"
-#include "System/EvnContextInterface.h"
+#include <Utils/EvnContextInterface.h>
 
 #include <cmath>
 

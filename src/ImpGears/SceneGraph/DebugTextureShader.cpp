@@ -1,4 +1,4 @@
-#include "Graphics/DebugTextureShader.h"
+#include <SceneGraph/DebugTextureShader.h>
 
 IMPGEARS_BEGIN
 

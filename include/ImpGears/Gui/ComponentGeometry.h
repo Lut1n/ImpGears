@@ -2,8 +2,8 @@
 #define IMP_GUI_GEOMETRY_H
 
 #include "Core/impBase.h"
-#include "Graphics/VBOData.h"
-#include "Math/Rectangle.h"
+#include <SceneGraph/VBOData.h>
+#include <Core/Rectangle.h>
 
 IMPGEARS_BEGIN
 

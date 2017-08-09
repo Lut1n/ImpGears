@@ -2,7 +2,7 @@
 #define IMP_MATRIX3_H
 
 #include "Core/impBase.h"
-#include "../Math/Vector3.h"
+#include <Core/Vector3.h>
 
 IMPGEARS_BEGIN
 

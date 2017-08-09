@@ -1,7 +1,7 @@
 #ifndef SFMLCONTEXTINTERFACE_H
 #define SFMLCONTEXTINTERFACE_H
 
-#include "System/EvnContextInterface.h"
+#include <Utils/EvnContextInterface.h>
 
 #include <vector>
 

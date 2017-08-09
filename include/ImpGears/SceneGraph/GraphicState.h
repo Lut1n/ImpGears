@@ -2,9 +2,9 @@
 #define IMP_GRAPHICSTATE_H
 
 #include "Core/impBase.h"
-#include "Graphics/RenderTarget.h"
-#include "Graphics/RenderParameters.h"
-#include "Graphics/Shader.h"
+#include <SceneGraph/RenderTarget.h>
+#include <SceneGraph/RenderParameters.h>
+#include <SceneGraph/Shader.h>
 
 #include <vector>
 #include <memory>

@@ -1,9 +1,9 @@
-#include "Math/Matrix3.h"
+#include <Core/Matrix3.h>
 
 #include <cstring>
 #include <cmath>
 
-#include "Math/Matrix4.h"
+#include <Core/Matrix4.h>
 
 IMPGEARS_BEGIN
 

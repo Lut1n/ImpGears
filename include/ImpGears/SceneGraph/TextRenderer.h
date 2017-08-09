@@ -2,8 +2,8 @@
 #define IMP_TEXT_RENDERER
 
 #include <Core/impBase.h>
-#include <Data/JsonReaderWriter.h>
-#include <Graphics/ImageData.h>
+#include <Utils/JsonReaderWriter.h>
+#include <SceneGraph/ImageData.h>
 
 IMPGEARS_BEGIN
 

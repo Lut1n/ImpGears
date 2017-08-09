@@ -2,7 +2,7 @@
 #define IMP_ENTITY_H
 
 #include "Core/impBase.h"
-#include "EvnContextInterface.h"
+#include <Utils/EvnContextInterface.h>
 
 IMPGEARS_BEGIN
 

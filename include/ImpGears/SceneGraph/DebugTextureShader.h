@@ -2,7 +2,7 @@
 #define IMP_DEBUGTEXTURESHADER_H
 
 #include "Core/impBase.h"
-#include "Graphics/Shader.h"
+#include <SceneGraph/Shader.h>
 
 IMPGEARS_BEGIN
 

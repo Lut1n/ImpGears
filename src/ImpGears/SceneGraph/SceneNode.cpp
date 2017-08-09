@@ -1,6 +1,6 @@
-#include "Graphics/GraphicRenderer.h"
-#include "Graphics/SceneNode.h"
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/OpenGL.h>
 #include <iostream>
 
 #include <cmath>

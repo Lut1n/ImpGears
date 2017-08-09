@@ -1,6 +1,6 @@
-#include "Data/MeshNode.h"
-#include "Graphics/DeferredShader.h"
-#include "Graphics/ShadowBufferShader.h"
+#include <SceneGraph/MeshNode.h>
+#include <SceneGraph/DeferredShader.h>
+#include <SceneGraph/ShadowBufferShader.h>
 
 IMPGEARS_BEGIN
 

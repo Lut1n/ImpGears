@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Graphics/GraphicState.h"
+#include <SceneGraph/GraphicState.h>
 
 IMPGEARS_BEGIN
 

@@ -1,5 +1,5 @@
 #include "Gui/GuiText.h"
-#include "Graphics/TextRenderer.h"
+#include <SceneGraph/TextRenderer.h>
 
 IMPGEARS_BEGIN
 

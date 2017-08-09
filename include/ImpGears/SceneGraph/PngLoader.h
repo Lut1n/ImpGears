@@ -6,8 +6,8 @@
 // #include "Graphics/png.h"
 #include <cstdio>
 #include <cstdlib>
-#include "Graphics/Texture.h"
-#include "Graphics/ImageData.h"
+#include <SceneGraph/Texture.h>
+#include <SceneGraph/ImageData.h>
 
 
 typedef struct IMP_API

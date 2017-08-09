@@ -2,7 +2,7 @@
 #define IMP_LAYOUT_STATE_H
 
 #include "Core/impBase.h"
-#include "Math/Rectangle.h"
+#include <Core/Rectangle.h>
 
 IMPGEARS_BEGIN
 

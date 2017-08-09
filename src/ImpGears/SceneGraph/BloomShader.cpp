@@ -1,4 +1,4 @@
-#include "Graphics/BloomShader.h"
+#include <SceneGraph/BloomShader.h>
 
 IMPGEARS_BEGIN
 

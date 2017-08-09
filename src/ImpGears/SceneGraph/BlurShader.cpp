@@ -1,4 +1,4 @@
-#include "Graphics/BlurShader.h"
+#include <SceneGraph/BlurShader.h>
 
 IMPGEARS_BEGIN
 

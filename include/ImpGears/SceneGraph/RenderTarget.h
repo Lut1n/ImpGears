@@ -2,8 +2,8 @@
 #define IMP_RENDERTARGET_H
 
 #include "Core/impBase.h"
-#include "Graphics/GLcommon.h"
-#include "Graphics/Texture.h"
+#include <SceneGraph/OpenGL.h>
+#include <SceneGraph/Texture.h>
 
 IMPGEARS_BEGIN
 

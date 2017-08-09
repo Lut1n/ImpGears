@@ -1,4 +1,4 @@
-#include <Graphics/BmpLoader.h>
+#include <SceneGraph/BmpLoader.h>
 
 #include <cstdlib>
 #include <cstring>

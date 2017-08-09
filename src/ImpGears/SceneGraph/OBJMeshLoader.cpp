@@ -1,5 +1,5 @@
-#include "Data/OBJMeshLoader.h"
-#include <System/Parser.h>
+#include <SceneGraph/OBJMeshLoader.h>
+#include <Core/Parser.h>
 #include <vector>
 #include <fstream>
 #include <string>

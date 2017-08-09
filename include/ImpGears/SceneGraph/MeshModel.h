@@ -2,7 +2,7 @@
 #define IMP_MESHMODEL_H
 
 #include "Core/impBase.h"
-#include "Graphics/VBOData.h"
+#include <SceneGraph/VBOData.h>
 
 IMPGEARS_BEGIN
 

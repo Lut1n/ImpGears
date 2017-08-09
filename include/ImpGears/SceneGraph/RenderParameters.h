@@ -2,10 +2,10 @@
 #define IMP_RENDERPARAMETERS_H
 
 #include "Core/impBase.h"
-#include "Math/Vector3.h"
-#include "Math/Matrix4.h"
+#include <Core/Vector3.h>
+#include <Core/Matrix4.h>
 
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/OpenGL.h>
 
 IMPGEARS_BEGIN
 

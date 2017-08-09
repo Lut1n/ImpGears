@@ -1,8 +1,8 @@
 #ifndef IMP_STRATEGICCAMERA_H
 #define IMP_STRATEGICCAMERA_H
 
-#include "Graphics/GLcommon.h"
-#include "Graphics/Camera.h"
+#include <SceneGraph/OpenGL.h>
+#include <SceneGraph/Camera.h>
 #include "Core/KeyBindingConfig.h"
 
 IMPGEARS_BEGIN

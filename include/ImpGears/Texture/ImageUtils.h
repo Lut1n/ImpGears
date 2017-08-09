@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "Core/impBase.h"
-#include "Graphics/ImageData.h"
-#include <Math/BasicFunctions.h>
+#include <SceneGraph/ImageData.h>
+#include <Core/BasicFunctions.h>
 
 #include <ctime>
 #include <cmath>

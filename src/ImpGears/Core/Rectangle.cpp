@@ -1,4 +1,4 @@
-#include "Math/Rectangle.h"
+#include <Core/Rectangle.h>
 
 IMPGEARS_BEGIN
 

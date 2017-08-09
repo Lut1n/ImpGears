@@ -1,5 +1,5 @@
-#include "Graphics/VBOManager.h"
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/VBOManager.h>
+#include <SceneGraph/OpenGL.h>
 
 #include <iostream>
 

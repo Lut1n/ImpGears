@@ -2,11 +2,11 @@
 #define IMP_GRAPHICRENDERER_H
 
 #include "Core/impBase.h"
-#include "Math/Matrix4.h"
-#include "System/EvnContextInterface.h"
-#include "Graphics/SceneNode.h"
-#include "Graphics/Camera.h"
-#include "Graphics/RenderParameters.h"
+#include <Core/Matrix4.h>
+#include <Utils/EvnContextInterface.h>
+#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Camera.h>
+#include <SceneGraph/RenderParameters.h>
 
 IMPGEARS_BEGIN
 

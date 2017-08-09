@@ -1,4 +1,4 @@
-#include "System/Entity.h"
+#include <Core/Entity.h>
 
 IMPGEARS_BEGIN
 

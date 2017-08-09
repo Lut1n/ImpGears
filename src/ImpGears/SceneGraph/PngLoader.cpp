@@ -1,4 +1,4 @@
-#include "Graphics/PngLoader.h"
+#include <SceneGraph/PngLoader.h>
 
 PngLoader::PngLoader()
 {

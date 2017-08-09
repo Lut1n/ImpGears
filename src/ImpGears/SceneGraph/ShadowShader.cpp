@@ -1,4 +1,4 @@
-#include "Graphics/ShadowShader.h"
+#include <SceneGraph/ShadowShader.h>
 
 IMPGEARS_BEGIN
 

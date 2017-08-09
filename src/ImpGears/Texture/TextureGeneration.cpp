@@ -1,4 +1,4 @@
-#include <Data/TextureGeneration.h>
+#include <Texture/TextureGeneration.h>
 
 #include <iostream>
 #include <cstdlib>

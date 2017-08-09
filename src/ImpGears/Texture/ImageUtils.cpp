@@ -1,5 +1,5 @@
-#include <Data/ImageUtils.h>
-#include <Math/Perlin.h>
+#include <Texture/ImageUtils.h>
+#include <Core/Perlin.h>
 
 #include <iostream>
 

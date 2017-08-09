@@ -1,4 +1,4 @@
-#include "Graphics/ImageData.h"
+#include <SceneGraph/ImageData.h>
 
 #include <cstdlib>
 #include <cstring>

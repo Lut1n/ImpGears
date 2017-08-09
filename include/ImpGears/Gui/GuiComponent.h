@@ -3,12 +3,12 @@
 
 #include "Core/impBase.h"
 #include "Core/State.h"
-#include "System/EvnContextInterface.h"
+#include <Utils/EvnContextInterface.h>
 
-#include "Graphics/SceneNode.h"
-#include "Graphics/Shader.h"
+#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Shader.h>
 
-#include "Math/Rectangle.h"
+#include <Core/Rectangle.h>
 
 #include <Gui/ComponentGeometry.h>
 #include <Gui/Layout.h>

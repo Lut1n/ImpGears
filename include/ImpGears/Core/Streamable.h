@@ -7,7 +7,7 @@ Define an interface for reading or writing a object from or to a file.
 #ifndef IMP_STREAMABLE_H
 #define IMP_STREAMABLE_H
 
-#include "System/Parser.h"
+#include <Core/Parser.h>
 
 IMPGEARS_BEGIN
 

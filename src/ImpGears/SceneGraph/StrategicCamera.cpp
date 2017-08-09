@@ -1,4 +1,4 @@
-#include "Graphics/StrategicCamera.h"
+#include <SceneGraph/StrategicCamera.h>
 #include "Core/State.h"
 
 IMPGEARS_BEGIN

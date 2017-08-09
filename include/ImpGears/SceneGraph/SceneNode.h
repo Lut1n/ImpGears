@@ -4,10 +4,10 @@
 #include "Core/impBase.h"
 #include <list>
 #include <memory>
-#include "Math/Vector3.h"
-#include "Math/Matrix4.h"
-#include "System/EvnContextInterface.h"
-#include "Graphics/GraphicState.h"
+#include <Core/Vector3.h>
+#include <Core/Matrix4.h>
+#include <Utils/EvnContextInterface.h>
+#include <SceneGraph/GraphicState.h>
 
 IMPGEARS_BEGIN
 

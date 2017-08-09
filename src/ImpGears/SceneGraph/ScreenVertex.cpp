@@ -1,4 +1,4 @@
-#include <Graphics/ScreenVertex.h>
+#include <SceneGraph/ScreenVertex.h>
 
 IMPGEARS_BEGIN
 

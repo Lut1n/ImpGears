@@ -2,7 +2,7 @@
 #define IMP_GUI_EVENT_H
 
 #include "Core/impBase.h"
-#include "System/EvnContextInterface.h"
+#include <Utils/EvnContextInterface.h>
 
 IMPGEARS_BEGIN
 

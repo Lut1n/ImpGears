@@ -1,5 +1,5 @@
-#include "Graphics/Texture.h"
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/Texture.h>
+#include <SceneGraph/OpenGL.h>
 
 #include <cstring>
 #include <iostream>

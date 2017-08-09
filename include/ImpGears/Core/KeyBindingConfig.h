@@ -2,7 +2,7 @@
 #define IMP_KEYBINDINGCONFIG_H
 
 #include "Core/impBase.h"
-#include "System/Streamable.h"
+#include <Core/Streamable.h>
 
 #include <map>
 #include <string>

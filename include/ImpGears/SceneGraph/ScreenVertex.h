@@ -2,8 +2,8 @@
 #define IMP_SCREENVERTEX_H
 
 #include "Core/impBase.h"
-#include "Graphics/VBOData.h"
-#include "Graphics/SceneNode.h"
+#include <SceneGraph/VBOData.h>
+#include <SceneGraph/SceneNode.h>
 
 IMPGEARS_BEGIN
 

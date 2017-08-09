@@ -1,6 +1,6 @@
-#include <Graphics/TextRenderer.h>
+#include <SceneGraph/TextRenderer.h>
 
-#include <Graphics/BmpLoader.h>
+#include <SceneGraph/BmpLoader.h>
 
 IMPGEARS_BEGIN
 

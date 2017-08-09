@@ -1,8 +1,8 @@
-#include "Graphics/RenderTarget.h"
-#include "System/EvnContextInterface.h"
+#include <SceneGraph/RenderTarget.h>
+#include <Utils/EvnContextInterface.h>
 #include <cstdio>
 
-#include "Graphics/Camera.h"
+#include <SceneGraph/Camera.h>
 
 #include <iostream>
 

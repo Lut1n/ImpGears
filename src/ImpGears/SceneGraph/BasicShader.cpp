@@ -1,4 +1,4 @@
-#include "Graphics/BasicShader.h"
+#include <SceneGraph/BasicShader.h>
 
 IMPGEARS_BEGIN
 

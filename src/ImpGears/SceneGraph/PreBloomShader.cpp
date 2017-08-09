@@ -1,4 +1,4 @@
-#include "Graphics/PreBloomShader.h"
+#include <SceneGraph/PreBloomShader.h>
 
 IMPGEARS_BEGIN
 

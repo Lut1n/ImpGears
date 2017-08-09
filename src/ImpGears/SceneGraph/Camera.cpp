@@ -1,7 +1,7 @@
-#include "Graphics/Camera.h"
+#include <SceneGraph/Camera.h>
 
-#include "Graphics/GLcommon.h"
-#include "Graphics/GraphicRenderer.h"
+#include <SceneGraph/OpenGL.h>
+#include <SceneGraph/GraphicRenderer.h>
 #include <cmath>
 #include <iostream>
 

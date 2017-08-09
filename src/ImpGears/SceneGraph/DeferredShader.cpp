@@ -1,4 +1,4 @@
-#include "Graphics/DeferredShader.h"
+#include <SceneGraph/DeferredShader.h>
 
 IMPGEARS_BEGIN
 

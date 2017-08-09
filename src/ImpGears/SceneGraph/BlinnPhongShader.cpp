@@ -1,4 +1,4 @@
-#include "Graphics/BlinnPhongShader.h"
+#include <SceneGraph/BlinnPhongShader.h>
 
 IMPGEARS_BEGIN
 

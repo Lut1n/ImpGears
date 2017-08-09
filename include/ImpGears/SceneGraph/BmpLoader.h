@@ -2,8 +2,8 @@
 #define IMP_BMPLOADER_H
 
 #include <Core/impBase.h>
-#include <Graphics/ImageData.h>
-#include "Graphics/Texture.h"
+#include <SceneGraph/ImageData.h>
+#include <SceneGraph/Texture.h>
 
 #include <iostream>
 #include <fstream>

@@ -1,12 +1,12 @@
 #ifndef IMP_CAMERA_H
 #define IMP_CAMERA_H
 
-#include "System/EvnContextInterface.h"
-#include "Math/Vector3.h"
-#include "Math/Matrix4.h"
+#include <Utils/EvnContextInterface.h>
+#include <Core/Vector3.h>
+#include <Core/Matrix4.h>
 #include "Core/impBase.h"
-#include "System/Entity.h"
-#include "Graphics/SceneNode.h"
+#include <Core/Entity.h>
+#include <SceneGraph/SceneNode.h>
 
 IMPGEARS_BEGIN
 

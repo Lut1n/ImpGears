@@ -1,5 +1,5 @@
 #include "Gui/GuiImage.h"
-#include "Graphics/BmpLoader.h"
+#include <SceneGraph/BmpLoader.h>
 
 IMPGEARS_BEGIN
 

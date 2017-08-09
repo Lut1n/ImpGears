@@ -2,7 +2,7 @@
 #define IMP_TEXTURE_H
 
 #include "Core/impBase.h"
-#include "Graphics/ImageData.h"
+#include <SceneGraph/ImageData.h>
 
 #include <string>
 

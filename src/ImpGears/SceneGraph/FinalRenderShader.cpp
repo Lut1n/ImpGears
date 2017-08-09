@@ -1,4 +1,4 @@
-#include "Graphics/FinalRenderShader.h"
+#include <SceneGraph/FinalRenderShader.h>
 
 IMPGEARS_BEGIN
 

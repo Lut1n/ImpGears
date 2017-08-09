@@ -1,4 +1,4 @@
-#include "Graphics/RenderParameters.h"
+#include <SceneGraph/RenderParameters.h>
 
 IMPGEARS_BEGIN
 

@@ -1,5 +1,5 @@
-#include "Graphics/GraphicRenderer.h"
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/OpenGL.h>
 #include "Core/frustumParams.h"
 
 #include <cstdlib>

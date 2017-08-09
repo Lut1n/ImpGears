@@ -1,7 +1,7 @@
 #ifndef IMP_BLURSHADER_H
 #define IMP_BLURSHADER_H
 
-#include "Graphics/Shader.h"
+#include <SceneGraph/Shader.h>
 
 IMPGEARS_BEGIN
 

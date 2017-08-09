@@ -1,7 +1,7 @@
-#include "Data/MeshModel.h"
+#include <SceneGraph/MeshModel.h>
 #include <cstring>
 #include <cstdio>
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/OpenGL.h>
 
 IMPGEARS_BEGIN
 

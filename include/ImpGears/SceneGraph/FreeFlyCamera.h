@@ -3,7 +3,7 @@
 
 #define DIST_ACTION 300.f
 
-#include "Graphics/Camera.h"
+#include <SceneGraph/Camera.h>
 #include <iostream>
 #include "Core/impBase.h"
 #include "Core/Timer.h"

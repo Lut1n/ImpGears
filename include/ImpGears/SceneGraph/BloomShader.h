@@ -1,7 +1,7 @@
 #ifndef IMP_BLOOMSHADER_H
 #define IMP_BLOOMSHADER_H
 
-#include "Graphics/Shader.h"
+#include <SceneGraph/Shader.h>
 
 IMPGEARS_BEGIN
 

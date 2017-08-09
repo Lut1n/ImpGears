@@ -2,7 +2,7 @@
 #define OBJMESHLOADER_H
 
 #include "Core/impBase.h"
-#include "Data/MeshModel.h"
+#include <SceneGraph/MeshModel.h>
 
 IMPGEARS_BEGIN
 

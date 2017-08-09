@@ -2,7 +2,7 @@
 #define IMP_TEXTURE_GENERATION_H
 
 #include <Core/impBase.h>
-#include <Math/Perlin.h>
+#include <Core/Perlin.h>
 
 
 IMPGEARS_BEGIN

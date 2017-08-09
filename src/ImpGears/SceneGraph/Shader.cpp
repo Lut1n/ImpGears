@@ -1,5 +1,5 @@
-#include "Graphics/Shader.h"
-#include "Graphics/GLcommon.h"
+#include <SceneGraph/Shader.h>
+#include <SceneGraph/OpenGL.h>
 
 #include <cstdio>
 #include <iostream>

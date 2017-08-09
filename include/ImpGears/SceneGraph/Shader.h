@@ -5,8 +5,8 @@
 #include <memory>
 
 #include "Core/impBase.h"
-#include "Math/Matrix4.h"
-#include "Graphics/Texture.h"
+#include <Core/Matrix4.h>
+#include <SceneGraph/Texture.h>
 
 IMPGEARS_BEGIN
 

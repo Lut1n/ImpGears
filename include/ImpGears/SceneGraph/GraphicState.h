@@ -47,6 +47,9 @@ class IMP_API GraphicStatesManager
 	void popState();
 	
 	void applyCurrentState();
+	
+	void revert(GraphicState* lastState);
+	
 	protected:
 
 	std::vector< GraphicState* > _stack;

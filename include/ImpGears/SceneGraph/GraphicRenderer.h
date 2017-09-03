@@ -19,8 +19,9 @@ class IMP_API GraphicRenderer
 
         void renderScene();
 
-        void setRenderParameters(const RenderParameters& parameters){m_parameters = parameters;}
-        const RenderParameters& getRenderParameters() const {return m_parameters;}
+        void setRenderParameters(std::shared_ptr<RenderParameters>& parameters){_parameters = parameters;}
+		std::shared_ptr<RenderParameters> getRenderParameters() const {return _parameters;}
+
 
         static GraphicRenderer* getInstance(){return instance;}
 
@@ -30,13 +31,14 @@ class IMP_API GraphicRenderer
         SceneNode* getSceneRoot(){return _root.get();}
 
         //void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
-        const Matrix4& getProjectionMatrix() const {return m_parameters.getProjectionMatrix();}
+        const Matrix4& getProjectionMatrix() const {return _parameters->getProjectionMatrix();}
 		
 		GraphicStatesManager& getStateManager() {return _stateMgr;}
 
     protected:
 
-        RenderParameters m_parameters;
+        std::shared_ptr<GraphicState> _state;
+		std::shared_ptr<RenderParameters> _parameters;
         std::shared_ptr<SceneNode> _root;
 
         static void setInstance(GraphicRenderer* inst){instance = inst;}

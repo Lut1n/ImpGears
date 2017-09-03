@@ -88,8 +88,9 @@ void GraphicStatesManager::pushState(GraphicState* st)
 //--------------------------------------------------------------
 void GraphicStatesManager::popState()
 {
+	GraphicState* lastState = _stack.back();
 	_stack.pop_back();
-	// applyCurrentState();
+    revert(lastState);
 }
 
 //--------------------------------------------------------------
@@ -106,10 +107,39 @@ void GraphicStatesManager::applyCurrentState()
 	
 	if(resultParameters != nullptr)
 	{
-		resultParameters->apply();
+		resultParameters->apply(_stack.size() <= 1);
 	}
 	
 	if(resultShader != nullptr)
+	{
+		resultShader->enable();
+		resultShader->updateAllParameters();
+	}
+}
+
+//--------------------------------------------------------------
+void GraphicStatesManager::revert(GraphicState* lastState)
+{
+    if(lastState == nullptr)
+    {
+        return;
+    }
+    
+	imp::RenderTarget* resultTarget = getTarget();
+	imp::RenderParameters* resultParameters = getParameters();
+	imp::Shader* resultShader = getShader();
+	
+	if(lastState->_target != nullptr && resultTarget != nullptr)
+	{
+		resultTarget->bind();
+	}
+	
+	if(lastState->_parameters != nullptr && resultParameters != nullptr)
+	{
+		resultParameters->apply(false);
+	}
+	
+	if(lastState->_shader != nullptr && resultShader != nullptr)
 	{
 		resultShader->enable();
 		resultShader->updateAllParameters();

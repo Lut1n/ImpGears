@@ -51,7 +51,7 @@ class IMP_API RenderParameters
         void enable() const;
         void disable() const;
 		
-		void apply() const;
+		void apply(bool clearBuffer) const;
 
         void setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue);
         void setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue);

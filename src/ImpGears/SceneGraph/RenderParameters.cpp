@@ -21,7 +21,13 @@ RenderParameters::RenderParameters():
 //--------------------------------------------------------------
 RenderParameters::RenderParameters(const RenderParameters& other):
     m_faceCullingMode(other.m_faceCullingMode),
-    m_blendMode(other.m_blendMode)
+    m_blendMode(other.m_blendMode),
+	_clearColorChanged(other._clearColorChanged),
+	_clearDepthChanged(other._clearDepthChanged),
+	_faceCullingChanged(other._faceCullingChanged),
+	_blendModeChanged(other._blendModeChanged),
+	_fogChanged(other._fogChanged)
+
 {
     m_clearColor = other.m_clearColor;
     m_projectionMatrix = other.m_projectionMatrix;
@@ -44,6 +50,13 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
     m_projectionMatrix = other.m_projectionMatrix;
 	_clearDepth = other._clearDepth;
 	_fogState = other._fogState;
+	
+	_clearColorChanged = other._clearColorChanged;
+	_clearDepthChanged = other._clearDepthChanged;
+	_faceCullingChanged = other._faceCullingChanged;
+	_blendModeChanged = other._blendModeChanged;
+	_fogChanged = other._fogChanged;
+
 
     return *this;
 }
@@ -103,7 +116,7 @@ void RenderParameters::disable() const
 }
 
 //--------------------------------------------------------------
-void RenderParameters::apply() const
+void RenderParameters::apply(bool clearBuffer) const
 {
 	if(_clearColorChanged)
 	{
@@ -170,7 +183,7 @@ void RenderParameters::apply() const
 		}
 	}
 	
-	if(_clearColorChanged || _clearDepthChanged)
+	if(clearBuffer && (_clearColorChanged || _clearDepthChanged) )
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}

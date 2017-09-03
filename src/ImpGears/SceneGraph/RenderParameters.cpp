@@ -38,7 +38,6 @@ RenderParameters::RenderParameters(const RenderParameters& other):
 //--------------------------------------------------------------
 RenderParameters::~RenderParameters()
 {
-    disable();
 }
 
 //--------------------------------------------------------------
@@ -66,53 +65,6 @@ void RenderParameters::setClearColor(const Vector3& clearColor)
 {
     m_clearColor = clearColor;
 	_clearColorChanged = true;
-}
-
-//--------------------------------------------------------------
-void RenderParameters::enable() const
-{
-    glClearColor(m_clearColor.getX(), m_clearColor.getY(), m_clearColor.getZ(), 0.f);
-
-    /// Face culling mode
-    if(m_faceCullingMode == FaceCullingMode_None)
-    {
-        glDisable(GL_CULL_FACE);
-    }
-    else
-    {
-        glEnable(GL_CULL_FACE);
-        glFrontFace(GL_CCW); // GL_CW or GL_CCW
-
-        if(m_faceCullingMode == FaceCullingMode_Back)
-            glCullFace(GL_BACK); // GL_FRONT, GL_BACK or GL_FRONT_AND_BACK
-        else if(m_faceCullingMode == FaceCullingMode_Front)
-            glCullFace(GL_FRONT);
-    }
-
-    /// Blending mode
-    if(m_blendMode == BlendMode_None)
-    {
-        glDisable(GL_BLEND);
-    }
-    else if(m_blendMode == BlendMode_SrcAlphaBased)
-    {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    /// Enable Z-buffer
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_TRUE);
-    glClearDepth(1.f);
-
-    /// Fog
-    glDisable(GL_FOG);
-}
-
-//--------------------------------------------------------------
-void RenderParameters::disable() const
-{
 }
 
 //--------------------------------------------------------------
@@ -213,20 +165,6 @@ void RenderParameters::setClearDepth(float depth)
 {
 	_clearDepth = depth;
 	_clearDepthChanged = true;
-}
-
-//--------------------------------------------------------------
-RenderParameters* RenderParameters::createDefaultParameters()
-{
-	RenderParameters* params = new RenderParameters();
-	
-	params->setClearColor( Vector3(1.f, 1.f, 1.f) );
-	params->setClearDepth( 1.f );
-	params->setFog( ParamState_Disable );
-	params->setBlendMode(BlendMode_SrcAlphaBased);
-	params->setFaceCullingMode(FaceCullingMode_Back);
-	
-	return params;
 }
 
 IMPGEARS_END

@@ -47,9 +47,6 @@ class IMP_API RenderParameters
 
         void setBlendMode(BlendMode blendMode){m_blendMode = blendMode;_blendModeChanged=true;}
         BlendMode getBlendMode() const{return m_blendMode;}
-
-        void enable() const;
-        void disable() const;
 		
 		void apply(bool clearBuffer) const;
 
@@ -61,8 +58,6 @@ class IMP_API RenderParameters
 		
 		void setFog(ParamState state);
 		void setClearDepth(float depth);
-		
-		static RenderParameters* createDefaultParameters();
 
     protected:
     private:

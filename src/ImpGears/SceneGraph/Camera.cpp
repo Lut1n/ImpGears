@@ -224,7 +224,7 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
 }
 
 
-void Camera::render(imp::Uint32 passID)
+void Camera::render()
 {
 	activate();
 	lookAt();

@@ -33,7 +33,7 @@ class IMP_API Camera : public Entity, public SceneNode
             float tanfovy;
         };
 
-        virtual void render(imp::Uint32 passID);
+        virtual void render();
 		
         Camera(bool active = true);
         virtual ~Camera();

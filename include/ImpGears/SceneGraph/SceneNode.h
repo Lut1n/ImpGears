@@ -23,7 +23,7 @@ class IMP_API SceneNode
         SceneNode();
         virtual ~SceneNode();
 
-        virtual void render(imp::Uint32 passID) = 0;
+        virtual void render() = 0;
 
         void setRotation(float rx, float ry, float rz){
             this->rx = rx;
@@ -48,7 +48,7 @@ class IMP_API SceneNode
         float getRy() const{return ry;}
         float getRz() const{return rz;}
 
-        void renderAll(imp::Uint32 passID);
+        void renderAll();
 
         const imp::Vector3 getPosition() const{return position;}
         const imp::Vector3 getOrientation() const{return orientation;}

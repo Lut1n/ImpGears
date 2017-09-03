@@ -14,7 +14,7 @@ class IMP_API GuiImage : public GuiComponent
 	GuiImage();
 	virtual ~GuiImage();
 
-	virtual void renderComponent(imp::Uint32 passID, float px = 0.0, float py = 0.0);
+	virtual void renderComponent(float px = 0.0, float py = 0.0);
 	
 	
 	void setImage(const std::string& filename);

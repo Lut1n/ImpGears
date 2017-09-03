@@ -26,12 +26,12 @@ GuiContainer::~GuiContainer()
 }
 
 //--------------------------------------------------------------
-void GuiContainer::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiContainer::renderComponent(float parentX, float parentY)
 {
 	
 	if(_visible == false) return;
 
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 
 	// apply render on content
 	Rectangle clippingRect = Rectangle(
@@ -55,7 +55,7 @@ void GuiContainer::renderComponent(imp::Uint32 passID, float parentX, float pare
 	
 	if( _content->isVisible() )
 	{
-		_content->renderComponent(passID, parentX+getPositionX(), parentY+getPositionY());
+		_content->renderComponent(parentX+getPositionX(), parentY+getPositionY());
 	}
 }
 

@@ -13,7 +13,7 @@ class IMP_API MeshNode : public SceneNode
         MeshNode(MeshModel* model);
         virtual ~MeshNode();
 
-        virtual void render(imp::Uint32 passID);
+        virtual void render();
 
 		const MeshModel* getModel() const {return m_model;}
 

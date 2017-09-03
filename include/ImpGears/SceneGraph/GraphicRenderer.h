@@ -17,7 +17,7 @@ class IMP_API GraphicRenderer
         GraphicRenderer();
         virtual ~GraphicRenderer();
 
-        void renderScene(Uint32 passID);
+        void renderScene();
 
         void setRenderParameters(const RenderParameters& parameters){m_parameters = parameters;}
         const RenderParameters& getRenderParameters() const {return m_parameters;}

@@ -13,7 +13,7 @@ class IMP_API ScreenVertex : public VBOData, public SceneNode
         ScreenVertex();
         virtual ~ScreenVertex();
 
-        virtual void render(imp::Uint32 passID);
+        virtual void render();
 
     protected:
     private:

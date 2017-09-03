@@ -36,7 +36,7 @@ ScreenVertex::~ScreenVertex()
 }
 
 
-void ScreenVertex::render(imp::Uint32 passID)
+void ScreenVertex::render()
 {
 	drawVBO();
 }

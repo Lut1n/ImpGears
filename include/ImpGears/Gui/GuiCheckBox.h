@@ -14,7 +14,7 @@ class IMP_API GuiCheckBox
 	GuiCheckBox();
 	virtual ~GuiCheckBox();
 
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 
 	void setChecked(bool checked){_checked = checked;}
 	bool isChecked() const {return _checked;}

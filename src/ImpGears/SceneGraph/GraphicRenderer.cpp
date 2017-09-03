@@ -37,13 +37,13 @@ GraphicRenderer::~GraphicRenderer()
 }
 
 //--------------------------------------------------------------
-void GraphicRenderer::renderScene(imp::Uint32 passID){
+void GraphicRenderer::renderScene(){
 
     m_parameters.enable();
 
 	if(_root != nullptr)
 	{
-		_root->renderAll(passID);
+		_root->renderAll();
 	}
 
     m_parameters.disable();

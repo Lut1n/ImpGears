@@ -60,7 +60,7 @@ GuiCheckBox::~GuiCheckBox()
 }
 
 //--------------------------------------------------------------
-void GuiCheckBox::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiCheckBox::renderComponent(float parentX, float parentY)
 {	
 	if(isChecked())
 	{
@@ -71,7 +71,7 @@ void GuiCheckBox::renderComponent(imp::Uint32 passID, float parentX, float paren
 		check->getBackground()->setBackgroundColor(Vector3(1.0,1.0,1.0));
 	}
 
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 	
 	float h = rightComponent->getSizeY();
 	check->setSize(h,h);

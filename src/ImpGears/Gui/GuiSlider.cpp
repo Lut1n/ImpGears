@@ -81,7 +81,7 @@ GuiSlider::~GuiSlider()
 }
 
 //--------------------------------------------------------------
-void GuiSlider::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiSlider::renderComponent(float parentX, float parentY)
 {
 	float normalized = _value / (_max-_min);
 	if(normalized < 0.0)normalized=0.0; else if(normalized>1.0)normalized=1.0;
@@ -99,7 +99,7 @@ void GuiSlider::renderComponent(imp::Uint32 passID, float parentX, float parentY
 		_barButton->setPosition(barPos, 0.0);
 	}
 	
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 }
 
 //--------------------------------------------------------------

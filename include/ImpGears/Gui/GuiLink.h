@@ -95,7 +95,7 @@ public:
 	void setSide(Side side);
 	Side getSide() const {return _side;}
 	
-	virtual void renderComponent(imp::Uint32 passID, float parentX, float parentY);
+	virtual void renderComponent(float parentX, float parentY);
 	
 	virtual void getAnchorPosition(float& x, float& y);
 	

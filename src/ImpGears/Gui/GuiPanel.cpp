@@ -14,7 +14,7 @@ GuiPanel::~GuiPanel()
 }
 
 //--------------------------------------------------------------
-void GuiPanel::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiPanel::renderComponent(float parentX, float parentY)
 {
 	GuiComponent::_guiComponentShader->setVector3Parameter( "u_color", _backgroundColor );
 	GuiComponent::_guiComponentShader->setFloatParameter( "u_type", 1.0 );
@@ -23,7 +23,7 @@ void GuiPanel::renderComponent(imp::Uint32 passID, float parentX, float parentY)
 	GuiComponent::_guiComponentShader->setFloatParameter("u_sizeY", getSizeY());
 
 	_quad.draw();
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 }
 
 //--------------------------------------------------------------

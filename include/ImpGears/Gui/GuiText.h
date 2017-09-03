@@ -14,7 +14,7 @@ class IMP_API GuiText : public GuiComponent
 	GuiText();
 	virtual ~GuiText();
 	
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 	
 	
 	void setText(const std::string& text);

@@ -13,17 +13,8 @@ MeshNode::~MeshNode()
 {
 }
 
-void MeshNode::render(imp::Uint32 passID)
+void MeshNode::render()
 {
-    if(passID == 0)
-    {
-        imp::ShadowBufferShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
-    }
-    if(passID == 3)
-    {
-        imp::DeferredShader::instance->setMatrix4Parameter("u_model", getModelMatrix());
-        imp::DeferredShader::instance->setMatrix4Parameter("u_normal", getModelMatrix());
-    }
     m_model->render();
 }
 

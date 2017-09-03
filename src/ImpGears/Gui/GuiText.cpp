@@ -20,7 +20,7 @@ GuiText::~GuiText()
 }
 
 //--------------------------------------------------------------
-void GuiText::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiText::renderComponent(float parentX, float parentY)
 {
 	if(_textDirty)
 	{
@@ -44,7 +44,7 @@ void GuiText::renderComponent(imp::Uint32 passID, float parentX, float parentY)
 	GuiComponent::_guiComponentShader->setFloatParameter("u_sizeY", getSizeY());
 
 	_quad.draw();
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 }
 
 //--------------------------------------------------------------

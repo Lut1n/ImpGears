@@ -21,7 +21,7 @@ class IMP_API GuiSlider : public GuiComponent
 	GuiSlider();
 	virtual ~GuiSlider();
 	
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 	
 	void slideAction(float moving);
 

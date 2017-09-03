@@ -18,7 +18,7 @@ class IMP_API GuiScrollbar : public GuiSlider
 	
 	GuiContainer* getAssociatedComponent() {return _box;}
 	
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 	
 	float getNormalizedSize();
 	void setContainedPosition(float position);

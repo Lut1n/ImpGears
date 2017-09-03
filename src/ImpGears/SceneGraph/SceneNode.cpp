@@ -44,7 +44,7 @@ void SceneNode::removeSubNode(const std::shared_ptr<SceneNode>& sceneNode){
 }
 
 //--------------------------------------------------------------
-void SceneNode::renderAll(imp::Uint32 passID)
+void SceneNode::renderAll()
 {	
     if(!renderActivated)return;
 
@@ -66,13 +66,13 @@ void SceneNode::renderAll(imp::Uint32 passID)
 			states.getShader()->setProjection( states.getParameters()->getProjectionMatrix() );
 	}
 	
-    render(passID);
+    render();
 
     for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++)
     {
         SceneNode* sub = it->get();
         sub->setParentModelMatrices(modelMat, normalMat);
-        sub->renderAll(passID);
+        sub->renderAll();
     }
 	
 	states.popState();

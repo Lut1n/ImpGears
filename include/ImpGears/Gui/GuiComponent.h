@@ -69,8 +69,8 @@ class IMP_API GuiComponent
 	void addEventHandler(GuiEventHandler* handler);
 	void removeEventHandler(GuiEventHandler* handler);
 
-	virtual void render(imp::Uint32 passID);
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void render();
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 	virtual bool event(imp::State* state, float x = 0.0, float y = 0.0);
 	virtual void computeBounds(Rectangle& bounds) const;
 

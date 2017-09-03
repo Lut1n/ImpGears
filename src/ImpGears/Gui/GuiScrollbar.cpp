@@ -77,11 +77,11 @@ void GuiScrollbar::updateFieldView()
 }
 
 //--------------------------------------------------------------
-void GuiScrollbar::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiScrollbar::renderComponent(float parentX, float parentY)
 {
 	updateFieldView();
 	
-	GuiSlider::renderComponent(passID, parentX, parentY);
+	GuiSlider::renderComponent(parentX, parentY);
 }
 
 

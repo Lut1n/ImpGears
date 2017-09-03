@@ -33,7 +33,7 @@ void GuiImage::setImage(ImageData* image)
 }
 
 //--------------------------------------------------------------
-void GuiImage::renderComponent(imp::Uint32 passID, float px, float py)
+void GuiImage::renderComponent(float px, float py)
 {
 	GuiComponent::_guiComponentShader->setTextureParameter("u_texture", _texture, 0);
 	GuiComponent::_guiComponentShader->setVector3Parameter( "u_color", Vector3(1.0,1.0,1.0) );
@@ -42,7 +42,7 @@ void GuiImage::renderComponent(imp::Uint32 passID, float px, float py)
 	GuiComponent::_guiComponentShader->setFloatParameter("u_sizeX", getSizeX());
 	GuiComponent::_guiComponentShader->setFloatParameter("u_sizeY", getSizeY());
 	_quad.draw();
-	GuiComponent::renderComponent(passID, px, py);
+	GuiComponent::renderComponent(px, py);
 }
 
 IMPGEARS_END

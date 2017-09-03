@@ -18,7 +18,7 @@ class IMP_API GuiComboBox
 	GuiComboBox();
 	virtual ~GuiComboBox();
 
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 
 	void select(unsigned int selectedID);
 	void openList();

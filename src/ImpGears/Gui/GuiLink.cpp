@@ -198,7 +198,7 @@ void GuiLinkAnchor::unsetLink()
 }
 
 //--------------------------------------------------------------
-void GuiLinkAnchor::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiLinkAnchor::renderComponent(float parentX, float parentY)
 {
 	if(_side == Side_Left)
 	{
@@ -209,7 +209,7 @@ void GuiLinkAnchor::renderComponent(imp::Uint32 passID, float parentX, float par
 		_text->setPosition(+(20.0), 0.0);
 	}
 	
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 	
 	_absPosX = parentX + getPositionX();
 	_absPosY = parentY + getPositionY();

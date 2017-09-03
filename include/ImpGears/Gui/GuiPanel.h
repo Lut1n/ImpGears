@@ -14,7 +14,7 @@ class IMP_API GuiPanel : public GuiComponent
 	GuiPanel();
 	virtual ~GuiPanel();
 	
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 	
 	void setBackgroundColor(const Vector3& bgColor);
 	

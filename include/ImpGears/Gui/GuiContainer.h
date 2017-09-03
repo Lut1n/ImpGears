@@ -18,7 +18,7 @@ class IMP_API GuiContainer
 	void addComponent(GuiComponent* comp);
 	void removeComponent(GuiComponent* comp);
 
-	virtual void renderComponent(imp::Uint32 passID, float parentX = 0.0, float parentY = 0.0);
+	virtual void renderComponent(float parentX = 0.0, float parentY = 0.0);
 	virtual bool event(imp::State* state, float x = 0.0, float y = 0.0);
 
 	void setContentPosition(float x, float y);

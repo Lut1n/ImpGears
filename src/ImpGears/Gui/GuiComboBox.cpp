@@ -64,14 +64,14 @@ GuiComboBox::~GuiComboBox()
 }
 
 //--------------------------------------------------------------
-void GuiComboBox::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiComboBox::renderComponent(float parentX, float parentY)
 {
 	_openButton->setSize( _selected->getSizeY(), _selected->getSizeY() );
 	_selected->setPosition(_selected->getSizeY(), 0.0);
 	_list->setPosition(_selected->getSizeY(), _selected->getSizeY() );
 	_list->setSize(_selected->getSizeX(), _selected->getSizeY() * 5.0);
 
-	GuiComponent::renderComponent(passID, parentX, parentY);
+	GuiComponent::renderComponent(parentX, parentY);
 }
 
 //--------------------------------------------------------------

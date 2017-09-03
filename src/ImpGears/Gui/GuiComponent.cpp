@@ -101,13 +101,13 @@ void GuiComponent::removeEventHandler(GuiEventHandler* handler)
 }
 
 //--------------------------------------------------------------
-void GuiComponent::render(imp::Uint32 passID)
+void GuiComponent::render()
 {
-	renderComponent(passID, 0.0, 0.0);
+	renderComponent(0.0, 0.0);
 }
 
 //--------------------------------------------------------------
-void GuiComponent::renderComponent(imp::Uint32 passID, float parentX, float parentY)
+void GuiComponent::renderComponent(float parentX, float parentY)
 {
 	if(_visible == false) return;
 
@@ -134,7 +134,7 @@ void GuiComponent::renderComponent(imp::Uint32 passID, float parentX, float pare
 		
 		if( _components[i]->isVisible() )
 		{
-			_components[i]->renderComponent(passID, parentX+getPositionX(), parentY+getPositionY());
+			_components[i]->renderComponent(parentX+getPositionX(), parentY+getPositionY());
 		}
 	}
 }

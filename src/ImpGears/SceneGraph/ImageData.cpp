@@ -138,7 +138,13 @@ Pixel ImageData::getPixel(Uint32 x, Uint32 y) const
 	Pixel result;
 	
 	if(x >= m_width || x<0 || y>= m_height || y<0)
+	{
+		result.r = 0;
+		result.g = 0;
+		result.b = 0;
+		result.a = 255;
 		return result;
+	}
 	
 	Uint32 start = (y*m_rawSize) + (x*m_bpp/8);
 

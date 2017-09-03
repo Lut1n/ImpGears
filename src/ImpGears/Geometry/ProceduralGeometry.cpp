@@ -137,6 +137,17 @@ void Geometry::noiseBump(unsigned int octaveCount, double persistence, double fr
 	}
 }
 
+void Geometry::bump(SignalFunctor* functor, float force)
+{
+       for(unsigned int i=0; i<_vertices.size();++i)
+       {
+        double noise = functor->apply(_vertices[i].getX(), _vertices[i].getY(), _vertices[i].getZ());
+               imp::Vector3 n(_vertices[i]);
+               n.normalize();
+               _vertices[i] += n * (noise * force);
+    }
+}
+
 Geometry Geometry::createQuad(unsigned int subdivisionCount, const imp::Vector3& xvec, const imp::Vector3& yvec, const imp::Vector3& zvec, float size)
 {
 	const float center = (subdivisionCount+1.f)/2.f;

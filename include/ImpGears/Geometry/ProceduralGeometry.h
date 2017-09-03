@@ -10,6 +10,14 @@
 
 IMPGEARS_BEGIN
 
+class IMP_API SignalFunctor
+{
+	public:
+	
+	virtual double apply(double x, double y, double z) = 0;
+};
+
+
 class IMP_API Geometry
 {
 	public:
@@ -45,6 +53,8 @@ class IMP_API Geometry
 	void fillBuffer(std::vector<float>& buffer);
 	
 	void noiseBump(unsigned int octaveCount, double persistence, double freq, float force = 1.0);
+	
+	void bump(SignalFunctor* functor, float force = 1.0);
 	
 	static Geometry createQuad(unsigned int subdivisionCount, const imp::Vector3& xvec, const imp::Vector3& yvec, const imp::Vector3& zvec, float size = 1.f);
 	

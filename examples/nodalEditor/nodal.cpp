@@ -964,7 +964,7 @@ void EditorGraph::updateAllNode()
 	std::vector<int> updatednodes;
 	
 	// iterate
-	for(unsigned int i=0; i<_nodes.size(); ++i)
+	/*for(unsigned int i=0; i<_nodes.size(); ++i)
 	{
 		if(_nodes[i]->isDirty())
 		{
@@ -972,13 +972,13 @@ void EditorGraph::updateAllNode()
 			_nodes[i]->_guiImage->setImage( _nodes[i]->_image );
 			updatednodes.push_back(i);
 		}
-	}
+	}*/
 	
 	// make dirty depending nodes
 	// looking for dependances (make them dirty too)
 	
 	// for all nodes
-	for(unsigned int i=0; i<_nodes.size(); ++i)
+	/*for(unsigned int i=0; i<_nodes.size(); ++i)
 	{
 		bool dpDirty = false;
 		// check dependances
@@ -1002,7 +1002,7 @@ void EditorGraph::updateAllNode()
 		{
 			_nodes[i]->makeDirty();
 		}
-	}
+	}*/
 }
 
 //--------------------------------------------------------------
@@ -1091,7 +1091,7 @@ static imp::RenderTarget guiTarget;
 static imp::Texture* guiTexture;
 
 //--------------------------------------------------------------
-void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, imp::RenderParameters& screenParameters)
+void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, std::shared_ptr<imp::RenderParameters>& screenParameters)
 {
 //	GuiStateSingleton::getInstance()->defaultShader = &defaultShader;
 	if(s_guiRoot == IMP_NULL)
@@ -1109,13 +1109,13 @@ void GuiRender(imp::RenderTarget& target, imp::GraphicRenderer& renderer, imp::R
 	renderer.setRenderParameters(screenParameters);
 	target.bind();
 	GuiComponent::_guiComponentShader->enable();
-	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_projection", screenParameters.getProjectionMatrix());
+	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_projection", screenParameters->getProjectionMatrix());
 	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_view", imp::Matrix4::getIdentityMat());
 	GuiComponent::_guiComponentShader->setMatrix4Parameter("u_model", imp::Matrix4::getIdentityMat());
 	GuiComponent::_guiComponentShader->setFloatParameter("u_cornerRadius", 3.0);
-	renderer.renderScene(-1);
+	renderer.renderScene();
 	
-	s_guiRoot->render(0);
+	s_guiRoot->render();
 	
 	GuiLinkRenderer::instance()->updateBuffer();
 	GuiComponent::_guiComponentShader->setVector3Parameter( "u_color", Vector3(1.0,1.0,1.0) );
@@ -1194,9 +1194,10 @@ int main(int argc, char* argv[])
 	evnContext->setWindowTitle(0, argv[1]);
 
 	// screen render parameters
-	imp::RenderParameters screenParameters;
-	screenParameters.setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-	screenParameters.setClearColor(imp::Vector3(0.f, 0.f, 1.f));
+	std::shared_ptr<imp::RenderParameters> screenParameters;
+screenParameters.reset( new imp::RenderParameters() )	;
+	screenParameters->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+	screenParameters->setClearColor(imp::Vector3(0.f, 0.f, 1.f));
 
 	// screen render target
 	imp::RenderTarget screenTarget;
@@ -1219,9 +1220,9 @@ int main(int argc, char* argv[])
 		onEvent(*imp::EvnContextInterface::getInstance());
 		GuiOnEvent();
 		
-		EditorGraph::getInstance()->updateAllNode();
+		// EditorGraph::getInstance()->updateAllNode();
 		
-		GuiRender(guiTarget, renderer, guiRenderParameters);
+		/*GuiRender(guiTarget, renderer, guiRenderParameters);
 
 		renderer.setRenderParameters(screenParameters);
 		screenTarget.bind();
@@ -1235,7 +1236,7 @@ int main(int argc, char* argv[])
 		renderer.renderScene(-1);
 		screen.render(0);
 		defaultShader.disable();
-		screenTarget.unbind();
+		screenTarget.unbind();*/
 
 		evnContext->display(0);
 	}

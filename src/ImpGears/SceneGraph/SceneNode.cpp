@@ -60,8 +60,8 @@ void SceneNode::renderAll()
 	if(states.getShader())
 	{
 		states.getShader()->setModel(modelMat);
-		/*if(imp::Camera::getActiveCamera())
-			states.getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );*/
+		if(imp::Camera::getActiveCamera())
+			states.getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );
 		if(states.getParameters())
 			states.getShader()->setProjection( states.getParameters()->getProjectionMatrix() );
 	}

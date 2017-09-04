@@ -1,11 +1,11 @@
-#include <SceneGraph/MeshModel.h>
+#include <SceneGraph/Mesh.h>
 #include <cstring>
 #include <cstdio>
 #include <SceneGraph/OpenGL.h>
 
 IMPGEARS_BEGIN
 
-MeshModel::MeshModel():
+Mesh::Mesh():
     m_vertexBuffer(IMP_NULL),
     m_texCoordBuffer(IMP_NULL),
     m_normalBuffer(IMP_NULL),
@@ -17,12 +17,12 @@ MeshModel::MeshModel():
 {
 }
 
-MeshModel::~MeshModel()
+Mesh::~Mesh()
 {
     destroy();
 }
 
-void MeshModel::clearVertexBuffer()
+void Mesh::clearVertexBuffer()
 {
     if(m_vertexBufferSize == 0)
         return;
@@ -32,7 +32,7 @@ void MeshModel::clearVertexBuffer()
     m_vertexBufferSize = 0;
 }
 
-void MeshModel::clearTexCoordBuffer()
+void Mesh::clearTexCoordBuffer()
 {
     if(m_texCoordBufferSize == 0)
         return;
@@ -42,7 +42,7 @@ void MeshModel::clearTexCoordBuffer()
     m_texCoordBufferSize = 0;
 }
 
-void MeshModel::clearNormalBuffer()
+void Mesh::clearNormalBuffer()
 {
     if(m_normalBufferSize == 0)
         return;
@@ -52,7 +52,7 @@ void MeshModel::clearNormalBuffer()
     m_normalBufferSize = 0;
 }
 
-void MeshModel::setVertexBuffer(const float* vertexBuffer, Uint32 size)
+void Mesh::setVertexBuffer(const float* vertexBuffer, Uint32 size)
 {
     clearVertexBuffer();
 
@@ -64,7 +64,7 @@ void MeshModel::setVertexBuffer(const float* vertexBuffer, Uint32 size)
     memcpy(m_vertexBuffer, vertexBuffer, sizeof(float)*size);
 }
 
-void MeshModel::setTexCoordBuffer(const float* texCoordBuffer, Uint32 size)
+void Mesh::setTexCoordBuffer(const float* texCoordBuffer, Uint32 size)
 {
     clearTexCoordBuffer();
 
@@ -76,7 +76,7 @@ void MeshModel::setTexCoordBuffer(const float* texCoordBuffer, Uint32 size)
     memcpy(m_texCoordBuffer, texCoordBuffer, sizeof(float)*size);
 }
 
-void MeshModel::setNormalBuffer(const float* normalBuffer, Uint32 size)
+void Mesh::setNormalBuffer(const float* normalBuffer, Uint32 size)
 {
     clearNormalBuffer();
 
@@ -88,12 +88,12 @@ void MeshModel::setNormalBuffer(const float* normalBuffer, Uint32 size)
     memcpy(m_normalBuffer, normalBuffer, sizeof(float)*size);
 }
 
-void MeshModel::setMaterial()
+void Mesh::setMaterial()
 {
 
 }
 
-void MeshModel::setVertexMode(VertexMode vertexMode)
+void Mesh::setVertexMode(VertexMode vertexMode)
 {
     m_vertexMode = vertexMode;
     switch(m_vertexMode)
@@ -113,7 +113,7 @@ void MeshModel::setVertexMode(VertexMode vertexMode)
     }
 }
 
-void MeshModel::updateVBO(bool clearLocalData)
+void Mesh::updateVBO(bool clearLocalData)
 {
     Uint32 vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
 
@@ -142,7 +142,7 @@ void MeshModel::updateVBO(bool clearLocalData)
     }
 }
 
-void MeshModel::render()
+void Mesh::render()
 {
     //setVertexMode(VertexMode_Lines);
 
@@ -187,7 +187,7 @@ void MeshModel::render()
     unbindVBO();
 }
 
-void MeshModel::destroy()
+void Mesh::destroy()
 {
     clearVertexBuffer();
     clearTexCoordBuffer();
@@ -198,7 +198,7 @@ void MeshModel::destroy()
         releaseVBO();
 }
 
-void MeshModel::debugPrint()
+void Mesh::debugPrint()
 {
     for(unsigned int i=0; i<m_vertexBufferSize; ++i)
     {

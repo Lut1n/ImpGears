@@ -1,12 +1,12 @@
-#ifndef IMP_MESHMODEL_H
-#define IMP_MESHMODEL_H
+#ifndef IMP_MESH_H
+#define IMP_MESH_H
 
 #include "Core/impBase.h"
 #include <SceneGraph/VBOData.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API MeshModel : public VBOData
+class IMP_API Mesh : public VBOData
 {
     public:
 
@@ -18,8 +18,8 @@ class IMP_API MeshModel : public VBOData
             VertexMode_Points
         };
 
-        MeshModel();
-        virtual ~MeshModel();
+        Mesh();
+        virtual ~Mesh();
 
         void clearVertexBuffer();
         void clearTexCoordBuffer();
@@ -65,4 +65,4 @@ class IMP_API MeshModel : public VBOData
 
 IMPGEARS_END
 
-#endif // IMP_MESHMODEL_H
+#endif // IMP_MESH_H

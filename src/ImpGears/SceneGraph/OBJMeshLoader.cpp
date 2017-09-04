@@ -145,7 +145,7 @@ OBJMeshLoader::~OBJMeshLoader()
 {
 }
 
-MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
+Mesh* OBJMeshLoader::loadFromFile(const char* filename)
 {
     std::vector<float> vertices;
     std::vector<float> texCoords;
@@ -157,7 +157,7 @@ MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
     std::string buff;
 
     bool isQuad = false;
-    MeshModel::VertexMode vertexMode = MeshModel::VertexMode_Triangles;
+    Mesh::VertexMode vertexMode = Mesh::VertexMode_Triangles;
 
     while(f.good())
     {
@@ -190,26 +190,26 @@ MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
         {
             // points
             getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer, isQuad);
-            vertexMode = MeshModel::VertexMode_Points;
+            vertexMode = Mesh::VertexMode_Points;
         }
         else if(buff[0] == 'l')
         {
             // lines
             getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer, isQuad);
-            vertexMode = MeshModel::VertexMode_Lines;
+            vertexMode = Mesh::VertexMode_Lines;
         }
         else if(buff[0] == 'f')
         {
             // faces
             getIndices(buff, vertices, texCoords, normals, vertexBuffer, texCoordBuffer, normalBuffer, isQuad);
             if(isQuad)
-                vertexMode = MeshModel::VertexMode_Quads;
+                vertexMode = Mesh::VertexMode_Quads;
         }
     }
 
     f.close();
 
-    MeshModel* model = new MeshModel();
+    Mesh* model = new Mesh();
 
     model->setVertexBuffer(vertexBuffer.data(), vertexBuffer.size());
     model->setTexCoordBuffer(texCoordBuffer.data(), texCoordBuffer.size());
@@ -221,7 +221,7 @@ MeshModel* OBJMeshLoader::loadFromFile(const char* filename)
     return model;
 }
 
-bool OBJMeshLoader::saveToFile(const MeshModel* meshModel, const char* filename)
+bool OBJMeshLoader::saveToFile(const Mesh* mesh, const char* filename)
 {
     //imp::Parser file(filename, imp::Parser::FileType_Text, imp::Parser::AccessMode_Write);
 

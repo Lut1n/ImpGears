@@ -2,7 +2,7 @@
 #define OBJMESHLOADER_H
 
 #include "Core/impBase.h"
-#include <SceneGraph/MeshModel.h>
+#include <SceneGraph/Mesh.h>
 
 IMPGEARS_BEGIN
 
@@ -12,9 +12,9 @@ class IMP_API OBJMeshLoader
         OBJMeshLoader();
         virtual ~OBJMeshLoader();
 
-        static MeshModel* loadFromFile(const char* filename);
+        static Mesh* loadFromFile(const char* filename);
 
-		static bool saveToFile(const MeshModel* meshModel, const char* filename);
+		static bool saveToFile(const Mesh* mesh, const char* filename);
 
     protected:
 

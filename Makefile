@@ -10,10 +10,10 @@ else
 endif
 
 ### mingw64
-LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system -pthread -lpng  -lglew32 -lopengl32
+LDFLAGS=-pthread -lpng  -lglew32 -lopengl32
 
 ### linux
-#LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system -pthread -lpng  -pthread -lGLEW -lGL
+#LDFLAGS=-pthread -lpng  -pthread -lGLEW -lGL
 
 SRCDIR=src/ImpGears
 INCDIR=include/ImpGears

@@ -6,7 +6,7 @@
 #include <memory>
 #include <Core/Vector3.h>
 #include <Core/Matrix4.h>
-#include <Utils/EvnContextInterface.h>
+
 #include <SceneGraph/GraphicState.h>
 
 IMPGEARS_BEGIN

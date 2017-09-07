@@ -3,7 +3,7 @@
 
 #include "Core/impBase.h"
 #include <Core/Matrix4.h>
-#include <Utils/EvnContextInterface.h>
+
 #include <SceneGraph/SceneNode.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/RenderParameters.h>

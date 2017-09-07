@@ -1,11 +1,10 @@
 #ifndef IMP_CAMERA_H
 #define IMP_CAMERA_H
 
-#include <Utils/EvnContextInterface.h>
+
 #include <Core/Vector3.h>
 #include <Core/Matrix4.h>
 #include "Core/impBase.h"
-#include <Core/Entity.h>
 #include <SceneGraph/SceneNode.h>
 
 IMPGEARS_BEGIN
@@ -14,7 +13,7 @@ IMPGEARS_BEGIN
 //#define SPHERIC_FOV 1
 
 /// \brief Defines a scene camera.
-class IMP_API Camera : public Entity, public SceneNode
+class IMP_API Camera : public SceneNode
 {
     public:
 
@@ -40,7 +39,6 @@ class IMP_API Camera : public Entity, public SceneNode
 
         virtual void initialize();
         virtual void update();
-        virtual void onEvent(const Event& evn);
 
         virtual void activate() {setActiveCamera(this);}
         virtual void lookAt();

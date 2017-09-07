@@ -21,10 +21,8 @@ class IMP_API RenderTarget
 
         RenderTarget();
         virtual ~RenderTarget();
-
-        /// \brief Creates a window render target.
-        /// \param windowID - The ID of the window.
-        void createScreenTarget(Uint32 windowID);
+		
+        void createScreenTarget(Uint32 width, Uint32 height);
 
         /// \brief Creates a texture render target.
         /// \param width - The width of the internal texture.

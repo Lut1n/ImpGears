@@ -2,7 +2,7 @@
 #define IMP_STATE_H
 
 #include "Core/impBase.h"
-#include <Utils/EvnContextInterface.h>
+
 
 #define SENSIBILITY 0.002f
 
@@ -14,10 +14,6 @@ class IMP_API State
     public:
         State();
         virtual ~State();
-
-        /// \brief Called when event is received.
-        /// \param event - The received event.
-        void onEvent(const imp::Event& event);
 
         /// \brief Gets the instance of the game state.
         /// \return The instance.
@@ -34,14 +30,9 @@ class IMP_API State
 			ActionState_Released
 		};
 
-	ActionState m_pressedKeys[Event::KeyCount];
-	ActionState m_pressedMouseButtons[Event::Mouse_ButtonCount];
-
 	float xMouse, yMouse;
 	float xdep, ydep;
-		
-	Event::Key _lastPressedKey;
-	Event::Key _lastReleasedKey;
+	
 	char _keyValue;
 
 	void setWindowDim(unsigned int w, unsigned int h)

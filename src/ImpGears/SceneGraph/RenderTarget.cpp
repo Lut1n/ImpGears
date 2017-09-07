@@ -1,5 +1,5 @@
 #include <SceneGraph/RenderTarget.h>
-#include <Utils/EvnContextInterface.h>
+
 #include <cstdio>
 
 #include <SceneGraph/Camera.h>
@@ -29,15 +29,13 @@ RenderTarget::~RenderTarget()
 }
 
 //--------------------------------------------------------------
-void RenderTarget::createScreenTarget(Uint32 windowID)
+void RenderTarget::createScreenTarget(Uint32 width, Uint32 height)
 {
     destroy();
     m_type = TargetType_Screen;
-	m_windowID = windowID;
 
-    EvnContextInterface* evn = EvnContextInterface::getInstance();
-    m_width = evn->getWidth(windowID);
-    m_height = evn->getHeight(windowID);
+    m_width = width;
+    m_height = height;
     m_bpp = 32;
     m_hasDepthBuffer = false;
 }
@@ -150,13 +148,6 @@ void RenderTarget::bind()
     else{
         unbind();
     }
-
-	if(m_type == TargetType_Screen)
-	{
-		EvnContextInterface* evn = EvnContextInterface::getInstance();
-		m_width = evn->getWidth(m_windowID);
-		m_height = evn->getHeight(m_windowID);
-	}
 
     glViewport(0, 0, m_width, m_height);
 }

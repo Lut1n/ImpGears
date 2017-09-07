@@ -1,12 +1,12 @@
 #include <SceneGraph/GraphicRenderer.h>
 #include <SceneGraph/GraphicState.h>
 #include <SceneGraph/RenderTarget.h>
-#include <SceneGraph/FreeFlyCamera.h>
+#include <SceneGraph/Camera.h>
 #include <SceneGraph/VBOData.h>
 
-#include "Core/State.h"
+#include <SFML/Graphics.hpp>
 
-#include "Utils/SFMLContextInterface.h"
+#include "Core/State.h"
 
 #include <Geometry/ProceduralGeometry.h>
 #include <cmath>
@@ -347,28 +347,24 @@ struct ViewerState
 	std::shared_ptr<Stars> stars;
     std::shared_ptr<LodSceneNode> _lod;
 
-	imp::EvnContextInterface* evnContext;
-	std::shared_ptr<imp::FreeFlyCamera> camera;
+	std::shared_ptr<imp::Camera> camera;
 
 	std::string filename;
 	
 	ViewerState()
 	{	
-		evnContext = new imp::SFMLContextInterface();
-		evnContext->createWindow(800,600);
-		evnContext->setCursorVisible(0, true);
 		
 		// screen render target
 		screenTarget .reset( new imp::RenderTarget() );
-		screenTarget->createScreenTarget(0);
+		screenTarget->createScreenTarget(800,600);
 		
-		camera.reset( new imp::FreeFlyCamera(400, 300) );
+		camera.reset( new imp::Camera() );
 		camera->initFrustum(800, 600, 60.0*3.14159f/180.f, 0.1, 128.0);
 		camera->setPosition(imp::Vector3(0.0f, 0.0f, 1.5f));
 		camera->setTarget(imp::Vector3(0.0f, 0.0f, 0.0f));
 		
 		renderer.reset(new imp::GraphicRenderer() );
-		renderer->setCenterCursor(false);
+		// renderer->setCenterCursor(false);
         
         _shader.reset(new imp::Shader(vertexCodeSource.c_str(), fragmentCodeSource.c_str()));
         _shaderOcean.reset(new imp::Shader(vertexCodeSource.c_str(), fragmentCodeSource_Ocean.c_str()) );
@@ -406,52 +402,38 @@ struct ViewerState
 
 };
 
-void onEvent_private( imp::EvnContextInterface& evnContext )
-{
-	// get event
-	evnContext.getEvents(0);
-
-	// manage event
-	imp::Event event;
-	while (evnContext.nextEvent(event))
-		imp::State::getInstance()->onEvent(event);
-}
-
-void onEvent(imp::EvnContextInterface& evnContext)
-{
-	// engine event handling
-	onEvent_private(evnContext);
-
-	// user event handling
-	imp::State* state = imp::State::getInstance();
-
-	if(state->m_pressedKeys[imp::Event::Escape])
-		exit(0);
-
-}
-
 int main(int argc, char* argv[])
 {
-	ViewerState v_state;
     
     sf::Clock clock;
 	
-	while (v_state.evnContext->isOpen(0))
-	{
+	sf::RenderWindow window(sf::VideoMode(800, 600), "My window", sf::Style::Default, sf::ContextSettings(24));
+	window.setFramerateLimit(60);
 	
-		onEvent(*imp::EvnContextInterface::getInstance());
+	ViewerState v_state;
+
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
+                window.close();
+        }
+		
         
         if(clock.getElapsedTime().asSeconds() > 2.0*3.141592)
             clock.restart();
+		
 	
         double d = sin(clock.getElapsedTime().asMilliseconds() / 1000.0);
         v_state.camera->setPosition(imp::Vector3(0.0f, 0.0f, 1.0 + (d+1.0) * 3.0));
+		
 		// rendering
 		v_state.renderer->renderScene();
-
-		// display
-		v_state.evnContext->display(0);
-	}
+		
+		window.display();
+    }
 
 	delete imp::VBOManager::getInstance();
 

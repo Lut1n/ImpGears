@@ -6,25 +6,11 @@
 #include "Core/Timer.h"
 #include "Core/State.h"
 
-#include "Utils/SFMLContextInterface.h"
+#include <SFML/Graphics.hpp>
 #include <SceneGraph/ScreenVertex.h>
 
 #include <Core/FileInfo.h>
 
-
-void onEvent(imp::EvnContextInterface& evnContext)
-{
-	evnContext.getEvents(0);
-
-	imp::Event event;
-	while (evnContext.nextEvent(event))
-		imp::State::getInstance()->onEvent(event);
-
-	imp::State* state = imp::State::getInstance();
-
-	if(state->m_pressedKeys[imp::Event::Escape])
-		exit(0);
-}
 
 std::string loadShader(const char* filename)
 {
@@ -50,18 +36,17 @@ std::string loadShader(const char* filename)
 
 int main(int argc, char* argv[])
 {
+	if(argc<2)
+		return 0;
+	
+	sf::RenderWindow window(sf::VideoMode(500, 500), "My window", sf::Style::Default, sf::ContextSettings(24));
+	window.setFramerateLimit(60);
+	
 	imp::Timer fpsTimer;
 	imp::State state;
 
-	imp::EvnContextInterface* evnContext = new imp::SFMLContextInterface();
-	evnContext->createWindow(500,500);
-	evnContext->setCursorVisible(0, true);
-
 	imp::GraphicRenderer renderer;
-	renderer.setCenterCursor(false);
 
-	if(argc<2)
-		return 0;
 
     imp::ImageData data;
     data.create(500, 500, imp::PixelFormat_BGRA8);
@@ -75,17 +60,17 @@ int main(int argc, char* argv[])
 
 	state.setWindowDim(texture.getWidth(), texture.getHeight());
 
-    evnContext->resizeWindow(0, texture.getWidth(), texture.getHeight());
-	evnContext->setWindowTitle(0, argv[1]);
+	window.setTitle(argv[1]);
 
 	// screen render parameters
-	imp::RenderParameters screenParameters;
-	screenParameters.setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-	screenParameters.setClearColor(imp::Vector3(0.f, 0.f, 1.f));
+	std::shared_ptr<imp::RenderParameters> screenParameters;
+	screenParameters.reset(new imp::RenderParameters());
+	screenParameters->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+	screenParameters->setClearColor(imp::Vector3(0.f, 0.f, 1.f));
 
 	// screen render target
 	imp::RenderTarget screenTarget;
-	screenTarget.createScreenTarget(0);
+	screenTarget.createScreenTarget(500,500);
 
 	imp::Matrix4 i4 = imp::Matrix4::getIdentityMat();
 
@@ -96,9 +81,14 @@ int main(int argc, char* argv[])
 
     imp::Timer timer;
     
-	while (evnContext->isOpen(0))
+	while (window.isOpen())
 	{
-		onEvent(*evnContext);
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
+                window.close();
+        }
 
 		// reload if changed
 		time_t access, modif, status;
@@ -122,12 +112,12 @@ int main(int argc, char* argv[])
 		defaultShader->setMatrix4Parameter("u_model", i4);
 		defaultShader->setTextureParameter("u_colorTexture", &texture, 0);
         defaultShader->setFloatParameter("u_timer", timer.getTime());
-		renderer.renderScene(-1);
-		screen.render(0);
+		renderer.renderScene();
+		screen.render();
 		defaultShader->disable();
 		screenTarget.unbind();
 
-		evnContext->display(0);
+		window.display();
 	}
 
 	delete imp::VBOManager::getInstance();

@@ -3,13 +3,10 @@
 #include <SceneGraph/GraphicRenderer.h>
 #include <SceneGraph/RenderTarget.h>
 
-#include "Core/Timer.h"
-#include "Core/State.h"
-
 #include <SFML/Graphics.hpp>
 #include <SceneGraph/ScreenVertex.h>
 
-#include <Core/FileInfo.h>
+#include <Utils/FileInfo.h>
 
 
 std::string loadShader(const char* filename)
@@ -41,9 +38,6 @@ int main(int argc, char* argv[])
 	
 	sf::RenderWindow window(sf::VideoMode(500, 500), "My window", sf::Style::Default, sf::ContextSettings(24));
 	window.setFramerateLimit(60);
-	
-	imp::Timer fpsTimer;
-	imp::State state;
 
 	imp::GraphicRenderer renderer;
 
@@ -57,8 +51,6 @@ int main(int argc, char* argv[])
 
 	time_t accessLast, modifLast, statusLast;
 	imp::getTimeInfo(argv[1], accessLast, modifLast, statusLast);
-
-	state.setWindowDim(texture.getWidth(), texture.getHeight());
 
 	window.setTitle(argv[1]);
 
@@ -79,7 +71,7 @@ int main(int argc, char* argv[])
 	imp::Shader* defaultShader = new imp::Shader(loadShader("defaultshader.vert").c_str(), loadShader(argv[1]).c_str());
 	imp::ScreenVertex screen;
 
-    imp::Timer timer;
+    sf::Clock timer;
     
 	while (window.isOpen())
 	{
@@ -111,7 +103,7 @@ int main(int argc, char* argv[])
 		defaultShader->setMatrix4Parameter("u_view", i4);
 		defaultShader->setMatrix4Parameter("u_model", i4);
 		defaultShader->setTextureParameter("u_colorTexture", &texture, 0);
-        defaultShader->setFloatParameter("u_timer", timer.getTime());
+        defaultShader->setFloatParameter("u_timer", timer.getElapsedTime().asMilliseconds());
 		renderer.renderScene();
 		screen.render();
 		defaultShader->disable();

@@ -6,7 +6,6 @@
 #include <Texture/ImageUtils.h>
 #include <Utils/JsonReaderWriter.h>
 #include <Core/Perlin.h>
-#include <Core/FileInfo.h>
 #include <Core/BasicFunctions.h>
 
 #include <map>

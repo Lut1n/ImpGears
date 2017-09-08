@@ -6,8 +6,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "Core/State.h"
-
 #include <Geometry/ProceduralGeometry.h>
 #include <cmath>
 
@@ -330,7 +328,6 @@ class Spheroid : public imp::VBOData, public imp::SceneNode
 
 struct ViewerState
 {
-	imp::State state;
 	std::shared_ptr<imp::GraphicRenderer> renderer;
 	std::shared_ptr<imp::RenderTarget> screenTarget;
 

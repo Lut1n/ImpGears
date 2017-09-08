@@ -10,9 +10,9 @@ Currently works only with binary files. Next step is to add support for xml file
 #define IMP_PARSER_H
 
 #include "cstdio"
+#include <iostream>
 
 #include "Core/impBase.h"
-#include "Core/String.h"
 
 IMPGEARS_BEGIN
 
@@ -48,8 +48,8 @@ public:
 
     IMP_PARSER_READWRITE_DEC(float)
 
-	bool readLine(String& line, Uint32 maxLineLength = 256);
-	void writeLine(const String& line);
+	bool readLine(std::string& line, Uint32 maxLineLength = 256);
+	void writeLine(const std::string& line);
 
 	bool isEnd() const;
 

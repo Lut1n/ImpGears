@@ -53,7 +53,7 @@ Parser::~Parser()
 }
 
 //--------------------------------------------------------------
-bool Parser::readLine(String& line, Uint32 maxLineLength)
+bool Parser::readLine(std::string& line, Uint32 maxLineLength)
 {
 	Int32 pos0 = ftell(stream);
 	char buffer[maxLineLength+1];
@@ -88,9 +88,9 @@ bool Parser::readLine(String& line, Uint32 maxLineLength)
 }
 
 //--------------------------------------------------------------
-void Parser::writeLine(const String& line)
+void Parser::writeLine(const std::string& line)
 {
-	Write(line.getValue(), line.getSize());
+	Write(line.c_str(), line.size());
 	Write("\n", 1);
 }
 

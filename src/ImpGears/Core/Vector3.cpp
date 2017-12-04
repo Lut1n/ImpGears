@@ -117,6 +117,12 @@ Vector3 Vector3::operator*(const Matrix3& matrix) const
 }*/
 
 //--------------------------------------------------------------
+bool Vector3::operator==(const Vector3& other) const
+{
+	return m_x==other.m_x && m_y==other.m_y && m_z==other.m_z;
+}
+
+//--------------------------------------------------------------
 void Vector3::rotationX(float rx)
 {
     /*

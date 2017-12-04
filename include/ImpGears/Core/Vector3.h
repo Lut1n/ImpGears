@@ -45,6 +45,8 @@ class IMP_API Vector3
 
         Vector3 operator+(const Vector3& other) const;
         Vector3 operator-(const Vector3& other) const;
+		
+		bool operator==(const Vector3& other) const;
 
         void rotationX(float rx);
         void rotationY(float ry);

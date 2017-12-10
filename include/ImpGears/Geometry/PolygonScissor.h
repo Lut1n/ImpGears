@@ -11,8 +11,11 @@ class IMP_API PolygonScissor
 {
     public:
 
-    // volumetric substract operator on Geometries
     Polygon substract(Polygon& solid1, Polygon& solid2);
+	
+    Polygon merge(Polygon& solid1, Polygon& solid2);
+	
+    Polygon intersect(Polygon& solid1, Polygon& solid2);
 
 };
 

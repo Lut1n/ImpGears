@@ -1,7 +1,7 @@
 #ifndef IMP_SCENENODE_H
 #define IMP_SCENENODE_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <list>
 #include <memory>
 #include <Core/Vector3.h>

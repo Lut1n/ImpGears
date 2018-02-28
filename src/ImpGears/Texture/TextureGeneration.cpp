@@ -7,13 +7,13 @@
 IMPGEARS_BEGIN
 
 NoiseGenerator::NoiseGenerator()
-	: _interpolator(IMP_NULL)
+	: _interpolator(nullptr)
 {
 
 }
 
 NoiseGenerator::NoiseGenerator(const Config& config)
-	: _interpolator(IMP_NULL)
+	: _interpolator(nullptr)
 {
 	setConfig(config);
 }

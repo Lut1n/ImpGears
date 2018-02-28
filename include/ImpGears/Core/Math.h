@@ -1,7 +1,7 @@
 #ifndef IMP_MATH_H
 #define IMP_MATH_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 

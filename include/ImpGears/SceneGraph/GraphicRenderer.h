@@ -1,7 +1,7 @@
 #ifndef IMP_GRAPHICRENDERER_H
 #define IMP_GRAPHICRENDERER_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <Core/Matrix4.h>
 
 #include <SceneGraph/SceneNode.h>

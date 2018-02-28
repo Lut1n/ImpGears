@@ -1,7 +1,7 @@
 #ifndef IMP_PERLINTECH_H
 #define IMP_PERLINTECH_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
 
 #include <cstring>

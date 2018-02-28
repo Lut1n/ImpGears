@@ -291,7 +291,7 @@ imp::Texture* BmpLoader::loadFromFile(const char* filename)
 	
 	imp::Texture* tex = new imp::Texture( filename );
 	
-	if(data == IMP_NULL)
+	if(data == nullptr)
 		std::cout << "no image data\n";
 	else
 	{
@@ -308,7 +308,7 @@ void BmpLoader::loadFromFile(const char* filename, imp::ImageData** image)
 	
 	(*image) = NULL;
 
-	if(data == IMP_NULL)
+	if(data == nullptr)
 		std::cout << "no image data\n";
 	else
 	{

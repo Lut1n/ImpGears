@@ -3,7 +3,7 @@
 IMPGEARS_BEGIN
 
 
-DefaultShader* DefaultShader::_instance = IMP_NULL;
+DefaultShader* DefaultShader::_instance = nullptr;
 
 
 //--------------------------------------------------------------

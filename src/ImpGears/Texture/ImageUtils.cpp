@@ -78,9 +78,9 @@ void applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY)
 	ImageData temp;
 	temp.clone(bitmap);
 
-	for(Uint32 i=0; i<bitmap.getWidth(); ++i)
+	for(std::uint32_t i=0; i<bitmap.getWidth(); ++i)
 	{
-		for(Uint32 j=0; j<bitmap.getHeight(); ++j)
+		for(std::uint32_t j=0; j<bitmap.getHeight(); ++j)
 		{
 			float periodX = bitmap.getWidth() / frqX;
 			float periodY = bitmap.getHeight() / frqY;
@@ -108,9 +108,9 @@ void applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY)
 
 void blend(ImageData& dst, ImageData& src, float alpha)
 {
-	for(Uint32 i=0; i<dst.getWidth(); ++i)
+	for(std::uint32_t i=0; i<dst.getWidth(); ++i)
 	{
-		for(Uint32 j=0; j<dst.getHeight(); ++j)
+		for(std::uint32_t j=0; j<dst.getHeight(); ++j)
 		{
 			Pixel srcColor, dstColor;
 			srcColor = src.getPixel(i,j);
@@ -124,9 +124,9 @@ void blend(ImageData& dst, ImageData& src, float alpha)
 
 void blend(ImageData& dst, ImageData& src, ImageData& alphaMap, double threshold)
 {
-   	for(Uint32 i=0; i<dst.getWidth(); ++i)
+   	for(std::uint32_t i=0; i<dst.getWidth(); ++i)
 	{
-		for(Uint32 j=0; j<dst.getHeight(); ++j)
+		for(std::uint32_t j=0; j<dst.getHeight(); ++j)
 		{
 			Pixel srcColor, dstColor;
 			srcColor = src.getPixel(i,j);
@@ -149,9 +149,9 @@ void heightToNormal(ImageData& in, ImageData& out, float force, float prec)
 
 	out.clone(in); 
 
-	for(Uint32 i=0; i<in.getWidth(); ++i)
+	for(std::uint32_t i=0; i<in.getWidth(); ++i)
 	{
-		for(Uint32 j=0; j<in.getHeight(); ++j)
+		for(std::uint32_t j=0; j<in.getHeight(); ++j)
 		{
 
 			float h1 = (float)(in.getPixel(i-dist,j).red)/255.0;
@@ -336,14 +336,14 @@ void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp:
 
 void applyMaximization(imp::ImageData& img)
 {
-	Uint8 maxR = 0;
-	Uint8 minR = 255;
+	std::uint8_t maxR = 0;
+	std::uint8_t minR = 255;
 
 	// scan
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		Uint8 r = img.getPixel(i,j).r;
+		std::uint8_t r = img.getPixel(i,j).r;
 		if(r < minR)
 			minR = r;
 		else if(r > maxR)
@@ -355,7 +355,7 @@ void applyMaximization(imp::ImageData& img)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
 		double t = double(img.getPixel(i,j).r);
-		Uint8 newt = (Uint8)Lerp( 0.0, 255.0, (t-minR)/(maxR-minR) );
+		std::uint8_t newt = (std::uint8_t)Lerp( 0.0, 255.0, (t-minR)/(maxR-minR) );
 		Pixel px = {newt,newt,newt, 255};
 		img.setPixel(i,j,px);
 	}}
@@ -435,7 +435,7 @@ void drawCellularNoise(imp::ImageData& img, unsigned int cellcount, const imp::I
             
             // apply new value
             const double maxR = (fieldW)*(fieldW);
-            Uint8 newt = (Uint8)Lerp( 0.0, 255.0, d/maxR);
+            std::uint8_t newt = (std::uint8_t)Lerp( 0.0, 255.0, d/maxR);
             Pixel px = {newt,newt,newt, 255};
             img.setPixel(i,j,px);
         }

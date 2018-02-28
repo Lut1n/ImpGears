@@ -16,10 +16,10 @@ RenderTarget::RenderTarget():
     m_bpp(0),
     m_textureCount(0),
     m_hasDepthBuffer(false),
-    m_depthTexture(IMP_NULL)
+    m_depthTexture(nullptr)
 {
-    for(Uint32 i=0; i<5; ++i)
-        m_colorTextures[i] = IMP_NULL;
+    for(std::uint32_t i=0; i<5; ++i)
+        m_colorTextures[i] = nullptr;
 }
 
 //--------------------------------------------------------------
@@ -29,7 +29,7 @@ RenderTarget::~RenderTarget()
 }
 
 //--------------------------------------------------------------
-void RenderTarget::createScreenTarget(Uint32 width, Uint32 height)
+void RenderTarget::createScreenTarget(std::uint32_t width, std::uint32_t height)
 {
     destroy();
     m_type = TargetType_Screen;
@@ -41,7 +41,7 @@ void RenderTarget::createScreenTarget(Uint32 width, Uint32 height)
 }
 
 //--------------------------------------------------------------
-void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textureCount, bool depthBuffer)
+void RenderTarget::createBufferTarget(std::uint32_t width, std::uint32_t height, std::uint32_t textureCount, bool depthBuffer)
 {
     destroy();
     m_type = TargetType_Buffer;
@@ -56,7 +56,7 @@ void RenderTarget::createBufferTarget(Uint32 width, Uint32 height, Uint32 textur
 
     GLenum DrawBuffers[5] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
 
-    for(Uint32 i=0; i<textureCount; ++i)
+    for(std::uint32_t i=0; i<textureCount; ++i)
     {
         m_colorTextures[i] = new Texture();
         m_colorTextures[i]->create(width, height, PixelFormat_RGBA8);
@@ -96,16 +96,16 @@ void RenderTarget::destroy()
     {
         glDeleteFramebuffers(1, &m_frameBufferID);
 
-        for(Uint32 i=0; i<m_textureCount; ++i)
+        for(std::uint32_t i=0; i<m_textureCount; ++i)
         {
             delete m_colorTextures[i];
-            m_colorTextures[i] = IMP_NULL;
+            m_colorTextures[i] = nullptr;
         }
 
         if(m_hasDepthBuffer)
         {
             delete m_depthTexture;
-            m_depthTexture = IMP_NULL;
+            m_depthTexture = nullptr;
         }
     }
 
@@ -115,12 +115,12 @@ void RenderTarget::destroy()
 }
 
 //--------------------------------------------------------------
-Texture* RenderTarget::getTexture(Uint32 n)
+Texture* RenderTarget::getTexture(std::uint32_t n)
 {
     if(m_type != TargetType_Buffer)
     {
         fprintf(stderr, "[impError] Render target has not texture buffer.\n");
-        return IMP_NULL;
+        return nullptr;
     }
 
     return m_colorTextures[n];
@@ -132,7 +132,7 @@ Texture* RenderTarget::getDepthTexture()
     if(m_type != TargetType_Buffer || m_hasDepthBuffer == false)
     {
         fprintf(stderr, "[impError] Render target has not depth texture.\n");
-        return IMP_NULL;
+        return nullptr;
     }
 
     return m_depthTexture;
@@ -157,7 +157,7 @@ void RenderTarget::unbind()
 {
     if(m_type == TargetType_Buffer)
     {
-        for(Uint32 i=0; i<m_textureCount; ++i)
+        for(std::uint32_t i=0; i<m_textureCount; ++i)
             {
                 m_colorTextures[i]->notifyTextureRendering();
                 m_colorTextures[i]->synchronize();

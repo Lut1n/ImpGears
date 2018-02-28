@@ -1,7 +1,7 @@
 #ifndef IMP_RECTANGLE_H
 #define IMP_RECTANGLE_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 

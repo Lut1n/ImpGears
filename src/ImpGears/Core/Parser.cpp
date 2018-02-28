@@ -7,11 +7,11 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 #define IMP_PARSER_READWRITE(T)\
-    imp::Uint32 Parser::Read(T* _buffer, imp::Uint32 _size)\
+    std::uint32_t Parser::Read(T* _buffer, std::uint32_t _size)\
     {\
-        return (imp::Uint32) fread((void*)_buffer, sizeof(T), _size, stream);\
+        return (std::uint32_t) fread((void*)_buffer, sizeof(T), _size, stream);\
     }\
-    void Parser::Write(const T* _buffer, imp::Uint32 _size)\
+    void Parser::Write(const T* _buffer, std::uint32_t _size)\
     {\
         fwrite((const void*)_buffer, sizeof(T), _size, stream);\
     }
@@ -53,11 +53,11 @@ Parser::~Parser()
 }
 
 //--------------------------------------------------------------
-bool Parser::readLine(std::string& line, Uint32 maxLineLength)
+bool Parser::readLine(std::string& line, std::uint32_t maxLineLength)
 {
-	Int32 pos0 = ftell(stream);
+	std::int32_t pos0 = ftell(stream);
 	char buffer[maxLineLength+1];
-	Int32 read = Read(buffer, maxLineLength);
+	std::int32_t read = Read(buffer, maxLineLength);
 
 	if( read == 0 || buffer[0] == '\0' )
 	{
@@ -66,12 +66,12 @@ bool Parser::readLine(std::string& line, Uint32 maxLineLength)
 	}
 
 	/// find '\n' character
-	for(Int32 c=0; c<read; ++c)
+	for(std::int32_t c=0; c<read; ++c)
 	{
 		if(buffer[c] == '\n' || buffer[c] == '\r')
 		{
 			buffer[c] = '\0';
-			Int32 pos1 = (pos0+1) + c;
+			std::int32_t pos1 = (pos0+1) + c;
 			if( c+1<read && (buffer[c+1] == '\r' || buffer[c+1] == '\n') )
 				pos1 += 1;
 			fseek(stream, pos1, SEEK_SET);
@@ -80,7 +80,7 @@ bool Parser::readLine(std::string& line, Uint32 maxLineLength)
 		}
 	}
 
-	Int32 pos1 = (pos0+1) + read;
+	std::int32_t pos1 = (pos0+1) + read;
 	fseek(stream, pos1, SEEK_SET);
 	buffer[read] = '\0';
 	line = buffer;
@@ -104,10 +104,10 @@ bool Parser::isEnd() const
 IMP_PARSER_READWRITE(char)
 
 //--------------------------------------------------------------
-IMP_PARSER_READWRITE(imp::Int8)
+IMP_PARSER_READWRITE(std::int8_t)
 
 //--------------------------------------------------------------
-IMP_PARSER_READWRITE(imp::Uint8)
+IMP_PARSER_READWRITE(std::uint8_t)
 
 //--------------------------------------------------------------
 IMP_PARSER_READWRITE(float)

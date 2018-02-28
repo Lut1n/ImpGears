@@ -1,7 +1,7 @@
 #ifndef IMP_FILE_INFO_H
 #define IMP_FILE_INFO_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 
 // struct stat is defined in <sys/stat.h>
 #include <sys/stat.h>

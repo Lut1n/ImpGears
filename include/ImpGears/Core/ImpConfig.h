@@ -1,5 +1,5 @@
-#ifndef IMPBUILDCONFIG_HPP_INCLUDED
-#define IMPBUILDCONFIG_HPP_INCLUDED
+#ifndef IMPCONFIG_H
+#define IMPCONFIG_H
 
 /// IMPGEARS_BUILD_DLL must be defined for dll building
 /// IMPGEARS_STATIC must be defined for static link
@@ -46,4 +46,9 @@
     #define IMP_API_C_CODE_END
 #endif
 
-#endif // IMPBUILDCONFIG_HPP_INCLUDED
+
+// define namespace
+#define IMPGEARS_BEGIN namespace imp{
+#define IMPGEARS_END };
+
+#endif // IMPCONFIG_H

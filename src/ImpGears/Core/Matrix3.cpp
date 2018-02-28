@@ -11,7 +11,7 @@ IMPGEARS_BEGIN
 
 Matrix3::Matrix3()
 {
-    for(Uint32 i=0; i<9; ++i)
+    for(std::uint32_t i=0; i<9; ++i)
         m_values[i] = 0.f;
 }
 
@@ -38,12 +38,12 @@ Matrix3::~Matrix3()
 {
 }
 
-void Matrix3::setValue(Uint32 l, Uint32 c, float value)
+void Matrix3::setValue(std::uint32_t l, std::uint32_t c, float value)
 {
     m_values[c*3+l] = value;
 }
 
-float Matrix3::getValue(Uint32 l, Uint32 c) const
+float Matrix3::getValue(std::uint32_t l, std::uint32_t c) const
 {
     return m_values[c*3+l];
 }
@@ -57,7 +57,7 @@ Matrix3& Matrix3::operator=(const Matrix3& other)
 
 Matrix3& Matrix3::operator+=(const Matrix3& other)
 {
-    for(Uint32 i=0; i<9; ++i)
+    for(std::uint32_t i=0; i<9; ++i)
         m_values[i] += other.m_values[i];
 
     return *this;
@@ -65,7 +65,7 @@ Matrix3& Matrix3::operator+=(const Matrix3& other)
 
 Matrix3& Matrix3::operator-=(const Matrix3& other)
 {
-    for(Uint32 i=0; i<9; ++i)
+    for(std::uint32_t i=0; i<9; ++i)
         m_values[i] -= other.m_values[i];
 
     return *this;
@@ -75,11 +75,11 @@ Matrix3& Matrix3::operator*=(const Matrix3& other)
 {
     const Matrix3 before(*this);
 
-    for(Uint32 l=0;l<3;l++)
-    for(Uint32 c=0;c<3;c++){
+    for(std::uint32_t l=0;l<3;l++)
+    for(std::uint32_t c=0;c<3;c++){
 
         m_values[c*3+l] = 0.f;
-        for(Uint32 k=0; k<3;k++)
+        for(std::uint32_t k=0; k<3;k++)
             m_values[c*3+l] += ( before.m_values[c*3+k] * other.m_values[k*3+l] );
     }
 
@@ -88,7 +88,7 @@ Matrix3& Matrix3::operator*=(const Matrix3& other)
 
 Matrix3& Matrix3::operator*=(float scalar)
 {
-    for(Uint32 i=0; i<9; ++i)
+    for(std::uint32_t i=0; i<9; ++i)
         m_values[i] *= scalar;
 
     return *this;
@@ -154,8 +154,8 @@ Matrix3 Matrix3::getTranspose() const
 {
     Matrix3 transpose(*this);
 
-    for(Uint32 i=0;i<3;i++){
-    for(Uint32 j=0;j<3;j++){
+    for(std::uint32_t i=0;i<3;i++){
+    for(std::uint32_t j=0;j<3;j++){
         transpose.setValue(i,j, getValue(j,i));
     }}
 

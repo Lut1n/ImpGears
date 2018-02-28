@@ -6,9 +6,9 @@
 IMPGEARS_BEGIN
 
 Mesh::Mesh():
-    m_vertexBuffer(IMP_NULL),
-    m_texCoordBuffer(IMP_NULL),
-    m_normalBuffer(IMP_NULL),
+    m_vertexBuffer(nullptr),
+    m_texCoordBuffer(nullptr),
+    m_normalBuffer(nullptr),
     m_vertexBufferSize(0),
     m_texCoordBufferSize(0),
     m_normalBufferSize(0),
@@ -28,7 +28,7 @@ void Mesh::clearVertexBuffer()
         return;
 
     delete [] m_vertexBuffer;
-    m_vertexBuffer = IMP_NULL;
+    m_vertexBuffer = nullptr;
     m_vertexBufferSize = 0;
 }
 
@@ -38,7 +38,7 @@ void Mesh::clearTexCoordBuffer()
         return;
 
     delete [] m_texCoordBuffer;
-    m_texCoordBuffer = IMP_NULL;
+    m_texCoordBuffer = nullptr;
     m_texCoordBufferSize = 0;
 }
 
@@ -48,11 +48,11 @@ void Mesh::clearNormalBuffer()
         return;
 
     delete [] m_normalBuffer;
-    m_normalBuffer = IMP_NULL;
+    m_normalBuffer = nullptr;
     m_normalBufferSize = 0;
 }
 
-void Mesh::setVertexBuffer(const float* vertexBuffer, Uint32 size)
+void Mesh::setVertexBuffer(const float* vertexBuffer, std::uint32_t size)
 {
     clearVertexBuffer();
 
@@ -64,7 +64,7 @@ void Mesh::setVertexBuffer(const float* vertexBuffer, Uint32 size)
     memcpy(m_vertexBuffer, vertexBuffer, sizeof(float)*size);
 }
 
-void Mesh::setTexCoordBuffer(const float* texCoordBuffer, Uint32 size)
+void Mesh::setTexCoordBuffer(const float* texCoordBuffer, std::uint32_t size)
 {
     clearTexCoordBuffer();
 
@@ -76,7 +76,7 @@ void Mesh::setTexCoordBuffer(const float* texCoordBuffer, Uint32 size)
     memcpy(m_texCoordBuffer, texCoordBuffer, sizeof(float)*size);
 }
 
-void Mesh::setNormalBuffer(const float* normalBuffer, Uint32 size)
+void Mesh::setNormalBuffer(const float* normalBuffer, std::uint32_t size)
 {
     clearNormalBuffer();
 
@@ -115,7 +115,7 @@ void Mesh::setVertexMode(VertexMode vertexMode)
 
 void Mesh::updateVBO(bool clearLocalData)
 {
-    Uint32 vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
+    std::uint32_t vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
 
     if(getVBOID() == 0)
     {
@@ -152,12 +152,12 @@ void Mesh::render()
     enableNormalArray(m_normalOffset);
 
     ///texture
-    /*if(m_material != IMP_NULL)
+    /*if(m_material != nullptr)
     {
         bind();
     }*/
 
-    Uint32 mode = GL_QUADS;
+    std::uint32_t mode = GL_QUADS;
     switch(m_vertexMode)
     {
         case VertexMode_Points:
@@ -174,12 +174,12 @@ void Mesh::render()
             break;
     }
 
-    Uint32 count = m_vertexBufferSize/3;
+    std::uint32_t count = m_vertexBufferSize/3;
 
     glDrawArrays(mode, 0, count);
 
     ///texture
-    /*if(m_material != IMP_NULL)
+    /*if(m_material != nullptr)
     {
         unbind();
     }*/

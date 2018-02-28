@@ -1,7 +1,7 @@
 #ifndef IMP_JSON_H
 #define IMp_JSON_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 
 #include <iostream>
 #include <vector>

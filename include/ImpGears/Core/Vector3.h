@@ -1,7 +1,7 @@
 #ifndef IMP_VECTOR3_H
 #define IMP_VECTOR3_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 

@@ -12,13 +12,13 @@ Currently works only with binary files. Next step is to add support for xml file
 #include "cstdio"
 #include <iostream>
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 
 #define IMP_PARSER_READWRITE_DEC(T)\
-    imp::Uint32 Read(T* _buffer, imp::Uint32 _size);\
-    void Write(const T* _buffer, imp::Uint32 _size);\
+    std::uint32_t Read(T* _buffer, std::uint32_t _size);\
+    void Write(const T* _buffer, std::uint32_t _size);\
 
 class IMP_API Parser
 {
@@ -42,13 +42,13 @@ public:
 
     IMP_PARSER_READWRITE_DEC(char)
 
-    IMP_PARSER_READWRITE_DEC(imp::Int8)
+    IMP_PARSER_READWRITE_DEC(std::int8_t)
 
-    IMP_PARSER_READWRITE_DEC(imp::Uint8)
+    IMP_PARSER_READWRITE_DEC(std::uint8_t)
 
     IMP_PARSER_READWRITE_DEC(float)
 
-	bool readLine(std::string& line, Uint32 maxLineLength = 256);
+	bool readLine(std::string& line, std::uint32_t maxLineLength = 256);
 	void writeLine(const std::string& line);
 
 	bool isEnd() const;

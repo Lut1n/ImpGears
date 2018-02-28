@@ -1,7 +1,7 @@
 #ifndef IMP_BASIC_FUNCTION_H
 #define IMP_BASIC_FUNCTION_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 

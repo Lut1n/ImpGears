@@ -34,7 +34,7 @@ void VBOData::drawVBO()
     GL_CHECKERROR("[impErr] VBOData::drawVBO - vertex pointer");
 
     ///texture coord
-	imp::Uint32 texcoordOffset = _verticesCount * (3 * sizeof(float) );
+	std::uint32_t texcoordOffset = _verticesCount * (3 * sizeof(float) );
     enableTexCoordArray(texcoordOffset);
 
 	unsigned int glPrimitive = GL_QUADS;
@@ -63,7 +63,7 @@ void VBOData::drawVBO()
 }
 
 //--------------------------------------------------------------
-void VBOData::requestVBO(imp::Uint32 _size, VBOManager::UsageMode _usage)
+void VBOData::requestVBO(std::uint32_t _size, VBOManager::UsageMode _usage)
 {
     vboID = VBOManager::getInstance()->request(_size, _usage);
     vboSize = _size;
@@ -82,22 +82,22 @@ void VBOData::releaseVBO()
 }
 
 //--------------------------------------------------------------
-void VBOData::resizeVBO(imp::Uint32 _size)
+void VBOData::resizeVBO(std::uint32_t _size)
 {
     VBOManager::getInstance()->resize(vboID, _size, usage);
 }
 
 //--------------------------------------------------------------
-void VBOData::setVertices(const float* buffer, imp::Uint32 size)
+void VBOData::setVertices(const float* buffer, std::uint32_t size)
 {
-	Uint32 vertexSize = (sizeof(float) * 3.0);
+	std::uint32_t vertexSize = (sizeof(float) * 3.0);
 	_verticesCount = size / vertexSize;
 
 	setData((const void*)buffer, size, 0);
 }
 
 //--------------------------------------------------------------
-void VBOData::setData(const void* _buffer, imp::Uint32 _size, imp::Uint32 _vboOffset)
+void VBOData::setData(const void* _buffer, std::uint32_t _size, std::uint32_t _vboOffset)
 {
     glBindBuffer(GL_ARRAY_BUFFER, (GLuint)vboID);
     glBufferSubData(GL_ARRAY_BUFFER, _vboOffset, _size, _buffer);
@@ -105,58 +105,58 @@ void VBOData::setData(const void* _buffer, imp::Uint32 _size, imp::Uint32 _vboOf
 }
 
 //--------------------------------------------------------------
-void VBOData::setData(const void* _buffer, imp::Uint32 _size)
+void VBOData::setData(const void* _buffer, std::uint32_t _size)
 {
     setData(_buffer, _size, 0);
 }
 
 //--------------------------------------------------------------
-void VBOData::enableVertexArray(imp::Uint64 _offset)
+void VBOData::enableVertexArray(std::uint64_t _offset)
 {
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_offset);
 }
 
 //--------------------------------------------------------------
-void VBOData::enableNormalArray(imp::Uint64 _offset)
+void VBOData::enableNormalArray(std::uint64_t _offset)
 {
     glEnableClientState( GL_NORMAL_ARRAY );
     glNormalPointer(GL_FLOAT, 0, (GLvoid*)(_offset));
 }
 
 //--------------------------------------------------------------
-void VBOData::enableTexCoordArray(imp::Uint64 _offset)
+void VBOData::enableTexCoordArray(std::uint64_t _offset)
 {
     glEnableClientState( GL_TEXTURE_COORD_ARRAY );
     glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(_offset));
 }
 
 //--------------------------------------------------------------
-void VBOData::enableColorArray(imp::Uint64 _offset)
+void VBOData::enableColorArray(std::uint64_t _offset)
 {
     glEnableClientState( GL_COLOR_ARRAY );
     glColorPointer(4, GL_FLOAT, 0, (GLvoid*)(_offset));
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOData::getVBOID() const
+std::uint32_t VBOData::getVBOID() const
 {
     return vboID;
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOData::getVBOSize() const
+std::uint32_t VBOData::getVBOSize() const
 {
     return vboSize;
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOData::getBoundVbo()
+std::uint32_t VBOData::getBoundVbo()
 {
     GLint id;
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &id);
 
-    return static_cast<imp::Uint32>(id);
+    return static_cast<std::uint32_t>(id);
 }
 
 //--------------------------------------------------------------

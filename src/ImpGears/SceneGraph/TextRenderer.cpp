@@ -5,7 +5,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-TextRenderer* TextRenderer::_instance = IMP_NULL;
+TextRenderer* TextRenderer::_instance = nullptr;
 
 //--------------------------------------------------------------
 TextRenderer::TextRenderer(const std::string& filename)
@@ -30,7 +30,7 @@ void TextRenderer::loadFontSprite(const std::string& filename)
 	
 	std::string spritefilename = config->getString("file")->value;
 	
-	imp::ImageData* temp = IMP_NULL;
+	imp::ImageData* temp = nullptr;
 	BmpLoader::loadFromFile(spritefilename.c_str(), &temp);
 	_sprite = new imp::ImageData();
 	_sprite->convert(*temp, imp::PixelFormat_BGRA8);
@@ -63,7 +63,7 @@ bool TextRenderer::findGlyphPosition(char glyph, unsigned int& x, unsigned int& 
 //--------------------------------------------------------------
 void TextRenderer::renderText(const std::string& text, imp::ImageData* targetImg, const imp::Pixel& fg, const imp::Pixel& bg)
 {
-	if(_mapping == IMP_NULL)
+	if(_mapping == nullptr)
 		return;
 	
 	targetImg->create(_charWidth * text.size(), _charHeight, imp::PixelFormat_BGRA8);
@@ -82,7 +82,7 @@ void TextRenderer::renderText(const std::string& text, imp::ImageData* targetImg
 }
 
 //--------------------------------------------------------------
-TextRenderer* TextRenderer::getInstance() { if(_instance == IMP_NULL)_instance = new TextRenderer(); return _instance; }
+TextRenderer* TextRenderer::getInstance() { if(_instance == nullptr)_instance = new TextRenderer(); return _instance; }
 
 
 //--------------------------------------------------------------

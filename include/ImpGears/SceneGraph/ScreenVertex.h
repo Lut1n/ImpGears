@@ -1,7 +1,7 @@
 #ifndef IMP_SCREENVERTEX_H
 #define IMP_SCREENVERTEX_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/VBOData.h>
 #include <SceneGraph/SceneNode.h>
 
@@ -18,7 +18,7 @@ class IMP_API ScreenVertex : public VBOData, public SceneNode
     protected:
     private:
 
-        Uint64 m_texCoordOffset;
+        std::uint64_t m_texCoordOffset;
 };
 
 IMPGEARS_END

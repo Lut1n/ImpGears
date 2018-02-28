@@ -27,11 +27,11 @@ public:
 
 private:
 
-    imp::Uint32 vboID;
-    imp::Uint32 vboSize;
+    std::uint32_t vboID;
+    std::uint32_t vboSize;
     VBOManager::UsageMode usage;
 	Primitive _primitive;
-	imp::Uint32 _verticesCount;
+	std::uint32_t _verticesCount;
 
 public:
 
@@ -41,30 +41,30 @@ public:
 
 	void drawVBO();
 
-    void requestVBO(imp::Uint32 _size, VBOManager::UsageMode _usage = VBOManager::UsageMode_Static);
+    void requestVBO(std::uint32_t _size, VBOManager::UsageMode _usage = VBOManager::UsageMode_Static);
 
     void releaseVBO();
 
-    void resizeVBO(imp::Uint32 _size);
+    void resizeVBO(std::uint32_t _size);
 
-	void setVertices(const float* buffer, imp::Uint32 size);
+	void setVertices(const float* buffer, std::uint32_t size);
 
-    void setData(const void* _buffer, imp::Uint32 _size, imp::Uint32 _vboOffset);
+    void setData(const void* _buffer, std::uint32_t _size, std::uint32_t _vboOffset);
 
-    void setData(const void* _buffer, imp::Uint32 _size);
+    void setData(const void* _buffer, std::uint32_t _size);
 
 	void setPrimitive(Primitive prim) {_primitive = prim;}
 	Primitive getPrimitive() const {return _primitive;}
 
-    void enableVertexArray(imp::Uint64 _offset);
-    void enableNormalArray(imp::Uint64 _offset);
-    void enableTexCoordArray(imp::Uint64 _offset);
-    void enableColorArray(imp::Uint64 _offset);
+    void enableVertexArray(std::uint64_t _offset);
+    void enableNormalArray(std::uint64_t _offset);
+    void enableTexCoordArray(std::uint64_t _offset);
+    void enableColorArray(std::uint64_t _offset);
 
-    imp::Uint32 getVBOID() const;
-    imp::Uint32 getVBOSize() const;
+    std::uint32_t getVBOID() const;
+    std::uint32_t getVBOSize() const;
 
-    static imp::Uint32 getBoundVbo();
+    static std::uint32_t getBoundVbo();
     static void bindVBO(const VBOData& _vboData);
     static void unbindVBO();
 };

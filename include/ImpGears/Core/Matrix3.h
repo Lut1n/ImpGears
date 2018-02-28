@@ -1,7 +1,7 @@
 #ifndef IMP_MATRIX3_H
 #define IMP_MATRIX3_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <Core/Vector3.h>
 
 IMPGEARS_BEGIN
@@ -17,8 +17,8 @@ class IMP_API Matrix3
         Matrix3(const float values[9]);
         virtual ~Matrix3();
 
-        void setValue(Uint32 l, Uint32 c, float value);
-        float getValue(Uint32 l, Uint32 c) const;
+        void setValue(std::uint32_t l, std::uint32_t c, float value);
+        float getValue(std::uint32_t l, std::uint32_t c) const;
 
         Matrix3& operator=(const Matrix3& other);
         Matrix3& operator+=(const Matrix3& other);

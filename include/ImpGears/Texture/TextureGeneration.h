@@ -1,7 +1,7 @@
 #ifndef IMP_TEXTURE_GENERATION_H
 #define IMP_TEXTURE_GENERATION_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 #include <Core/Perlin.h>
 
 

@@ -1,7 +1,7 @@
 #ifndef IMP_TEXTURE_H
 #define IMP_TEXTURE_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
 
 #include <string>
@@ -31,7 +31,7 @@ class IMP_API Texture
         /// \param height - The height of the texture.
         /// \param format - The pixel format.
         /// \param memoryMode - The memory mode.
-        void loadFromMemory(char* data, Uint32 width, Uint32 height, PixelFormat format = PixelFormat_RGBA8);
+        void loadFromMemory(char* data, std::uint32_t width, std::uint32_t height, PixelFormat format = PixelFormat_RGBA8);
 
         /// \brief Loads the texture from pixel buffer.
         /// \param data - A pointer to the data buffer.
@@ -43,7 +43,7 @@ class IMP_API Texture
         /// \param height - The height of the texture.
         /// \param format - The pixel format.
         /// \param memoryMode - The memory mode.
-		void create(Uint32 width, Uint32 height, PixelFormat format = PixelFormat_RGBA8);
+		void create(std::uint32_t width, std::uint32_t height, PixelFormat format = PixelFormat_RGBA8);
 
 		/// \brief Destroy a texture
 		void destroy();
@@ -56,7 +56,7 @@ class IMP_API Texture
         void bind() const;
         void unbind() const;
 
-		Uint32 getVideoID() const{return m_videoID;}
+		std::uint32_t getVideoID() const{return m_videoID;}
 
         bool isSmooth() const{return m_isSmooth;}
         void setSmooth(bool smooth){m_isSmooth = smooth; updateVideoParams();}
@@ -65,12 +65,12 @@ class IMP_API Texture
         void setRepeated(bool repeated){m_isRepeated = repeated; updateVideoParams();}
 
         bool hasMimap() const{return m_hasMipmap;}
-        void setMipmap(bool mipmap, Uint32 maxLevel = 1000){m_hasMipmap = mipmap; m_mipmapMaxLevel = maxLevel; updateVideoParams();}
+        void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){m_hasMipmap = mipmap; m_mipmapMaxLevel = maxLevel; updateVideoParams();}
 
         void setMemorySyncMode(MemorySyncMode mode){m_syncMode = mode;}
 
-        Uint32 getWidth() const {return m_data.getWidth();}
-        Uint32 getHeight() const {return m_data.getHeight();}
+        std::uint32_t getWidth() const {return m_data.getWidth();}
+        std::uint32_t getHeight() const {return m_data.getHeight();}
 
     protected:
     private:
@@ -81,7 +81,7 @@ class IMP_API Texture
 
         ImageData m_data;
 
-        Uint32 m_videoID;
+        std::uint32_t m_videoID;
 
         MemorySyncMode m_syncMode;
         bool m_videoMemLastModified;
@@ -90,7 +90,7 @@ class IMP_API Texture
 		bool m_isRepeated;
 		bool m_hasMipmap;
 
-		Uint32 m_mipmapMaxLevel;
+		std::uint32_t m_mipmapMaxLevel;
 		
 		std::string m_name;
 };

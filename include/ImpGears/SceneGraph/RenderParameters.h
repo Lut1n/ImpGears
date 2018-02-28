@@ -1,7 +1,7 @@
 #ifndef IMP_RENDERPARAMETERS_H
 #define IMP_RENDERPARAMETERS_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <Core/Vector3.h>
 #include <Core/Matrix4.h>
 

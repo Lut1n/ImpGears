@@ -14,10 +14,10 @@ void initRandom()
 //--------------------------------------------------------------
 float random(float min, float max, float precision)
 {
-    Int64 iMin = (Int64)(min/precision);
-    Int64 iMax = (Int64)(max/precision);
+    std::int64_t iMin = (std::int64_t)(min/precision);
+    std::int64_t iMax = (std::int64_t)(max/precision);
 
-    Int64 iRand = rand()%(iMax-iMin)+iMin;
+    std::int64_t iRand = rand()%(iMax-iMin)+iMin;
 
     return (float)(iRand)*precision;
 }

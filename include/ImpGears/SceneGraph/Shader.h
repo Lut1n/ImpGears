@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <Core/Matrix4.h>
 #include <SceneGraph/Texture.h>
 
@@ -93,7 +93,7 @@ class IMP_API Shader
 			
 			void set(const Matrix4* mat4Array, int count = 1);
 			
-			void set(const Texture* texture, Int32 textureUnit = 0);
+			void set(const Texture* texture, std::int32_t textureUnit = 0);
 			
 			const std::string& getID() const {return id;}
 			
@@ -102,7 +102,7 @@ class IMP_API Shader
 			private:
 			
 			std::string id;
-			Uint32 count;
+			std::uint32_t count;
 			Type type;
 			Value value;
 			const Texture* sampler;
@@ -112,10 +112,10 @@ class IMP_API Shader
         Shader(const char* vertexShader, const char* fragmentShader);
         virtual ~Shader();
 
-        void setTextureParameter(const char* name, const Texture* texture, Int32 textureUnit = 0);
+        void setTextureParameter(const char* name, const Texture* texture, std::int32_t textureUnit = 0);
         void setFloatParameter(const char* name, float value);
         void setMatrix4Parameter(const char* name, const Matrix4& Matrix4);
-        void setVector3ArrayParameter(const char* name, float* vector3Array, Uint32 count);
+        void setVector3ArrayParameter(const char* name, float* vector3Array, std::uint32_t count);
         void setVector3Parameter(const char* name, const Vector3& vec3);
 		
 		void setParameter(const Parameter& param);
@@ -127,8 +127,8 @@ class IMP_API Shader
         void enable();
         void disable();
 		
-		Int32 getParameterLocation(const std::string& id) const;
-		Uint32 getID() const {return m_programID;}
+		std::int32_t getParameterLocation(const std::string& id) const;
+		std::uint32_t getID() const {return m_programID;}
 
         static const Shader* getActiveShader() {return m_instance;}
 		
@@ -139,10 +139,10 @@ class IMP_API Shader
 		void updateAllParameters();
 		void updateParameter(const std::string& name);
 		
-		void addTextureParameter(const std::string& name, const Texture* texture, Int32 textureUnit = 0);
+		void addTextureParameter(const std::string& name, const Texture* texture, std::int32_t textureUnit = 0);
         void addFloatParameter(const std::string& name, float value);
         void addMatrix4Parameter(const std::string& name, const Matrix4* Matrix4);
-        void addVector3ArrayParameter(const std::string& name,  float* vector3Array, Uint32 count);
+        void addVector3ArrayParameter(const std::string& name,  float* vector3Array, std::uint32_t count);
         void addVector3Parameter(const std::string& name, const Vector3* vec3);
 		
         void addProjection(const Matrix4* projection);
@@ -152,9 +152,9 @@ class IMP_API Shader
     protected:
     private:
 
-        Uint32 m_vertexID;
-        Uint32 m_fragmentID;
-        Uint32 m_programID;
+        std::uint32_t m_vertexID;
+        std::uint32_t m_fragmentID;
+        std::uint32_t m_programID;
 
         static Shader* m_instance;
 		

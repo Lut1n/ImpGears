@@ -3,7 +3,7 @@
 
 #include <Geometry/Polygon.h>
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 

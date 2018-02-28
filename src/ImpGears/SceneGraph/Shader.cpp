@@ -7,7 +7,7 @@
 
 IMPGEARS_BEGIN
 
-Shader* Shader::m_instance = IMP_NULL;
+Shader* Shader::m_instance = nullptr;
 
 
 //--------------------------------------------------------------
@@ -15,7 +15,7 @@ Shader::Parameter::Parameter(const std::string& id, Type type)
 {
 	this->id = id;
 	this->type = type;
-	this->sampler = IMP_NULL;
+	this->sampler = nullptr;
 }
 
 //--------------------------------------------------------------
@@ -86,7 +86,7 @@ void Shader::Parameter::set(const Matrix4* mat4Array, int count)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const Texture* texture, Int32 textureUnit)
+void Shader::Parameter::set(const Texture* texture, std::int32_t textureUnit)
 {
 	this->type = Type_Sampler;
 	value.value_1i = textureUnit;
@@ -96,7 +96,7 @@ void Shader::Parameter::set(const Texture* texture, Int32 textureUnit)
 //--------------------------------------------------------------
 void Shader::Parameter::updateUniform(const Shader& program) const
 {
-	Int32 uniformLocation = program.getParameterLocation( this->getID() );
+	std::int32_t uniformLocation = program.getParameterLocation( this->getID() );
 	
 	if(type == Type_1f)
 	{
@@ -214,14 +214,14 @@ Shader::Shader(const char* vertexShader, const char* fragmentShader)
 }
 
 //--------------------------------------------------------------
-void Shader::setTextureParameter(const char* name, const Texture* texture, Int32 textureUnit)
+void Shader::setTextureParameter(const char* name, const Texture* texture, std::int32_t textureUnit)
 {
     enable();
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, texture->getVideoID());
 
-    Int32 location = glGetUniformLocation(m_programID, name);
+    std::int32_t location = glGetUniformLocation(m_programID, name);
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
     GL_CHECKERROR(name);
@@ -231,10 +231,10 @@ void Shader::setTextureParameter(const char* name, const Texture* texture, Int32
 }
 
 //--------------------------------------------------------------
-void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, Uint32 count)
+void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, std::uint32_t count)
 {
     enable();
-    Int32 location = glGetUniformLocation(m_programID, name);
+    std::int32_t location = glGetUniformLocation(m_programID, name);
     glUniform3fv(location, count, vector3Array);
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
@@ -263,7 +263,7 @@ void Shader::setFloatParameter(const char* name, float value)
 void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
 {
     enable();
-    Int32 location = glGetUniformLocation(m_programID, name);
+    std::int32_t location = glGetUniformLocation(m_programID, name);
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
     GL_CHECKERROR("Matrix4 location");
@@ -281,7 +281,7 @@ void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
 void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
 {
     enable();
-    Int32 location = glGetUniformLocation(m_programID, name);
+    std::int32_t location = glGetUniformLocation(m_programID, name);
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
     GL_CHECKERROR("vec3 location");
@@ -352,9 +352,9 @@ void Shader::enable()
 }
 
 //--------------------------------------------------------------
-Int32 Shader::getParameterLocation(const std::string& id) const
+std::int32_t Shader::getParameterLocation(const std::string& id) const
 {
-	Int32 location = glGetUniformLocation(m_programID, id.c_str());
+	std::int32_t location = glGetUniformLocation(m_programID, id.c_str());
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", id.c_str());
     GL_CHECKERROR("parameter location");
@@ -366,7 +366,7 @@ Int32 Shader::getParameterLocation(const std::string& id) const
 void Shader::disable()
 {
     glUseProgram (0) ;
-    m_instance = IMP_NULL;
+    m_instance = nullptr;
 }
 
 //--------------------------------------------------------------
@@ -379,8 +379,8 @@ void Shader::addParameter(const std::shared_ptr<Parameter>& param)
 void Shader::removeParameter(Parameter* param)
 {
 	bool found = false;
-	Uint32 index = -1;
-	for(Uint32 i=0; i<_parameters.size(); ++i)
+	std::uint32_t index = -1;
+	for(std::uint32_t i=0; i<_parameters.size(); ++i)
 		if(_parameters[i]->getID() == param->getID())
 		{
 			index = i;
@@ -390,7 +390,7 @@ void Shader::removeParameter(Parameter* param)
 	
 	if(found)
 	{
-		for(Uint32 i=index+1; i<_parameters.size(); ++i)
+		for(std::uint32_t i=index+1; i<_parameters.size(); ++i)
 			_parameters[i-1] = _parameters[i];
 		
 		_parameters.resize(_parameters.size()-1);
@@ -406,17 +406,17 @@ void Shader::clearParameter()
 //--------------------------------------------------------------
 Shader::Parameter* Shader::getParameter(const std::string& name)
 {
-	for(Uint32 i=0; i<_parameters.size(); ++i)
+	for(std::uint32_t i=0; i<_parameters.size(); ++i)
 		if(_parameters[i]->getID() == name)
 			return _parameters[i].get();
 		
-	return IMP_NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------
 void Shader::updateAllParameters()
 {
-	for(Uint32 i=0; i<_parameters.size(); ++i)
+	for(std::uint32_t i=0; i<_parameters.size(); ++i)
 	{
 		_parameters[i]->updateUniform( *this );
 	}
@@ -429,7 +429,7 @@ void Shader::updateParameter(const std::string& name)
 }
 
 //--------------------------------------------------------------
-void Shader::addTextureParameter(const std::string& name, const Texture* texture, Int32 textureUnit)
+void Shader::addTextureParameter(const std::string& name, const Texture* texture, std::int32_t textureUnit)
 {
 	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_Sampler) );
 	param->set(texture, textureUnit);
@@ -453,7 +453,7 @@ void Shader::addMatrix4Parameter(const std::string& name, const Matrix4* mat4)
 }
 
 //--------------------------------------------------------------
-void Shader::addVector3ArrayParameter(const std::string& name, float* vector3Array, Uint32 count)
+void Shader::addVector3ArrayParameter(const std::string& name, float* vector3Array, std::uint32_t count)
 {
 	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_3fv) );
 	param->set(vector3Array,count);

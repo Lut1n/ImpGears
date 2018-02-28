@@ -7,7 +7,7 @@ Define a manager for using VBOs. VBOManager keeps id and size of VBO created. It
 #ifndef VBOMANAGER_H
 #define VBOMANAGER_H
 
-#include "../Core/impBase.h"
+#include <Core/Object.h>
 
 #define VBO_MAX 100000
 
@@ -15,8 +15,8 @@ IMPGEARS_BEGIN
 
 struct IMP_API VBO_Info
 {
-    imp::Uint32 videoID;
-    imp::Uint32 size;
+    std::uint32_t videoID;
+    std::uint32_t size;
 };
 
 /// \brief Defines The game VBO Manager.
@@ -28,10 +28,10 @@ private:
 
     static VBOManager* instance;
 
-    imp::Uint32 memoryUsed;
+    std::uint32_t memoryUsed;
 
     VBO_Info vboInfos[VBO_MAX];
-    imp::Uint32 nbVbo;
+    std::uint32_t nbVbo;
 
 public:
 
@@ -46,15 +46,15 @@ public:
 
     static VBOManager* getInstance();
 
-    imp::Uint32 request(imp::Uint32 _size, UsageMode _usage);
-    void release(imp::Uint32 _id);
+    std::uint32_t request(std::uint32_t _size, UsageMode _usage);
+    void release(std::uint32_t _id);
 
-    void resize(imp::Uint32 _id, imp::Uint32 _size, UsageMode _usage);
+    void resize(std::uint32_t _id, std::uint32_t _size, UsageMode _usage);
 
-    imp::Uint32 getVideoID(imp::Uint32 _index);
-    imp::Uint32 findVideoID(imp::Uint32 _id);
+    std::uint32_t getVideoID(std::uint32_t _index);
+    std::uint32_t findVideoID(std::uint32_t _id);
 
-    imp::Uint32 getMemoryUsed() const{return memoryUsed;}
+    std::uint32_t getMemoryUsed() const{return memoryUsed;}
 };
 
 IMPGEARS_END

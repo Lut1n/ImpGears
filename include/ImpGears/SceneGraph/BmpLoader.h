@@ -1,7 +1,7 @@
 #ifndef IMP_BMPLOADER_H
 #define IMP_BMPLOADER_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
 #include <SceneGraph/Texture.h>
 

@@ -1,7 +1,7 @@
 #ifndef IMP_PROCEDURAL_GEOMETRY_H
 #define IMP_PROCEDURAL_GEOMETRY_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 
 #include <Core/Vector3.h>
 #include <Core/Math.h>

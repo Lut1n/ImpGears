@@ -58,12 +58,12 @@ const Matrix4& Matrix4::operator*=(const Matrix4& other)
 {
     Matrix4 original(*this);
 
-    for(Uint32 l=0; l<4; ++l)
+    for(std::uint32_t l=0; l<4; ++l)
     {
-        for(Uint32 c=0; c<4; ++c)
+        for(std::uint32_t c=0; c<4; ++c)
         {
             float r = 0.f;
-            for(Uint32 n = 0; n<4; ++n)
+            for(std::uint32_t n = 0; n<4; ++n)
                 r += original.getValue(l,n) * other.getValue(n,c);
 
             setValue(l,c,r);
@@ -84,7 +84,7 @@ const Matrix4 Matrix4::operator*(const Matrix4& other) const
 //--------------------------------------------------------------
 const Matrix4& Matrix4::operator*=(float scalar)
 {
-    for(Uint32 i=0; i<16; ++i)
+    for(std::uint32_t i=0; i<16; ++i)
         m_data[0] *= scalar;
 
     return *this;
@@ -118,9 +118,9 @@ const Matrix4 Matrix4::getTranspose() const
 {
     Matrix4 transposed(*this);
 
-    for(Uint32 i=0; i<4; ++i)
+    for(std::uint32_t i=0; i<4; ++i)
     {
-        for(Uint32 j=0; j<4; ++j)
+        for(std::uint32_t j=0; j<4; ++j)
         {
             transposed.setValue(i, j, getValue(j,i));
         }
@@ -204,13 +204,13 @@ const float* Matrix4::getData() const
 }
 
 //--------------------------------------------------------------
-void Matrix4::setValue(Uint32 c, Uint32 l, float v)
+void Matrix4::setValue(std::uint32_t c, std::uint32_t l, float v)
 {
     m_data[c*4+l] = v;
 }
 
 //--------------------------------------------------------------
-float Matrix4::getValue(Uint32 c, Uint32 l) const
+float Matrix4::getValue(std::uint32_t c, std::uint32_t l) const
 {
     return m_data[c*4+l];
 }

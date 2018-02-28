@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
 #include <Core/BasicFunctions.h>
 
@@ -119,11 +119,11 @@ void IMP_API applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY);
 
 inline imp::Pixel IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned int y);
 
-void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
+void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = nullptr, float perturbIntensity = 1.0);
 
-void IMP_API drawDirectionnalSignal(imp::ImageData& img, SignalType signaltype, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
+void IMP_API drawDirectionnalSignal(imp::ImageData& img, SignalType signaltype, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = nullptr, float perturbIntensity = 1.0);
 
-void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = IMP_NULL, float perturbIntensity = 1.0);
+void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = nullptr, float perturbIntensity = 1.0);
 
 void IMP_API applyPerturbation(imp::ImageData& img, const imp::ImageData& normals, float intensity);
 

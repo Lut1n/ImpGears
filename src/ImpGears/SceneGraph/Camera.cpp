@@ -13,7 +13,7 @@ IMPGEARS_BEGIN
 const imp::Vector3 Camera::m_upVector(0.f, 0.f, 1.f);
 
 //--------------------------------------------------------------
-Camera* Camera::m_activeCamera = IMP_NULL;
+Camera* Camera::m_activeCamera = nullptr;
 
 //--------------------------------------------------------------
 Camera::Camera(bool active)

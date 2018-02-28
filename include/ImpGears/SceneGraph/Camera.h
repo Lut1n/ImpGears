@@ -4,7 +4,7 @@
 
 #include <Core/Vector3.h>
 #include <Core/Matrix4.h>
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/SceneNode.h>
 
 IMPGEARS_BEGIN

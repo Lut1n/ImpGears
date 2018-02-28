@@ -1,7 +1,7 @@
 #ifndef IMP_MATRIX4_H
 #define IMP_MATRIX4_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <Core/Vector3.h>
 
 IMPGEARS_BEGIN
@@ -49,12 +49,12 @@ class IMP_API Matrix4
         /// \brief Set a value
         /// \param c - the column
         /// \param l - the line
-        void setValue(Uint32 c, Uint32 l, float v);
+        void setValue(std::uint32_t c, std::uint32_t l, float v);
 
         /// \brief Get a value
         /// \param c - the column
         /// \param l - the line
-        float getValue(Uint32 c, Uint32 l) const;
+        float getValue(std::uint32_t c, std::uint32_t l) const;
 
         static const Matrix4 getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue);
         static const Matrix4 getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue);

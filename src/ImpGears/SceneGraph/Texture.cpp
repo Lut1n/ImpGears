@@ -32,16 +32,16 @@ Texture::~Texture()
 }
 
 //--------------------------------------------------------------
-void Texture::loadFromMemory(char* data, Uint32 width, Uint32 height, PixelFormat format)
+void Texture::loadFromMemory(char* data, std::uint32_t width, std::uint32_t height, PixelFormat format)
 {
 	// std::cout << m_name << " - load from mem\n";
-	Uint32 bpp = 32;
+	std::uint32_t bpp = 32;
 	if( format == PixelFormat_BGR8 || format == PixelFormat_RGB8 )
 		bpp = 24;
 	else if(format == PixelFormat_RGBA8 || format == PixelFormat_BGRA8)
 		bpp = 32;
 	
-    m_data.create(width, height, bpp, format, reinterpret_cast<Uint8*>(data) );
+    m_data.create(width, height, bpp, format, reinterpret_cast<std::uint8_t*>(data) );
     updateVideoParams();
     updateVideoMemory();
 }
@@ -57,9 +57,9 @@ void Texture::loadFromImageData(const ImageData* data)
 }
 
 //--------------------------------------------------------------
-void Texture::create(Uint32 width, Uint32 height, PixelFormat format)
+void Texture::create(std::uint32_t width, std::uint32_t height, PixelFormat format)
 {
-	Uint32 bpp = 32;
+	std::uint32_t bpp = 32;
 	if( format == PixelFormat_BGR8 || format == PixelFormat_RGB8 )
 		bpp = 24;
 	else if(format == PixelFormat_RGBA8 || format == PixelFormat_BGRA8)
@@ -80,7 +80,7 @@ void Texture::destroy()
 //--------------------------------------------------------------
 void Texture::getImageData(ImageData* data) const
 {
-    if(data == IMP_NULL)
+    if(data == nullptr)
         return;
 
     data->clone(m_data);
@@ -107,9 +107,9 @@ void Texture::synchronize()
 //--------------------------------------------------------------
 void Texture::updateVideoMemory()
 {
-    Int32 glInternalFormat = 0;
-    Int32 glDataFormat = 0;
-    Int32 glDataType = GL_UNSIGNED_BYTE;
+    std::int32_t glInternalFormat = 0;
+    std::int32_t glDataFormat = 0;
+    std::int32_t glDataType = GL_UNSIGNED_BYTE;
 
     switch(m_data.getFormat())
     {
@@ -148,8 +148,8 @@ void Texture::updateVideoMemory()
 
 void Texture::updateVideoParams()
 {
-    Int32 glFilterMagValue = m_isSmooth? GL_NEAREST : GL_LINEAR;
-    Int32 glWrapMode = m_isRepeated? GL_REPEAT : GL_CLAMP_TO_EDGE;
+    std::int32_t glFilterMagValue = m_isSmooth? GL_NEAREST : GL_LINEAR;
+    std::int32_t glWrapMode = m_isRepeated? GL_REPEAT : GL_CLAMP_TO_EDGE;
 
     GLint glFilterMinValue = glFilterMagValue;
     if(m_hasMipmap)

@@ -5,12 +5,12 @@
 
 IMPGEARS_BEGIN
 
-VBOManager* VBOManager::instance = IMP_NULL;
+VBOManager* VBOManager::instance = nullptr;
 
 //--------------------------------------------------------------
 VBOManager* VBOManager::getInstance()
 {
-    if(VBOManager::instance == IMP_NULL)
+    if(VBOManager::instance == nullptr)
         new VBOManager();
 
     return VBOManager::instance;
@@ -30,14 +30,14 @@ VBOManager::~VBOManager()
     if( memoryUsed != 0 )
 		std::cout << "impError : GPU memory unfree : " << memoryUsed << " bytes (" << nbVbo << " vbo)" << std::endl;
 
-    for(imp::Uint32 index = 0; index<nbVbo; ++index)
+    for(std::uint32_t index = 0; index<nbVbo; ++index)
         release(vboInfos[index].videoID);
 
-    VBOManager::instance = IMP_NULL;
+    VBOManager::instance = nullptr;
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOManager::request(imp::Uint32 _size, UsageMode _usage)
+std::uint32_t VBOManager::request(std::uint32_t _size, UsageMode _usage)
 {
     if(nbVbo >= VBO_MAX)
     {
@@ -50,7 +50,7 @@ imp::Uint32 VBOManager::request(imp::Uint32 _size, UsageMode _usage)
     GL_CHECKERROR("request VBO");
 
     VBO_Info info;
-    info.videoID = static_cast<imp::Uint32>(id);
+    info.videoID = static_cast<std::uint32_t>(id);
     info.size = 0;
 
     vboInfos[nbVbo++] = info;
@@ -61,16 +61,16 @@ imp::Uint32 VBOManager::request(imp::Uint32 _size, UsageMode _usage)
 }
 
 //--------------------------------------------------------------
-void VBOManager::release(imp::Uint32 _id)
+void VBOManager::release(std::uint32_t _id)
 {
     if(_id == 0)
         return;
 
-    imp::Uint32 index = findVideoID(_id);
+    std::uint32_t index = findVideoID(_id);
 
     memoryUsed -= vboInfos[index].size;
 
-    for(imp::Uint32 i = index+1; i<nbVbo; ++i)
+    for(std::uint32_t i = index+1; i<nbVbo; ++i)
         vboInfos[i-1] = vboInfos[i];
 
     --nbVbo;
@@ -83,7 +83,7 @@ void VBOManager::release(imp::Uint32 _id)
 }
 
 //--------------------------------------------------------------
-void VBOManager::resize(imp::Uint32 _id, imp::Uint32 _size, UsageMode _usage)
+void VBOManager::resize(std::uint32_t _id, std::uint32_t _size, UsageMode _usage)
 {
     if(_id == 0)
         return;
@@ -98,22 +98,22 @@ void VBOManager::resize(imp::Uint32 _id, imp::Uint32 _size, UsageMode _usage)
     glBufferData(GL_ARRAY_BUFFER, _size, 0, glUsage);
     GL_CHECKERROR("VBO set data");
 
-    imp::Uint32 index = findVideoID(_id);
+    std::uint32_t index = findVideoID(_id);
     memoryUsed -= vboInfos[index].size;
     vboInfos[index].size = _size;
     memoryUsed += vboInfos[index].size;
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOManager::getVideoID(imp::Uint32 _index)
+std::uint32_t VBOManager::getVideoID(std::uint32_t _index)
 {
     return vboInfos[_index].videoID;
 }
 
 //--------------------------------------------------------------
-imp::Uint32 VBOManager::findVideoID(imp::Uint32 _id)
+std::uint32_t VBOManager::findVideoID(std::uint32_t _id)
 {
-    for(imp::Uint32 index = 0; index<nbVbo; ++index)
+    for(std::uint32_t index = 0; index<nbVbo; ++index)
         if(vboInfos[index].videoID == _id)
             return index;
 

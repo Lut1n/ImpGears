@@ -1,7 +1,7 @@
 #ifndef IMP_TEXT_RENDERER
 #define IMP_TEXT_RENDERER
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 #include <Utils/JsonReaderWriter.h>
 #include <SceneGraph/ImageData.h>
 

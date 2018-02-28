@@ -20,8 +20,8 @@ ScreenVertex::ScreenVertex()
       0.f, 1.f
     };
 
-    Uint32 vertexBuffSize = 12*sizeof(float);
-    Uint32 texCoordSize = 8*sizeof(float);
+    std::uint32_t vertexBuffSize = 12*sizeof(float);
+    std::uint32_t texCoordSize = 8*sizeof(float);
 
     m_texCoordOffset = vertexBuffSize;
 

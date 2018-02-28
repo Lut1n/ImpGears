@@ -15,7 +15,7 @@ imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
 {
 /*       FILE *fp = fopen(filename, "rb");
     if (!fp)
-       return (IMP_NULL);
+       return (nullptr);
 
     //check
     png_byte pngsig[8];
@@ -23,7 +23,7 @@ imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
     bool is_png = !png_sig_cmp(pngsig, 0, 8);
 
     if (!is_png)
-       return (IMP_NULL);
+       return (nullptr);
 
     //loading
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -31,7 +31,7 @@ imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
     if(!png_ptr)
     {
         fprintf(stderr, "impError : Cannot load png image %s\n", filename);
-        return IMP_NULL;
+        return nullptr;
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
@@ -39,11 +39,11 @@ imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
     {
         fprintf(stderr, "impError : Cannot load png image %s\n", filename);
         png_destroy_read_struct(&png_ptr, (png_infopp)0, (png_infopp)0);
-        return IMP_NULL;
+        return nullptr;
     }
 
-    png_bytep* row_ptrs = IMP_NULL;
-    char* data = IMP_NULL;
+    png_bytep* row_ptrs = nullptr;
+    char* data = nullptr;
 
     if ( setjmp(png_jmpbuf(png_ptr)) )
     {
@@ -52,7 +52,7 @@ imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
         if (data != NULL) delete [] data;
 
         fprintf(stderr, "impError : Cannot load png %s\n", filename);
-        return IMP_NULL;
+        return nullptr;
     }
 
     /// set reading callback (readData)
@@ -135,7 +135,7 @@ imp::Texture* PngLoader::loadFromFile(const char* filename)
 {
     imp::ImageData* data = loadImageDataFromFile(filename);
 
-    if(data == IMP_NULL)
+    if(data == nullptr)
         fprintf(stderr, "impError : cannot load pixel data from file %s\n", filename);
 
     imp::Texture* tex = new imp::Texture();
@@ -256,7 +256,7 @@ pngimage_t PngLoader::loadFrom(const char* filename)
 
     return img;*/
 	fprintf(stderr, "impError : png image not supported anymore\n");
-	return IMP_NULL;
+	return nullptr;
 }
 
 

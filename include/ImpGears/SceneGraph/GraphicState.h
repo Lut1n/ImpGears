@@ -1,7 +1,7 @@
 #ifndef IMP_GRAPHICSTATE_H
 #define IMP_GRAPHICSTATE_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/RenderTarget.h>
 #include <SceneGraph/RenderParameters.h>
 #include <SceneGraph/Shader.h>

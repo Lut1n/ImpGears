@@ -1,7 +1,7 @@
 #ifndef OBJMESHLOADER_H
 #define OBJMESHLOADER_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/Mesh.h>
 
 IMPGEARS_BEGIN

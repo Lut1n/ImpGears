@@ -1,7 +1,7 @@
 #ifndef IMP_RENDERTARGET_H
 #define IMP_RENDERTARGET_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/OpenGL.h>
 #include <SceneGraph/Texture.h>
 
@@ -22,20 +22,20 @@ class IMP_API RenderTarget
         RenderTarget();
         virtual ~RenderTarget();
 		
-        void createScreenTarget(Uint32 width, Uint32 height);
+        void createScreenTarget(std::uint32_t width, std::uint32_t height);
 
         /// \brief Creates a texture render target.
         /// \param width - The width of the internal texture.
         /// \param height - The height of the internal texture.
         /// \param depthBuffer - A second buffer for the depth must be created ?
-        void createBufferTarget(Uint32 width, Uint32 height, Uint32 textureCount, bool depthBuffer);
+        void createBufferTarget(std::uint32_t width, std::uint32_t height, std::uint32_t textureCount, bool depthBuffer);
 
         void destroy();
 
         bool hasDepthBuffer() const{return m_hasDepthBuffer;}
 
 
-        Texture* getTexture(Uint32 n);
+        Texture* getTexture(std::uint32_t n);
         Texture* getDepthTexture();
 
         void bind();
@@ -45,17 +45,17 @@ class IMP_API RenderTarget
     private:
 
     TargetType m_type;
-    Uint32 m_width;
-    Uint32 m_height;
-    Uint32 m_bpp;
+    std::uint32_t m_width;
+    std::uint32_t m_height;
+    std::uint32_t m_bpp;
 
-    Uint32 m_textureCount;
+    std::uint32_t m_textureCount;
     bool m_hasDepthBuffer;
 
     Texture* m_colorTextures[5];
     Texture* m_depthTexture;
     GLuint m_frameBufferID;
-	Uint32 m_windowID;
+	std::uint32_t m_windowID;
 };
 
 IMPGEARS_END

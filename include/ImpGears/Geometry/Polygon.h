@@ -1,7 +1,7 @@
 #ifndef IMP_POLYGON_H
 #define IMP_POLYGON_H
 
-#include <Core/impBase.h>
+#include <Core/Object.h>
 #include <Core/Math.h>
 #include <Core/Vector3.h>
 

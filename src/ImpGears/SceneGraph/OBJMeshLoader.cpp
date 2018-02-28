@@ -69,16 +69,16 @@ void getVertex(std::string& buff, std::vector<float>& vertices)
     vertices.push_back(z);
 }
 
-imp::Uint32 parseIndices(const char* buff, std::vector<imp::Uint32>& vArr, std::vector<imp::Uint32>& vtArr,std::vector<imp::Uint32>& vnArr)
+std::uint32_t parseIndices(const char* buff, std::vector<std::uint32_t>& vArr, std::vector<std::uint32_t>& vtArr,std::vector<std::uint32_t>& vnArr)
 {
-    imp::Uint32 nbIndices = 0;
+    std::uint32_t nbIndices = 0;
 
     std::string strBuff(buff), sub;
     strBuff = strBuff.substr(strBuff.find(" ")+1); // remove "f "
 
     while(strBuff.size() > 0)
     {
-        imp::Int32 spaceIt = strBuff.find(" ");
+        std::int32_t spaceIt = strBuff.find(" ");
 
 		if(spaceIt == -1)
 		{
@@ -93,7 +93,7 @@ imp::Uint32 parseIndices(const char* buff, std::vector<imp::Uint32>& vArr, std::
 
         normalizeIndicesString(sub);
 
-        imp::Uint32 v=0, vt=0, vn=0;
+        std::uint32_t v=0, vt=0, vn=0;
         std::sscanf(sub.c_str(), "%u/%u/%u", &v, &vt, &vn);
 
         vArr.push_back(v); vtArr.push_back(vt); vnArr.push_back(vn);
@@ -111,15 +111,15 @@ void getIndices(std::string& buff, std::vector<float>& vertices, std::vector<flo
     if(nbInd == 4)
         isQuad = true;
 
-    std::vector<imp::Uint32> vIndices;
-    std::vector<imp::Uint32> vtIndices;
-    std::vector<imp::Uint32> vnIndices;
-    imp::Uint32 nbIndices = parseIndices(buff.c_str(), vIndices, vtIndices, vnIndices);
-    for(imp::Uint32 i=0; i<nbIndices; ++i)
+    std::vector<std::uint32_t> vIndices;
+    std::vector<std::uint32_t> vtIndices;
+    std::vector<std::uint32_t> vnIndices;
+    std::uint32_t nbIndices = parseIndices(buff.c_str(), vIndices, vtIndices, vnIndices);
+    for(std::uint32_t i=0; i<nbIndices; ++i)
     {
-        imp::Uint32 v = vIndices[i] - 1;
-        imp::Uint32 vt = vtIndices[i] - 1;
-        imp::Uint32 vn = vnIndices[i] - 1;
+        std::uint32_t v = vIndices[i] - 1;
+        std::uint32_t vt = vtIndices[i] - 1;
+        std::uint32_t vn = vnIndices[i] - 1;
 
         vertexBuffer.push_back(vertices[v*3]);
         vertexBuffer.push_back(vertices[v*3+1]);

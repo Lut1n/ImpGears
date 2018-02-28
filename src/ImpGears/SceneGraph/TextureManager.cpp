@@ -18,7 +18,7 @@ TextureManager::~TextureManager()
 Texture* TextureManager::getTexture(std::string name){
     Texture* result = textures[name];
 
-    if(result == IMP_NULL){
+    if(result == nullptr){
         result = PngLoader::loadFromFile(name.c_str());
         textures[name] = result;
     }

@@ -1,7 +1,7 @@
 #ifndef IMP_MESH_H
 #define IMP_MESH_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 #include <SceneGraph/VBOData.h>
 
 IMPGEARS_BEGIN
@@ -25,9 +25,9 @@ class IMP_API Mesh : public VBOData
         void clearTexCoordBuffer();
         void clearNormalBuffer();
 
-        void setVertexBuffer(const float* vertexBuffer, Uint32 size);
-        void setTexCoordBuffer(const float* texCoordBuffer, Uint32 size);
-        void setNormalBuffer(const float* normalBuffer, Uint32 size);
+        void setVertexBuffer(const float* vertexBuffer, std::uint32_t size);
+        void setTexCoordBuffer(const float* texCoordBuffer, std::uint32_t size);
+        void setNormalBuffer(const float* normalBuffer, std::uint32_t size);
 
         void setMaterial();
 
@@ -49,16 +49,16 @@ class IMP_API Mesh : public VBOData
     float* m_texCoordBuffer;
     float* m_normalBuffer;
 
-    Uint32 m_vertexBufferSize;
-    Uint32 m_texCoordBufferSize;
-    Uint32 m_normalBufferSize;
+    std::uint32_t m_vertexBufferSize;
+    std::uint32_t m_texCoordBufferSize;
+    std::uint32_t m_normalBufferSize;
 
-    Uint64 m_vertexOffset;
-    Uint64 m_texCoordOffset;
-    Uint64 m_normalOffset;
+    std::uint64_t m_vertexOffset;
+    std::uint64_t m_texCoordOffset;
+    std::uint64_t m_normalOffset;
 
     VertexMode m_vertexMode;
-    Uint32 m_vertexSize;
+    std::uint32_t m_vertexSize;
 
     //Material* m_material;
 };

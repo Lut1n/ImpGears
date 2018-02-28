@@ -1,16 +1,16 @@
 #ifndef IMP_IMAGEDATA_H
 #define IMP_IMAGEDATA_H
 
-#include "Core/impBase.h"
+#include <Core/Object.h>
 
 IMPGEARS_BEGIN
 
 /// \struct Pixel - Defines a RGBA pixel.
 union IMP_API Pixel
 {
-	struct { imp::Uint32 red, green, blue, alpha; };
-	struct { imp::Uint32 x, y, z, w; };
-	struct { imp::Uint32 r, g, b, a; };
+	struct { std::uint32_t red, green, blue, alpha; };
+	struct { std::uint32_t x, y, z, w; };
+	struct { std::uint32_t r, g, b, a; };
 };
 
 enum IMP_API PixelFormat
@@ -27,18 +27,18 @@ enum IMP_API PixelFormat
 
 struct Rect
 {
-	Uint32 x;
-	Uint32 y;
-	Uint32 w;
-	Uint32 h;
+	std::uint32_t x;
+	std::uint32_t y;
+	std::uint32_t w;
+	std::uint32_t h;
 };
 
 /*
 enum IMP_API PixelType
 {
     PixelType_Unknown = 0,
-    PixelType_Uint8,
-    PixelType_Uint16
+    PixelType_std::uint8_t,
+    PixelType_std::uint16_t
 };
 */
 
@@ -49,15 +49,15 @@ class IMP_API ImageData
 	ImageData();
 	virtual ~ImageData();
 
-	void create(Uint32 w, Uint32 h, Uint32 bpp, PixelFormat format, Uint8* srcBuffer = IMP_NULL);
-	void create(Uint32 w, Uint32 h, PixelFormat format, Uint8* srcBuffer = IMP_NULL);
+	void create(std::uint32_t w, std::uint32_t h, std::uint32_t bpp, PixelFormat format, std::uint8_t* srcBuffer = nullptr);
+	void create(std::uint32_t w, std::uint32_t h, PixelFormat format, std::uint8_t* srcBuffer = nullptr);
 	void destroy();
 
-	const Uint8* getBuffer() const{return m_buffer; }
+	const std::uint8_t* getBuffer() const{return m_buffer; }
 
 	void clone(const ImageData& other);
-	void resize(Int32 w, Int32 h, Int32 xrel=0, Int32 yrel=0);
-	void rescale(Int32 w, Int32 h);
+	void resize(std::int32_t w, std::int32_t h, std::int32_t xrel=0, std::int32_t yrel=0);
+	void rescale(std::int32_t w, std::int32_t h);
 	void draw(const ImageData& srcData, const Rect& srcRect, const Rect& dstRect);
 	
 	void convert(const ImageData& srcData, PixelFormat targetFormat);
@@ -65,36 +65,36 @@ class IMP_API ImageData
 	void fill(const Pixel& color);
 
 
-	Pixel getPixel(Uint32 x, Uint32 y) const;
-	void setPixel(Uint32 x, Uint32 y, Pixel pixel);
+	Pixel getPixel(std::uint32_t x, std::uint32_t y) const;
+	void setPixel(std::uint32_t x, std::uint32_t y, Pixel pixel);
 
-	Pixel getRepeatPixel(Uint32 x, Uint32 y) const;
-	void setRepeatPixel(Uint32 x, Uint32 y, Pixel pixel);
+	Pixel getRepeatPixel(std::uint32_t x, std::uint32_t y) const;
+	void setRepeatPixel(std::uint32_t x, std::uint32_t y, Pixel pixel);
 
-	Uint32 getWidth() const{return m_width;}
-	Uint32 getHeight() const{return m_height;}
-	Uint32 getBpp() const{return m_bpp;}
+	std::uint32_t getWidth() const{return m_width;}
+	std::uint32_t getHeight() const{return m_height;}
+	std::uint32_t getBpp() const{return m_bpp;}
 	PixelFormat getFormat()const{return m_format;}
 	// PixelType getType()const{return m_type;}
 
-	Uint8* getData() {return m_buffer;}
-	Uint32 getDataSize() {return m_bufferSize;}
-	Uint32 getDataRawSize() {return m_rawSize;}
+	std::uint8_t* getData() {return m_buffer;}
+	std::uint32_t getDataSize() {return m_bufferSize;}
+	std::uint32_t getDataRawSize() {return m_rawSize;}
 
-	// static Pixel convertIntoPixel(const Uint8* pixelBuff, PixelFormat format);
-	// static void fillBuffFromPixel(Pixel pixel, Uint8* outBuff, PixelFormat format);
+	// static Pixel convertIntoPixel(const std::uint8_t* pixelBuff, PixelFormat format);
+	// static void fillBuffFromPixel(Pixel pixel, std::uint8_t* outBuff, PixelFormat format);
 
     protected:
     private:
 
-        Uint8* m_buffer;
-        Uint32 m_bufferSize;
+        std::uint8_t* m_buffer;
+        std::uint32_t m_bufferSize;
 		
-		Uint32 m_rawSize;
+		std::uint32_t m_rawSize;
 
-        Uint32 m_width, m_height;
-        Uint32 m_bpp;
-        Uint32 m_channels;
+        std::uint32_t m_width, m_height;
+        std::uint32_t m_bpp;
+        std::uint32_t m_channels;
         PixelFormat m_format;
         // PixelType m_type;
 };

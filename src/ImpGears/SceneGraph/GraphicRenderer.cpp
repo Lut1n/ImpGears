@@ -36,6 +36,7 @@ GraphicRenderer::GraphicRenderer()
     _parameters->setBlendMode(imp::RenderParameters::BlendMode_SrcAlphaBased);
     _parameters->setFog(RenderParameters::ParamState_Disable);
     _parameters->setFaceCullingMode(RenderParameters::FaceCullingMode_Back);
+    _parameters->setViewport(0.0,0.0,800.0,400.0);
     
     _state.reset(new GraphicState());
     _state->setParameters(_parameters);

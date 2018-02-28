@@ -60,6 +60,8 @@ class IMP_API RenderParameters : public Object
 		
 		void setFog(ParamState state);
 		void setClearDepth(float depth);
+		
+		void setViewport(float x, float y, float width, float height);
 
     protected:
     private:
@@ -71,11 +73,14 @@ class IMP_API RenderParameters : public Object
         BlendMode m_blendMode;
 		ParamState _fogState;
 		
+		float _viewport[4];
+		
 		bool _clearColorChanged;
 		bool _clearDepthChanged;
 		bool _faceCullingChanged;
 		bool _blendModeChanged;
 		bool _fogChanged;
+		bool _viewportChanged;
 };
 
 IMPGEARS_END

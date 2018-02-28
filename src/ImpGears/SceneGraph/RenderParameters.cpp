@@ -10,7 +10,8 @@ RenderParameters::RenderParameters():
 	_clearDepthChanged(false),
 	_faceCullingChanged(false),
 	_blendModeChanged(false),
-	_fogChanged(false)
+	_fogChanged(false),
+	_viewportChanged(false)
 {
     m_clearColor = Vector3(1.f, 1.f, 1.f); //alpha = 1.f
 	_clearDepth = 1.f;
@@ -26,13 +27,18 @@ RenderParameters::RenderParameters(const RenderParameters& other):
 	_clearDepthChanged(other._clearDepthChanged),
 	_faceCullingChanged(other._faceCullingChanged),
 	_blendModeChanged(other._blendModeChanged),
-	_fogChanged(other._fogChanged)
+	_fogChanged(other._fogChanged),
+	_viewportChanged(other._viewportChanged)
 
 {
     m_clearColor = other.m_clearColor;
     m_projectionMatrix = other.m_projectionMatrix;
 	_clearDepth = other._clearDepth;
 	_fogState = other._fogState;
+	_viewport[0] = other._viewport[0];
+	_viewport[1] = other._viewport[1];
+	_viewport[2] = other._viewport[2];
+	_viewport[3] = other._viewport[3];
 }
 
 //--------------------------------------------------------------
@@ -49,12 +55,18 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
     m_projectionMatrix = other.m_projectionMatrix;
 	_clearDepth = other._clearDepth;
 	_fogState = other._fogState;
+	_viewportChanged = other._viewportChanged;
 	
 	_clearColorChanged = other._clearColorChanged;
 	_clearDepthChanged = other._clearDepthChanged;
 	_faceCullingChanged = other._faceCullingChanged;
 	_blendModeChanged = other._blendModeChanged;
 	_fogChanged = other._fogChanged;
+	
+	_viewport[0] = other._viewport[0];
+	_viewport[1] = other._viewport[1];
+	_viewport[2] = other._viewport[2];
+	_viewport[3] = other._viewport[3];
 
 
     return *this;
@@ -135,6 +147,11 @@ void RenderParameters::apply(bool clearBuffer) const
 		}
 	}
 	
+	if(_viewportChanged)
+	{
+			glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+	}
+	
 	if(clearBuffer && (_clearColorChanged || _clearDepthChanged) )
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -165,6 +182,16 @@ void RenderParameters::setClearDepth(float depth)
 {
 	_clearDepth = depth;
 	_clearDepthChanged = true;
+}
+
+//--------------------------------------------------------------
+void RenderParameters::setViewport(float x, float y, float width, float height)
+{
+	_viewport[0] = x;
+	_viewport[1] = y;
+	_viewport[2] = width;
+	_viewport[3] = height;
+	_viewportChanged = true;
 }
 
 IMPGEARS_END

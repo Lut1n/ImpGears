@@ -66,7 +66,7 @@ void TextRenderer::renderText(const std::string& text, imp::ImageData* targetImg
 	if(_mapping == nullptr)
 		return;
 	
-	targetImg->create(_charWidth * text.size(), _charHeight, imp::PixelFormat_BGRA8);
+	targetImg->build(_charWidth * text.size(), _charHeight, imp::PixelFormat_BGRA8);
 	
 	for(unsigned int i=0; i<text.size(); ++i)
 	{

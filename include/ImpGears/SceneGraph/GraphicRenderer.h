@@ -11,9 +11,12 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines The graphic renderer.
-class IMP_API GraphicRenderer
+class IMP_API GraphicRenderer : public Object
 {
     public:
+	
+		Meta_Class(GraphicRenderer)
+		
         GraphicRenderer();
         virtual ~GraphicRenderer();
 

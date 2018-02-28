@@ -31,7 +31,7 @@ void NoiseGenerator::setConfig(const Config& config)
         octavemap[i] = new FloatMap(_config.resolutionX, _config.resolutionY);
     }
 
-    resultmap.create(_config.resolutionX, _config.resolutionY, PixelFormat_RGB8);
+    resultmap.build(_config.resolutionX, _config.resolutionY, PixelFormat_RGB8);
 
     this->vmin = _config.valueMin;
     this->vmax = _config.valueMax;

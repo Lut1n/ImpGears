@@ -42,15 +42,17 @@ enum IMP_API PixelType
 };
 */
 
-class IMP_API ImageData
+class IMP_API ImageData : public Object
 {
     public:
+	
+	Meta_Class(ImageData)
 
 	ImageData();
 	virtual ~ImageData();
 
-	void create(std::uint32_t w, std::uint32_t h, std::uint32_t bpp, PixelFormat format, std::uint8_t* srcBuffer = nullptr);
-	void create(std::uint32_t w, std::uint32_t h, PixelFormat format, std::uint8_t* srcBuffer = nullptr);
+	void build(std::uint32_t w, std::uint32_t h, std::uint32_t bpp, PixelFormat format, std::uint8_t* srcBuffer = nullptr);
+	void build(std::uint32_t w, std::uint32_t h, PixelFormat format, std::uint8_t* srcBuffer = nullptr);
 	void destroy();
 
 	const std::uint8_t* getBuffer() const{return m_buffer; }

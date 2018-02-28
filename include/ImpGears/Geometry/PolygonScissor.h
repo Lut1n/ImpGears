@@ -7,10 +7,12 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API PolygonScissor
+class IMP_API PolygonScissor : public Object
 {
     public:
 
+	Meta_Class(PolygonScissor)
+	
     Polygon substract(Polygon& solid1, Polygon& solid2);
 	
     Polygon merge(Polygon& solid1, Polygon& solid2);

@@ -8,9 +8,12 @@ IMPGEARS_BEGIN
 
 class Matrix4;
 
-class IMP_API Matrix3
+class IMP_API Matrix3 : public Object
 {
     public:
+	
+		Meta_Class(Matrix3)
+	
         Matrix3();
         Matrix3(const Matrix3& other);
         Matrix3(const Matrix4& Matrix4);

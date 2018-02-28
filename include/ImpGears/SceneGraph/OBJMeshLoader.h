@@ -6,9 +6,12 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API OBJMeshLoader
+class IMP_API OBJMeshLoader : public Object
 {
     public:
+	
+		Meta_Class(OBJMeshLoader)
+	
         OBJMeshLoader();
         virtual ~OBJMeshLoader();
 

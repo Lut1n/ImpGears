@@ -26,7 +26,7 @@ Bitmap::~Bitmap()
 }
 
 //--------------------------------------------------------------
-void Bitmap::create(int width, int height, const imp::Pixel& initialColor)
+void Bitmap::build(int width, int height, const imp::Pixel& initialColor)
 {
     dib = DIB_BITMAPINFOHEADER;
 
@@ -47,7 +47,7 @@ void Bitmap::create(int width, int height, const imp::Pixel& initialColor)
     // int rawSize = (int)( (header.bpp * header.width + 31)/32 ) * 4;
     // int bufferSize = rawSize * header.height;
 
-    _internalImageData->create(width, height, imp::PixelFormat_BGR8);
+    _internalImageData->build(width, height, imp::PixelFormat_BGR8);
     _internalImageData->fill( initialColor );
 }
 
@@ -160,7 +160,7 @@ void Bitmap::loadFromFile(std::string filename)
 			// go to pixel data
 			seek(is, fileHeader.dataOffset);
 			
-            _internalImageData->create(header.width, header.height, header.bpp, format);
+            _internalImageData->build(header.width, header.height, header.bpp, format);
             unsigned char buffer[rawSize];
             for(int i=0; i<header.height; ++i)
             {
@@ -322,7 +322,7 @@ void BmpLoader::saveToFile(const imp::ImageData* image, const char* filename)
 	imp::Pixel initColor = {255, 255, 255, 255};
 
 	Bitmap bitmap;
-	bitmap.create(image->getWidth(), image->getHeight(), initColor);
+	bitmap.build(image->getWidth(), image->getHeight(), initColor);
 	bitmap.getInternalImageData()->clone(*image);
 	bitmap.saveToFile(filename);
 }

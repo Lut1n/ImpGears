@@ -7,9 +7,11 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines an openGL matrix4x4 wrapper.
-class IMP_API Matrix4
+class IMP_API Matrix4 : public Object
 {
     public:
+	
+		Meta_Class(Matrix4)
 
         Matrix4();
 

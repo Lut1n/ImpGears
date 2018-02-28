@@ -11,6 +11,9 @@ IMPGEARS_BEGIN
 class IMP_API BasicShader : public Shader
 {
     public:
+	
+		Meta_Class(BasicShader)
+	
         BasicShader();
         virtual ~BasicShader();
 

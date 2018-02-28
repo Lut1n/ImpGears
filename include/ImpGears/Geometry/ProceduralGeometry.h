@@ -18,13 +18,15 @@ class IMP_API SignalFunctor
 };
 
 
-class IMP_API Geometry
+class IMP_API Geometry : public Object
 {
 	public:
 	
 	std::vector<imp::Vector3> _vertices;
 	// std::vector<imp::Vector3> _normals;
 	//std::vector<unsigned int> _indices;
+	
+	Meta_Class(Geometry)
 	
 	Geometry();
 	

@@ -9,13 +9,15 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API Edge
+class IMP_API Edge : public Object
 {
 	public:
 	
     imp::Vector3 _p1;
     imp::Vector3 _p2;
     imp::Vector3 _n;
+	
+	Meta_Class(Edge)
 	
 	Edge(){}
 	
@@ -49,7 +51,7 @@ class IMP_API Edge
 	
 typedef std::vector<Edge> EdgeBuffer;
 
-class IMP_API Polygon
+class IMP_API Polygon : public Object
 {
 	public:
 	
@@ -57,6 +59,8 @@ class IMP_API Polygon
 	
 	mutable imp::Vector3 _boundsA;
 	mutable imp::Vector3 _boundsB;
+	
+	Meta_Class(Polygon)
 	
 	Polygon(){}
 	

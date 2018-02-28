@@ -127,7 +127,7 @@ imp::ImageData* PngLoader::loadImageDataFromFile(const char* filename)
 	
 	fprintf(stderr, "impError : png image not supported anymore.\n");
 	imp::ImageData* data = new imp::ImageData();
-	data->create(512, 512, 32, imp::PixelFormat_RGBA8);
+	data->build(512, 512, 32, imp::PixelFormat_RGBA8);
 	return data;
 }
 

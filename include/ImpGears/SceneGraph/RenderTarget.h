@@ -8,7 +8,7 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines a render target. A render target can be a texture or a window.
-class IMP_API RenderTarget
+class IMP_API RenderTarget : public Object
 {
     public:
 
@@ -18,6 +18,8 @@ class IMP_API RenderTarget
           TargetType_Screen,
           TargetType_Buffer
         };
+		
+		Meta_Class(RenderTarget)
 
         RenderTarget();
         virtual ~RenderTarget();

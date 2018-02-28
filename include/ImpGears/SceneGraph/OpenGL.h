@@ -3,12 +3,7 @@
 
 // #define GLEW_STATIC
 #include <GL/glew.h>
-//#include <GL/glut.h>
-//#include <GL/glu.h>
 #include <GL/gl.h>
-
-#include <cstdio>
-#include <string>
 
 #define GL_CHECKERROR(msg) GLcheckError(msg, __FILE__, __LINE__);
 
@@ -60,14 +55,15 @@ inline void glErrToString(GLenum error, std::string& string)
 }
 
 
-inline void GLcheckError(const char* _debugMsg, const char* _file, int _line)
+inline void GLcheckError(const char* debugMsg, const char* file, int line)
 {
     GLenum error = glGetError();
     if(error != GL_NO_ERROR)
 	{
 		std::string strErr;
 		glErrToString(error, strErr);
-		fprintf(stderr, "[impError] %s - GL error in %s at line %d.\n%s\n", _debugMsg, _file, _line, strErr.c_str() );
+		std::cerr << "[impError] " << debugMsg << " - GL error in " << file << " at line " << line << std::endl;
+		std::cerr << strErr << std::endl;
 	}
 }
 

@@ -8,9 +8,11 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-class IMP_API TextRenderer
+class IMP_API TextRenderer : public Object
 {
 	public:
+	
+	Meta_Class(TextRenderer)
 
 	TextRenderer(const std::string& filename = "../commun/spritefont-config.json");
 

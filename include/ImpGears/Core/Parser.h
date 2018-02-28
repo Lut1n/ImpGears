@@ -20,7 +20,7 @@ IMPGEARS_BEGIN
     std::uint32_t Read(T* _buffer, std::uint32_t _size);\
     void Write(const T* _buffer, std::uint32_t _size);\
 
-class IMP_API Parser
+class IMP_API Parser : public Object
 {
 public:
 
@@ -36,6 +36,8 @@ public:
         FileType_Text,
         FileType_Binary
     };
+	
+	Meta_Class(Parser)
 
     Parser(const char* _filename, FileType _type, AccessMode _mode);
     ~Parser();

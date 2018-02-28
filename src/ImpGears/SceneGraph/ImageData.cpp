@@ -38,13 +38,13 @@ void ImageData::loadFromMemory(const void* data, std::uint32_t width, std::uint3
 }*/
 
 //--------------------------------------------------------------
-void ImageData::create(std::uint32_t width, std::uint32_t height, std::uint32_t bpp, PixelFormat format, std::uint8_t* srcBuffer)
+void ImageData::build(std::uint32_t width, std::uint32_t height, std::uint32_t bpp, PixelFormat format, std::uint8_t* srcBuffer)
 {
-    create(width, height, format, srcBuffer);
+    build(width, height, format, srcBuffer);
 }
 
 //--------------------------------------------------------------
-void ImageData::create(std::uint32_t width, std::uint32_t height, PixelFormat format, std::uint8_t* srcBuffer)
+void ImageData::build(std::uint32_t width, std::uint32_t height, PixelFormat format, std::uint8_t* srcBuffer)
 {
     destroy();
 
@@ -357,7 +357,7 @@ void ImageData::clone(const ImageData& other)
 	   || (m_bpp != other.m_bpp))
     {
 		destroy();
-        create(other.m_width, other.m_height, other.m_format);
+        build(other.m_width, other.m_height, other.m_format);
     }
 
     memcpy(m_buffer, other.m_buffer, m_bufferSize);
@@ -392,7 +392,7 @@ void ImageData::draw(const ImageData& srcData, const Rect& srcRect, const Rect& 
 //--------------------------------------------------------------
 void ImageData::convert(const ImageData& srcData, PixelFormat targetFormat)
 {
-	create(srcData.m_width, srcData.m_height, targetFormat);
+	build(srcData.m_width, srcData.m_height, targetFormat);
 	for(std::uint32_t i = 0; i<m_width; ++i)
 	{
 		for(std::uint32_t j = 0; j<m_height; ++j)

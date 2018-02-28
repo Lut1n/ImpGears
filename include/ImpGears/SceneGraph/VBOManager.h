@@ -20,9 +20,11 @@ struct IMP_API VBO_Info
 };
 
 /// \brief Defines The game VBO Manager.
-class IMP_API VBOManager
+class IMP_API VBOManager : public Object
 {
 private:
+
+	Meta_Class(VBOManager)
 
     VBOManager();
 

@@ -9,7 +9,7 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines a texture.
-class IMP_API Texture
+class IMP_API Texture : public Object
 {
     public:
 
@@ -20,6 +20,8 @@ class IMP_API Texture
             MemorySyncMode_LocalOnVideo,
             MemorySyncMode_Bidirectional
         };
+		
+		Meta_Class(Texture)
 
         Texture(const std::string& name = "");
 
@@ -43,7 +45,7 @@ class IMP_API Texture
         /// \param height - The height of the texture.
         /// \param format - The pixel format.
         /// \param memoryMode - The memory mode.
-		void create(std::uint32_t width, std::uint32_t height, PixelFormat format = PixelFormat_RGBA8);
+		void build(std::uint32_t width, std::uint32_t height, PixelFormat format = PixelFormat_RGBA8);
 
 		/// \brief Destroy a texture
 		void destroy();

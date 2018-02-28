@@ -12,7 +12,7 @@ Define an interface for using VBO. VBOData keeps memory size used after request.
 IMPGEARS_BEGIN
 
 /// \brief Defines a vbo data.
-class IMP_API VBOData
+class IMP_API VBOData : public Object
 {
 
 public:
@@ -34,6 +34,8 @@ private:
 	std::uint32_t _verticesCount;
 
 public:
+
+	Meta_Class(VBOData)
 
     VBOData();
 

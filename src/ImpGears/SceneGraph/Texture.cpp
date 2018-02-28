@@ -41,7 +41,7 @@ void Texture::loadFromMemory(char* data, std::uint32_t width, std::uint32_t heig
 	else if(format == PixelFormat_RGBA8 || format == PixelFormat_BGRA8)
 		bpp = 32;
 	
-    m_data.create(width, height, bpp, format, reinterpret_cast<std::uint8_t*>(data) );
+    m_data.build(width, height, bpp, format, reinterpret_cast<std::uint8_t*>(data) );
     updateVideoParams();
     updateVideoMemory();
 }
@@ -50,14 +50,14 @@ void Texture::loadFromMemory(char* data, std::uint32_t width, std::uint32_t heig
 void Texture::loadFromImageData(const ImageData* data)
 {
 	// std::cout << m_name << " - load from image data\n";
-    create(data->getWidth(), data->getHeight(), data->getFormat());
+    build(data->getWidth(), data->getHeight(), data->getFormat());
     m_data.clone(*data);
 	updateVideoParams();
     updateVideoMemory();
 }
 
 //--------------------------------------------------------------
-void Texture::create(std::uint32_t width, std::uint32_t height, PixelFormat format)
+void Texture::build(std::uint32_t width, std::uint32_t height, PixelFormat format)
 {
 	std::uint32_t bpp = 32;
 	if( format == PixelFormat_BGR8 || format == PixelFormat_RGB8 )
@@ -65,7 +65,7 @@ void Texture::create(std::uint32_t width, std::uint32_t height, PixelFormat form
 	else if(format == PixelFormat_RGBA8 || format == PixelFormat_BGRA8)
 		bpp = 32;
 	
-    m_data.create(width, height, bpp, format);
+    m_data.build(width, height, bpp, format);
 
     updateVideoParams();
     updateVideoMemory();

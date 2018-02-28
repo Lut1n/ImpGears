@@ -10,6 +10,9 @@ IMPGEARS_BEGIN
 class IMP_API ScreenVertex : public VBOData, public SceneNode
 {
     public:
+	
+		Meta_Class(ScreenVertex)
+	
         ScreenVertex();
         virtual ~ScreenVertex();
 

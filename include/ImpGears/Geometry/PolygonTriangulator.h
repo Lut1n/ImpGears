@@ -7,9 +7,11 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API PolygonTriangulator
+class IMP_API PolygonTriangulator : public Object
 {
 	public:
+	
+	Meta_Class(PolygonTriangulator)
 	
 	void triangulate(Polygon& polygon, std::vector<Polygon>& TriangleSet);
 };

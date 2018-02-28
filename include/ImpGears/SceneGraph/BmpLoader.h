@@ -84,14 +84,17 @@ void write(std::ofstream & stream, T value)
     stream.write( (char*)&value, sizeof(T) );
 }
 
-class IMP_API Bitmap
+class IMP_API Bitmap : public imp::Object
 {
 public:
+
+	Meta_Class(Bitmap)
+
     Bitmap();
 
     ~Bitmap();
 
-    void create(int width, int height, const imp::Pixel& initialColor);
+    void build(int width, int height, const imp::Pixel& initialColor);
 
     void saveToFile(std::string filename);
 

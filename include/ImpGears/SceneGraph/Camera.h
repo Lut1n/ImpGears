@@ -34,6 +34,8 @@ class IMP_API Camera : public SceneNode
 
         virtual void render();
 		
+		Meta_Class(Camera)
+		
         Camera(bool active = true);
         virtual ~Camera();
 

@@ -9,9 +9,12 @@ IMPGEARS_BEGIN
 
 typedef std::map<std::string, Texture*> TextureMap;
 
-class IMP_API TextureManager
+class IMP_API TextureManager : public Object
 {
     public:
+	
+		Meta_Class(TextureManager)
+		
         TextureManager();
         virtual ~TextureManager();
 

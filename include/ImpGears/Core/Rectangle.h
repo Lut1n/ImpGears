@@ -6,9 +6,12 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines a float rectangle.
-class IMP_API Rectangle
+class IMP_API Rectangle : public Object
 {
 	public:
+	
+	
+	Meta_Class(Rectangle)
 	
 	Rectangle();
 	Rectangle(const Rectangle& other);

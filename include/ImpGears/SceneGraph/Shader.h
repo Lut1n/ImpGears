@@ -13,12 +13,12 @@ IMPGEARS_BEGIN
 #define IMP_GLSL_SRC( src ) #src
 
 /// \brief Defines a shader (vertex and fragment shaders).
-class IMP_API Shader
+class IMP_API Shader : public Object
 {
     public:
 	
 		/// \brief Defines a shader parameter (uniform).
-		class Parameter
+		class Parameter : public Object
 		{
 			public:
 			
@@ -73,6 +73,8 @@ class IMP_API Shader
 				const Matrix4* value_mat4v;
 			};
 			
+			Meta_Class(Parameter)
+			
 			Parameter(const std::string& id, Type type);
 			
 			~Parameter();
@@ -108,6 +110,8 @@ class IMP_API Shader
 			const Texture* sampler;
 			
 		};
+		
+		Meta_Class(Shader)
 	
         Shader(const char* vertexShader, const char* fragmentShader);
         virtual ~Shader();

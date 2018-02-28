@@ -17,9 +17,12 @@ typedef std::list< std::shared_ptr<SceneNode> > SceneNodeList;
 typedef SceneNodeList::iterator SceneNodeIt;
 
 /// \brief Defines a scene node. Has to be added to a scene for rendering.
-class IMP_API SceneNode
+class IMP_API SceneNode : public Object
 {
     public:
+	
+		Meta_Class(SceneNode)
+	
         SceneNode();
         virtual ~SceneNode();
 

@@ -6,9 +6,12 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines a float vector3.
-class IMP_API Vector3
+class IMP_API Vector3 : public Object
 {
     public:
+		
+		Meta_Class(Vector3)
+	
         Vector3();
         Vector3(float x, float y, float z);
         Vector3(const Vector3& other);

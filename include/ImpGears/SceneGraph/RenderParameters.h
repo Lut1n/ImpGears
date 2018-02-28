@@ -10,7 +10,7 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines the render parameters.
-class IMP_API RenderParameters
+class IMP_API RenderParameters : public Object
 {
     public:
 
@@ -32,6 +32,8 @@ class IMP_API RenderParameters
             ParamState_Disable = 0,
             ParamState_Enable
         };
+		
+		Meta_Class(RenderParameters)
 
         RenderParameters();
         RenderParameters(const RenderParameters& other);

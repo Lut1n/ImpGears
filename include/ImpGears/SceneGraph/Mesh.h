@@ -17,6 +17,8 @@ class IMP_API Mesh : public VBOData
             VertexMode_Lines,
             VertexMode_Points
         };
+		
+		Meta_Class(Mesh)
 
         Mesh();
         virtual ~Mesh();

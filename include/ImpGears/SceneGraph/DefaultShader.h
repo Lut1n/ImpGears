@@ -11,6 +11,9 @@ IMPGEARS_BEGIN
 class IMP_API DefaultShader : public Shader
 {
     public:
+	
+		Meta_Class(DefaultShader)
+	
         DefaultShader();
         virtual ~DefaultShader();
 

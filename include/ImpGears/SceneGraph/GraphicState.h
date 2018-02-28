@@ -13,24 +13,28 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-struct IMP_API GraphicState
+struct IMP_API GraphicState : public Object
 {
-	std::shared_ptr<imp::RenderTarget>			_target;
-	std::shared_ptr<imp::RenderParameters> 	_parameters;
-	std::shared_ptr<imp::Shader> 					_shader;
+	RenderTarget::Ptr			_target;
+	RenderParameters::Ptr 	_parameters;
+	Shader::Ptr 					_shader;
+	
+	Meta_Class(GraphicState)
 	
 	GraphicState();
 	
-	void setTarget(const std::shared_ptr<imp::RenderTarget>& target);
-	void setParameters(const std::shared_ptr<imp::RenderParameters>& params);
-	void setShader(const std::shared_ptr<imp::Shader>& shader);
+	void setTarget(const RenderTarget::Ptr& target);
+	void setParameters(const RenderParameters::Ptr& params);
+	void setShader(const Shader::Ptr& shader);
 };
 
 
 //--------------------------------------------------------------
-class IMP_API GraphicStatesManager
+class IMP_API GraphicStatesManager : public Object
 {
 	public:
+	
+	Meta_Class(GraphicStatesManager)
 	
 	GraphicStatesManager();
 	

@@ -26,7 +26,7 @@ public:
 	virtual float operator() (float a, float b, float t)
 	{
 		float ft = t * 3.1415927f;
-		float f = (1.f - cos(ft)) * .5f;
+		float f = (1.f - std::cos(ft)) * .5f;
 		return  a*(1.f-f) + b*f;
 	}
 };

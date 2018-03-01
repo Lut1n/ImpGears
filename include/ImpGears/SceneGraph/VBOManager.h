@@ -1,7 +1,7 @@
 /*
 Graphics/VBOManager.h
 
-Define a manager for using VBOs. VBOManager keeps id and size of VBO created. It's useful for detecting unfree video memory.
+Define a manager for ustd::sing VBOs. VBOManager keeps id and size of VBO created. It's useful for detecting unfree video memory.
 */
 
 #ifndef VBOMANAGER_H

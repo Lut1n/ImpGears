@@ -1,5 +1,5 @@
 #include <Core/Perlin.h>
-#include <Core/BasicFunctions.h>
+#include <Core/Math.h>
 
 #include <ctime>
 #include <cstdlib>
@@ -50,6 +50,14 @@ public:
 
 		return _instance;
 	}
+	
+	template<typename T>
+	static void swap(T* a, T* b)
+	{
+		T t = *a;
+		*a = *b;
+		*b = t;
+	}
 
 private:
 
@@ -78,6 +86,8 @@ void PermutationTable::init(int seed, unsigned int uniqueValueCount, unsigned in
 	_seed = seed;
 
 
+	std::srand(_seed);
+	
 	// generation
 	for(unsigned int i=0; i<uniqueValueCount; ++i)
 		_table[i] = i;
@@ -86,7 +96,7 @@ void PermutationTable::init(int seed, unsigned int uniqueValueCount, unsigned in
 	for(unsigned int i=0; i<uniqueValueCount; ++i)
 	{
 		int x = i;
-		double r01 = (randHugosElias(_seed+i) + 1) / 2;
+		double r01 = (std::rand() + 1) / 2;
 		int y = r01 * 255;
 		swap( &(_table[x]), &(_table[y]) );
 	}
@@ -143,14 +153,13 @@ double perlinMain(double x, double y, double z, int tileSize)
 {
 	PermutationTable::getInstance()->init(0);
 	
+	int X = std::floor(x);
+	int Y = std::floor(y);
+	int Z = std::floor(z);
 	
-	int X, Y, Z;
-	double fx, fy, fz;
-	// get integer value into X, Y and Z
-	// get fractionnal value in x, y, z.
-	intFrac(x, X, fx);
-	intFrac(y, Y, fy);
-	intFrac(z, Z, fz);
+	double fx = Frac(x);
+	double fy = Frac(y);
+	double fz = Frac(z);
 
 	// do a modulo 256 on X, Y, Z.
 	X &= 255;

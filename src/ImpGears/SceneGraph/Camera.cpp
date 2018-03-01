@@ -113,7 +113,7 @@ bool Camera::testFov(float x, float y, float z, float r)
 
     ///fps culling///
     if(//orientation.dot(cam2posN) < 0.f
-       depth < 0.f && m_frustumConf.frustum_near - depth > effectiveR)return false; //because if cos negative (depth is negative)
+       depth < 0.f && m_frustumConf.frustum_near - depth > effectiveR)return false; //because if std::cos negative (depth is negative)
 
     ///frustum culling (spheric)///
     #ifdef SPHERIC_FOV

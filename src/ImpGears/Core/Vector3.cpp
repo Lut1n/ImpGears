@@ -36,9 +36,9 @@ Vector3::~Vector3()
 //--------------------------------------------------------------
 void Vector3::setRadial(float theta, float phi, float norm)
 {
-    m_x = norm * cosf(phi) * cosf(theta);
-    m_y = norm * cosf(phi) * sinf(theta);
-    m_z = norm * sinf(phi);
+    m_x = norm * std::cos(phi) * std::cos(theta);
+    m_y = norm * std::cos(phi) * std::sin(theta);
+    m_z = norm * std::sin(phi);
 }
 
 //--------------------------------------------------------------
@@ -127,12 +127,12 @@ void Vector3::rotationX(float rx)
 {
     /*
     rx =    |   1         0         0     |
-            |   0         cos     -sin    |
-            |   0         sin     cos     |
+            |   0         std::cos     -std::sin    |
+            |   0         std::sin     std::cos     |
     */
 
-    float ny = m_y*cosf(rx) - m_z*sinf(rx);
-    float nz = m_y*sinf(rx) + m_z*cosf(rx);
+    float ny = m_y*std::cos(rx) - m_z*std::sin(rx);
+    float nz = m_y*std::sin(rx) + m_z*std::cos(rx);
 	
 	m_y  =ny;
 	m_z = nz;
@@ -142,13 +142,13 @@ void Vector3::rotationX(float rx)
 void Vector3::rotationY(float ry)
 {
     /*
-    ry =    |   cos     0         sin     |
+    ry =    |   std::cos     0         std::sin     |
             |   0         1         0     |
-            |   -sin     0        cos     |
+            |   -std::sin     0        std::cos     |
     */
 
-	float nx = m_x*cosf(ry) + m_z*sinf(ry);
-	float nz = -m_y*sinf(ry) + m_z*cosf(ry);
+	float nx = m_x*std::cos(ry) + m_z*std::sin(ry);
+	float nz = -m_y*std::sin(ry) + m_z*std::cos(ry);
 	
 	m_x  =nx;
 	m_z = nz;
@@ -158,13 +158,13 @@ void Vector3::rotationY(float ry)
 void Vector3::rotationZ(float rz)
 {
     /*
-    rz =    |   cos     -sin    0         |
-            |   sin     cos     0         |
+    rz =    |   std::cos     -std::sin    0         |
+            |   std::sin     std::cos     0         |
             |   0         0        1      |
     */
 
-    float nx = m_x*cosf(rz) - m_y*sinf(rz);
-    float ny = m_x*sinf(rz) + m_y*cosf(rz);
+    float nx = m_x*std::cos(rz) - m_y*std::sin(rz);
+    float ny = m_x*std::sin(rz) + m_y*std::cos(rz);
 	
 	m_x = nx;
 	m_y = ny;

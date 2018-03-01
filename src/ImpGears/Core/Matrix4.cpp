@@ -321,8 +321,8 @@ const Matrix4 Matrix4::getRotationXAxisMat(float rx)
 {
     const float data[16] = {
         1.f,    0.f,        0.f,        0.f,
-        0.f,    cosf(rx),   -sinf(rx),  0.f,
-        0.f,    sinf(rx),   cosf(rx),   0.f,
+        0.f,    std::cos(rx),   -std::sin(rx),  0.f,
+        0.f,    std::sin(rx),   std::cos(rx),   0.f,
         0.f,    0.f,        0.f,        1.f
     };
 
@@ -334,9 +334,9 @@ const Matrix4 Matrix4::getRotationXAxisMat(float rx)
 const Matrix4 Matrix4::getRotationYAxisMat(float ry)
 {
     const float data[16] = {
-        cosf(ry),    0.f,        sinf(ry),   0.f,
+        std::cos(ry),    0.f,        std::sin(ry),   0.f,
         0.f,         1.f,        0.f,        0.f,
-        -sinf(ry),   0.f,        cosf(ry),   0.f,
+        -std::sin(ry),   0.f,        std::cos(ry),   0.f,
         0.f,         0.f,        0.f,        1.f
     };
 
@@ -348,8 +348,8 @@ const Matrix4 Matrix4::getRotationYAxisMat(float ry)
 const Matrix4 Matrix4::getRotationZAxisMat(float rz)
 {
     const float data[16] = {
-        cosf(rz),    -sinf(rz),   0.f,    0.f,
-        sinf(rz),    cosf(rz),    0.f,    0.f,
+        std::cos(rz),    -std::sin(rz),   0.f,    0.f,
+        std::sin(rz),    std::cos(rz),    0.f,    0.f,
         0.f,        0.f,          1.f,    0.f,
         0.f,        0.f,          0.f,    1.f
     };

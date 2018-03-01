@@ -17,7 +17,7 @@ class IMP_API Matrix4 : public Object
 
         Matrix4(const Matrix4& other);
 
-        /// \brief Constructor using float buffer.
+        /// \brief Constructor ustd::sing float buffer.
         /// \param data - The Matrix4 data (column major).
         /// \param transpose - The Matrix4 data must be transposed.
         Matrix4(const float* data, bool transpose = false);

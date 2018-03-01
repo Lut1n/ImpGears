@@ -212,13 +212,13 @@ Matrix4 Matrix3::asMatrix4() const
 const Matrix3 Matrix3::getRotationMatrixX(float rad)
 {
     ///     1           0           0
-    ///     0           cos(a)      -sin(a)
-    ///     0           sin(a)      cos(a)
+    ///     0           std::cos(a)      -std::sin(a)
+    ///     0           std::sin(a)      std::cos(a)
 
     const float values[9] = {
         1.f,        0.f,            0.f,
-        0.f,        cosf(rad),      -sinf(rad),
-        0.f,        sinf(rad),      cosf(rad)
+        0.f,        std::cos(rad),      -std::sin(rad),
+        0.f,        std::sin(rad),      std::cos(rad)
     };
 
     return Matrix3(values);
@@ -226,14 +226,14 @@ const Matrix3 Matrix3::getRotationMatrixX(float rad)
 
 const Matrix3 Matrix3::getRotationMatrixY(float rad)
 {
-    ///     cos(a)      0           sin(a)
+    ///     std::cos(a)      0           std::sin(a)
     ///     0           1           0
-    ///     -sin(a)     0           cos(a)
+    ///     -std::sin(a)     0           std::cos(a)
 
     const float values[9] = {
-        cosf(rad),      0.f,        sinf(rad),
+        std::cos(rad),      0.f,        std::sin(rad),
         0.f,            1.f,        0.f,
-        -sinf(rad),     0.f,        cosf(rad)
+        -std::sin(rad),     0.f,        std::cos(rad)
     };
 
     return Matrix3(values);
@@ -241,13 +241,13 @@ const Matrix3 Matrix3::getRotationMatrixY(float rad)
 
 const Matrix3 Matrix3::getRotationMatrixZ(float rad)
 {
-    ///     cos(a)      -sin(a)     0
-    ///     sin(a)      cos(a)      0
+    ///     std::cos(a)      -std::sin(a)     0
+    ///     std::sin(a)      std::cos(a)      0
     ///     0           0           1
 
     const float values[9] = {
-        cosf(rad),      -sinf(rad),         0.f,
-        sinf(rad),      cosf(rad),          0.f,
+        std::cos(rad),      -std::sin(rad),         0.f,
+        std::sin(rad),      std::cos(rad),          0.f,
         0.f,            0.f,                1.f
     };
 

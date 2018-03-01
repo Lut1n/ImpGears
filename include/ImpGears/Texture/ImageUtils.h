@@ -5,7 +5,7 @@
 
 #include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
-#include <Core/BasicFunctions.h>
+#include <Core/Math.h>
 
 #include <ctime>
 #include <cmath>

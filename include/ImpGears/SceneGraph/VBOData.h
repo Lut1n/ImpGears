@@ -1,7 +1,7 @@
 /*
 Graphics/VBOData.h
 
-Define an interface for using VBO. VBOData keeps memory size used after request.
+Define an interface for ustd::sing VBO. VBOData keeps memory size used after request.
 */
 
 #ifndef VBODATA_H

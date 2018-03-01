@@ -52,44 +52,36 @@ void ImageData::build(std::uint32_t width, std::uint32_t height, PixelFormat for
 	m_height = height;
 	m_bpp = 32;
     m_channels = 4;
-    // m_type = PixelType_std::uint8_t;
 
 	m_format = format;
 	
     switch(format)
     {
         case PixelFormat_RGB8:
-            // m_type = PixelType_std::uint8_t;
             m_bpp = 24;
             m_channels = 3;
             break;
         case PixelFormat_BGR8:
-            // m_type = PixelType_std::uint8_t;
             m_bpp = 24;
             m_channels = 3;
             break;
         case PixelFormat_RGBA8:
-            // m_type = PixelType_std::uint8_t;
             m_bpp = 32;
             m_channels = 4;
             break;
         case PixelFormat_BGRA8:
-            // m_type = PixelType_std::uint8_t;
             m_bpp = 32;
             m_channels = 4;
             break;
         case PixelFormat_RG16:
-            // m_type = PixelType_std::uint16_t;
             m_bpp = 32;
             m_channels = 2;
             break;
         case PixelFormat_R8:
-            // m_type = PixelType_std::uint16_t;
             m_bpp = 8;
             m_channels = 1;
             break;
         case PixelFormat_R16:
-            // m_type = PixelType_std::uint16_t;
             m_bpp = 16;
             m_channels = 1;
             break;

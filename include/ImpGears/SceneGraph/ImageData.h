@@ -33,15 +33,6 @@ struct Rect
 	std::uint32_t h;
 };
 
-/*
-enum IMP_API PixelType
-{
-    PixelType_Unknown = 0,
-    PixelType_std::uint8_t,
-    PixelType_std::uint16_t
-};
-*/
-
 class IMP_API ImageData : public Object
 {
     public:
@@ -98,7 +89,6 @@ class IMP_API ImageData : public Object
         std::uint32_t m_bpp;
         std::uint32_t m_channels;
         PixelFormat m_format;
-        // PixelType m_type;
 };
 
 IMPGEARS_END

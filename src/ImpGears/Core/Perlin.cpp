@@ -96,8 +96,7 @@ void PermutationTable::init(int seed, unsigned int uniqueValueCount, unsigned in
 	for(unsigned int i=0; i<uniqueValueCount; ++i)
 	{
 		int x = i;
-		double r01 = (std::rand() + 1) / 2;
-		int y = r01 * 255;
+		int y = Rand(0.0, 1.0) * 255;
 		swap( &(_table[x]), &(_table[y]) );
 	}
 

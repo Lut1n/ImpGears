@@ -13,14 +13,14 @@ void RandSeed(double s)
 }
 
 //--------------------------------------------------------------
-float Rand(float min, float max, float precision)
+double Rand(double min, double max, double precision)
 {
     std::int64_t iMin = (std::int64_t)(min/precision);
     std::int64_t iMax = (std::int64_t)(max/precision);
 
     std::int64_t iRand = std::rand()%(iMax-iMin)+iMin;
 
-    return (float)(iRand)*precision;
+    return (double)(iRand)*precision;
 }
 
 double Frac(double t)

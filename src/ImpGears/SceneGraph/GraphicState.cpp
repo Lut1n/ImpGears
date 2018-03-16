@@ -107,12 +107,14 @@ void GraphicStatesManager::applyCurrentState()
 	
 	if(resultParameters != nullptr)
 	{
+		// TODO : move clear into Camera node
 		resultParameters->apply(_stack.size() <= 1);
 	}
 	
 	if(resultShader != nullptr)
 	{
 		resultShader->enable();
+		// TODO : test each uniform
 		resultShader->updateAllParameters();
 	}
 }
@@ -142,6 +144,7 @@ void GraphicStatesManager::revert(GraphicState* lastState)
 	if(lastState->_shader != nullptr && resultShader != nullptr)
 	{
 		resultShader->enable();
+		// TODO : test each uniform
 		resultShader->updateAllParameters();
 	}
 }

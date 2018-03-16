@@ -152,9 +152,14 @@ void RenderParameters::apply(bool clearBuffer) const
 			glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
 	}
 	
-	if(clearBuffer && (_clearColorChanged || _clearDepthChanged) )
+	bool clearCall = (_clearColorChanged || _clearDepthChanged);
+	
+	if( clearBuffer && clearCall )
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		GLbitfield bitfield = 0;
+		if(_clearColorChanged)bitfield = bitfield | GL_COLOR_BUFFER_BIT;
+		if(_clearDepthChanged)bitfield = bitfield | GL_DEPTH_BUFFER_BIT;
+		glClear(bitfield);
 	}
 }
 

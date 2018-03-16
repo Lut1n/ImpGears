@@ -156,6 +156,7 @@ class IMP_API Shader : public Object
     protected:
     private:
 
+		bool				_valid;
         std::uint32_t m_vertexID;
         std::uint32_t m_fragmentID;
         std::uint32_t m_programID;

@@ -153,21 +153,22 @@ void Shader::Parameter::updateUniform(const Shader& program) const
 
 //--------------------------------------------------------------
 Shader::Shader(const char* vertexShader, const char* fragmentShader)
+	: _valid(false)
 {
     // Création des shaders
     m_vertexID = glCreateShader (GL_VERTEX_SHADER) ;
-    GL_CHECKERROR("create vertex shader");
+    _valid = GL_CHECKERROR("create vertex shader");
 
     m_fragmentID = glCreateShader (GL_FRAGMENT_SHADER) ;
-    GL_CHECKERROR("cretae fragment shader");
+    _valid &= GL_CHECKERROR("cretae fragment shader");
 
 
     // Envoi du code source
     glShaderSource (m_vertexID, 1, &vertexShader, NULL) ;
-    GL_CHECKERROR("set vertex shader source");
+    _valid &= GL_CHECKERROR("set vertex shader source");
 
     glShaderSource (m_fragmentID, 1, &fragmentShader, NULL) ;
-    GL_CHECKERROR("set fragment shader source");
+    _valid &= GL_CHECKERROR("set fragment shader source");
 
     GLint result = GL_TRUE;
 
@@ -200,23 +201,23 @@ Shader::Shader(const char* vertexShader, const char* fragmentShader)
 
     // Création du programme
     m_programID = glCreateProgram () ;
-    GL_CHECKERROR("shader program creation");
+    _valid &= GL_CHECKERROR("shader program creation");
 
     // Attache des shaders au programme (on peut les détacher avec la fonction glDetachShader)
     glAttachShader (m_programID, m_vertexID);
-    GL_CHECKERROR("attach vertex shader");
+    _valid &= GL_CHECKERROR("attach vertex shader");
     glAttachShader (m_programID, m_fragmentID);
-    GL_CHECKERROR("attach fragment shader");
+    _valid &= GL_CHECKERROR("attach fragment shader");
 
     // Linkage du programme
     glLinkProgram (m_programID);
-    GL_CHECKERROR("link shader program");
+    _valid &= GL_CHECKERROR("link shader program");
 }
 
 //--------------------------------------------------------------
 void Shader::setTextureParameter(const char* name, const Texture* texture, std::int32_t textureUnit)
 {
-    enable();
+    // enable();
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, texture->getVideoID());
@@ -233,7 +234,7 @@ void Shader::setTextureParameter(const char* name, const Texture* texture, std::
 //--------------------------------------------------------------
 void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, std::uint32_t count)
 {
-    enable();
+    // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
     glUniform3fv(location, count, vector3Array);
     GLenum errorState = glGetError();
@@ -248,7 +249,7 @@ void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, std
 //--------------------------------------------------------------
 void Shader::setFloatParameter(const char* name, float value)
 {
-    enable();
+    // enable();
     glUniform1f(glGetUniformLocation(m_programID, name), static_cast<GLfloat>(value));
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
@@ -262,7 +263,7 @@ void Shader::setFloatParameter(const char* name, float value)
 //--------------------------------------------------------------
 void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
 {
-    enable();
+    // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
@@ -280,7 +281,7 @@ void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
 //--------------------------------------------------------------
 void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
 {
-    enable();
+    // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
@@ -341,6 +342,11 @@ void Shader::enable()
     if(!isprogram)
         fprintf(stdout, "this is not a program\n");
 */
+	if( !_valid )
+	{
+		std::cout << "shader " << getObjectID() << " is not valid" << std::endl;
+	}
+
     glUseProgram (m_programID) ;
     GL_CHECKERROR("use shader program");
     m_instance = this;

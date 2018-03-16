@@ -16,7 +16,7 @@
 #define Meta_Class(name) \
 	typedef std::shared_ptr<name> Ptr;\
 	static std::string getClassName() {return std::string( #name );}\
-	virtual std::string getObjectId() const {std::stringstream ss; ss << getClassName() << "@" << (this); return ss.str();}\
+	virtual std::string getObjectID() const {std::stringstream ss; ss << getClassName() << "@" << (this); return ss.str();}\
 	template<class... Args> static Ptr create(Args&&... args) {return std::make_shared<name>(std::forward<Args>(args)...);}
 
 IMPGEARS_BEGIN

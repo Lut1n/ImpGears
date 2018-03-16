@@ -11,7 +11,7 @@ Shader* Shader::m_instance = nullptr;
 
 
 //--------------------------------------------------------------
-Shader::Parameter::Parameter(const std::string& id, Type type)
+Uniform::Uniform(const std::string& id, Type type)
 {
 	this->id = id;
 	this->type = type;
@@ -19,34 +19,34 @@ Shader::Parameter::Parameter(const std::string& id, Type type)
 }
 
 //--------------------------------------------------------------
-Shader::Parameter::~Parameter()
+Uniform::~Uniform()
 {
 	
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(float float1)
+void Uniform::set(float float1)
 {
 	this->type = Type_1f;
 	value.value_1f = float1;
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const Vector3* vec3)
+void Uniform::set(const Vector3* vec3)
 {
 	this->type = Type_3f;
 	value.value_3f = vec3;
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(int int1)
+void Uniform::set(int int1)
 {
 	this->type = Type_1i;
 	value.value_1i = int1;
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const float* float1Array, int count)
+void Uniform::set(const float* float1Array, int count)
 {
 	this->type = Type_1fv;
 	value.value_1fv = float1Array;
@@ -54,7 +54,7 @@ void Shader::Parameter::set(const float* float1Array, int count)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const Vector3* vec3Array, int count)
+void Uniform::set(const Vector3* vec3Array, int count)
 {
 	this->type = Type_3fv;
 	value.value_3fv = vec3Array;
@@ -62,7 +62,7 @@ void Shader::Parameter::set(const Vector3* vec3Array, int count)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const int* int1Array, int count)
+void Uniform::set(const int* int1Array, int count)
 {
 	this->type = Type_1iv;
 	value.value_1iv = int1Array;
@@ -70,7 +70,7 @@ void Shader::Parameter::set(const int* int1Array, int count)
 }
 
 //--------------------------------------------------------------
-/*void Shader::Parameter::set(const Matrix3* mat3Array, int count)
+/*void Uniform::set(const Matrix3* mat3Array, int count)
 {
 	this->type = Type_Mat3v;
 	value.value_mat3v = mat3Array;
@@ -78,7 +78,7 @@ void Shader::Parameter::set(const int* int1Array, int count)
 }*/
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const Matrix4* mat4Array, int count)
+void Uniform::set(const Matrix4* mat4Array, int count)
 {
 	this->type = Type_Mat4v;
 	value.value_mat4v = mat4Array;
@@ -86,7 +86,7 @@ void Shader::Parameter::set(const Matrix4* mat4Array, int count)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::set(const Texture* texture, std::int32_t textureUnit)
+void Uniform::set(const Texture* texture, std::int32_t textureUnit)
 {
 	this->type = Type_Sampler;
 	value.value_1i = textureUnit;
@@ -94,9 +94,9 @@ void Shader::Parameter::set(const Texture* texture, std::int32_t textureUnit)
 }
 
 //--------------------------------------------------------------
-void Shader::Parameter::updateUniform(const Shader& program) const
+void Uniform::updateUniform(const Shader& program) const
 {
-	std::int32_t uniformLocation = program.getParameterLocation( this->getID() );
+	std::int32_t uniformLocation = program.getUniformLocation( this->getID() );
 	
 	if(type == Type_1f)
 	{
@@ -215,7 +215,7 @@ Shader::Shader(const char* vertexShader, const char* fragmentShader)
 }
 
 //--------------------------------------------------------------
-void Shader::setTextureParameter(const char* name, const Texture* texture, std::int32_t textureUnit)
+void Shader::setTextureUniform(const char* name, const Texture* texture, std::int32_t textureUnit)
 {
     // enable();
     glEnable(GL_TEXTURE_2D);
@@ -232,7 +232,7 @@ void Shader::setTextureParameter(const char* name, const Texture* texture, std::
 }
 
 //--------------------------------------------------------------
-void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, std::uint32_t count)
+void Shader::setVector3ArrayUniform(const char* name, float* vector3Array, std::uint32_t count)
 {
     // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
@@ -247,7 +247,7 @@ void Shader::setVector3ArrayParameter(const char* name, float* vector3Array, std
 }
 
 //--------------------------------------------------------------
-void Shader::setFloatParameter(const char* name, float value)
+void Shader::setFloatUniform(const char* name, float value)
 {
     // enable();
     glUniform1f(glGetUniformLocation(m_programID, name), static_cast<GLfloat>(value));
@@ -261,7 +261,7 @@ void Shader::setFloatParameter(const char* name, float value)
 }
 
 //--------------------------------------------------------------
-void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
+void Shader::setMatrix4Uniform(const char* name, const Matrix4& Matrix4)
 {
     // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
@@ -279,7 +279,7 @@ void Shader::setMatrix4Parameter(const char* name, const Matrix4& Matrix4)
 }
 
 //--------------------------------------------------------------
-void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
+void Shader::setVector3Uniform(const char* name, const Vector3& vec3)
 {
     // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
@@ -298,7 +298,7 @@ void Shader::setVector3Parameter(const char* name, const Vector3& vec3)
 }
 
 //--------------------------------------------------------------
-void Shader::setParameter(const Parameter& param)
+void Shader::setUniform(const Uniform& param)
 {
 	param.updateUniform( *this );
 }
@@ -306,19 +306,19 @@ void Shader::setParameter(const Parameter& param)
 //--------------------------------------------------------------
 void Shader::setProjection(const Matrix4& projection)
 {
-    setMatrix4Parameter("u_projection", projection);
+    setMatrix4Uniform("u_projection", projection);
 }
 
 //--------------------------------------------------------------
 void Shader::setView(const Matrix4& view)
 {
-    setMatrix4Parameter("u_view", view);
+    setMatrix4Uniform("u_view", view);
 }
 
 //--------------------------------------------------------------
 void Shader::setModel(const Matrix4& model)
 {
-    setMatrix4Parameter("u_model", model);
+    setMatrix4Uniform("u_model", model);
 }
 
 //--------------------------------------------------------------
@@ -358,7 +358,7 @@ void Shader::enable()
 }
 
 //--------------------------------------------------------------
-std::int32_t Shader::getParameterLocation(const std::string& id) const
+std::int32_t Shader::getUniformLocation(const std::string& id) const
 {
 	std::int32_t location = glGetUniformLocation(m_programID, id.c_str());
     if(location == -1)
@@ -376,13 +376,13 @@ void Shader::disable()
 }
 
 //--------------------------------------------------------------
-void Shader::addParameter(const std::shared_ptr<Parameter>& param)
+void Shader::addUniform(const std::shared_ptr<Uniform>& param)
 {
 	_parameters.push_back( param );
 }
 
 //--------------------------------------------------------------
-void Shader::removeParameter(Parameter* param)
+void Shader::removeUniform(const Uniform::Ptr& param)
 {
 	bool found = false;
 	std::uint32_t index = -1;
@@ -404,23 +404,23 @@ void Shader::removeParameter(Parameter* param)
 }
 
 //--------------------------------------------------------------
-void Shader::clearParameter()
+void Shader::clearUniforms()
 {
 	_parameters.clear();
 }
 
 //--------------------------------------------------------------
-Shader::Parameter* Shader::getParameter(const std::string& name)
+Uniform::Ptr Shader::getUniform(const std::string& name)
 {
 	for(std::uint32_t i=0; i<_parameters.size(); ++i)
 		if(_parameters[i]->getID() == name)
-			return _parameters[i].get();
+			return _parameters[i];
 		
 	return nullptr;
 }
 
 //--------------------------------------------------------------
-void Shader::updateAllParameters()
+void Shader::updateAllUniforms()
 {
 	for(std::uint32_t i=0; i<_parameters.size(); ++i)
 	{
@@ -429,67 +429,67 @@ void Shader::updateAllParameters()
 }
 
 //--------------------------------------------------------------
-void Shader::updateParameter(const std::string& name)
+void Shader::updateUniform(const std::string& name)
 {
-	getParameter(name)->updateUniform( *this );
+	getUniform(name)->updateUniform( *this );
 }
 
 //--------------------------------------------------------------
-void Shader::addTextureParameter(const std::string& name, const Texture* texture, std::int32_t textureUnit)
+void Shader::addTextureUniform(const std::string& name, const Texture* texture, std::int32_t textureUnit)
 {
-	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_Sampler) );
+	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_Sampler) );
 	param->set(texture, textureUnit);
-	addParameter(param);
+	addUniform(param);
 }
 
 //--------------------------------------------------------------
-void Shader::addFloatParameter(const std::string& name, float value)
+void Shader::addFloatUniform(const std::string& name, float value)
 {
-	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_1f) );
+	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_1f) );
 	param->set(value);
-	addParameter(param);
+	addUniform(param);
 }
 
 //--------------------------------------------------------------
-void Shader::addMatrix4Parameter(const std::string& name, const Matrix4* mat4)
+void Shader::addMatrix4Uniform(const std::string& name, const Matrix4* mat4)
 {
-	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_Mat4v) );
+	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_Mat4v) );
 	param->set(mat4);
-	addParameter(param);
+	addUniform(param);
 }
 
 //--------------------------------------------------------------
-void Shader::addVector3ArrayParameter(const std::string& name, float* vector3Array, std::uint32_t count)
+void Shader::addVector3ArrayUniform(const std::string& name, float* vector3Array, std::uint32_t count)
 {
-	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_3fv) );
+	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_3fv) );
 	param->set(vector3Array,count);
-	addParameter(param);
+	addUniform(param);
 }
 
 //--------------------------------------------------------------
-void Shader::addVector3Parameter(const std::string& name, const Vector3* vec3)
+void Shader::addVector3Uniform(const std::string& name, const Vector3* vec3)
 {
-	std::shared_ptr<Parameter> param( new Parameter(name, Parameter::Type_3f) );
+	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_3f) );
 	param->set(vec3);
-	addParameter(param);
+	addUniform(param);
 }
 
 //--------------------------------------------------------------
 void Shader::addProjection(const Matrix4* projection)
 {
-	addMatrix4Parameter("u_projection", projection);
+	addMatrix4Uniform("u_projection", projection);
 }
 
 //--------------------------------------------------------------
 void Shader::addView(const Matrix4* view)
 {
-	addMatrix4Parameter("u_view", view);
+	addMatrix4Uniform("u_view", view);
 }
 
 //--------------------------------------------------------------
 void Shader::addModel(const Matrix4* model)
 {
-	addMatrix4Parameter("u_model", model);
+	addMatrix4Uniform("u_model", model);
 }
 
 IMPGEARS_END

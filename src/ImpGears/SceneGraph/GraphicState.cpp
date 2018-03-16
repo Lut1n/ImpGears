@@ -115,7 +115,7 @@ void GraphicStatesManager::applyCurrentState()
 	{
 		resultShader->enable();
 		// TODO : test each uniform
-		resultShader->updateAllParameters();
+		resultShader->updateAllUniforms();
 	}
 }
 
@@ -145,7 +145,7 @@ void GraphicStatesManager::revert(GraphicState* lastState)
 	{
 		resultShader->enable();
 		// TODO : test each uniform
-		resultShader->updateAllParameters();
+		resultShader->updateAllUniforms();
 	}
 }
 

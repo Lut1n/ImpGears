@@ -94,6 +94,16 @@ Vector3& Vector3::operator-=(const Vector3& other)
 }
 
 //--------------------------------------------------------------
+Vector3& Vector3::operator*=(const Vector3& other)
+{
+    m_x *= other.m_x;
+    m_y *= other.m_y;
+    m_z *= other.m_z;
+
+    return *this;
+}
+
+//--------------------------------------------------------------
 Vector3 Vector3::operator+(const Vector3& other) const
 {
     return Vector3(m_x+other.m_x, m_y+other.m_y, m_z+other.m_z);
@@ -103,6 +113,12 @@ Vector3 Vector3::operator+(const Vector3& other) const
 Vector3 Vector3::operator-(const Vector3& other) const
 {
     return Vector3(m_x-other.m_x, m_y-other.m_y, m_z-other.m_z);
+}
+
+//--------------------------------------------------------------
+Vector3 Vector3::operator*(const Vector3& other) const
+{
+	return Vector3(m_x*other.m_x, m_y*other.m_y, m_z*other.m_z);
 }
 
 /*

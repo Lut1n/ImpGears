@@ -100,7 +100,7 @@ void Bitmap::saveToFile(std::string filename)
         os.flush();
         os.close();
 
-		printInfoLog();
+		// printInfoLog();
 		// dumpData();
     }
 }
@@ -114,7 +114,7 @@ void Bitmap::loadFromFile(std::string filename)
         // check bmp file
         if(read<char>(is) == 'B' && read<char>(is) == 'M')
         {
-            std::cout << "bmp magic number OK" << std::endl;
+            // std::cout << "bmp magic number OK" << std::endl;
         }
         else
         {
@@ -286,7 +286,7 @@ imp::Texture* BmpLoader::loadFromFile(const char* filename)
 {
 	Bitmap bmp;
 	bmp.loadFromFile( filename );
-	bmp.printInfoLog();
+	// bmp.printInfoLog();
 	imp::ImageData* data = bmp.getInternalImageData();
 	
 	imp::Texture* tex = new imp::Texture( filename );
@@ -303,7 +303,7 @@ void BmpLoader::loadFromFile(const char* filename, imp::ImageData** image)
 {
 	Bitmap bmp;
 	bmp.loadFromFile( filename );
-	bmp.printInfoLog();
+	// bmp.printInfoLog();
 	imp::ImageData* data = bmp.getInternalImageData();
 	
 	(*image) = NULL;

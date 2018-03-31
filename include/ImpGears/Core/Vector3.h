@@ -13,29 +13,21 @@ class IMP_API Vector3 : public Object
 		Meta_Class(Vector3)
 	
         Vector3();
+        Vector3(const float* buf);
         Vector3(float x, float y, float z);
         Vector3(const Vector3& other);
         virtual ~Vector3();
 
-        void setX(float x){m_x = x;}
-        void setY(float y){m_y = y;}
-        void setZ(float z){m_z = z;}
+        float& x();
+        float& y();
+        float& z();
 
-        const float getX() const{return m_x;}
-        const float getY() const{return m_y;}
-        const float getZ() const{return m_z;}
+        float x() const;
+        float y() const;
+        float z() const;
 
-        void setXYZ(float x, float y, float z)
-        {
-            m_x = x;
-            m_y = y;
-            m_z = z;
-        }
-
-        /// \brief Sets the vector value from angles and norm.
-        /// \param theta - Z axis rotation angle.
-        /// \param phi - X axis rotation angle.
-        /// \param norm - The norm of the vector.
+        void set(float x, float y, float z);
+		
         void setRadial(float theta, float phi, float norm = 1);
 
         Vector3& operator*=(const float scalar);
@@ -52,35 +44,26 @@ class IMP_API Vector3 : public Object
         Vector3 operator*(const Vector3& other) const;
 		
 		bool operator==(const Vector3& other) const;
+		
+		float& operator[](unsigned int i);
+		float operator[](unsigned int i) const;
 
-        void rotationX(float rx);
-        void rotationY(float ry);
-        void rotationZ(float rz);
+        void rotX(float rx);
+        void rotY(float ry);
+        void rotZ(float rz);
+		
+        float dot(const Vector3& other) const;
+		
+        Vector3 cross(const Vector3& other) const;
 
-        /// \brief Applies a dot product.
-        /// \param other - An other vector3.
-        /// \return The result of the dot product.
-        float dotProduct(const Vector3& other) const;
-
-        /// \brief Applies a cross product.
-        /// \param other - An other vector3.
-        /// \return The result of the cross product.
-        Vector3 crossProduct(const Vector3& other) const;
-
-        float getNorm() const;
-        float getSqNorm() const;
-
-        /// \brief Applies a truncation on the vector values.
-        void truncate();
+        float length() const;
+        float length2() const;
 
         void normalize();
 
-    protected:
     private:
-
-        float m_x;
-        float m_y;
-        float m_z;
+	
+        float _data[3];
 };
 
 IMPGEARS_END

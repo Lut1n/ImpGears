@@ -5,27 +5,33 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-Vector3::Vector3():
-    m_x(0),
-    m_y(0),
-    m_z(0)
+Vector3::Vector3()
 {
+	_data[0] = _data[1] = _data[2] = 0.0;
+}
+	
+//--------------------------------------------------------------
+Vector3::Vector3(const float* buf)
+{
+	_data[0] = buf[0];
+	_data[1] = buf[1];
+	_data[2] = buf[2];
 }
 
 //--------------------------------------------------------------
-Vector3::Vector3(float x, float y, float z):
-    m_x(x),
-    m_y(y),
-    m_z(z)
+Vector3::Vector3(float x, float y, float z)
 {
+	_data[0] = x;
+	_data[1] = y;
+	_data[2] = z;
 }
 
 //--------------------------------------------------------------
-Vector3::Vector3(const Vector3& other):
-    m_x(other.m_x),
-    m_y(other.m_y),
-    m_z(other.m_z)
+Vector3::Vector3(const Vector3& other)
 {
+	_data[0] = other[0];
+	_data[1] = other[1];
+	_data[2] = other[2];
 }
 
 //--------------------------------------------------------------
@@ -36,17 +42,35 @@ Vector3::~Vector3()
 //--------------------------------------------------------------
 void Vector3::setRadial(float theta, float phi, float norm)
 {
-    m_x = norm * std::cos(phi) * std::cos(theta);
-    m_y = norm * std::cos(phi) * std::sin(theta);
-    m_z = norm * std::sin(phi);
+    _data[0] = norm * std::cos(phi) * std::cos(theta);
+    _data[1] = norm * std::cos(phi) * std::sin(theta);
+    _data[2] = norm * std::sin(phi);
+}
+
+//--------------------------------------------------------------
+float& Vector3::x() {return _data[0]; }
+float& Vector3::y() {return _data[1]; }
+float& Vector3::z() {return _data[2]; }
+
+//--------------------------------------------------------------
+float Vector3::x() const {return _data[0]; }
+float Vector3::y() const {return _data[1]; }
+float Vector3::z() const {return _data[2]; }
+
+//--------------------------------------------------------------
+void Vector3::set(float x, float y, float z)
+{
+	_data[0] = x;
+	_data[1] = y;
+	_data[2] = z;
 }
 
 //--------------------------------------------------------------
 Vector3& Vector3::operator*=(const float scalar)
 {
-    m_x *= scalar;
-    m_y *= scalar;
-    m_z *= scalar;
+    _data[0] *= scalar;
+    _data[1] *= scalar;
+    _data[2] *= scalar;
 
     return *this;
 }
@@ -54,21 +78,22 @@ Vector3& Vector3::operator*=(const float scalar)
 //--------------------------------------------------------------
 Vector3 Vector3::operator*(const float scalar) const
 {
-    return Vector3(m_x*scalar, m_y*scalar, m_z*scalar);
+	Vector3 res(*this); res *= scalar;
+    return res;
 }
 
 //--------------------------------------------------------------
 Vector3 Vector3::operator/(const float scalar) const
 {
-    return Vector3(m_x/scalar, m_y/scalar, m_z/scalar);
+    return Vector3(_data[0]/scalar, _data[1]/scalar, _data[2]/scalar);
 }
 
 //--------------------------------------------------------------
 Vector3& Vector3::operator=(const Vector3& other)
 {
-    m_x = other.m_x;
-    m_y = other.m_y;
-    m_z = other.m_z;
+    _data[0] = other[0];
+    _data[1] = other[1];
+    _data[2] = other[2];
 
     return *this;
 }
@@ -76,9 +101,9 @@ Vector3& Vector3::operator=(const Vector3& other)
 //--------------------------------------------------------------
 Vector3& Vector3::operator+=(const Vector3& other)
 {
-    m_x += other.m_x;
-    m_y += other.m_y;
-    m_z += other.m_z;
+    _data[0] += other[0];
+    _data[1] += other[1];
+    _data[2] += other[2];
 
     return *this;
 }
@@ -86,9 +111,9 @@ Vector3& Vector3::operator+=(const Vector3& other)
 //--------------------------------------------------------------
 Vector3& Vector3::operator-=(const Vector3& other)
 {
-    m_x -= other.m_x;
-    m_y -= other.m_y;
-    m_z -= other.m_z;
+    _data[0] -= other[0];
+    _data[1] -= other[1];
+    _data[2] -= other[2];
 
     return *this;
 }
@@ -96,9 +121,9 @@ Vector3& Vector3::operator-=(const Vector3& other)
 //--------------------------------------------------------------
 Vector3& Vector3::operator*=(const Vector3& other)
 {
-    m_x *= other.m_x;
-    m_y *= other.m_y;
-    m_z *= other.m_z;
+    _data[0] *= other[0];
+    _data[1] *= other[1];
+    _data[2] *= other[2];
 
     return *this;
 }
@@ -106,19 +131,22 @@ Vector3& Vector3::operator*=(const Vector3& other)
 //--------------------------------------------------------------
 Vector3 Vector3::operator+(const Vector3& other) const
 {
-    return Vector3(m_x+other.m_x, m_y+other.m_y, m_z+other.m_z);
+	Vector3 res(*this); res += other;
+    return res;
 }
 
 //--------------------------------------------------------------
 Vector3 Vector3::operator-(const Vector3& other) const
 {
-    return Vector3(m_x-other.m_x, m_y-other.m_y, m_z-other.m_z);
+	Vector3 res(*this); res -= other;
+    return res;
 }
 
 //--------------------------------------------------------------
 Vector3 Vector3::operator*(const Vector3& other) const
 {
-	return Vector3(m_x*other.m_x, m_y*other.m_y, m_z*other.m_z);
+	Vector3 res(*this); res *= other;
+    return res;
 }
 
 /*
@@ -135,11 +163,23 @@ Vector3 Vector3::operator*(const Matrix3& matrix) const
 //--------------------------------------------------------------
 bool Vector3::operator==(const Vector3& other) const
 {
-	return m_x==other.m_x && m_y==other.m_y && m_z==other.m_z;
+	return _data[0]==other[0] && _data[1]==other[1] && _data[2]==other[2];
+}
+		
+//--------------------------------------------------------------
+float& Vector3::operator[](unsigned int i)
+{
+	return _data[i];
 }
 
 //--------------------------------------------------------------
-void Vector3::rotationX(float rx)
+float Vector3::operator[](unsigned int i) const
+{
+	return _data[i];
+}
+
+//--------------------------------------------------------------
+void Vector3::rotX(float rx)
 {
     /*
     rx =    |   1         0         0     |
@@ -147,15 +187,15 @@ void Vector3::rotationX(float rx)
             |   0         std::sin     std::cos     |
     */
 
-    float ny = m_y*std::cos(rx) - m_z*std::sin(rx);
-    float nz = m_y*std::sin(rx) + m_z*std::cos(rx);
+    float ny = _data[1]*std::cos(rx) - _data[2]*std::sin(rx);
+    float nz = _data[1]*std::sin(rx) + _data[2]*std::cos(rx);
 	
-	m_y  =ny;
-	m_z = nz;
+	_data[1]  =ny;
+	_data[2] = nz;
 }
 
 //--------------------------------------------------------------
-void Vector3::rotationY(float ry)
+void Vector3::rotY(float ry)
 {
     /*
     ry =    |   std::cos     0         std::sin     |
@@ -163,15 +203,15 @@ void Vector3::rotationY(float ry)
             |   -std::sin     0        std::cos     |
     */
 
-	float nx = m_x*std::cos(ry) + m_z*std::sin(ry);
-	float nz = -m_y*std::sin(ry) + m_z*std::cos(ry);
+	float nx = _data[0]*std::cos(ry) - _data[2]*std::sin(ry);
+	float nz = _data[0]*std::sin(ry) + _data[2]*std::cos(ry);
 	
-	m_x  =nx;
-	m_z = nz;
+	_data[0]  =nx;
+	_data[2] = nz;
 }
 
 //--------------------------------------------------------------
-void Vector3::rotationZ(float rz)
+void Vector3::rotZ(float rz)
 {
     /*
     rz =    |   std::cos     -std::sin    0         |
@@ -179,21 +219,21 @@ void Vector3::rotationZ(float rz)
             |   0         0        1      |
     */
 
-    float nx = m_x*std::cos(rz) - m_y*std::sin(rz);
-    float ny = m_x*std::sin(rz) + m_y*std::cos(rz);
+    float nx = _data[0]*std::cos(rz) - _data[1]*std::sin(rz);
+    float ny = _data[0]*std::sin(rz) + _data[1]*std::cos(rz);
 	
-	m_x = nx;
-	m_y = ny;
+	_data[0] = nx;
+	_data[1] = ny;
 }
 
 //--------------------------------------------------------------
-float Vector3::dotProduct(const Vector3& other) const
+float Vector3::dot(const Vector3& other) const
 {
-    return m_x*other.m_x + m_y*other.m_y + m_z*other.m_z;
+    return _data[0]*other[0] + _data[1]*other[1] + _data[2]*other[2];
 }
 
 //--------------------------------------------------------------
-Vector3 Vector3::crossProduct(const Vector3& other) const
+Vector3 Vector3::cross(const Vector3& other) const
 {
     /*
     s1  =   u2.v3   -   u3.v2
@@ -201,46 +241,37 @@ Vector3 Vector3::crossProduct(const Vector3& other) const
     s3  =   u1.v2   -   u2.v1
     */
     return Vector3(
-               m_y*other.m_z - m_z*other.m_y,
-               m_z*other.m_x - m_x*other.m_z,
-               m_x*other.m_y - m_y*other.m_x);
+               _data[1]*other[2] - _data[2]*other[1],
+               _data[2]*other[0] - _data[0]*other[2],
+               _data[0]*other[1] - _data[1]*other[0]);
 }
 
 //--------------------------------------------------------------
-float Vector3::getNorm() const
+float Vector3::length() const
 {
-    return sqrtf(getSqNorm());
+    return std::sqrt(length2());
 }
 
 //--------------------------------------------------------------
-float Vector3::getSqNorm() const
+float Vector3::length2() const
 {
-    return (m_x*m_x + m_y*m_y + m_z*m_z);///3.f;
-}
-
-//--------------------------------------------------------------
-void Vector3::truncate()
-{
-    int i;
-
-    i=m_x; m_x=i;
-    i=m_y; m_y=i;
-    i=m_z; m_z=i;
+    return dot(*this);
 }
 
 //--------------------------------------------------------------
 void Vector3::normalize()
 {
-    float n = getNorm();
+    float len = length();
 
-    if(n == 0.f){
-        m_x = 1.f;
+    if(len == 0.0)
+	{
+        _data[0] = 1.0;
         return;
     }
 
-    m_x = m_x/n;
-    m_y = m_y/n;
-    m_z = m_z/n;
+    _data[0] = _data[0]/len;
+    _data[1] = _data[1]/len;
+    _data[2] = _data[2]/len;
 }
 
 IMPGEARS_END

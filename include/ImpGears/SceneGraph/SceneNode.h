@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 #include <list>
 #include <memory>
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 
 #include <SceneGraph/GraphicState.h>
@@ -35,12 +35,12 @@ class IMP_API SceneNode : public Object
             m_localMatrixHasChanged = true;
         }
 
-        void setPosition(imp::Vector3 position){
+        void setPosition(imp::Vec3 position){
             this->position = position;
             m_localMatrixHasChanged = true;
         }
 
-        void setOrientation(imp::Vector3 orientation){
+        void setOrientation(imp::Vec3 orientation){
             this->orientation = orientation;
         }
 		
@@ -53,8 +53,8 @@ class IMP_API SceneNode : public Object
 
         void renderAll();
 
-        const imp::Vector3 getPosition() const{return position;}
-        const imp::Vector3 getOrientation() const{return orientation;}
+        const imp::Vec3 getPosition() const{return position;}
+        const imp::Vec3 getOrientation() const{return orientation;}
 
         bool renderIsActivated() const{return renderActivated;}
         void setRenderActivated(bool activated){renderActivated = activated;}
@@ -67,7 +67,7 @@ class IMP_API SceneNode : public Object
             m_parentNormalMatrix = pNormalMat;
         }
 
-        void setScale(const Vector3& _scale)
+        void setScale(const Vec3& _scale)
         {
             scale = _scale;
             m_localMatrixHasChanged = true;
@@ -90,10 +90,10 @@ class IMP_API SceneNode : public Object
 
         float rx, ry, rz;
 
-        imp::Vector3 position;
-        imp::Vector3 orientation;
+        imp::Vec3 position;
+        imp::Vec3 orientation;
 
-        Vector3 scale;
+        Vec3 scale;
 
         bool renderActivated;
 

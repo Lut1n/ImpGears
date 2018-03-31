@@ -3,7 +3,7 @@
 
 #include <Core/Object.h>
 
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 #include <Core/Math.h>
 
 #include <vector>
@@ -22,8 +22,8 @@ class IMP_API Geometry : public Object
 {
 	public:
 	
-	std::vector<imp::Vector3> _vertices;
-	// std::vector<imp::Vector3> _normals;
+	std::vector<imp::Vec3> _vertices;
+	// std::vector<imp::Vec3> _normals;
 	//std::vector<unsigned int> _indices;
 	
 	Meta_Class(Geometry)
@@ -38,9 +38,9 @@ class IMP_API Geometry : public Object
 	
 	Geometry operator+(const Geometry& other);
 	
-	void origin(const imp::Vector3& origin);
+	void origin(const imp::Vec3& origin);
 	
-	void scale(const imp::Vector3& vec);
+	void scale(const imp::Vec3& vec);
 	
 	void sphericalNormalization(float factor);
 	
@@ -58,11 +58,11 @@ class IMP_API Geometry : public Object
 	
 	void bump(SignalFunctor* functor, float force = 1.0);
 	
-	static Geometry createQuad(unsigned int subdivisionCount, const imp::Vector3& xvec, const imp::Vector3& yvec, const imp::Vector3& zvec, float size = 1.f);
+	static Geometry createQuad(unsigned int subdivisionCount, const imp::Vec3& xvec, const imp::Vec3& yvec, const imp::Vec3& zvec, float size = 1.f);
 	
 	static Geometry createCube(unsigned int subdivisionCount);
 	
-	static Geometry generateTriangle(unsigned int subdivisionCount, const imp::Vector3& p1, const imp::Vector3& p2, const imp::Vector3& p3);
+	static Geometry generateTriangle(unsigned int subdivisionCount, const imp::Vec3& p1, const imp::Vec3& p2, const imp::Vec3& p3);
 	
 	static Geometry createTetrahedron(unsigned int subdivisionCount);
 	

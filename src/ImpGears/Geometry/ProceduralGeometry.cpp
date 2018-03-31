@@ -12,7 +12,7 @@ inline double frac(double x)
 	return x - std::floor(x);
 }
 
-inline imp::Vector3 mix(const imp::Vector3& v1, const imp::Vector3& v2, double f)
+inline imp::Vec3 mix(const imp::Vec3& v1, const imp::Vec3& v2, double f)
 {
 	return (v2-v1)*f + v1;
 }
@@ -57,7 +57,7 @@ Geometry Geometry::operator+(const Geometry& other)
 	return geo;
 }
 
-void Geometry::origin(const imp::Vector3& origin)
+void Geometry::origin(const imp::Vec3& origin)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
@@ -65,7 +65,7 @@ void Geometry::origin(const imp::Vector3& origin)
 	}
 }
 
-void Geometry::scale(const imp::Vector3& vec)
+void Geometry::scale(const imp::Vec3& vec)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
@@ -79,7 +79,7 @@ void Geometry::sphericalNormalization(float factor)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		imp::Vector3 vn = _vertices[i];
+		imp::Vec3 vn = _vertices[i];
 		 vn.normalize();
 		 
 		 _vertices[i] = mix(_vertices[i], vn, factor);
@@ -130,8 +130,8 @@ void Geometry::noiseBump(unsigned int octaveCount, double persistence, double fr
 	{
 		// double noise = imp::simplexOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
 		 double noise = imp::perlinOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
-		//double noise = (frac( std::sin( _vertices[i].dot( imp::Vector3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
-		imp::Vector3 n(_vertices[i]);
+		//double noise = (frac( std::sin( _vertices[i].dot( imp::Vec3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
+		imp::Vec3 n(_vertices[i]);
 		n.normalize();
 		_vertices[i] += n * (noise * force);
 	}
@@ -142,13 +142,13 @@ void Geometry::bump(SignalFunctor* functor, float force)
        for(unsigned int i=0; i<_vertices.size();++i)
        {
         double noise = functor->apply(_vertices[i].x(), _vertices[i].y(), _vertices[i].z());
-               imp::Vector3 n(_vertices[i]);
+               imp::Vec3 n(_vertices[i]);
                n.normalize();
                _vertices[i] += n * (noise * force);
     }
 }
 
-Geometry Geometry::createQuad(unsigned int subdivisionCount, const imp::Vector3& xvec, const imp::Vector3& yvec, const imp::Vector3& zvec, float size)
+Geometry Geometry::createQuad(unsigned int subdivisionCount, const imp::Vec3& xvec, const imp::Vec3& yvec, const imp::Vec3& zvec, float size)
 {
 	const float center = (subdivisionCount+1.f)/2.f;
 	const float scaling = size/center;
@@ -174,12 +174,12 @@ Geometry Geometry::createQuad(unsigned int subdivisionCount, const imp::Vector3&
 
 Geometry Geometry::createCube(unsigned int subdivisionCount)
 {
-	imp::Vector3 v_x(1.0,0.0,0.0);
-	imp::Vector3 v_y(0.0,1.0,0.0);
-	imp::Vector3 v_z(0.0,0.0,1.0);
-	imp::Vector3 v_ox(-1.0,0.0,0.0);
-	imp::Vector3 v_oy(0.0,-1.0,0.0);
-	imp::Vector3 v_oz(0.0,0.0,-1.0);
+	imp::Vec3 v_x(1.0,0.0,0.0);
+	imp::Vec3 v_y(0.0,1.0,0.0);
+	imp::Vec3 v_z(0.0,0.0,1.0);
+	imp::Vec3 v_ox(-1.0,0.0,0.0);
+	imp::Vec3 v_oy(0.0,-1.0,0.0);
+	imp::Vec3 v_oz(0.0,0.0,-1.0);
 	
 	Geometry up = createQuad(subdivisionCount, v_x, v_y, v_z);
 	up.origin( v_oz );
@@ -199,12 +199,12 @@ Geometry Geometry::createCube(unsigned int subdivisionCount)
 	return cube;
 }
 
-Geometry Geometry::generateTriangle(unsigned int subdivisionCount, const imp::Vector3& p1, const imp::Vector3& p2, const imp::Vector3& p3)
+Geometry Geometry::generateTriangle(unsigned int subdivisionCount, const imp::Vec3& p1, const imp::Vec3& p2, const imp::Vec3& p3)
 {
 	Geometry tri;
 	
-	imp::Vector3 u = (p2-p1) / (subdivisionCount+1);
-	imp::Vector3 v = (p3-p1) / (subdivisionCount+1);
+	imp::Vec3 u = (p2-p1) / (subdivisionCount+1);
+	imp::Vec3 v = (p3-p1) / (subdivisionCount+1);
 	
 	for(unsigned int j=0; j<(subdivisionCount+1); ++j)
 	{
@@ -232,10 +232,10 @@ Geometry Geometry::createTetrahedron(unsigned int subdivisionCount)
 	const double PI = 3.141592;
 	const double rad120 = (120.0 * PI / 180.0);
 	
-	imp::Vector3 p1(0.0,0.0,-1.0);
-	imp::Vector3 p2(0.0,0.0,-1.0);
-	imp::Vector3 p3(0.0,0.0,-1.0);
-	imp::Vector3 p4(0.0,0.0,-1.0);
+	imp::Vec3 p1(0.0,0.0,-1.0);
+	imp::Vec3 p2(0.0,0.0,-1.0);
+	imp::Vec3 p3(0.0,0.0,-1.0);
+	imp::Vec3 p4(0.0,0.0,-1.0);
 	
 	p1.rotY(rad120);
 	
@@ -261,11 +261,11 @@ Geometry Geometry::createPyramid(unsigned int baseDivision, unsigned int subdivi
 	for(double step = 0; step < 2.0*PI; step+=radStep)
 	{
 		
-		imp::Vector3 p1(0.0,0.0,-1.0);
+		imp::Vec3 p1(0.0,0.0,-1.0);
 		
-		imp::Vector3 p2 = p1;
-		imp::Vector3 p3 = p1;
-		imp::Vector3 p4 = p1;
+		imp::Vec3 p2 = p1;
+		imp::Vec3 p3 = p1;
+		imp::Vec3 p4 = p1;
 		
 		p2.rotY(rad120);
 		p3.rotY(rad120);

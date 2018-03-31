@@ -10,7 +10,7 @@ IMPGEARS_BEGIN
 #define STRAT_CAM_HEIGHT 70.f
 
 //--------------------------------------------------------------
-const imp::Vector3 Camera::m_upVector(0.f, 0.f, 1.f);
+const imp::Vec3 Camera::m_upVector(0.f, 0.f, 1.f);
 
 //--------------------------------------------------------------
 Camera* Camera::m_activeCamera = nullptr;
@@ -38,14 +38,14 @@ void Camera::update(){
 //--------------------------------------------------------------
 void Camera::lookAt()
 {
-    imp::Vector3 pos = m_position;
-    imp::Vector3 target = m_position + m_orientation;
+    imp::Vec3 pos = m_position;
+    imp::Vec3 target = m_position + m_orientation;
 
     m_viewMatrix = Matrix4::getViewMat(pos, target, m_upVector);
 }
 
 //--------------------------------------------------------------
-void Camera::setTarget(const imp::Vector3& target)
+void Camera::setTarget(const imp::Vec3& target)
 {
     m_target = target;
 
@@ -54,7 +54,7 @@ void Camera::setTarget(const imp::Vector3& target)
 }
 
 //--------------------------------------------------------------
-void Camera::move(const imp::Vector3& move)
+void Camera::move(const imp::Vec3& move)
 {
     m_position = m_position + move;
 }
@@ -98,11 +98,11 @@ void Camera::initFrustum(float width, float height, float fovy, float nearDist, 
 //--------------------------------------------------------------
 bool Camera::testFov(float x, float y, float z, float r)
 {
-    imp::Vector3 v(x,y,z);
-    if(r >= 1.f)v = v + imp::Vector3(r,r,r);
+    imp::Vec3 v(x,y,z);
+    if(r >= 1.f)v = v + imp::Vec3(r,r,r);
 
-    imp::Vector3 cam2pos =v - m_position;
-    imp::Vector3 cam2posN(cam2pos); cam2posN.normalize();
+    imp::Vec3 cam2pos =v - m_position;
+    imp::Vec3 cam2posN(cam2pos); cam2posN.normalize();
     float camDist = cam2pos.length();
     float depth = camDist * cam2posN.dot(m_orientation);
     float effectiveR = sqrtf( r*r + r*r + r*r );
@@ -117,7 +117,7 @@ bool Camera::testFov(float x, float y, float z, float r)
 
     ///frustum culling (spheric)///
     #ifdef SPHERIC_FOV
-    imp::Vector3 relSphere = cam2pos - m_frustumSphereCenter;
+    imp::Vec3 relSphere = cam2pos - m_frustumSphereCenter;
     float sphereSquareDist = relSphere.getSqNorm();
     sumR = (m_frustumConf.sphereRadius+effectiveR);
     if( sphereSquareDist >  sumR*sumR )return false;
@@ -126,8 +126,8 @@ bool Camera::testFov(float x, float y, float z, float r)
     #ifdef CONIC_FOV
     ///frustum culling (conic)///
     float r_local = (m_frustumConf.tanfov*depth);
-    imp::Vector3 projectionTotal(m_orientation * depth);
-    imp::Vector3 distVect( projectionTotal - cam2pos );
+    imp::Vec3 projectionTotal(m_orientation * depth);
+    imp::Vec3 distVect( projectionTotal - cam2pos );
     float dist = distVect.getSqNorm();
     sumR = (r_local+effectiveR);
     if( dist > sumR*sumR )return false;
@@ -179,7 +179,7 @@ void Camera::updateFov()
 }
 
 //--------------------------------------------------------------
-const Vector3 Camera::getVectorFromCursor(float x, float y)
+const Vec3 Camera::getVectorFromCursor(float x, float y)
 {
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -196,7 +196,7 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
 
 
     ///espace camera
-    imp::Vector3 cam = Camera::getActiveCamera()->getPosition();
+    imp::Vec3 cam = Camera::getActiveCamera()->getPosition();
     vx -= cam.x();
     vy -= cam.y();
     vz -= cam.z();
@@ -213,10 +213,10 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
 
     if(result == GL_FALSE){
         //error
-        return Vector3(0.f, 0.f, 0.f);
+        return Vec3(0.f, 0.f, 0.f);
     }
 
-    return Vector3(vx, vy, vz);
+    return Vec3(vx, vy, vz);
 }
 
 

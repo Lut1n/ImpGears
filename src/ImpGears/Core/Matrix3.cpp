@@ -114,13 +114,13 @@ Matrix3 Matrix3::operator*(float scalar) const
     return Matrix3(*this) *= scalar;
 }
 
-imp::Vector3 Matrix3::operator*(const imp::Vector3& vector) const
+imp::Vec3 Matrix3::operator*(const imp::Vec3& vector) const
 {
-    imp::Vector3 result;
+    imp::Vec3 result;
 
-    imp::Vector3 line1(m_values[0], m_values[1], m_values[2]);
-    imp::Vector3 line2(m_values[3], m_values[4], m_values[5]);
-    imp::Vector3 line3(m_values[6], m_values[7], m_values[8]);
+    imp::Vec3 line1(m_values[0], m_values[1], m_values[2]);
+    imp::Vec3 line2(m_values[3], m_values[4], m_values[5]);
+    imp::Vec3 line3(m_values[6], m_values[7], m_values[8]);
 
     result.x() = line1.dot(vector);
     result.y() = line2.dot(vector);

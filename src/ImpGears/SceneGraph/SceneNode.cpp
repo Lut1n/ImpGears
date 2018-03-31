@@ -25,7 +25,7 @@ SceneNode::SceneNode():
     m_localModelMatrix = Matrix4::getIdentityMat();
     m_localNormalMatrix = Matrix4::getIdentityMat();
 
-    scale = Vector3(1.f, 1.f, 1.f);
+    scale = Vec3(1.f, 1.f, 1.f);
 }
 
 //--------------------------------------------------------------

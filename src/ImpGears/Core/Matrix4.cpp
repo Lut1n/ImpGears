@@ -100,9 +100,9 @@ const Matrix4 Matrix4::operator*(float scalar) const
 }
 
 //--------------------------------------------------------------
-const Vector3 Matrix4::operator*(const Vector3& vec) const
+const Vec3 Matrix4::operator*(const Vec3& vec) const
 {
-    Vector3 result;
+    Vec3 result;
 
     result.set(
                   vec.x()*IDX(1,1) + vec.y()*IDX(2,1) + vec.z()*IDX(3,1) + IDX(4,1),
@@ -275,11 +275,11 @@ const Matrix4 Matrix4::getOrthographicProjectionMat(float width, float height, f
 }
 
 //--------------------------------------------------------------
-const Matrix4 Matrix4::getViewMat(const Vector3& pos, const Vector3& target, const Vector3& up)
+const Matrix4 Matrix4::getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up)
 {
-    Vector3 zAxis = pos-target; zAxis.normalize();
-    Vector3 xAxis = up.cross(zAxis); xAxis.normalize();
-    Vector3 yAxis = zAxis.cross(xAxis);
+    Vec3 zAxis = pos-target; zAxis.normalize();
+    Vec3 xAxis = up.cross(zAxis); xAxis.normalize();
+    Vec3 yAxis = zAxis.cross(xAxis);
 
     const float data[16] = {
         xAxis.x(),                   yAxis.x(),                     zAxis.x(),                    0.f,

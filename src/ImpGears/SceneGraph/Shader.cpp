@@ -32,7 +32,7 @@ void Uniform::set(float float1)
 }
 
 //--------------------------------------------------------------
-void Uniform::set(const Vector3* vec3)
+void Uniform::set(const Vec3* vec3)
 {
 	this->type = Type_3f;
 	value.value_3f = vec3;
@@ -54,7 +54,7 @@ void Uniform::set(const float* float1Array, int count)
 }
 
 //--------------------------------------------------------------
-void Uniform::set(const Vector3* vec3Array, int count)
+void Uniform::set(const Vec3* vec3Array, int count)
 {
 	this->type = Type_3fv;
 	value.value_3fv = vec3Array;
@@ -232,7 +232,7 @@ void Shader::setTextureUniform(const char* name, const Texture* texture, std::in
 }
 
 //--------------------------------------------------------------
-void Shader::setVector3ArrayUniform(const char* name, float* vector3Array, std::uint32_t count)
+void Shader::setVec3ArrayUniform(const char* name, float* vector3Array, std::uint32_t count)
 {
     // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
@@ -279,7 +279,7 @@ void Shader::setMatrix4Uniform(const char* name, const Matrix4& Matrix4)
 }
 
 //--------------------------------------------------------------
-void Shader::setVector3Uniform(const char* name, const Vector3& vec3)
+void Shader::setVec3Uniform(const char* name, const Vec3& vec3)
 {
     // enable();
     std::int32_t location = glGetUniformLocation(m_programID, name);
@@ -459,7 +459,7 @@ void Shader::addMatrix4Uniform(const std::string& name, const Matrix4* mat4)
 }
 
 //--------------------------------------------------------------
-void Shader::addVector3ArrayUniform(const std::string& name, float* vector3Array, std::uint32_t count)
+void Shader::addVec3ArrayUniform(const std::string& name, float* vector3Array, std::uint32_t count)
 {
 	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_3fv) );
 	param->set(vector3Array,count);
@@ -467,7 +467,7 @@ void Shader::addVector3ArrayUniform(const std::string& name, float* vector3Array
 }
 
 //--------------------------------------------------------------
-void Shader::addVector3Uniform(const std::string& name, const Vector3* vec3)
+void Shader::addVec3Uniform(const std::string& name, const Vec3* vec3)
 {
 	std::shared_ptr<Uniform> param( new Uniform(name, Uniform::Type_3f) );
 	param->set(vec3);

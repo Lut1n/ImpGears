@@ -13,7 +13,7 @@ RenderParameters::RenderParameters():
 	_fogChanged(false),
 	_viewportChanged(false)
 {
-    m_clearColor = Vector3(1.f, 1.f, 1.f); //alpha = 1.f
+    m_clearColor = Vec3(1.f, 1.f, 1.f); //alpha = 1.f
 	_clearDepth = 1.f;
 	_fogState = ParamState_Disable;
     m_projectionMatrix = Matrix4::getPerspectiveProjectionMat(45.f, 4.f/3.f, 0.1f, 100.f);
@@ -73,7 +73,7 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setClearColor(const Vector3& clearColor)
+void RenderParameters::setClearColor(const Vec3& clearColor)
 {
     m_clearColor = clearColor;
 	_clearColorChanged = true;

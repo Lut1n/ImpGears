@@ -2,7 +2,7 @@
 #define IMP_MATRIX3_H
 
 #include <Core/Object.h>
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 
 IMPGEARS_BEGIN
 
@@ -33,7 +33,7 @@ class IMP_API Matrix3 : public Object
         Matrix3 operator-(const Matrix3& other) const;
         Matrix3 operator*(const Matrix3& other) const;
         Matrix3 operator*(float scalar) const;
-        imp::Vector3 operator*(const imp::Vector3& vector) const;
+        imp::Vec3 operator*(const imp::Vec3& vector) const;
 
         float getDet() const;
         Matrix3 getTranspose() const;

@@ -3,7 +3,7 @@
 
 #include <Core/Object.h>
 #include <Core/Math.h>
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 
 #include <vector>
 
@@ -13,9 +13,9 @@ class IMP_API Edge : public Object
 {
 	public:
 	
-    imp::Vector3 _p1;
-    imp::Vector3 _p2;
-    imp::Vector3 _n;
+    imp::Vec3 _p1;
+    imp::Vec3 _p2;
+    imp::Vec3 _n;
 	
 	Meta_Class(Edge)
 	
@@ -27,7 +27,7 @@ class IMP_API Edge : public Object
 		, _n(other._n)
 	{}
 	
-	Edge(const imp::Vector3& p1, const imp::Vector3& p2, const imp::Vector3& n)
+	Edge(const imp::Vec3& p1, const imp::Vec3& p2, const imp::Vec3& n)
 		: _p1(p1)
 		, _p2(p2)
 		, _n(n)
@@ -45,7 +45,7 @@ class IMP_API Edge : public Object
         return _p1==other._p1 && _p2==other._p2;
     }
 	
-	bool intersection(const Edge& other, imp::Vector3& ipoint) const;
+	bool intersection(const Edge& other, imp::Vec3& ipoint) const;
 };
 
 	
@@ -57,8 +57,8 @@ class IMP_API Polygon : public Object
 	
 	EdgeBuffer	_edges;
 	
-	mutable imp::Vector3 _boundsA;
-	mutable imp::Vector3 _boundsB;
+	mutable imp::Vec3 _boundsA;
+	mutable imp::Vec3 _boundsB;
 	
 	Meta_Class(Polygon)
 	
@@ -68,14 +68,14 @@ class IMP_API Polygon : public Object
 	
 	void computeBounds() const;
 	
-	bool inside(const imp::Vector3& point) const;
+	bool inside(const imp::Vec3& point) const;
 	
 	bool inside(const Edge& edge) const;
 	bool outside(const Edge& edge) const;
 	
-	float distance(const imp::Vector3& point) const;
+	float distance(const imp::Vec3& point) const;
 	
-	bool intersection(const Edge& edge, imp::Vector3& ipoint) const;
+	bool intersection(const Edge& edge, imp::Vec3& ipoint) const;
 	
 	void push_back(const Edge& edge)
 	{

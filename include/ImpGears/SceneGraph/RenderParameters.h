@@ -2,7 +2,7 @@
 #define IMP_RENDERPARAMETERS_H
 
 #include <Core/Object.h>
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 
 #include <SceneGraph/OpenGL.h>
@@ -41,8 +41,8 @@ class IMP_API RenderParameters : public Object
 
         const RenderParameters& operator=(const RenderParameters& other);
 
-        void setClearColor(const Vector3& clearColor);
-        const Vector3& getClearColor() const{return m_clearColor;}
+        void setClearColor(const Vec3& clearColor);
+        const Vec3& getClearColor() const{return m_clearColor;}
 
         void setFaceCullingMode(FaceCullingMode faceCullingMode){m_faceCullingMode = faceCullingMode;_faceCullingChanged=true;}
         FaceCullingMode getFaceCullingMode() const{return m_faceCullingMode;}
@@ -66,7 +66,7 @@ class IMP_API RenderParameters : public Object
     protected:
     private:
 
-        Vector3 m_clearColor;
+        Vec3 m_clearColor;
 		float _clearDepth;
         Matrix4 m_projectionMatrix;
         FaceCullingMode m_faceCullingMode;

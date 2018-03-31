@@ -2,7 +2,7 @@
 #define IMP_MATRIX4_H
 
 #include <Core/Object.h>
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 
 IMPGEARS_BEGIN
 
@@ -32,7 +32,7 @@ class IMP_API Matrix4 : public Object
         const Matrix4& operator*=(float scalar);
         const Matrix4 operator*(float scalar) const;
 
-        const Vector3 operator*(const Vector3& vec) const;
+        const Vec3 operator*(const Vec3& vec) const;
 
         const Matrix4 getTranspose() const;
 
@@ -61,7 +61,7 @@ class IMP_API Matrix4 : public Object
         static const Matrix4 getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue);
         static const Matrix4 getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue);
         static const Matrix4 getOrthographicProjectionMat(float width, float height, float nearValue, float farValue);
-        static const Matrix4 getViewMat(const Vector3& pos, const Vector3& target, const Vector3& up);
+        static const Matrix4 getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up);
         static const Matrix4& getIdentityMat();
         static const Matrix4 getTranslationMat(float tx, float ty, float tz);
         static const Matrix4 getRotationMat(float rx, float ry, float rz);

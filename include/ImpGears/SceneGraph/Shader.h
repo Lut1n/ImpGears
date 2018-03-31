@@ -61,10 +61,10 @@ class Uniform : public Object
 	union Value
 	{
 		float	 value_1f;
-		const Vector3* value_3f;
+		const Vec3* value_3f;
 		int		 value_1i;
 		const float*	 value_1fv;
-		const Vector3* value_3fv;
+		const Vec3* value_3fv;
 		const int*	 value_1iv;
 		// const Matrix3* value_mat3v;
 		const Matrix4* value_mat4v;
@@ -78,13 +78,13 @@ class Uniform : public Object
 	
 	void set(float float1);
 	
-	void set(const Vector3* vec3);
+	void set(const Vec3* vec3);
 	
 	void set(int int1);
 	
 	void set(const float* float1Array, int count = 1);
 	
-	void set(const Vector3* vec3Array, int count);
+	void set(const Vec3* vec3Array, int count);
 	
 	void set(const int* int1Array, int count = 1);
 	
@@ -121,8 +121,8 @@ class IMP_API Shader : public Object
         void setTextureUniform(const char* name, const Texture* texture, std::int32_t textureUnit = 0);
         void setFloatUniform(const char* name, float value);
         void setMatrix4Uniform(const char* name, const Matrix4& Matrix4);
-        void setVector3ArrayUniform(const char* name, float* vector3Array, std::uint32_t count);
-        void setVector3Uniform(const char* name, const Vector3& vec3);
+        void setVec3ArrayUniform(const char* name, float* vector3Array, std::uint32_t count);
+        void setVec3Uniform(const char* name, const Vec3& vec3);
 		
 		void setUniform(const Uniform& param);
 
@@ -148,8 +148,8 @@ class IMP_API Shader : public Object
 		void addTextureUniform(const std::string& name, const Texture* texture, std::int32_t textureUnit = 0);
         void addFloatUniform(const std::string& name, float value);
         void addMatrix4Uniform(const std::string& name, const Matrix4* Matrix4);
-        void addVector3ArrayUniform(const std::string& name,  float* vector3Array, std::uint32_t count);
-        void addVector3Uniform(const std::string& name, const Vector3* vec3);
+        void addVec3ArrayUniform(const std::string& name,  float* vector3Array, std::uint32_t count);
+        void addVec3Uniform(const std::string& name, const Vec3* vec3);
 		
         void addProjection(const Matrix4* projection);
         void addView(const Matrix4* view);

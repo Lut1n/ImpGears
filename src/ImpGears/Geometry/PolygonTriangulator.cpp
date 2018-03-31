@@ -4,7 +4,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-int findNextSegment(const Edge& curr, const Polygon& poly, const EdgeBuffer& alreadyTaken, const imp::Vector3& pTaken)
+int findNextSegment(const Edge& curr, const Polygon& poly, const EdgeBuffer& alreadyTaken, const imp::Vec3& pTaken)
 {
 	for(unsigned int i=0; i<poly.size(); ++i)
 	{
@@ -29,11 +29,11 @@ int findNextSegment(const Edge& curr, const Polygon& poly, const EdgeBuffer& alr
 }
 
 //--------------------------------------------------------------
-imp::Vector3 findOppositePoint(const imp::Vector3& p0, const Polygon& poly)
+imp::Vec3 findOppositePoint(const imp::Vec3& p0, const Polygon& poly)
 {
-	imp::Vector3 unused;
+	imp::Vec3 unused;
 			
-    std::vector<imp::Vector3> adjacents;
+    std::vector<imp::Vec3> adjacents;
     for(unsigned int i=0; i<poly.size(); ++i)
 	{
         if(poly[i]._p1 == p0)
@@ -85,11 +85,11 @@ imp::Vector3 findOppositePoint(const imp::Vector3& p0, const Polygon& poly)
             }
         }
 	}
-    return imp::Vector3(0.0,0.0,0.0);
+    return imp::Vec3(0.0,0.0,0.0);
 }
 
 //--------------------------------------------------------------
-int findSegment(const imp::Vector3& point, const Polygon& poly, const imp::Vector3& dirv)
+int findSegment(const imp::Vec3& point, const Polygon& poly, const imp::Vec3& dirv)
 {
 	for(unsigned int i=0; i<poly.size(); ++i)
 	{
@@ -106,10 +106,10 @@ int findSegment(const imp::Vector3& point, const Polygon& poly, const imp::Vecto
 }
 
 //--------------------------------------------------------------
-Polygon constructPolygon(const Polygon& src, const imp::Vector3& begin, const imp::Vector3& end, const imp::Vector3& n)
+Polygon constructPolygon(const Polygon& src, const imp::Vec3& begin, const imp::Vec3& end, const imp::Vec3& n)
 {
-    imp::Vector3 b2e = end - begin;
-    imp::Vector3 dirv = imp::Vector3(0.0,0.0,1.0).cross(b2e);
+    imp::Vec3 b2e = end - begin;
+    imp::Vec3 dirv = imp::Vec3(0.0,0.0,1.0).cross(b2e);
     dirv.normalize();
     
     Polygon res;
@@ -138,9 +138,9 @@ bool processPolygon(std::vector<Polygon>& polygons, unsigned int index)
     
     if(poly.size() > 3)
     {
-        imp::Vector3 firstPoint = poly[0]._p1;
-        imp::Vector3 opposite = findOppositePoint(firstPoint, poly);
-		if(opposite == imp::Vector3(0.0,0.0,0.0))
+        imp::Vec3 firstPoint = poly[0]._p1;
+        imp::Vec3 opposite = findOppositePoint(firstPoint, poly);
+		if(opposite == imp::Vec3(0.0,0.0,0.0))
 		{
 			firstPoint = poly[0]._p2;
 			opposite = findOppositePoint(firstPoint, poly);
@@ -149,18 +149,18 @@ bool processPolygon(std::vector<Polygon>& polygons, unsigned int index)
         Edge segScissor;
         segScissor._p1 = firstPoint;
         segScissor._p2 = opposite;
-        segScissor._n = imp::Vector3(0.0,0.0,0.0);
+        segScissor._n = imp::Vec3(0.0,0.0,0.0);
 		
-		imp::Vector3 n = opposite - firstPoint;
-		n = imp::Vector3(0.0,0.0,1.0).cross(n);
+		imp::Vec3 n = opposite - firstPoint;
+		n = imp::Vec3(0.0,0.0,1.0).cross(n);
 		n.normalize();
         
         // construct 2 sub path
         // polygons.
         Polygon subpoly1 = constructPolygon(poly, segScissor._p1, segScissor._p2, n);
-        Polygon subpoly2 = constructPolygon(poly, segScissor._p1, segScissor._p2, imp::Vector3(0.0,0.0,0.0)-n);
+        Polygon subpoly2 = constructPolygon(poly, segScissor._p1, segScissor._p2, imp::Vec3(0.0,0.0,0.0)-n);
 		
-        segScissor._n = imp::Vector3(0.0,0.0,0.0)-n;
+        segScissor._n = imp::Vec3(0.0,0.0,0.0)-n;
         subpoly1.push_back(segScissor);
         segScissor._n = n;
         subpoly2.push_back(segScissor);

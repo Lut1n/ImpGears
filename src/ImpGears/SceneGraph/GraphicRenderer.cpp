@@ -31,7 +31,7 @@ GraphicRenderer::GraphicRenderer()
     // default parameters values
     _parameters.reset(new RenderParameters());
     _parameters->setPerspectiveProjection(60.0, 4.0/3.0, 0.1, 128.0);
-    _parameters->setClearColor(imp::Vector3(0.0, 0.0, 0.0));
+    _parameters->setClearColor(imp::Vec3(0.0, 0.0, 0.0));
     _parameters->setClearDepth( 1.0 );
     _parameters->setBlendMode(imp::RenderParameters::BlendMode_SrcAlphaBased);
     _parameters->setFog(RenderParameters::ParamState_Disable);

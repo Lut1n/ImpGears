@@ -3,7 +3,7 @@
 
 #include <Core/Object.h>
 
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 
 IMPGEARS_BEGIN
@@ -17,7 +17,7 @@ class IMP_API Vec4 : public Object
 
 		Vec4();
 
-		Vec4(const Vector3& v);
+		Vec4(const Vec3& v);
 
 		Vec4(const Vec4& v);
 
@@ -25,7 +25,7 @@ class IMP_API Vec4 : public Object
 
 		virtual ~Vec4();
 
-		operator Vector3() const;
+		operator Vec3() const;
 
 		void uniformize();
 

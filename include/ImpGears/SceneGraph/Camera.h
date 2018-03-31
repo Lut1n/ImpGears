@@ -2,7 +2,7 @@
 #define IMP_CAMERA_H
 
 
-#include <Core/Vector3.h>
+#include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 #include <Core/Object.h>
 #include <SceneGraph/SceneNode.h>
@@ -45,19 +45,19 @@ class IMP_API Camera : public SceneNode
         virtual void activate() {setActiveCamera(this);}
         virtual void lookAt();
 
-        const imp::Vector3& getPosition() const{return m_position;}
-        void setPosition(const imp::Vector3& position){m_position = position;}
+        const imp::Vec3& getPosition() const{return m_position;}
+        void setPosition(const imp::Vec3& position){m_position = position;}
 
-        const imp::Vector3& getForwardVector() const{return m_orientation;}
-        const imp::Vector3& getLateralVector() const{return m_lateralVector;}
-        void setTarget(const imp::Vector3& target);
+        const imp::Vec3& getForwardVector() const{return m_orientation;}
+        const imp::Vec3& getLateralVector() const{return m_lateralVector;}
+        void setTarget(const imp::Vec3& target);
 
-        void move(const imp::Vector3& move);
+        void move(const imp::Vec3& move);
         void rotate(float theta, float phi);
 
         void initFrustum(float width, float height, float fovy, float nearDist, float farDist);
 
-//        bool testHitBox(const imp::Vector3& position, const lut1n::HitBox& hitbox) const;
+//        bool testHitBox(const imp::Vec3& position, const lut1n::HitBox& hitbox) const;
         bool testFov(float x, float y, float z, float r);
 
         void setMovable(bool movable){m_movable = movable;}
@@ -69,9 +69,9 @@ class IMP_API Camera : public SceneNode
         float getVerticalAngle() const{return m_phi;}
 
         static Camera* getActiveCamera() {return m_activeCamera;}
-        static const imp::Vector3& getUpVector() {return m_upVector;}
+        static const imp::Vec3& getUpVector() {return m_upVector;}
 
-        const Vector3 getVectorFromCursor(float x, float y);
+        const Vec3 getVectorFromCursor(float x, float y);
 
         const Matrix4& getViewMatrix() const{return m_viewMatrix;}
 
@@ -87,17 +87,17 @@ class IMP_API Camera : public SceneNode
 
     private:
 
-        static const imp::Vector3 m_upVector;
+        static const imp::Vec3 m_upVector;
 
         static Camera* m_activeCamera;
 
-        imp::Vector3 m_position;
-        imp::Vector3 m_orientation;
-        imp::Vector3 m_target;
+        imp::Vec3 m_position;
+        imp::Vec3 m_orientation;
+        imp::Vec3 m_target;
 
-        //imp::Vector3 m_forwardVector;
-        imp::Vector3 m_lateralVector;
-        imp::Vector3 m_headVector;
+        //imp::Vec3 m_forwardVector;
+        imp::Vec3 m_lateralVector;
+        imp::Vec3 m_headVector;
 
         bool m_movable;
         float m_motionSensivity;
@@ -107,7 +107,7 @@ class IMP_API Camera : public SceneNode
         FrustumConfig m_frustumConf;
 
         /// interet ?
-        imp::Vector3 m_frustumSphereCenter;
+        imp::Vec3 m_frustumSphereCenter;
 
         Matrix4 m_viewMatrix;
 };

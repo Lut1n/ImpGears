@@ -12,13 +12,13 @@ static const int COMEIN = 2;
 static const int COMEOUT = 3;
     
 //--------------------------------------------------------------
-bool checkIntersection(Edge& e1, Polygon& poly, std::map<double, imp::Vector3>& regPoint, std::map<double, int>& regState)
+bool checkIntersection(Edge& e1, Polygon& poly, std::map<double, imp::Vec3>& regPoint, std::map<double, int>& regState)
 {
 	bool result = false;
 	
     for(unsigned int i=0; i<poly.size(); i++)
     {
-		imp::Vector3 ipoint;
+		imp::Vec3 ipoint;
 		if(e1.intersection(poly[i],ipoint))
 		{
 			double dirp1 = (e1._p1 - ipoint).dot(poly[i]._n);
@@ -46,9 +46,9 @@ bool checkIntersection(Edge& e1, Polygon& poly, std::map<double, imp::Vector3>& 
 //--------------------------------------------------------------
 void splitEdge(Edge& edge, Polygon& poly, Polygon& result, bool edgeMinusPoly)
 {
-	static const imp::Vector3 zeroVec(0.0,0.0,0.0);
+	static const imp::Vec3 zeroVec(0.0,0.0,0.0);
 	
-    std::map<double, imp::Vector3> regPoint;
+    std::map<double, imp::Vec3> regPoint;
     std::map<double, int> regState;
     
     double firstKey = 0.0;
@@ -72,7 +72,7 @@ void splitEdge(Edge& edge, Polygon& poly, Polygon& result, bool edgeMinusPoly)
             int state = regState[key];            
             int state2 = regState[ it2->first ];
     
-			imp::Vector3 normal = edge._n;
+			imp::Vec3 normal = edge._n;
 	
 			if(edgeMinusPoly)
 			{
@@ -107,7 +107,7 @@ void splitEdge(Edge& edge, Polygon& poly, Polygon& result, bool edgeMinusPoly)
 //--------------------------------------------------------------
 void inversePolygon(Polygon& poly)
 {
-	static const imp::Vector3 zeroVec(0.0,0.0,0.0);
+	static const imp::Vec3 zeroVec(0.0,0.0,0.0);
 	
 	for(unsigned int i=0; i<poly.size(); i++)
     {

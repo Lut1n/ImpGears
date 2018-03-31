@@ -9,36 +9,36 @@ IMPGEARS_BEGIN
 
 /*
 
-bool operator==(const imp::Vector3& v1, const imp::Vector3& v2)
+bool operator==(const imp::Vec3& v1, const imp::Vec3& v2)
 {
     return v1.x() == v2.x() && v1.y() == v2.y() && v1.z() == v2.z();
 }*/
 
-std::ostream& operator<<(std::ostream& os, const imp::Vector3& v)
+std::ostream& operator<<(std::ostream& os, const imp::Vec3& v)
 {  
     os << "[" << v.x() << ";" << v.y() << ";" << v.z() << "]";  
     return os;  
 }  
 
-imp::Vector3 mix(const imp::Vector3& a, const imp::Vector3& b, float f)
+imp::Vec3 mix(const imp::Vec3& a, const imp::Vec3& b, float f)
 {
     return a + (b-a) * f;
 }
 
 //--------------------------------------------------------------
-bool Edge::intersection(const Edge& other, imp::Vector3& ipoint) const
+bool Edge::intersection(const Edge& other, imp::Vec3& ipoint) const
 {
 	const Edge& s1 = *this;
 	const Edge& s2 = other;
 	
-	imp::Vector3 p12 = s1._p2 - s1._p1;
-    imp::Vector3 a = s2._p1 - s1._p1;
-    imp::Vector3 b = s2._p2 - s1._p1;
+	imp::Vec3 p12 = s1._p2 - s1._p1;
+    imp::Vec3 a = s2._p1 - s1._p1;
+    imp::Vec3 b = s2._p2 - s1._p1;
     
-    imp::Vector3 tan = p12;
+    imp::Vec3 tan = p12;
     tan.normalize();
     
-    imp::Vector3 bitan = imp::Vector3(0.0,0.0,1.0).cross( tan );
+    imp::Vec3 bitan = imp::Vec3(0.0,0.0,1.0).cross( tan );
 	bitan.normalize();
     
     float da = a.dot(bitan);
@@ -94,33 +94,33 @@ void Polygon::computeBounds() const
 
 
 //--------------------------------------------------------------
-bool Polygon::inside(const imp::Vector3& p) const
+bool Polygon::inside(const imp::Vec3& p) const
 {	
     computeBounds();
-	imp::Vector3 offPolygonSet = (_boundsB - _boundsA);
+	imp::Vec3 offPolygonSet = (_boundsB - _boundsA);
 	offPolygonSet.normalize();
-	imp::Vector3 target = _boundsB + offPolygonSet;
+	imp::Vec3 target = _boundsB + offPolygonSet;
 	
 	Edge fakeSeg;
 	fakeSeg._p1 = p;
 	fakeSeg._p2 = target;
 	
-	std::map<double, imp::Vector3> _distNormals;
+	std::map<double, imp::Vec3> _distNormals;
 	
 	for(unsigned int i=0; i<_edges.size(); i++)
     {
-		imp::Vector3 ipoint;
+		imp::Vec3 ipoint;
 		if( fakeSeg.intersection(_edges[i], ipoint) )
 		{
 			_distNormals[(ipoint - p).length()] = _edges[i]._n;
 		}
 	}
 	
-	std::map<double, imp::Vector3>::iterator it = _distNormals.begin();
+	std::map<double, imp::Vec3>::iterator it = _distNormals.begin();
 	if(it != _distNormals.end())
 	{
-		imp::Vector3 n = it->second;
-		imp::Vector3 dir = target-p;
+		imp::Vec3 n = it->second;
+		imp::Vec3 dir = target-p;
 		if(dir.dot(n) >= 0.0)
 		{
 			return true;
@@ -132,7 +132,7 @@ bool Polygon::inside(const imp::Vector3& p) const
 
 
 //--------------------------------------------------------------
-float Polygon::distance(const imp::Vector3& p) const
+float Polygon::distance(const imp::Vec3& p) const
 {
 	float res = 1e20;
 	float ares = res;
@@ -140,9 +140,9 @@ float Polygon::distance(const imp::Vector3& p) const
 	
 	for(unsigned int i=0; i<_edges.size(); i++)
     {
-		imp::Vector3 pp1 = (p - _edges[i]._p1);
-		imp::Vector3 p12 = (_edges[i]._p2 - _edges[i]._p1);
-		imp::Vector3 tan = p12;
+		imp::Vec3 pp1 = (p - _edges[i]._p1);
+		imp::Vec3 p12 = (_edges[i]._p2 - _edges[i]._p1);
+		imp::Vec3 tan = p12;
 		tan.normalize();
 		
 		float projp = pp1.dot(tan);
@@ -189,7 +189,7 @@ bool Polygon::inside(const Edge& seg) const
 }
 
 //--------------------------------------------------------------
-bool Polygon::intersection(const Edge& edge, imp::Vector3& ipoint) const
+bool Polygon::intersection(const Edge& edge, imp::Vec3& ipoint) const
 {
 	for(unsigned int i=0; i<_edges.size(); i++)
     {

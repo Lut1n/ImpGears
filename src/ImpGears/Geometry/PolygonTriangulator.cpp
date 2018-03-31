@@ -93,11 +93,11 @@ int findSegment(const imp::Vector3& point, const Polygon& poly, const imp::Vecto
 {
 	for(unsigned int i=0; i<poly.size(); ++i)
 	{
-        if(poly[i]._p1==point && (poly[i]._p2-point).dotProduct(dirv) > 0.0)
+        if(poly[i]._p1==point && (poly[i]._p2-point).dot(dirv) > 0.0)
         {
 			return i;
         }
-        if(poly[i]._p2==point && (poly[i]._p1-point).dotProduct(dirv) > 0.0)
+        if(poly[i]._p2==point && (poly[i]._p1-point).dot(dirv) > 0.0)
         {
 			return i;
         }
@@ -109,7 +109,7 @@ int findSegment(const imp::Vector3& point, const Polygon& poly, const imp::Vecto
 Polygon constructPolygon(const Polygon& src, const imp::Vector3& begin, const imp::Vector3& end, const imp::Vector3& n)
 {
     imp::Vector3 b2e = end - begin;
-    imp::Vector3 dirv = imp::Vector3(0.0,0.0,1.0).crossProduct(b2e);
+    imp::Vector3 dirv = imp::Vector3(0.0,0.0,1.0).cross(b2e);
     dirv.normalize();
     
     Polygon res;
@@ -152,7 +152,7 @@ bool processPolygon(std::vector<Polygon>& polygons, unsigned int index)
         segScissor._n = imp::Vector3(0.0,0.0,0.0);
 		
 		imp::Vector3 n = opposite - firstPoint;
-		n = imp::Vector3(0.0,0.0,1.0).crossProduct(n);
+		n = imp::Vector3(0.0,0.0,1.0).cross(n);
 		n.normalize();
         
         // construct 2 sub path

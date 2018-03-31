@@ -104,7 +104,7 @@ void Uniform::updateUniform(const Shader& program) const
 	}
 	else if(type == Type_3f)
 	{
-		glUniform3f(uniformLocation, value.value_3f->getX(), value.value_3f->getY(), value.value_3f->getZ());
+		glUniform3f(uniformLocation, value.value_3f->x(), value.value_3f->y(), value.value_3f->z());
 	}
 	else if(type == Type_1i)
 	{
@@ -116,7 +116,7 @@ void Uniform::updateUniform(const Shader& program) const
 	}
 	else if(type == Type_3fv)
 	{
-		// glUniform3f(uniformLocation, value.value_3f->getX(), value.value_3f->getY(), value.value_3f->getZ());
+		// glUniform3f(uniformLocation, value.value_3f->x(), value.value_3f->y(), value.value_3f->z());
 	}
 	else if(type == Type_1iv)
 	{
@@ -287,7 +287,7 @@ void Shader::setVector3Uniform(const char* name, const Vector3& vec3)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
     GL_CHECKERROR("vec3 location");
 
-    glUniform3f(location, vec3.getX(), vec3.getY(), vec3.getZ());
+    glUniform3f(location, vec3.x(), vec3.y(), vec3.z());
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
 	{

@@ -69,9 +69,9 @@ void Geometry::scale(const imp::Vector3& vec)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].setX( _vertices[i].getX() * vec.getX() );
-		 _vertices[i].setY( _vertices[i].getY() * vec.getY() );
-		 _vertices[i].setZ( _vertices[i].getZ() * vec.getZ() );
+		 _vertices[i].x() = ( _vertices[i].x() * vec.x() );
+		 _vertices[i].y() = ( _vertices[i].y() * vec.y() );
+		 _vertices[i].z() = ( _vertices[i].z() * vec.z() );
 	}
 }
 
@@ -86,27 +86,27 @@ void Geometry::sphericalNormalization(float factor)
 	}
 }
 
-void Geometry::rotationX(float a)
+void Geometry::rotX(float a)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].rotationX(a);
+		 _vertices[i].rotX(a);
 	}
 }
 
-void Geometry::rotationY(float a)
+void Geometry::rotY(float a)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].rotationY(a);
+		 _vertices[i].rotY(a);
 	}
 }
 
-void Geometry::rotationZ(float a)
+void Geometry::rotZ(float a)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].rotationZ(a);
+		 _vertices[i].rotZ(a);
 	}
 }
 
@@ -118,9 +118,9 @@ void Geometry::fillBuffer(std::vector<float>& buffer)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		buffer.push_back( _vertices[i].getX() );
-		buffer.push_back( _vertices[i].getY() );
-		buffer.push_back( _vertices[i].getZ() );
+		buffer.push_back( _vertices[i].x() );
+		buffer.push_back( _vertices[i].y() );
+		buffer.push_back( _vertices[i].z() );
 	}
 }
 
@@ -128,9 +128,9 @@ void Geometry::noiseBump(unsigned int octaveCount, double persistence, double fr
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		// double noise = imp::simplexOctave(_vertices[i].getX(), _vertices[i].getY(), _vertices[i].getZ(), octaveCount, persistence, freq, 1.0);
-		 double noise = imp::perlinOctave(_vertices[i].getX(), _vertices[i].getY(), _vertices[i].getZ(), octaveCount, persistence, freq, 1.0);
-		//double noise = (frac( std::sin( _vertices[i].dotProduct( imp::Vector3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
+		// double noise = imp::simplexOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
+		 double noise = imp::perlinOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
+		//double noise = (frac( std::sin( _vertices[i].dot( imp::Vector3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
 		imp::Vector3 n(_vertices[i]);
 		n.normalize();
 		_vertices[i] += n * (noise * force);
@@ -141,7 +141,7 @@ void Geometry::bump(SignalFunctor* functor, float force)
 {
        for(unsigned int i=0; i<_vertices.size();++i)
        {
-        double noise = functor->apply(_vertices[i].getX(), _vertices[i].getY(), _vertices[i].getZ());
+        double noise = functor->apply(_vertices[i].x(), _vertices[i].y(), _vertices[i].z());
                imp::Vector3 n(_vertices[i]);
                n.normalize();
                _vertices[i] += n * (noise * force);
@@ -237,13 +237,13 @@ Geometry Geometry::createTetrahedron(unsigned int subdivisionCount)
 	imp::Vector3 p3(0.0,0.0,-1.0);
 	imp::Vector3 p4(0.0,0.0,-1.0);
 	
-	p1.rotationY(rad120);
+	p1.rotY(rad120);
 	
-	p2.rotationY(rad120);
-	p2.rotationZ(-rad120);
+	p2.rotY(rad120);
+	p2.rotZ(-rad120);
 	
-	p3.rotationY(rad120);
-	p3.rotationZ(rad120);
+	p3.rotY(rad120);
+	p3.rotZ(rad120);
 	
 	Geometry pir = generateTriangle(subdivisionCount, p1, p2, p3) + generateTriangle(subdivisionCount, p1, p4, p2) + generateTriangle(subdivisionCount, p2, p4, p3) + generateTriangle(subdivisionCount, p3, p4, p1);
 	
@@ -267,13 +267,13 @@ Geometry Geometry::createPyramid(unsigned int baseDivision, unsigned int subdivi
 		imp::Vector3 p3 = p1;
 		imp::Vector3 p4 = p1;
 		
-		p2.rotationY(rad120);
-		p3.rotationY(rad120);
-		p4.rotationY(rad120);
-		p4.setXYZ( 0.0, 0.0, p4.getZ() );
+		p2.rotY(rad120);
+		p3.rotY(rad120);
+		p4.rotY(rad120);
+		p4.set( 0.0, 0.0, p4.z() );
 		
-		p2.rotationZ(step);
-		p3.rotationZ(step+radStep);
+		p2.rotZ(step);
+		p3.rotZ(step+radStep);
 		
 		pir += generateTriangle(subdivisionCount, p1, p2, p3);
 		pir += generateTriangle(subdivisionCount, p3, p2, p4);

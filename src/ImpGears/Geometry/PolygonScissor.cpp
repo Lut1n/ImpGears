@@ -21,9 +21,9 @@ bool checkIntersection(Edge& e1, Polygon& poly, std::map<double, imp::Vector3>& 
 		imp::Vector3 ipoint;
 		if(e1.intersection(poly[i],ipoint))
 		{
-			double dirp1 = (e1._p1 - ipoint).dotProduct(poly[i]._n);
+			double dirp1 = (e1._p1 - ipoint).dot(poly[i]._n);
 			
-			double key = (ipoint - e1._p1).getNorm();
+			double key = (ipoint - e1._p1).length();
 			
 			if(dirp1 >= 0.0)
 			{
@@ -52,7 +52,7 @@ void splitEdge(Edge& edge, Polygon& poly, Polygon& result, bool edgeMinusPoly)
     std::map<double, int> regState;
     
     double firstKey = 0.0;
-    double lastKey = (edge._p2 - edge._p1).getNorm();
+    double lastKey = (edge._p2 - edge._p1).length();
     
     regState[firstKey] = poly.distance(edge._p1) > 0.0 ? OUTSIDE : INSIDE;
     regPoint[firstKey] = edge._p1;

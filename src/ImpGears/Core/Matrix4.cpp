@@ -104,10 +104,10 @@ const Vector3 Matrix4::operator*(const Vector3& vec) const
 {
     Vector3 result;
 
-    result.setXYZ(
-                  vec.getX()*IDX(1,1) + vec.getY()*IDX(2,1) + vec.getZ()*IDX(3,1) + IDX(4,1),
-                  vec.getX()*IDX(1,2) + vec.getY()*IDX(2,2) + vec.getZ()*IDX(3,2) + IDX(4,2),
-                  vec.getX()*IDX(1,3) + vec.getY()*IDX(2,3) + vec.getZ()*IDX(3,3) + IDX(4,3)
+    result.set(
+                  vec.x()*IDX(1,1) + vec.y()*IDX(2,1) + vec.z()*IDX(3,1) + IDX(4,1),
+                  vec.x()*IDX(1,2) + vec.y()*IDX(2,2) + vec.z()*IDX(3,2) + IDX(4,2),
+                  vec.x()*IDX(1,3) + vec.y()*IDX(2,3) + vec.z()*IDX(3,3) + IDX(4,3)
                   );
 
     return result;
@@ -278,14 +278,14 @@ const Matrix4 Matrix4::getOrthographicProjectionMat(float width, float height, f
 const Matrix4 Matrix4::getViewMat(const Vector3& pos, const Vector3& target, const Vector3& up)
 {
     Vector3 zAxis = pos-target; zAxis.normalize();
-    Vector3 xAxis = up.crossProduct(zAxis); xAxis.normalize();
-    Vector3 yAxis = zAxis.crossProduct(xAxis);
+    Vector3 xAxis = up.cross(zAxis); xAxis.normalize();
+    Vector3 yAxis = zAxis.cross(xAxis);
 
     const float data[16] = {
-        xAxis.getX(),                   yAxis.getX(),                     zAxis.getX(),                    0.f,
-        xAxis.getY(),                   yAxis.getY(),                     zAxis.getY(),                    0.f,
-        xAxis.getZ(),                   yAxis.getZ(),                     zAxis.getZ(),                    0.f,
-        -xAxis.dotProduct(pos),         -yAxis.dotProduct(pos),           -zAxis.dotProduct(pos),          1.f
+        xAxis.x(),                   yAxis.x(),                     zAxis.x(),                    0.f,
+        xAxis.y(),                   yAxis.y(),                     zAxis.y(),                    0.f,
+        xAxis.z(),                   yAxis.z(),                     zAxis.z(),                    0.f,
+        -xAxis.dot(pos),         -yAxis.dot(pos),           -zAxis.dot(pos),          1.f
     };
 
     return Matrix4(data);

@@ -11,12 +11,12 @@ IMPGEARS_BEGIN
 
 bool operator==(const imp::Vector3& v1, const imp::Vector3& v2)
 {
-    return v1.getX() == v2.getX() && v1.getY() == v2.getY() && v1.getZ() == v2.getZ();
+    return v1.x() == v2.x() && v1.y() == v2.y() && v1.z() == v2.z();
 }*/
 
 std::ostream& operator<<(std::ostream& os, const imp::Vector3& v)
 {  
-    os << "[" << v.getX() << ";" << v.getY() << ";" << v.getZ() << "]";  
+    os << "[" << v.x() << ";" << v.y() << ";" << v.z() << "]";  
     return os;  
 }  
 
@@ -38,18 +38,18 @@ bool Edge::intersection(const Edge& other, imp::Vector3& ipoint) const
     imp::Vector3 tan = p12;
     tan.normalize();
     
-    imp::Vector3 bitan = imp::Vector3(0.0,0.0,1.0).crossProduct( tan );
+    imp::Vector3 bitan = imp::Vector3(0.0,0.0,1.0).cross( tan );
 	bitan.normalize();
     
-    float da = a.dotProduct(bitan);
-    float db = b.dotProduct(bitan);
+    float da = a.dot(bitan);
+    float db = b.dot(bitan);
     if( da * db <= 0.0 ) // one on each side
     {
         float t = da / (da - db);
         ipoint = mix(a, b, t);
         
-        float di = ipoint.dotProduct(tan);
-        if(di > 0.0 && di < p12.getNorm())
+        float di = ipoint.dot(tan);
+        if(di > 0.0 && di < p12.length())
         {
 			ipoint = s1._p1 + ipoint;
             return true;
@@ -69,23 +69,23 @@ void Polygon::computeBounds() const
 	
 	for(unsigned int i=0; i<_edges.size(); i++)
     {
-		if( _edges[i]._p1.getX() < _boundsA.getX()
-			|| _edges[i]._p1.getY() < _boundsA.getY()  )
+		if( _edges[i]._p1.x() < _boundsA.x()
+			|| _edges[i]._p1.y() < _boundsA.y()  )
 		{
 			_boundsA = _edges[i]._p1;
 		}
-		if( _edges[i]._p2.getX() < _boundsA.getX()
-			|| _edges[i]._p2.getY() < _boundsA.getY()  )
+		if( _edges[i]._p2.x() < _boundsA.x()
+			|| _edges[i]._p2.y() < _boundsA.y()  )
 		{
 			_boundsA = _edges[i]._p2;
 		}
-		if( _edges[i]._p1.getX() > _boundsB.getX()
-			|| _edges[i]._p1.getY() > _boundsB.getY()  )
+		if( _edges[i]._p1.x() > _boundsB.x()
+			|| _edges[i]._p1.y() > _boundsB.y()  )
 		{
 			_boundsB = _edges[i]._p1;
 		}
-		if( _edges[i]._p2.getX() > _boundsB.getX()
-			|| _edges[i]._p2.getY() > _boundsB.getY()  )
+		if( _edges[i]._p2.x() > _boundsB.x()
+			|| _edges[i]._p2.y() > _boundsB.y()  )
 		{
 			_boundsB = _edges[i]._p2;
 		}
@@ -112,7 +112,7 @@ bool Polygon::inside(const imp::Vector3& p) const
 		imp::Vector3 ipoint;
 		if( fakeSeg.intersection(_edges[i], ipoint) )
 		{
-			_distNormals[(ipoint - p).getNorm()] = _edges[i]._n;
+			_distNormals[(ipoint - p).length()] = _edges[i]._n;
 		}
 	}
 	
@@ -121,7 +121,7 @@ bool Polygon::inside(const imp::Vector3& p) const
 	{
 		imp::Vector3 n = it->second;
 		imp::Vector3 dir = target-p;
-		if(dir.dotProduct(n) >= 0.0)
+		if(dir.dot(n) >= 0.0)
 		{
 			return true;
 		}
@@ -145,12 +145,12 @@ float Polygon::distance(const imp::Vector3& p) const
 		imp::Vector3 tan = p12;
 		tan.normalize();
 		
-		float projp = pp1.dotProduct(tan);
+		float projp = pp1.dot(tan);
 		
-		if(projp <= 0.0 || projp > p12.getNorm())
+		if(projp <= 0.0 || projp > p12.length())
 			continue;
 		
-		float local = (p - _edges[i]._p1).dotProduct(_edges[i]._n);
+		float local = (p - _edges[i]._p1).dot(_edges[i]._n);
 		float alocal = std::abs(local);
 		
 		if(alocal < ares)

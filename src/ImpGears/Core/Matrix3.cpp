@@ -122,9 +122,9 @@ imp::Vector3 Matrix3::operator*(const imp::Vector3& vector) const
     imp::Vector3 line2(m_values[3], m_values[4], m_values[5]);
     imp::Vector3 line3(m_values[6], m_values[7], m_values[8]);
 
-    result.setX(line1.dotProduct(vector));
-    result.setY(line2.dotProduct(vector));
-    result.setZ(line3.dotProduct(vector));
+    result.x() = line1.dot(vector);
+    result.y() = line2.dot(vector);
+    result.z() = line3.dot(vector);
 
     return result;
 }

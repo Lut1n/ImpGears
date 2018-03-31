@@ -84,17 +84,17 @@ void SceneNode::commitTransformation()
     if(m_localMatrixHasChanged)
     {
         m_localModelMatrix =
-            Matrix4::getTranslationMat(position.getX(), position.getY(), position.getZ())
+            Matrix4::getTranslationMat(position.x(), position.y(), position.z())
             * Matrix4::getRotationMat(rx, 0.f, 0.f)
             * Matrix4::getRotationMat(0.f, ry, 0.f)
             * Matrix4::getRotationMat(0.f, 0.f, rz)
-            * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ());
+            * Matrix4::getScaleMat(scale.x(), scale.y(), scale.z());
 
         m_localNormalMatrix =
             Matrix4::getRotationMat(rx, 0.f, 0.f)
             * Matrix4::getRotationMat(0.f, ry, 0.f)
             * Matrix4::getRotationMat(0.f, 0.f, rz)
-            * Matrix4::getScaleMat(scale.getX(), scale.getY(), scale.getZ()).getInverse();
+            * Matrix4::getScaleMat(scale.x(), scale.y(), scale.z()).getInverse();
 
         m_localMatrixHasChanged = false;
     }
@@ -107,13 +107,13 @@ void SceneNode::calculateRotation(){
 
     float convertion = 180.f/3.14159265359f;
 
-    float x2 = orientation.getX()*orientation.getX();
-    float y2 = orientation.getY()*orientation.getY();
+    float x2 = orientation.x()*orientation.x();
+    float y2 = orientation.y()*orientation.y();
     float xy = sqrt(x2+y2);
 
     rx = 0.f; //Rotation sur axe frontal
-    ry = -convertion * atan2f(orientation.getZ(), xy);
-    rz = convertion * atan2f(orientation.getY(), orientation.getX());
+    ry = -convertion * atan2f(orientation.z(), xy);
+    rz = convertion * atan2f(orientation.y(), orientation.x());
 
     m_localMatrixHasChanged = true;
 }

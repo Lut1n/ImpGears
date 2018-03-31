@@ -44,11 +44,11 @@ class IMP_API Geometry : public Object
 	
 	void sphericalNormalization(float factor);
 	
-	void rotationX(float a);
+	void rotX(float a);
 	
-	void rotationY(float a);
+	void rotY(float a);
 	
-	void rotationZ(float a);
+	void rotZ(float a);
 	
 	void optimize();
 	

@@ -103,8 +103,8 @@ bool Camera::testFov(float x, float y, float z, float r)
 
     imp::Vector3 cam2pos =v - m_position;
     imp::Vector3 cam2posN(cam2pos); cam2posN.normalize();
-    float camDist = cam2pos.getNorm();
-    float depth = camDist * cam2posN.dotProduct(m_orientation);
+    float camDist = cam2pos.length();
+    float depth = camDist * cam2posN.dot(m_orientation);
     float effectiveR = sqrtf( r*r + r*r + r*r );
     float sumR = 0.f;
 
@@ -135,14 +135,14 @@ bool Camera::testFov(float x, float y, float z, float r)
     #else
      {
         float r_local = (m_frustumConf.tanfovx*depth);
-        float dist = camDist * cam2posN.dotProduct(m_lateralVector);
+        float dist = camDist * cam2posN.dot(m_lateralVector);
         sumR = (r_local+effectiveR);
         if( dist*dist > sumR*sumR )return false;
      }
      ///frustum culling (pyramide fovY)///
      {
         float r_local = (m_frustumConf.tanfovy*depth);
-        float dist = camDist * cam2posN.dotProduct(m_headVector);
+        float dist = camDist * cam2posN.dot(m_headVector);
         sumR = (r_local+effectiveR);
         if( dist*dist > sumR*sumR )return false;
      }
@@ -162,7 +162,7 @@ void Camera::debugDraw()
 //--------------------------------------------------------------
 void Camera::updateLateralVector()
 {
-    m_lateralVector = m_orientation.crossProduct(m_upVector);
+    m_lateralVector = m_orientation.cross(m_upVector);
     m_lateralVector.normalize();
 }
 
@@ -174,7 +174,7 @@ void Camera::updateFov()
     m_frustumSphereCenter =  ( m_orientation * m_frustumConf.sphereCenterDist ); ///pass
 
     updateLateralVector();
-    m_headVector = m_lateralVector.crossProduct(m_orientation);
+    m_headVector = m_lateralVector.cross(m_orientation);
     m_headVector.normalize();
 }
 
@@ -197,9 +197,9 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
 
     ///espace camera
     imp::Vector3 cam = Camera::getActiveCamera()->getPosition();
-    vx -= cam.getX();
-    vy -= cam.getY();
-    vz -= cam.getZ();
+    vx -= cam.x();
+    vy -= cam.y();
+    vz -= cam.z();
 
     ///projection du point a la distance du sol
     vx *= -STRAT_CAM_HEIGHT/vz;
@@ -207,9 +207,9 @@ const Vector3 Camera::getVectorFromCursor(float x, float y)
     vz = -STRAT_CAM_HEIGHT;
 
     ///retour a l'espace monde
-    vx += cam.getX();
-    vy += cam.getY();
-    vz += cam.getZ();
+    vx += cam.x();
+    vy += cam.y();
+    vz += cam.z();
 
     if(result == GL_FALSE){
         //error

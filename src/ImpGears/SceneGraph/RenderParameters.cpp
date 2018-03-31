@@ -84,7 +84,7 @@ void RenderParameters::apply(bool clearBuffer) const
 {
 	if(_clearColorChanged)
 	{
-		glClearColor(m_clearColor.getX(), m_clearColor.getY(), m_clearColor.getZ(), 0.f);
+		glClearColor(m_clearColor.x(), m_clearColor.y(), m_clearColor.z(), 0.f);
 	}
 	
 	if(_faceCullingChanged)

@@ -2,16 +2,9 @@
 #define IMP_IMAGEDATA_H
 
 #include <Core/Object.h>
+#include <Core/Vec4.h>
 
 IMPGEARS_BEGIN
-
-/// \struct Pixel - Defines a RGBA pixel.
-union IMP_API Pixel
-{
-	struct { std::uint32_t red, green, blue, alpha; };
-	struct { std::uint32_t x, y, z, w; };
-	struct { std::uint32_t r, g, b, a; };
-};
 
 enum IMP_API PixelFormat
 {
@@ -55,14 +48,14 @@ class IMP_API ImageData : public Object
 	
 	void convert(const ImageData& srcData, PixelFormat targetFormat);
 
-	void fill(const Pixel& color);
+	void fill(const Vec4& color);
 
 
-	Pixel getPixel(std::uint32_t x, std::uint32_t y) const;
-	void setPixel(std::uint32_t x, std::uint32_t y, Pixel pixel);
+	Vec4 getPixel(std::uint32_t x, std::uint32_t y) const;
+	void setPixel(std::uint32_t x, std::uint32_t y, const Vec4& pixel);
 
-	Pixel getRepeatPixel(std::uint32_t x, std::uint32_t y) const;
-	void setRepeatPixel(std::uint32_t x, std::uint32_t y, Pixel pixel);
+	Vec4 getRepeatPixel(std::uint32_t x, std::uint32_t y) const;
+	void setRepeatPixel(std::uint32_t x, std::uint32_t y, const Vec4& pixel);
 
 	std::uint32_t getWidth() const{return m_width;}
 	std::uint32_t getHeight() const{return m_height;}

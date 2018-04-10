@@ -61,7 +61,7 @@ bool TextRenderer::findGlyphPosition(char glyph, unsigned int& x, unsigned int& 
 }
 
 //--------------------------------------------------------------
-void TextRenderer::renderText(const std::string& text, imp::ImageData* targetImg, const imp::Pixel& fg, const imp::Pixel& bg)
+void TextRenderer::renderText(const std::string& text, imp::ImageData* targetImg, const Vec4& fg, const Vec4& bg)
 {
 	if(_mapping == nullptr)
 		return;

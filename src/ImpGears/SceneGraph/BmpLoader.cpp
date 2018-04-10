@@ -26,7 +26,7 @@ Bitmap::~Bitmap()
 }
 
 //--------------------------------------------------------------
-void Bitmap::build(int width, int height, const imp::Pixel& initialColor)
+void Bitmap::build(int width, int height, const imp::Vec4& initialColor)
 {
     dib = DIB_BITMAPINFOHEADER;
 
@@ -235,19 +235,19 @@ void Bitmap::dumpData()
 }
 
 //--------------------------------------------------------------
-void Bitmap::getPixelColor(int x, int y, imp::Pixel& color)
+void Bitmap::getPixelColor(int x, int y, imp::Vec4& color)
 {
 	color = _internalImageData->getPixel(x,y);
 }
 
 //--------------------------------------------------------------
-void Bitmap::setPixelColor(int x, int y, imp::Pixel& color)
+void Bitmap::setPixelColor(int x, int y, imp::Vec4& color)
 {
     _internalImageData->setPixel(x,y,color);
 }
 
 //--------------------------------------------------------------
-void Bitmap::resize(int w, int h, imp::Pixel& color, int xrel, int yrel)
+void Bitmap::resize(int w, int h, imp::Vec4& color, int xrel, int yrel)
 {
     
 }
@@ -319,7 +319,7 @@ void BmpLoader::loadFromFile(const char* filename, imp::ImageData** image)
 
 void BmpLoader::saveToFile(const imp::ImageData* image, const char* filename)
 {
-	imp::Pixel initColor = {255, 255, 255, 255};
+	imp::Vec4 initColor(255, 255, 255, 255);
 
 	Bitmap bitmap;
 	bitmap.build(image->getWidth(), image->getHeight(), initColor);

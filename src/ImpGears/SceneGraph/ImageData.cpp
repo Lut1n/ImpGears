@@ -125,16 +125,16 @@ void ImageData::resize(std::int32_t w, std::int32_t h, std::int32_t xrel, std::i
 }
 
 //--------------------------------------------------------------
-Pixel ImageData::getPixel(std::uint32_t x, std::uint32_t y) const
+Vec4 ImageData::getPixel(std::uint32_t x, std::uint32_t y) const
 {
-	Pixel result;
+	Vec4 result;
 	
 	if(x >= m_width || x<0 || y>= m_height || y<0)
 	{
-		result.r = 0;
-		result.g = 0;
-		result.b = 0;
-		result.a = 255;
+		result[0] = 0;
+		result[1] = 0;
+		result[2] = 0;
+		result[3] = 255;
 		return result;
 	}
 	
@@ -144,78 +144,78 @@ Pixel ImageData::getPixel(std::uint32_t x, std::uint32_t y) const
 	{
 		std::uint8_t pixel[3];
 		memcpy(pixel, &(m_buffer[start]), 3);
-		result.r = pixel[0];
-		result.g = pixel[1];
-		result.b = pixel[2];
-		result.a = 255;
+		result[0] = pixel[0];
+		result[1] = pixel[1];
+		result[2] = pixel[2];
+		result[3] = 255;
 	}
 	else if(m_format == PixelFormat_BGR8)
 	{
 		std::uint8_t pixel[3];
 		memcpy(pixel, &(m_buffer[start]), 3);
-		result.b = pixel[0];
-		result.g = pixel[1];
-		result.r = pixel[2];
-		result.a = 255;
+		result[2] = pixel[0];
+		result[1] = pixel[1];
+		result[0] = pixel[2];
+		result[3] = 255;
 	}
 	else if(m_format == PixelFormat_RGBA8)
 	{
 		std::uint8_t pixel[4];
 		memcpy(pixel, &(m_buffer[start]), 4);
-		result.r = pixel[0];
-		result.g = pixel[1];
-		result.b = pixel[2];
-		result.a = pixel[3];
+		result[0] = pixel[0];
+		result[1] = pixel[1];
+		result[2] = pixel[2];
+		result[3] = pixel[3];
 	}
 	else if(m_format == PixelFormat_BGRA8)
 	{
 		std::uint8_t pixel[4];
 		memcpy(pixel, &(m_buffer[start]), 4);
-		result.b = pixel[0];
-		result.g = pixel[1];
-		result.r = pixel[2];
-		result.a = pixel[3];
+		result[2] = pixel[0];
+		result[1] = pixel[1];
+		result[0] = pixel[2];
+		result[3] = pixel[3];
 	}
 	else if(m_format == PixelFormat_RG16)
 	{
 		std::uint16_t pixel[2];
 		memcpy(pixel, &(m_buffer[start]), 4);
-		result.r = pixel[0];
-		result.g = pixel[1];
-		result.b = 0;
-		result.a = 1;
+		result[0] = pixel[0];
+		result[1] = pixel[1];
+		result[2] = 0;
+		result[3] = 1;
 	}
 	else if(m_format == PixelFormat_R8)
 	{
 		std::uint8_t pixel[1];
 		memcpy(pixel, &(m_buffer[start]), 1);
-		result.r = pixel[0];
-		result.g = 0;
-		result.b = 0;
-		result.a = 1;
+		result[0] = pixel[0];
+		result[1] = 0;
+		result[2] = 0;
+		result[3] = 1;
 	}
 	else if(m_format == PixelFormat_R16)
 	{
 		std::uint16_t pixel[1];
 		memcpy(pixel, &(m_buffer[start]), 2);
-		result.r = pixel[0];
-		result.g = 0;
-		result.b = 0;
-		result.a = 1;
+		result[0] = pixel[0];
+		result[1] = 0;
+		result[2] = 0;
+		result[3] = 1;
 	}
 	else
 	{
-		result.r = 0;
-		result.g = 0;
-		result.b = 0;
-		result.a = 1;
+		result[0] = 0;
+		result[1] = 0;
+		result[2] = 0;
+		result[3] = 1;
 	}
 
 	return result;
 }
 
 //--------------------------------------------------------------
-void ImageData::setPixel(std::uint32_t x, std::uint32_t y, Pixel pixel)
+void ImageData::setPixel(std::uint32_t x, std::uint32_t y, const Vec4& pixel)
 {
 	if(x >= m_width || x<0 || y>= m_height || y<0)
 		return;
@@ -228,60 +228,60 @@ void ImageData::setPixel(std::uint32_t x, std::uint32_t y, Pixel pixel)
 	if(m_format == PixelFormat_RGB8)
 	{
 		std::uint8_t pxbuf[3];
-		pxbuf[0] = pixel.r;
-		pxbuf[1] = pixel.g;
-		pxbuf[2] = pixel.b;
+		pxbuf[0] = pixel[0];
+		pxbuf[1] = pixel[1];
+		pxbuf[2] = pixel[2];
 		memcpy(&(m_buffer[start]), pxbuf, 3);
 	}
 	else if(m_format == PixelFormat_BGR8)
 	{
 		std::uint8_t pxbuf[3];
-		pxbuf[0] = pixel.b;
-		pxbuf[1] = pixel.g;
-		pxbuf[2] = pixel.r;
+		pxbuf[0] = pixel[2];
+		pxbuf[1] = pixel[1];
+		pxbuf[2] = pixel[0];
 		memcpy(&(m_buffer[start]), pxbuf, 3);
 	}
 	else if(m_format == PixelFormat_RGBA8)
 	{
 		std::uint8_t pxbuf[4];
-		pxbuf[0] = pixel.r;
-		pxbuf[1] = pixel.g;
-		pxbuf[2] = pixel.b;
-		pxbuf[3] = pixel.a;
+		pxbuf[0] = pixel[0];
+		pxbuf[1] = pixel[1];
+		pxbuf[2] = pixel[2];
+		pxbuf[3] = pixel[3];
 		memcpy(&(m_buffer[start]), pxbuf, 4);
 	}
 	else if(m_format == PixelFormat_BGRA8)
 	{
 		std::uint8_t pxbuf[4];
-		pxbuf[0] = pixel.b;
-		pxbuf[1] = pixel.g;
-		pxbuf[2] = pixel.r;
-		pxbuf[3] = pixel.a;
+		pxbuf[0] = pixel[2];
+		pxbuf[1] = pixel[1];
+		pxbuf[2] = pixel[0];
+		pxbuf[3] = pixel[3];
 		memcpy(&(m_buffer[start]), pxbuf, 4);
 	}
 	else if(m_format == PixelFormat_RG16)
 	{
 		std::uint16_t pxbuf[2];
-		pxbuf[0] = pixel.r;
-		pxbuf[1] = pixel.g;
+		pxbuf[0] = pixel[0];
+		pxbuf[1] = pixel[1];
 		memcpy(&(m_buffer[start]), pxbuf, 4);
 	}
 	else if(m_format == PixelFormat_R8)
 	{
 		std::uint8_t pxbuf[1];
-		pxbuf[0] = pixel.b;
+		pxbuf[0] = pixel[0];
 		memcpy(&(m_buffer[start]), pxbuf, 1);
 	}
 	else if(m_format == PixelFormat_R16)
 	{
 		std::uint16_t pxbuf[1];
-		pxbuf[0] = pixel.b;
+		pxbuf[0] = pixel[0];
 		memcpy(&(m_buffer[start]), pxbuf, 2);
 	}
 }
 
 //--------------------------------------------------------------
-Pixel ImageData::getRepeatPixel(std::uint32_t x, std::uint32_t y) const
+Vec4 ImageData::getRepeatPixel(std::uint32_t x, std::uint32_t y) const
 {
     if(x < 0.0)
         x = getWidth()+x;
@@ -297,7 +297,7 @@ Pixel ImageData::getRepeatPixel(std::uint32_t x, std::uint32_t y) const
 }
 
 //--------------------------------------------------------------
-void ImageData::setRepeatPixel(std::uint32_t x, std::uint32_t y, Pixel pixel)
+void ImageData::setRepeatPixel(std::uint32_t x, std::uint32_t y, const Vec4& pixel)
 {
     if(x < 0.0)
         x = getWidth()+x;
@@ -395,44 +395,44 @@ void ImageData::convert(const ImageData& srcData, PixelFormat targetFormat)
 }
 
 //--------------------------------------------------------------
-void ImageData::fill(const Pixel& color)
+void ImageData::fill(const Vec4& color)
 {
 	std::cout << "fill : size=" << m_bufferSize << "; chanl=" << m_channels << "; format=" << m_format << "\n";
-	std::cout << "color=" << color.r << " " << color.g << " " << color.b << "\n";
+	std::cout << "color=" << color[0] << " " << color[1] << " " << color[2] << "\n";
 	for(std::uint32_t i=0; i<m_bufferSize; i+=m_channels)
 	{
 		if(m_format == PixelFormat_RGB8)
 		{
 			std::uint8_t pixel[3];
-			pixel[0] = color.r;
-			pixel[1] = color.g;
-			pixel[2] = color.b;
+			pixel[0] = color[0];
+			pixel[1] = color[1];
+			pixel[2] = color[2];
 			memcpy(&(m_buffer[i]), pixel, 3);
 		}
 		else if(m_format == PixelFormat_BGR8)
 		{
 			std::uint8_t pixel[3];
-			pixel[0] = color.b;
-			pixel[1] = color.g;
-			pixel[2] = color.r;
+			pixel[0] = color[2];
+			pixel[1] = color[1];
+			pixel[2] = color[0];
 			memcpy(&(m_buffer[i]), pixel, 3);
 		}
 		else if(m_format == PixelFormat_RGBA8)
 		{
 			std::uint8_t pixel[4];
-			pixel[0] = color.r;
-			pixel[1] = color.g;
-			pixel[2] = color.b;
-			pixel[3] = color.a;
+			pixel[0] = color[0];
+			pixel[1] = color[1];
+			pixel[2] = color[2];
+			pixel[3] = color[3];
 			memcpy(&(m_buffer[i]), pixel, 4);
 		}
 		else if(m_format == PixelFormat_BGRA8)
 		{
 			std::uint8_t pixel[4];
-			pixel[0] = color.b;
-			pixel[1] = color.g;
-			pixel[2] = color.r;
-			pixel[3] = color.a;
+			pixel[0] = color[2];
+			pixel[1] = color[1];
+			pixel[2] = color[0];
+			pixel[3] = color[3];
 			memcpy(&(m_buffer[i]), pixel, 4);
 		}
 		else

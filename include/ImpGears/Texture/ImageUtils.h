@@ -82,13 +82,6 @@ public:
 
 static Randomizer randomizer;
 
-struct IMP_API Vec3
-{
-	float x;
-	float y;
-	float z;
-};
-
 float IMP_API min(float a, float b);
 
 float IMP_API max(float a, float b);
@@ -105,9 +98,9 @@ void IMP_API cross(Vec3 v1, Vec3 v2, Vec3& result);
 
 float IMP_API smoothstep(char edge0, char edge1, float delta);
 
-Pixel IMP_API lerp(Pixel a, Pixel b, float delta);
+Vec4 IMP_API lerp(Vec4 a, Vec4 b, float delta);
 
-Pixel IMP_API bilerp(Pixel oo, Pixel xo, Pixel oy, Pixel xy, float deltaX, float deltaY);
+Vec4 IMP_API bilerp(Vec4 oo, Vec4 xo, Vec4 oy, Vec4 xy, float deltaX, float deltaY);
 
 void IMP_API heightToNormal(ImageData& in, ImageData& out, float force, float prec);
 
@@ -117,7 +110,7 @@ void IMP_API blend(ImageData& dst, ImageData& src, ImageData& alphaMap, double t
 
 void IMP_API applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY);
 
-inline imp::Pixel IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned int y);
+inline Vec4 IMP_API mirGet(imp::ImageData& img, unsigned int x, unsigned int y);
 
 void IMP_API drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float freq, float ampl, float maxPeriodRatio = 0.5, const imp::ImageData* perturbation = nullptr, float perturbIntensity = 1.0);
 
@@ -127,9 +120,9 @@ void IMP_API drawRadialSinus(imp::ImageData& img, double posX, double posY, floa
 
 void IMP_API applyPerturbation(imp::ImageData& img, const imp::ImageData& normals, float intensity);
 
-void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2);
+void IMP_API applyColorization(imp::ImageData& img, const Vec4& color1, const Vec4& color2);
 
-void IMP_API applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2, Distribution& distrib);
+void IMP_API applyColorization(imp::ImageData& img, const Vec4& color1, const Vec4& color2, Distribution& distrib);
 
 void IMP_API applyMaximization(imp::ImageData& img);
 

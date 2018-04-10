@@ -169,10 +169,10 @@ void NoiseGenerator::compileResult()
 
 		std::cout << " " << currentvalue << " \n";
 
-		Pixel px;
-		px.red = currentvalue;
-		px.green = currentvalue;
-		px.blue = currentvalue;
+		Vec4 px;
+		px[0] = currentvalue;
+		px[1] = currentvalue;
+		px[2] = currentvalue;
         resultmap.setPixel(x,y,px);
     }
 }

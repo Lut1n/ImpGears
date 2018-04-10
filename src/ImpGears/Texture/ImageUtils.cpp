@@ -33,19 +33,19 @@ float frac(float v)
 
 void normalize(Vec3& v)
 {
-	float ln = v.x*v.x + v.y*v.y + v.z*v.z;
+	float ln = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
 	ln = sqrtf(ln);
 
-	v.x /= ln;
-	v.y /= ln;
-	v.z /= ln;
+	v[0] /= ln;
+	v[1] /= ln;
+	v[2] /= ln;
 }
 
 void cross(Vec3 v1, Vec3 v2, Vec3& result)
 {
-	result.x = v1.y*v2.z - v1.z*v2.y;
-	result.y = v1.z*v2.x - v1.x*v2.z;
-	result.z = v1.x*v2.y - v1.y*v2.x;
+	result[0] = v1[1]*v2[2] - v1[2]*v2[1];
+	result[1] = v1[2]*v2[0] - v1[0]*v2[2];
+	result[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 
 float smoothstep(char edge0, char edge1, float delta)
@@ -54,22 +54,22 @@ float smoothstep(char edge0, char edge1, float delta)
     return x*x*(3 - 2*x);
 }
 
-Pixel lerp(Pixel a, Pixel b, float delta)
+Vec4 lerp(Vec4 a, Vec4 b, float delta)
 {
 	delta = smoothstep(0.0, 1.0, delta);
-	Pixel result;
-	result.red = delta*b.red + (1.0-delta)*a.red;
-	result.green = delta*b.green + (1.0-delta)*a.green;
-	result.blue = delta*b.blue + (1.0-delta)*a.blue;
-	result.alpha = delta*b.alpha + (1.0-delta)*a.alpha;
+	Vec4 result;
+	result[0] = delta*b[0] + (1.0-delta)*a[0];
+	result[1] = delta*b[1] + (1.0-delta)*a[1];
+	result[2] = delta*b[2] + (1.0-delta)*a[2];
+	result[3] = delta*b[3] + (1.0-delta)*a[3];
 
 	return result;
 }
 
-Pixel bilerp(Pixel oo, Pixel xo, Pixel oy, Pixel xy, float deltaX, float deltaY)
+Vec4 bilerp(Vec4 oo, Vec4 xo, Vec4 oy, Vec4 xy, float deltaX, float deltaY)
 {
-	Pixel lx1 = lerp(oo, xo, deltaX);
-	Pixel lx2 = lerp(oy, xy, deltaX);
+	Vec4 lx1 = lerp(oo, xo, deltaX);
+	Vec4 lx2 = lerp(oy, xy, deltaX);
 	return lerp(lx1, lx2, deltaY);
 }
 
@@ -93,13 +93,13 @@ void applyBilinearInterpo(ImageData& bitmap, float frqX, float frqY)
 			float dx = frac(i/periodX);
 			float dy = frac(j/periodY);
 
-			Pixel oo = temp.getPixel(x0, y0);
-			Pixel xo = temp.getPixel(x1, y0);
-			Pixel oy = temp.getPixel(x0, y1);
-			Pixel xy = temp.getPixel(x1, y1);
+			Vec4 oo = temp.getPixel(x0, y0);
+			Vec4 xo = temp.getPixel(x1, y0);
+			Vec4 oy = temp.getPixel(x0, y1);
+			Vec4 xy = temp.getPixel(x1, y1);
 
-			Pixel color = bilerp(oo, xo, oy, xy, dx, dy);
-			//Pixel color = bismooth(oo, xo, oy, xy, dx, dy);
+			Vec4 color = bilerp(oo, xo, oy, xy, dx, dy);
+			//Vec4 color = bismooth(oo, xo, oy, xy, dx, dy);
 
 			bitmap.setPixel(i,j, color);
 		}
@@ -112,7 +112,7 @@ void blend(ImageData& dst, ImageData& src, float alpha)
 	{
 		for(std::uint32_t j=0; j<dst.getHeight(); ++j)
 		{
-			Pixel srcColor, dstColor;
+			Vec4 srcColor, dstColor;
 			srcColor = src.getPixel(i,j);
 			dstColor = dst.getPixel(i,j);
 
@@ -128,11 +128,11 @@ void blend(ImageData& dst, ImageData& src, ImageData& alphaMap, double threshold
 	{
 		for(std::uint32_t j=0; j<dst.getHeight(); ++j)
 		{
-			Pixel srcColor, dstColor;
+			Vec4 srcColor, dstColor;
 			srcColor = src.getPixel(i,j);
 			dstColor = dst.getPixel(i,j);
             
-            double alpha = (double)(alphaMap.getPixel(i,j).r) / 255.0;
+            double alpha = (double)(alphaMap.getPixel(i,j)[0]) / 255.0;
             /*if(alpha > threshold)
                 dstColor = srcColor;*/
             
@@ -154,39 +154,39 @@ void heightToNormal(ImageData& in, ImageData& out, float force, float prec)
 		for(std::uint32_t j=0; j<in.getHeight(); ++j)
 		{
 
-			float h1 = (float)(in.getPixel(i-dist,j).red)/255.0;
-			float h2 = (float)(in.getPixel(i+dist,j).red)/255.0;
-			float h3 = (float)(in.getPixel(i,j-dist).red)/255.0;
-			float h4 = (float)(in.getPixel(i,j+dist).red)/255.0;
+			float h1 = (float)(in.getPixel(i-dist,j)[0])/255.0;
+			float h2 = (float)(in.getPixel(i+dist,j)[0])/255.0;
+			float h3 = (float)(in.getPixel(i,j-dist)[0])/255.0;
+			float h4 = (float)(in.getPixel(i,j+dist)[0])/255.0;
 
 			Vec3 nx, ny, normal;
 
-			nx.x = 2.0;
-			nx.y = 0.0;
-			nx.z = (h2-h1) * force;
+			nx[0] = 2.0;
+			nx[1] = 0.0;
+			nx[2] = (h2-h1) * force;
 
-			ny.x = 0.0;
-			ny.y = 2.0;
-			ny.z = (h4-h3) * force;
+			ny[0] = 0.0;
+			ny[1] = 2.0;
+			ny[2] = (h4-h3) * force;
 
 			cross(nx, ny, normal);
 			normalize(normal);
 
-			normal.x += 1.0; normal.x /= 2.0;
-			normal.y += 1.0; normal.y /= 2.0;
-			normal.z += 1.0; normal.z /= 2.0;
+			normal[0] += 1.0; normal[0] /= 2.0;
+			normal[1] += 1.0; normal[1] /= 2.0;
+			normal[2] += 1.0; normal[2] /= 2.0;
 
-			Pixel pixel;
-			pixel.blue = (unsigned char)(normal.x * 255); // red
-			pixel.green = (unsigned char)(normal.y * 255); //green
-			pixel.red = (unsigned char)(normal.z * 255); // blue
-            pixel.alpha = 255;
+			Vec4 pixel;
+			pixel[2] = (unsigned char)(normal[0] * 255); // red
+			pixel[1] = (unsigned char)(normal[1] * 255); //green
+			pixel[0] = (unsigned char)(normal[2] * 255); // blue
+            pixel[3] = 255;
 			out.setPixel(i,j,pixel);
 		}
 	}
 }
 
-inline imp::Pixel mirGet(imp::ImageData& img, unsigned int x, unsigned int y)
+inline Vec4 mirGet(imp::ImageData& img, unsigned int x, unsigned int y)
 {
 	if(x < 0) x = -x;
 	else if(x>=img.getWidth()) x = img.getWidth() - (x-img.getWidth());
@@ -212,11 +212,11 @@ void drawDirectionnalSinus(imp::ImageData& img, double dirX, double dirY, float 
 		float t = dirDot;
 
 		if(perturbation != NULL)
-			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
+			t += perturbIntensity * perturbation->getPixel(i,j)[0];//imp::perlinMain(x/64,y/64,perturb/64);
 
 		float v = imp::Sin(t/diag * 3.141592 * freq, maxPeriodRatio);
 		unsigned int comp = (v+1.0)/2.0 * ampl;
-		imp::Pixel px = {comp,comp,comp,255};
+		Vec4 px(comp,comp,comp,255);
 		img.setPixel(i,j,px);
 	}}
 }
@@ -237,7 +237,7 @@ void drawDirectionnalSignal(imp::ImageData& img, SignalType signalType, double d
 		float t = dirDot;
 
 		if(perturbation != NULL)
-			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
+			t += perturbIntensity * perturbation->getPixel(i,j)[0];//imp::perlinMain(x/64,y/64,perturb/64);
 
 		float v = 0;
 		if(signalType == SignalType_Sinus)
@@ -248,7 +248,7 @@ void drawDirectionnalSignal(imp::ImageData& img, SignalType signalType, double d
 			v = imp::TriangleSignal(t/diag * 3.141592 * freq, maxPeriodRatio);
 
 		unsigned int comp = (v+1.0)/2.0 * ampl;
-		imp::Pixel px = {comp,comp,comp,255};
+		Vec4 px(comp,comp,comp,255);
 		img.setPixel(i,j,px);
 	}}
 }
@@ -266,11 +266,11 @@ void drawRadialSinus(imp::ImageData& img, double posX, double posY, float freq, 
 		float t = sqrtf(distX*distX + distY*distY);
 
 		if(perturbation != NULL)
-			t += perturbIntensity * perturbation->getPixel(i,j).r;//imp::perlinMain(x/64,y/64,perturb/64);
+			t += perturbIntensity * perturbation->getPixel(i,j)[0];//imp::perlinMain(x/64,y/64,perturb/64);
 
 		float v = imp::Sin(t/diag * 3.141592 * freq, maxPeriodRatio);
 		unsigned int comp = (v+1.0)/2.0 * ampl;
-		imp::Pixel px = {comp,comp,comp,255};
+		Vec4 px(comp,comp,comp,255);
 		img.setPixel(i,j,px);
 	}}
 }
@@ -283,52 +283,52 @@ void applyPerturbation(imp::ImageData& img, const imp::ImageData& normals, float
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		float depX = (normals.getPixel(i,j).r)/255.0;
-		float depY = (normals.getPixel(i,j).g)/255.0;
+		float depX = (normals.getPixel(i,j)[0])/255.0;
+		float depY = (normals.getPixel(i,j)[1])/255.0;
 
 		depX = depX*2.0 - 1.0;
 		depY = depY*2.0 - 1.0;
 
 
-		imp::Pixel px = mirGet(cloned, i+depX*intensity, j+depY*intensity);
+		Vec4 px = mirGet(cloned, i+depX*intensity, j+depY*intensity);
 
 		img.setPixel(i,j,px);
 	}}
 }
 
-void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2)
+void applyColorization(imp::ImageData& img, const imp::Vec4& color1, const imp::Vec4& color2)
 {
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		imp::Pixel px = img.getPixel(i,j);
+		imp::Vec4 px = img.getPixel(i,j);
 
-		px.r = (unsigned char)((px.r/255.0) * ((double)color2.r-(double)color1.r) + (double)color1.r);
-		px.g = (unsigned char)((px.g/255.0) * ((double)color2.g-(double)color1.g) + (double)color1.g);
-		px.b = (unsigned char)((px.b/255.0) * ((double)color2.b-(double)color1.b) + (double)color1.b);
+		px[0] = (unsigned char)((px[0]/255.0) * ((double)color2[0]-(double)color1[0]) + (double)color1[0]);
+		px[1] = (unsigned char)((px[1]/255.0) * ((double)color2[1]-(double)color1[1]) + (double)color1[1]);
+		px[2] = (unsigned char)((px[2]/255.0) * ((double)color2[2]-(double)color1[2]) + (double)color1[2]);
 
 		img.setPixel(i,j,px);
 	}}
 }
 
-void applyColorization(imp::ImageData& img, const imp::Pixel& color1, const imp::Pixel& color2, Distribution& distrib)
+void applyColorization(imp::ImageData& img, const imp::Vec4& color1, const imp::Vec4& color2, Distribution& distrib)
 {
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		imp::Pixel px = img.getPixel(i,j);
+		imp::Vec4 px = img.getPixel(i,j);
 
-		double t1 = (px.r/255.0);
-		double t2 = (px.g/255.0);
-		double t3 = (px.b/255.0);
+		double t1 = (px[0]/255.0);
+		double t2 = (px[1]/255.0);
+		double t3 = (px[2]/255.0);
 
 		t1 = distrib(t1);
 		t2 = distrib(t2);
 		t3 = distrib(t3);
 
-		px.r = (unsigned char)(t1 * ((double)color2.r-(double)color1.r) + (double)color1.r);
-		px.g = (unsigned char)(t2 * ((double)color2.g-(double)color1.g) + (double)color1.g);
-		px.b = (unsigned char)(t3 * ((double)color2.b-(double)color1.b) + (double)color1.b);
+		px[0] = (unsigned char)(t1 * ((double)color2[0]-(double)color1[0]) + (double)color1[0]);
+		px[1] = (unsigned char)(t2 * ((double)color2[1]-(double)color1[1]) + (double)color1[1]);
+		px[2] = (unsigned char)(t3 * ((double)color2[2]-(double)color1[2]) + (double)color1[2]);
 
 		img.setPixel(i,j,px);
 	}}
@@ -343,7 +343,7 @@ void applyMaximization(imp::ImageData& img)
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		std::uint8_t r = img.getPixel(i,j).r;
+		std::uint8_t r = img.getPixel(i,j)[0];
 		if(r < minR)
 			minR = r;
 		else if(r > maxR)
@@ -354,9 +354,9 @@ void applyMaximization(imp::ImageData& img)
 	for(unsigned int i=0; i<img.getWidth(); ++i)
 	{for(unsigned int j=0; j<img.getHeight(); ++j)
 	{
-		double t = double(img.getPixel(i,j).r);
+		double t = double(img.getPixel(i,j)[0]);
 		std::uint8_t newt = (std::uint8_t)Lerp( 0.0, 255.0, (t-minR)/(maxR-minR) );
-		Pixel px = {newt,newt,newt, 255};
+		Vec4 px(newt,newt,newt, 255);
 		img.setPixel(i,j,px);
 	}}
 }
@@ -377,8 +377,8 @@ void drawCellularNoise(imp::ImageData& img, unsigned int cellcount, const imp::I
         double x = (double)i * fieldW;
         double y = (double)j * fieldH;
         
-        xcell[j*cellcount+i] = x + double(noisemap->getPixel(x,y).r)/255.0 * fieldW;
-        ycell[j*cellcount+i] = y + double(noisemap->getPixel(x,y).r)/255.0 * fieldH;
+        xcell[j*cellcount+i] = x + double(noisemap->getPixel(x,y)[0])/255.0 * fieldW;
+        ycell[j*cellcount+i] = y + double(noisemap->getPixel(x,y)[0])/255.0 * fieldH;
         
         std::cout << "x=" << xcell[j*cellcount+i] << "; y=" << ycell[j*cellcount+i] << std::endl;
     }
@@ -436,7 +436,7 @@ void drawCellularNoise(imp::ImageData& img, unsigned int cellcount, const imp::I
             // apply new value
             const double maxR = (fieldW)*(fieldW);
             std::uint8_t newt = (std::uint8_t)Lerp( 0.0, 255.0, d/maxR);
-            Pixel px = {newt,newt,newt, 255};
+            Vec4 px(newt,newt,newt, 255);
             img.setPixel(i,j,px);
         }
     }

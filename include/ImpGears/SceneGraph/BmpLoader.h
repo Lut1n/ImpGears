@@ -94,7 +94,7 @@ public:
 
     ~Bitmap();
 
-    void build(int width, int height, const imp::Pixel& initialColor);
+    void build(int width, int height, const imp::Vec4& initialColor);
 
     void saveToFile(std::string filename);
 
@@ -104,11 +104,11 @@ public:
 
 	void dumpData();
 
-    void getPixelColor(int x, int y, imp::Pixel& color);
+    void getPixelColor(int x, int y, imp::Vec4& color);
 
-    void setPixelColor(int x, int y, imp::Pixel& color);
+    void setPixelColor(int x, int y, imp::Vec4& color);
 
-    void resize(int w, int h, imp::Pixel& color, int xrel=0, int yrel=0);
+    void resize(int w, int h, imp::Vec4& color, int xrel=0, int yrel=0);
 
     void clone(Bitmap& other);
 

@@ -22,7 +22,7 @@ class IMP_API TextRenderer : public Object
 
 	bool findGlyphPosition(char glyph, unsigned int& x, unsigned int& y);
 	
-	void renderText(const std::string& text, imp::ImageData* targetImg, const imp::Pixel& fg, const imp::Pixel& bg);
+	void renderText(const std::string& text, imp::ImageData* targetImg, const Vec4& fg, const Vec4& bg);
 
 	static TextRenderer* getInstance();
 	

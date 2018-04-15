@@ -1,5 +1,4 @@
- 
-        
+    
 // -----------------------------------------------------------------------------------------------------------------------  
 std::vector<float> generateTorch(const Vec3& center, float radius, int sub)
 {
@@ -104,10 +103,12 @@ std::vector<float> generateColors2(std::vector<float>& buf)
     {
         Vec3 v(buf[i+0],buf[i+1],buf[i+2]);
         // float disturb = (perlin(v * (1.0/4.0)))*2.0 - 1.0;
-        float disturb = (imp::perlinOctave(v.x(), v.y(), v.z(), 4, 0.7, 1.0/32.0) + 0.5);
+        float disturb = (imp::perlinOctave(v.x(), v.y(), v.z(), 8, 0.7, 1.0/32.0) + 0.5) * 4.0;
+        // disturb=disturb<0.0?0.0:disturb;
+        // disturb=disturb>1.0?1.0:disturb;
          
         Vec3 colorA(0.0,0.3,0.0);
-        Vec3 colorB(0.2,1.0,0.0);
+        Vec3 colorB(0.2,1.0,0.2);
          
         Vec3 finalColor = (colorB - colorA)*disturb + colorA;
          
@@ -163,7 +164,7 @@ std::vector<float> generateColors4(std::vector<float>& buf)
         Vec3 colorA(0.3,0.7,0.7);
         Vec3 colorB(0.7,0.2,0.3);
          
-        Vec3 finalColor = (colorB - colorA)*signal + colorA;
+        Vec3 finalColor = mix(colorA,colorB,signal);
          
         colorBuffer[i+0] = finalColor.x();
         colorBuffer[i+1] = finalColor.y();
@@ -179,7 +180,7 @@ std::vector<float> generateColors4(std::vector<float>& buf)
 // -----------------------------------------------------------------------------------------------------------------------
 struct DefaultRenderFrag : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator2& interpo)
+	virtual Vec4 operator()(Interpolator& interpo)
 	{
 		Vec3 zero(0.0,0.0,0.0);
 		Vec3 normal = interpo.get(Varying_Vert); normal.normalize();
@@ -190,28 +191,27 @@ struct DefaultRenderFrag : public FragCallback
 		Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
 		 
 		float a = light_dir.dot(normal);
-		a = a<0.0?0.0:a;
-		a = a>1.0?1.0:a;
+		clamp(a,0.0,1.0);
 		 
 		Vec3 reflection = (normal * 2.0 * a) - light_dir;
 		 
 		float s = reflection.dot(cam_dir);
-		s = s<0.0?0.0:s;
-		s = s>1.0?1.0:s;
+		clamp(s,0.0,1.0);
 		 
 		Vec3 spec = Vec3(1.0,1.0,1.0)*s;
 		 
 		Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
+        clamp(light_color);
 		 
-		Vec3 base_color = Vec3(1.0,1.0,1.0);
-		base_color = base_color * light_color * interpo.get(Varying_Color);
+		Vec3 base_color = light_color * interpo.get(Varying_Color);
+        clamp(base_color);
 		return base_color;
 	}
 };
 // -----------------------------------------------------------------------------------------------------------------------
 struct TerrRenderFrag : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator2& interpo)
+	virtual Vec4 operator()(Interpolator& interpo)
 	{
 		Vec3 zero(0.0,0.0,0.0);
 		Vec3 normal(0.0,0.0,1.0);
@@ -234,9 +234,10 @@ struct TerrRenderFrag : public FragCallback
 		Vec3 spec = Vec3(1.0,1.0,1.0)*s;
 		 
 		Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
+        clamp(light_color);
 		 
-		Vec3 base_color = Vec3(1.0,1.0,1.0);
-		base_color = base_color * light_color * interpo.get(Varying_Color);
+		Vec3 base_color = light_color * interpo.get(Varying_Color);
+        clamp(base_color);
 		return base_color;
 	}
 };
@@ -244,7 +245,7 @@ struct TerrRenderFrag : public FragCallback
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightRenderFrag : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator2& interpo)
+	virtual Vec4 operator()(Interpolator& interpo)
 	{
 		return Vec4(1.0,1.0,1.0,1.0);
 	}
@@ -289,7 +290,7 @@ struct LightRenderFrag : public FragCallback
 // -----------------------------------------------------------------------------------------------------------------------
 struct ClearFragCallback : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator2& interpo)
+	virtual Vec4 operator()(Interpolator& interpo)
 	{
         Vec3 col = interpo.get(Varying_Color);
 		return Vec4(col[0],col[1],col[2],1.0);

@@ -1,22 +1,57 @@
 
-
-float modulation(float b1, float b2, float p)
+// -----------------------------------------------------------------------------------------------------------------------
+struct Varying
 {
-    float res  = (p-b1)/(b2-b1);
-    res = res<0.0?0.0:res;
-    res = res>1.0?1.0:res;
-    return res;
-}
-
-struct Interpolator2
-{
-    struct Tuple
-    {
-        Vec3 p1;
-        Vec3 p2;
-    };
+    std::map<int, int> _adr;
+    std::vector<Vec3> _buf;
     
-    Vec4 sortmap, sortmap2;
+    void push(int id, const Vec3& v3)
+    {
+        _adr[id] = _buf.size();
+        _buf.resize(_buf.size()+1);
+        set(id,v3);
+    }
+    void set(int id, const Vec3& v3)
+    {
+		if(_adr.find(id) == _adr.end()) push(id, v3);
+		else
+		{
+			int adr = _adr[id];
+			_buf[adr] = v3;
+		}
+    }
+    Vec3& get(int id)
+    {
+        int adr = _adr[id];
+        return _buf[adr];
+    }
+    void copyAdr(const Varying& other)
+    {
+        std::map<int, int>::const_iterator it;
+        for(it = other._adr.begin(); it != other._adr.end(); it++)
+        {
+            _adr[ it->first ] = it->second;
+        }
+        _buf.resize(other._buf.size());
+    }
+    
+    void lerp(const Varying& varying_1, const Varying& varying_2, float delta)
+    {
+        const std::vector<Vec3>& _buf1 = varying_1._buf;
+        const std::vector<Vec3>& _buf2 = varying_2._buf;
+        
+        if(_buf.size() != _buf1.size()) copyAdr(varying_1);
+        
+        for(unsigned int i=0; i<_buf1.size(); ++i)
+        {
+            _buf[i] = _buf1[i]*(1.0-delta) + _buf2[i]*delta;
+        }
+    }
+};
+
+struct Interpolator
+{
+    SortMap sortmap, sortmap2;
     Varying var1,var2,var3;
     Varying xvar1,xvar2;
     Triangle triangleBuf[10];
@@ -33,7 +68,7 @@ struct Interpolator2
         for(int id=0;id<5;++id)
         {
             triangleBuf[id] = varArr[id];
-            applySort(triangleBuf[id], sortmap);
+            sortmap.apply(triangleBuf[id]);
             var1.set(id, triangleBuf[id].p1);
             var2.set(id, triangleBuf[id].p2);
             var3.set(id, triangleBuf[id].p3);
@@ -44,7 +79,7 @@ struct Interpolator2
         for(int id=0;id<5;++id)
         {
             tupleBuf[id] = varArr[id];
-            applySort(tupleBuf[id], sortmap2);
+            sortmap2.apply(tupleBuf[id]);
             xvar1.set(id, tupleBuf[id].p1);
             xvar2.set(id, tupleBuf[id].p2);
         }
@@ -56,9 +91,9 @@ struct Interpolator2
         lastY = -1;
         lastAdv = false;
         srcVertex = npc;
-        initSort(srcVertex.p1.y(),srcVertex.p2.y(),srcVertex.p3.y(), sortmap);
+        sortmap.init(srcVertex.p1.y(),srcVertex.p2.y(),srcVertex.p3.y());
         setVarying(varArr);
-        applySort(srcVertex,sortmap);
+        sortmap.apply(srcVertex);
     }
     
     void advanceY(int x)
@@ -67,37 +102,36 @@ struct Interpolator2
         float b = srcVertex.p2.y();
         float c = srcVertex.p3.y();
         
-        float rel = modulation(a, c, x); Varying varX;
+        float rel = clamp(step(a, c, x)); Varying varX;
         varX.lerp(var1, var3, rel);
         
-        iLine.p1 = lerp(srcVertex.p1,srcVertex.p3,rel);
+        iLine.p1 = mix(srcVertex.p1,srcVertex.p3,rel);
         for(int id=0; id<5; ++id) tupleBuf[id].p1 = varX.get(id);
         
         if(x < b)
         {
-            float rel = modulation(a, b, x);
+            float rel = clamp(step(a, b, x));
             varX.lerp(var1, var2, rel);
-            iLine.p2 = lerp(srcVertex.p1,srcVertex.p2,rel);
+            iLine.p2 = mix(srcVertex.p1,srcVertex.p2,rel);
         }
         else
         {
-            float rel = modulation(b, c, x);
+            float rel = clamp(step(b, c, x));
             varX.lerp(var2, var3, rel);
-            iLine.p2 = lerp(srcVertex.p2,srcVertex.p3,rel);
+            iLine.p2 = mix(srcVertex.p2,srcVertex.p3,rel);
         }
         
         for(int id=0; id<5; ++id) tupleBuf[id].p2 = varX.get(id);
         
-        // initSort(yNpc.p1.x(),yNpc.p2.x(), sortmap2);
-        initSort(iLine[0].x(),iLine[1].x(),sortmap2);
+        sortmap2.init(iLine[0].x(),iLine[1].x());
         
         setVarying2(tupleBuf);
-        applySort(iLine, sortmap2);
+        sortmap2.apply(iLine);
     }
     
     bool advanceX(int x)
     {
-        float rel = modulation(iLine.p1.x(),iLine.p2.x(), x);
+        float rel = step(iLine.p1.x(),iLine.p2.x(), x);
         
         //check if rel > 0 and rel < 1
         if(rel > 0.0 && rel < 1.0)
@@ -112,16 +146,8 @@ struct Interpolator2
     
     bool advance(int x, int y)
     {
-        if(y != lastY)
-        {
-            advanceY(y);
-            lastY = y;
-        }
-        if(x!= lastX)
-        {
-            lastAdv = advanceX(x);
-            lastX = x;
-        }
+        if(y != lastY) { advanceY(y); lastY = y; }
+        if(x!= lastX) { lastAdv = advanceX(x); lastX = x; }
         return lastAdv;
     }
     
@@ -139,54 +165,38 @@ struct Interpolator2
 // -----------------------------------------------------------------------------------------------------------------------
  struct FragCallback
  {
-    virtual Vec4 operator()(Interpolator2& interpo)  = 0;
+    virtual Vec4 operator()(Interpolator& interpo)  = 0;
  };
  
 // -----------------------------------------------------------------------------------------------------------------------
-Vec4 computeBounds(Triangle& tri)
+Vec4 getDrawClipping(Triangle& tri)
 {
-    float boundA_x = tri.p1.x();
-    float boundA_y = tri.p1.y();
-    float boundB_x = tri.p1.x();
-    float boundB_y = tri.p1.y();
-     
-    if(tri.p2.x() < boundA_x ) { boundA_x = tri.p2.x();}
-    if(tri.p3.x() < boundA_x ) { boundA_x = tri.p3.x();}
-                                                                                     
-    if(tri.p2.y() < boundA_y ) { boundA_y = tri.p2.y();}
-    if(tri.p3.y() < boundA_y ) { boundA_y = tri.p3.y();}
-                                                                                     
-    if(tri.p2.x() > boundB_x ) { boundB_x = tri.p2.x();}
-    if(tri.p3.x() > boundB_x ) { boundB_x = tri.p3.x();}
-                                                                                     
-    if(tri.p2.y() > boundB_y ) { boundB_y = tri.p2.y();}
-    if(tri.p3.y() > boundB_y ) { boundB_y = tri.p3.y();}
-     
     float w = state.viewport[2]*0.5;
     float h = state.viewport[3]*0.5;
+
+    Vec4 bounds = tri.getBounds();
+    bounds[0] = std::max(bounds[0],-w);
+    bounds[1] = std::min(bounds[1],w);
+    bounds[2] = std::max(bounds[2],-h);
+    bounds[3] = std::min(bounds[3],h);
      
-    if(boundA_x < -w) boundA_x = -w;
-    if(boundA_y < -h) boundA_y= -h;
-    if(boundB_x > w) boundB_x = w;
-    if(boundB_y > h) boundB_y = h;
-     
-    return Vec4(boundA_x,boundB_x,boundA_y,boundB_y);
+    return bounds;
 }
 
-Interpolator2 interpo2;
+Interpolator interpo2;
 
 // -----------------------------------------------------------------------------------------------------------------------
 void renderFragment(Triangle& mvpVertex, imp::ImageData& target, imp::ImageData& back, FragCallback& fragCallback)
 {
-    Vec4 bounds = computeBounds(mvpVertex);
+    Vec4 clipping = getDrawClipping(mvpVertex);
     
     float w = state.viewport[2]*0.5;
     float h = state.viewport[3]*0.5;
        
     // scanline algorithm
-    for(int j=bounds[2]; j<bounds[3]; ++j)
+    for(int j=clipping[2]; j<clipping[3]; ++j)
     {
-        for(int i=bounds[0]; i<bounds[1]; ++i)
+        for(int i=clipping[0]; i<clipping[1]; ++i)
         {
             if(interpo2.advance(i,j))
             {

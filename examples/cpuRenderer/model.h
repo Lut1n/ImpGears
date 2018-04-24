@@ -180,74 +180,108 @@ std::vector<float> generateColors4(std::vector<float>& buf)
 // -----------------------------------------------------------------------------------------------------------------------
 struct DefaultRenderFrag : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator& interpo)
+	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-		Vec3 zero(0.0,0.0,0.0);
-		Vec3 normal = interpo.get(Varying_Vert); normal.normalize();
-		Vec3 light_dir = light_1.position - interpo.get(Varying_MVert);
-		light_dir.normalize();
-		 
-		const float* md = state.view.getData();
-		Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
-		 
-		float a = light_dir.dot(normal);
-		clamp(a,0.0,1.0);
-		 
-		Vec3 reflection = (normal * 2.0 * a) - light_dir;
-		 
-		float s = reflection.dot(cam_dir);
-		clamp(s,0.0,1.0);
-		 
-		Vec3 spec = Vec3(1.0,1.0,1.0)*s;
-		 
-		Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
-        clamp(light_color);
-		 
-		Vec3 base_color = light_color * interpo.get(Varying_Color);
-        clamp(base_color);
-		return base_color;
+    
+    float w = state.viewport[2]*0.5;
+    float h = state.viewport[3]*0.5;
+		// depth test
+		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
+		float curr_depth = targetArr[1]->getPixel(x+w, y+h)[0];
+		if( new_depth < curr_depth)
+		{
+			Vec3 zero(0.0,0.0,0.0);
+			Vec3 normal = interpo.get(Varying_Vert); normal.normalize();
+			Vec3 light_dir = light_1.position - interpo.get(Varying_MVert);
+			light_dir.normalize();
+			 
+			const float* md = state.view.getData();
+			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
+			 
+			float a = light_dir.dot(normal);
+			clamp(a,0.0,1.0);
+			 
+			Vec3 reflection = (normal * 2.0 * a) - light_dir;
+			 
+			float s = reflection.dot(cam_dir);
+			clamp(s,0.0,1.0);
+			 
+			Vec3 spec = Vec3(1.0,1.0,1.0)*s;
+			 
+			Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
+			clamp(light_color);
+			 
+			Vec3 base_color = light_color * interpo.get(Varying_Color);
+			clamp(base_color);
+			Vec4 depth(new_depth,new_depth,new_depth,255);
+			targetArr[0]->setPixel(x+w,y+h,base_color * 255);
+			targetArr[1]->setPixel(x+w,y+h,depth);
+		}
 	}
 };
 // -----------------------------------------------------------------------------------------------------------------------
 struct TerrRenderFrag : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator& interpo)
+	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-		Vec3 zero(0.0,0.0,0.0);
-		Vec3 normal(0.0,0.0,1.0);
-		Vec3 light_dir = light_1.position - interpo.get(Varying_MVert);
-		light_dir.normalize();
-		 
-		const float* md = state.view.getData();
-		Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
-		 
-		float a = light_dir.dot(normal);
-		a = a<0.0?0.0:a;
-		a = a>1.0?1.0:a;
-		 
-		Vec3 reflection = (normal * 2.0 * a) - light_dir;
-		 
-		float s = reflection.dot(cam_dir);
-		s = s<0.0?0.0:s;
-		s = s>1.0?1.0:s;
-		 
-		Vec3 spec = Vec3(1.0,1.0,1.0)*s;
-		 
-		Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
-        clamp(light_color);
-		 
-		Vec3 base_color = light_color * interpo.get(Varying_Color);
-        clamp(base_color);
-		return base_color;
+    
+    float w = state.viewport[2]*0.5;
+    float h = state.viewport[3]*0.5;
+		// depth test
+		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
+		float curr_depth = targetArr[1]->getPixel(x+w, y+h)[0];
+		if( new_depth < curr_depth)
+		{
+			Vec3 zero(0.0,0.0,0.0);
+			Vec3 normal(0.0,0.0,1.0);
+			Vec3 light_dir = light_1.position - interpo.get(Varying_MVert);
+			light_dir.normalize();
+			 
+			const float* md = state.view.getData();
+			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
+			 
+			float a = light_dir.dot(normal);
+			a = a<0.0?0.0:a;
+			a = a>1.0?1.0:a;
+			 
+			Vec3 reflection = (normal * 2.0 * a) - light_dir;
+			 
+			float s = reflection.dot(cam_dir);
+			s = s<0.0?0.0:s;
+			s = s>1.0?1.0:s;
+			 
+			Vec3 spec = Vec3(1.0,1.0,1.0)*s;
+			 
+			Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
+			clamp(light_color);
+			 
+			Vec3 base_color = light_color * interpo.get(Varying_Color);
+			clamp(base_color);
+			Vec4 depth(new_depth,new_depth,new_depth,255);
+			targetArr[0]->setPixel(x+w,y+h,base_color * 255);
+			targetArr[1]->setPixel(x+w,y+h,depth);
+		}
 	}
 };
  
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightRenderFrag : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator& interpo)
+	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-		return Vec4(1.0,1.0,1.0,1.0);
+    
+    float w = state.viewport[2]*0.5;
+    float h = state.viewport[3]*0.5;
+		// depth test
+		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
+		float curr_depth = targetArr[1]->getPixel(x+w, y+h)[0];
+		if( new_depth < curr_depth)
+		{
+			Vec4 white(1,1,1,1);
+			Vec4 depth(new_depth,new_depth,new_depth,255);
+			targetArr[0]->setPixel(x+w,y+h,white * 255);
+			targetArr[1]->setPixel(x+w,y+h,depth);
+		}
 	}
 };
 
@@ -290,10 +324,15 @@ struct LightRenderFrag : public FragCallback
 // -----------------------------------------------------------------------------------------------------------------------
 struct ClearFragCallback : public FragCallback
 {
-	virtual Vec4 operator()(Interpolator& interpo)
+	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-        Vec3 col = interpo.get(Varying_Color);
-		return Vec4(col[0],col[1],col[2],1.0);
+    
+    float w = state.viewport[2]*0.5;
+    float h = state.viewport[3]*0.5;
+        Vec4 col(0.7,0.7,1.0,1.0);
+        Vec4 depth(1.0,1.0,1.0,1.0);
+		targetArr[0]->setPixel(x+w,y+h,col * 255);
+		targetArr[1]->setPixel(x+w,y+h,depth * 255);
 	}
 };
  

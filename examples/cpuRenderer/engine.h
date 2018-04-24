@@ -165,7 +165,7 @@ struct Interpolator
 // -----------------------------------------------------------------------------------------------------------------------
  struct FragCallback
  {
-    virtual Vec4 operator()(Interpolator& interpo)  = 0;
+    virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)  = 0;
  };
  
 // -----------------------------------------------------------------------------------------------------------------------
@@ -189,9 +189,6 @@ Interpolator interpo2;
 void renderFragment(Triangle& mvpVertex, imp::ImageData& target, imp::ImageData& back, FragCallback& fragCallback)
 {
     Vec4 clipping = getDrawClipping(mvpVertex);
-    
-    float w = state.viewport[2]*0.5;
-    float h = state.viewport[3]*0.5;
        
     // scanline algorithm
     for(int j=clipping[2]; j<clipping[3]; ++j)
@@ -200,18 +197,8 @@ void renderFragment(Triangle& mvpVertex, imp::ImageData& target, imp::ImageData&
         {
             if(interpo2.advance(i,j))
             {
-                // depth test
-                float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
-                float curr_depth = back.getPixel(i+w, j+h)[0];
-                if( new_depth < curr_depth)
-                {
-                     
-                    Vec4 color = fragCallback(interpo2) * 255.0;
-                     
-                    target.setPixel(i+w, j+h, color);
-                    Vec4 depthPx(new_depth,0.0,0.0,1.0);
-                    back.setPixel(i+w, j+h, depthPx);
-                }
+				 imp::ImageData* targetArr[2]; targetArr[0] = &target; targetArr[1] = &back;
+				 fragCallback(interpo2,i,j,targetArr);
             }
         }
     }

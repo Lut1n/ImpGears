@@ -31,47 +31,6 @@ struct RenderState
 };
   
 RenderState state;
-   
-// -----------------------------------------------------------------------------------------------------------------------
-struct Callback 
-{
-    virtual Vec4 operator()(float coordX, float coordY) = 0;
-};
-   
-// -----------------------------------------------------------------------------------------------------------------------
-void performFrag(imp::ImageData& target, Callback& callback)
-{
-    float w = target.getWidth();
-    float h = target.getHeight();
-      
-    int total = w*h;
-    int n=0;
-      
-    std::cout << "perform clear operation : 0%";
-      
-    for(unsigned int i=0; i<w; ++i)
-    {
-        for(unsigned int j=0; j<h; ++j)
-        {
-            Vec4 color = callback( i/w, j/h ) * 255.0;
-            target.setPixel(j, i, color);
-        }
-              
-        n+=h;
-          
-        float perc = (float)n/(float)total;
-          
-        std::cout << "\rperform clear operation : " << std::floor(perc*100) << "% ";
-    }
-    std::cout << "done" << std::endl;
-}
-   
-// -----------------------------------------------------------------------------------------------------------------------
-struct ClearColor : public Callback
-{
-    Vec4 color;
-    virtual Vec4 operator()(float coordX, float coordY) { return color; }
-};
  
 struct Light
 {
@@ -97,7 +56,6 @@ int main(int argc, char* argv[])
     Vec3 cam_position(0.0, 20.0, 0.0);
     Vec3 cam_target(0.0, 0.0, 0.0);
     Vec3 cam_up(0.0, 0.0, 1.0);
-    Vec4 clear_color(0.7, 0.7, 1.0,1.0);
     Vec3 rock_center(0.0,0.0,0.0);
       
     state.viewport = Vec4(0.0,0.0,CONFIG_WIDTH,CONFIG_HEIGHT);
@@ -129,8 +87,6 @@ int main(int argc, char* argv[])
     std::vector<float> torchGeo = generateTorch(rock_center, 0.2, 10);
     std::vector<float> torchCol = generateColors3(torchGeo);
        
-    ClearColor clear;
-       
     imp::ImageData target, backbuffer;
     target.build(CONFIG_WIDTH, CONFIG_HEIGHT, imp::PixelFormat_BGR8, nullptr);
     backbuffer.build(CONFIG_WIDTH, CONFIG_HEIGHT, imp::PixelFormat_BGR8, nullptr);
@@ -149,12 +105,7 @@ int main(int argc, char* argv[])
             cam_position = (Vec3)(Vec4(0.0, 10.0, 0.0,1.0) * rot);
             state.view = imp::Matrix4::getViewMat(cam_position, cam_target, cam_up);
            
-            clear.color = clear_color;
-            performFrag(target, clear);
-            //renderVertex(quad,qcolor,target,backbuffer, clearVert, clearFrag);
-               
-            clear.color = Vec4(1.0,1.0,1.0,1.0);
-            performFrag(backbuffer, clear);
+            renderVertex(quad,qcolor,target,backbuffer, clearVert, clearFrag);
                
             state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, -2.0);
             renderVertex(planeGeo, planeCol, target, backbuffer,defaultVert, terrFrag);

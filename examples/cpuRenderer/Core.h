@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 
+#define foreach(N,f) for(int i=0;i<N;++i){f;}
 
 // -----------------------------------------------------------------------------------------------------------------------
 float clamp(float x, float a = 0.0, float b = 1.0)
@@ -33,6 +34,12 @@ float smoothstep(float edge1, float edge2, float x)
     float res = (x-edge1)/(edge2-edge1);
     res = res * res * (3.0 - 2.0 * res);
     return res;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------
+float mix(float a, float b, float x)
+{
+    return (b - a)*x + a;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -73,7 +80,7 @@ struct Triangle
     Vec3 p1, p2, p3;
 	
 	Vec3& operator[](unsigned int i) { if(i==0)return p1; if(i==1)return p2; if(i==2)return p3; return p1; }
-	Vec3 operator[](unsigned int i) const { if(i==0)return p1; if(i==1)return p2; if(i==2)return p3; return p1; }
+	const Vec3& operator[](unsigned int i) const { if(i==0)return p1; if(i==1)return p2; if(i==2)return p3; return p1; }
       
     Triangle(){}
     Triangle(Vec3& p1, Vec3& p2, Vec3& p3) : p1(p1), p2(p2), p3(p3) {}

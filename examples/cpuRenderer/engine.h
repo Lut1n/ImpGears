@@ -1,61 +1,41 @@
 
+
 // -----------------------------------------------------------------------------------------------------------------------
 struct Varying
 {
     std::map<int, int> _adr;
-    std::vector<Vec3> _buf;
+    std::vector<float> _buf;
     
-    void push(int id, const Vec3& v3)
+    void set(int id, float* buf, int size)
     {
-        _adr[id] = _buf.size();
-        _buf.resize(_buf.size()+1);
-        set(id,v3);
-    }
-    void set(int id, const Vec3& v3)
-    {
-		if(_adr.find(id) == _adr.end()) push(id, v3);
-		else
-		{
-			int adr = _adr[id];
-			_buf[adr] = v3;
-		}
-    }
-    Vec3& get(int id)
-    {
-        int adr = _adr[id];
-        return _buf[adr];
-    }
-    void copyAdr(const Varying& other)
-    {
-        std::map<int, int>::const_iterator it;
-        for(it = other._adr.begin(); it != other._adr.end(); it++)
+		if(_adr.find(id) == _adr.end())
         {
-            _adr[ it->first ] = it->second;
+            _adr[id] = _buf.size();
+            _buf.resize(_buf.size()+size);
         }
-        _buf.resize(other._buf.size());
+        int adr = _adr[id];
+        for(int i=0;i<size;++i)_buf[adr+i] = buf[i];
     }
     
-    void lerp(const Varying& varying_1, const Varying& varying_2, float delta)
+    float* get(int id)
     {
-        const std::vector<Vec3>& _buf1 = varying_1._buf;
-        const std::vector<Vec3>& _buf2 = varying_2._buf;
+        return &(_buf[_adr[id]]);
+    }
+    
+    void lerp(const Varying& v1, const Varying& v2, float delta)
+    {
+        if(_buf.size() != v1._buf.size()) { _adr = v1._adr; _buf.resize(v1._buf.size()); }
         
-        if(_buf.size() != _buf1.size()) copyAdr(varying_1);
-        
-        for(unsigned int i=0; i<_buf1.size(); ++i) _buf[i] = mix(_buf1[i],_buf2[i],delta);
+        for(std::uint32_t i=0; i<v1._buf.size(); ++i) _buf[i] = mix(v1._buf[i],v2._buf[i],delta);
     }
 };
 
 struct Interpolator
 {
     SortMap sortmap, sortmap2;
-    Varying var1,var2,var3;
-    Varying xvar1,xvar2;
-    Triangle triangleBuf[10];
-    Triangle tupleBuf[10];
-    Vec3    singleBuf[10];
-    Triangle srcVertex;
-    Triangle iLine;
+    Varying var[3], xvar[2], varX;
+    Triangle triangleBuf[10], tupleBuf[10], srcVertex, iLine;
+    Vec3 singleBuf[10];
     
     int lastX, lastY;
     bool lastAdv;
@@ -66,9 +46,7 @@ struct Interpolator
         {
             triangleBuf[id] = varArr[id];
             sortmap.apply(triangleBuf[id]);
-            var1.set(id, triangleBuf[id].p1);
-            var2.set(id, triangleBuf[id].p2);
-            var3.set(id, triangleBuf[id].p3);
+            foreach(3, var[i].set(id, triangleBuf[id][i].data(),3) );
         }
     }
     void setVarying2(Triangle* varArr)
@@ -77,8 +55,7 @@ struct Interpolator
         {
             tupleBuf[id] = varArr[id];
             sortmap2.apply(tupleBuf[id]);
-            xvar1.set(id, tupleBuf[id].p1);
-            xvar2.set(id, tupleBuf[id].p2);
+            foreach(2, xvar[i].set(id, tupleBuf[id][i].data(),3) );
         }
     }
     
@@ -88,37 +65,26 @@ struct Interpolator
         lastY = -1;
         lastAdv = false;
         srcVertex = npc;
-        sortmap.init(srcVertex.p1.y(),srcVertex.p2.y(),srcVertex.p3.y());
+        sortmap.init(srcVertex[0].y(),srcVertex[1].y(),srcVertex[2].y());
         setVarying(varArr);
         sortmap.apply(srcVertex);
     }
+	
+	void computeIntersect(int side, int p1, int p2, float x)
+	{
+        float rel = clamp(step(srcVertex[p1].y(), srcVertex[p2].y(), x));
+        varX.lerp(var[p1], var[p2], rel);
+        iLine[side] = mix(srcVertex[p1],srcVertex[p2],rel);
+        foreach((int)varX._adr.size(), tupleBuf[i][side] = varX.get(i) );
+	}
     
     void advanceY(int x)
-    {
-        float a = srcVertex.p1.y();
-        float b = srcVertex.p2.y();
-        float c = srcVertex.p3.y();
-        
-        float rel = clamp(step(a, c, x)); Varying varX;
-        varX.lerp(var1, var3, rel);
-        
-        iLine.p1 = mix(srcVertex.p1,srcVertex.p3,rel);
-        for(int id=0; id<5; ++id) tupleBuf[id].p1 = varX.get(id);
-        
-        if(x < b)
-        {
-            float rel = clamp(step(a, b, x));
-            varX.lerp(var1, var2, rel);
-            iLine.p2 = mix(srcVertex.p1,srcVertex.p2,rel);
-        }
-        else
-        {
-            float rel = clamp(step(b, c, x));
-            varX.lerp(var2, var3, rel);
-            iLine.p2 = mix(srcVertex.p2,srcVertex.p3,rel);
-        }
-        
-        for(int id=0; id<5; ++id) tupleBuf[id].p2 = varX.get(id);
+    {        
+		int a = 1; int b = 2;
+		if(x < srcVertex[1].y()) {a=0; b=1;}
+		
+		computeIntersect(0, 0, 2, x);
+		computeIntersect(1, a, b, x);
         
         sortmap2.init(iLine[0].x(),iLine[1].x());
         
@@ -128,12 +94,12 @@ struct Interpolator
     
     bool advanceX(int x)
     {
-        float rel = step(iLine.p1.x(),iLine.p2.x(), x);
+        float rel = step(iLine[0].x(),iLine[1].x(), x);
         
         //check if rel > 0 and rel < 1
         if(rel >= 0.0 && rel <= 1.0)
         {
-            Varying varX; varX.lerp(xvar1, xvar2, rel);
+            Varying varX; varX.lerp(xvar[0], xvar[1], rel);
             
             for(int id=0; id<5; ++id) singleBuf[id] = varX.get(id);
             return true;

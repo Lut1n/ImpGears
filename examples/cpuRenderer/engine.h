@@ -42,10 +42,7 @@ struct Varying
         
         if(_buf.size() != _buf1.size()) copyAdr(varying_1);
         
-        for(unsigned int i=0; i<_buf1.size(); ++i)
-        {
-            _buf[i] = _buf1[i]*(1.0-delta) + _buf2[i]*delta;
-        }
+        for(unsigned int i=0; i<_buf1.size(); ++i) _buf[i] = mix(_buf1[i],_buf2[i],delta);
     }
 };
 
@@ -134,7 +131,7 @@ struct Interpolator
         float rel = step(iLine.p1.x(),iLine.p2.x(), x);
         
         //check if rel > 0 and rel < 1
-        if(rel > 0.0 && rel < 1.0)
+        if(rel >= 0.0 && rel <= 1.0)
         {
             Varying varX; varX.lerp(xvar1, xvar2, rel);
             
@@ -171,14 +168,11 @@ struct Interpolator
 // -----------------------------------------------------------------------------------------------------------------------
 Vec4 getDrawClipping(Triangle& tri)
 {
-    float w = state.viewport[2]*0.5;
-    float h = state.viewport[3]*0.5;
-
     Vec4 bounds = tri.getBounds();
-    bounds[0] = std::max(bounds[0],-w);
-    bounds[1] = std::min(bounds[1],w);
-    bounds[2] = std::max(bounds[2],-h);
-    bounds[3] = std::min(bounds[3],h);
+    bounds[0] = std::max(bounds[0], state.viewport[0]);
+    bounds[1] = std::min(bounds[1], state.viewport[2]);
+    bounds[2] = std::max(bounds[2], state.viewport[1]);
+    bounds[3] = std::min(bounds[3], state.viewport[3]);
      
     return bounds;
 }

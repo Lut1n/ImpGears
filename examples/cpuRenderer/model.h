@@ -182,12 +182,9 @@ struct DefaultRenderFrag : public FragCallback
 {
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-    
-    float w = state.viewport[2]*0.5;
-    float h = state.viewport[3]*0.5;
 		// depth test
 		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
-		float curr_depth = targetArr[1]->getPixel(x+w, y+h)[0];
+		float curr_depth = targetArr[1]->getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
 			Vec3 zero(0.0,0.0,0.0);
@@ -214,8 +211,8 @@ struct DefaultRenderFrag : public FragCallback
 			Vec3 base_color = light_color * interpo.get(Varying_Color);
 			clamp(base_color);
 			Vec4 depth(new_depth,new_depth,new_depth,255);
-			targetArr[0]->setPixel(x+w,y+h,base_color * 255);
-			targetArr[1]->setPixel(x+w,y+h,depth);
+			targetArr[0]->setPixel(x,y,base_color * 255);
+			targetArr[1]->setPixel(x,y,depth);
 		}
 	}
 };
@@ -224,12 +221,9 @@ struct TerrRenderFrag : public FragCallback
 {
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-    
-    float w = state.viewport[2]*0.5;
-    float h = state.viewport[3]*0.5;
 		// depth test
 		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
-		float curr_depth = targetArr[1]->getPixel(x+w, y+h)[0];
+		float curr_depth = targetArr[1]->getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
 			Vec3 zero(0.0,0.0,0.0);
@@ -258,8 +252,8 @@ struct TerrRenderFrag : public FragCallback
 			Vec3 base_color = light_color * interpo.get(Varying_Color);
 			clamp(base_color);
 			Vec4 depth(new_depth,new_depth,new_depth,255);
-			targetArr[0]->setPixel(x+w,y+h,base_color * 255);
-			targetArr[1]->setPixel(x+w,y+h,depth);
+			targetArr[0]->setPixel(x,y,base_color * 255);
+			targetArr[1]->setPixel(x,y,depth);
 		}
 	}
 };
@@ -269,18 +263,15 @@ struct LightRenderFrag : public FragCallback
 {
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-    
-    float w = state.viewport[2]*0.5;
-    float h = state.viewport[3]*0.5;
 		// depth test
 		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
-		float curr_depth = targetArr[1]->getPixel(x+w, y+h)[0];
+		float curr_depth = targetArr[1]->getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
 			Vec4 white(1,1,1,1);
 			Vec4 depth(new_depth,new_depth,new_depth,255);
-			targetArr[0]->setPixel(x+w,y+h,white * 255);
-			targetArr[1]->setPixel(x+w,y+h,depth);
+			targetArr[0]->setPixel(x,y,white * 255);
+			targetArr[1]->setPixel(x,y,depth);
 		}
 	}
 };
@@ -293,11 +284,12 @@ struct LightRenderFrag : public FragCallback
         imp::Matrix4 mv = state.model * state.view;
         imp::Matrix4 mvp = mv * state.projection;
         Vec3 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0);
+        Vec3 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0);
         
         vert_out[Varying_Vert] = Triangle(vert_in);
         vert_out[Varying_MVert] = vert_out[Varying_Vert] * state.model;
         vert_out[Varying_MVVert] = vert_out[Varying_Vert] * mv;
-        vert_out[Varying_MVPVert] = vert_out[Varying_Vert] * mvp * win;
+        vert_out[Varying_MVPVert] = (vert_out[Varying_Vert] * mvp * win) + win2;
         vert_out[Varying_Color] = Triangle(vert_in2);
         
         return vert_out[Varying_MVPVert];
@@ -310,11 +302,12 @@ struct LightRenderFrag : public FragCallback
     virtual Triangle operator()(float* vert_in, float* vert_in2, Triangle* vert_out)
     {
         Vec3 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0);
+        Vec3 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0);
         
         vert_out[Varying_Vert] = Triangle(vert_in);
         vert_out[Varying_MVert] = Triangle(vert_in);
         vert_out[Varying_MVVert] = Triangle(vert_in);
-        vert_out[Varying_MVPVert] = vert_out[Varying_Vert] * win;
+        vert_out[Varying_MVPVert] = (vert_out[Varying_Vert] * win) + win2;
         vert_out[Varying_Color] = Triangle(vert_in2);
         
         return vert_out[Varying_MVPVert];
@@ -326,13 +319,10 @@ struct ClearFragCallback : public FragCallback
 {
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
-    
-    float w = state.viewport[2]*0.5;
-    float h = state.viewport[3]*0.5;
         Vec4 col(0.7,0.7,1.0,1.0);
         Vec4 depth(1.0,1.0,1.0,1.0);
-		targetArr[0]->setPixel(x+w,y+h,col * 255);
-		targetArr[1]->setPixel(x+w,y+h,depth * 255);
+		targetArr[0]->setPixel(x,y,col * 255);
+		targetArr[1]->setPixel(x,y,depth * 255);
 	}
 };
  

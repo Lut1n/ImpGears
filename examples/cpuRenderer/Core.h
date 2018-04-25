@@ -82,6 +82,7 @@ struct Triangle
       
     Triangle operator*(imp::Matrix4& mat4) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = Vec4(me[i])*mat4; return res; }
     Triangle operator*(Vec3& v3) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = me[i]*v3; return res; }
+    Triangle operator+(Vec3& v3) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = me[i]+v3; return res; }
     
     Vec4 getBounds()
     {

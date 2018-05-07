@@ -60,6 +60,9 @@ class IMP_API Vec3 : public Object
         float length2() const;
 
         void normalize();
+		
+		float* data() {return _data;}
+		const float* data() const {return _data;}
 
     private:
 	

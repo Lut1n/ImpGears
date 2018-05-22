@@ -1,5 +1,4 @@
 #include <SceneGraph/TextureManager.h>
-#include <SceneGraph/PngLoader.h>
 
 IMPGEARS_BEGIN
 
@@ -19,7 +18,7 @@ Texture* TextureManager::getTexture(std::string name){
     Texture* result = textures[name];
 
     if(result == nullptr){
-        result = PngLoader::loadFromFile(name.c_str());
+        result = nullptr; // to implement
         textures[name] = result;
     }
 

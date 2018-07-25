@@ -43,6 +43,8 @@ class IMP_API Vec3 : public Object
         Vec3 operator-(const Vec3& other) const;
         Vec3 operator*(const Vec3& other) const;
 		
+        Vec3 operator-() const;
+		
 		bool operator==(const Vec3& other) const;
 		
 		float& operator[](unsigned int i);

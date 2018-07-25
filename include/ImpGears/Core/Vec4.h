@@ -41,6 +41,8 @@ class IMP_API Vec4 : public Object
 
 		Vec4 operator-(const Vec4& other) const;
 
+		Vec4 operator-() const;
+
 		Vec4 operator*(const Vec4& other) const;
 
 		bool operator==(const Vec4& other) const;

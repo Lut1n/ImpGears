@@ -11,7 +11,8 @@ RenderParameters::RenderParameters():
 	_faceCullingChanged(false),
 	_blendModeChanged(false),
 	_fogChanged(false),
-	_viewportChanged(false)
+	_viewportChanged(false),
+	_lineWidthChanged(false)
 {
     m_clearColor = Vec3(1.f, 1.f, 1.f); //alpha = 1.f
 	_clearDepth = 1.f;
@@ -28,7 +29,8 @@ RenderParameters::RenderParameters(const RenderParameters& other):
 	_faceCullingChanged(other._faceCullingChanged),
 	_blendModeChanged(other._blendModeChanged),
 	_fogChanged(other._fogChanged),
-	_viewportChanged(other._viewportChanged)
+	_viewportChanged(other._viewportChanged),
+	_lineWidthChanged(other._lineWidthChanged)
 
 {
     m_clearColor = other.m_clearColor;
@@ -56,6 +58,7 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
 	_clearDepth = other._clearDepth;
 	_fogState = other._fogState;
 	_viewportChanged = other._viewportChanged;
+    _lineWidthChanged = other._lineWidthChanged;
 	
 	_clearColorChanged = other._clearColorChanged;
 	_clearDepthChanged = other._clearDepthChanged;
@@ -117,6 +120,11 @@ void RenderParameters::apply(bool clearBuffer) const
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 	}
+	
+	if(_lineWidthChanged)
+    {
+        glLineWidth(_lineWidth);
+    }
 	
 	if(_clearDepthChanged)
 	{
@@ -197,6 +205,13 @@ void RenderParameters::setViewport(float x, float y, float width, float height)
 	_viewport[2] = width;
 	_viewport[3] = height;
 	_viewportChanged = true;
+}
+
+
+void RenderParameters::setLineWidth(float lw)
+{
+    _lineWidth = lw;
+    _lineWidthChanged = true;
 }
 
 IMPGEARS_END

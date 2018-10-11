@@ -15,7 +15,7 @@ IMPGEARS_BEGIN
 class Shader;
 
 /// \brief Defines a shader uniform.
-class Uniform : public Object
+class IMP_API Uniform : public Object
 {
 	public:
 	

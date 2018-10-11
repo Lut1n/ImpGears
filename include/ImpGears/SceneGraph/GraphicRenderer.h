@@ -22,7 +22,7 @@ class IMP_API GraphicRenderer : public Object
 
         void renderScene();
 
-        void setRenderParameters(std::shared_ptr<RenderParameters>& parameters){_parameters = parameters;}
+        void setRenderParameters(std::shared_ptr<RenderParameters>& parameters){_parameters = parameters; _state->setParameters(parameters);}
 		std::shared_ptr<RenderParameters> getRenderParameters() const {return _parameters;}
 
 

@@ -5,7 +5,7 @@
 
 IMPGEARS_BEGIN
 
-class Vec3 : public Vec<3,float>
+class IMP_API Vec3 : public Vec<3,float>
 {
 	public:
 	

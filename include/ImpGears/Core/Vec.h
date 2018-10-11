@@ -78,6 +78,8 @@ class IMP_API Vec : public Object
 
 		const Ty* data() const { return _data; }
 		Ty* data() { return _data; }
+		
+		static int size() {return Dim;}
 
     protected:
 

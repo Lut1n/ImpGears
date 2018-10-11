@@ -1,76 +1,46 @@
-#ifndef IMP_VECTOR3_H
-#define IMP_VECTOR3_H
+#ifndef IMP_VEC3_H
+#define IMP_VEC3_H
 
-#include <Core/Object.h>
+#include <Core/Vec.h>
 
 IMPGEARS_BEGIN
 
-/// \brief Defines a float vector3.
-class IMP_API Vec3 : public Object
+class Vec3 : public Vec<3,float>
 {
-    public:
-		
-		Meta_Class(Vec3)
+	public:
 	
-        Vec3();
-        Vec3(const float* buf);
-        Vec3(float x, float y, float z);
-        Vec3(const Vec3& other);
-        virtual ~Vec3();
-
-        float& x();
-        float& y();
-        float& z();
-
-        float x() const;
-        float y() const;
-        float z() const;
-
-        void set(float x, float y, float z);
-		
-        void setRadial(float theta, float phi, float norm = 1);
-
-        Vec3& operator*=(const float scalar);
-        Vec3 operator*(const float scalar) const;
-        Vec3 operator/(const float scalar) const;
-
-        Vec3& operator=(const Vec3& other);
-        Vec3& operator+=(const Vec3& other);
-        Vec3& operator-=(const Vec3& other);
-		Vec3& operator*=(const Vec3& other);
-
-        Vec3 operator+(const Vec3& other) const;
-        Vec3 operator-(const Vec3& other) const;
-        Vec3 operator*(const Vec3& other) const;
-		
-        Vec3 operator-() const;
-		
-		bool operator==(const Vec3& other) const;
-		
-		float& operator[](unsigned int i);
-		float operator[](unsigned int i) const;
-
-        void rotX(float rx);
-        void rotY(float ry);
-        void rotZ(float rz);
-		
-        float dot(const Vec3& other) const;
-		
-        Vec3 cross(const Vec3& other) const;
-
-        float length() const;
-        float length2() const;
-
-        void normalize();
-		
-		float* data() {return _data;}
-		const float* data() const {return _data;}
-
-    private:
+	Meta_Class(Vec3)
 	
-        float _data[3];
+	Vec3() : Vec() {}
+	Vec3(float v) : Vec(v) {}
+	Vec3(float x, float y, float z) : Vec(x,y,z) {}
+	Vec3(const Vec& v) : Vec(v) {}
+	Vec3(const float* buf) : Vec(buf) {}
+
+	void set(float x, float y, float z) { Vec::set(x,y,z); }
+	void setRadial(float theta, float phi) { /*todo*/ }
+	
+	void rotX(float a) {}
+	void rotY(float a) {}
+	void rotZ(float a) {}
+	
+	Vec3 cross(const Vec3& v) const
+	{
+		return Vec3(
+			_data[1]*v[2] - _data[2]*v[1],
+			_data[2]*v[0] - _data[0]*v[2],
+			_data[0]*v[1] - _data[1]*v[0]);
+	}
+	
+	float x() const { return _data[0]; }
+	float y() const { return _data[1]; }
+	float z() const { return _data[2]; }
+	
+	float& x() { return _data[0]; }
+	float& y() { return _data[1]; }
+	float& z() { return _data[2]; }
 };
 
 IMPGEARS_END
 
-#endif // IMP_VECTOR3_H
+#endif // IMP_VEC3_H

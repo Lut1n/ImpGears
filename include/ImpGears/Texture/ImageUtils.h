@@ -6,6 +6,7 @@
 #include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
 #include <Core/Math.h>
+#include <Core/Vec3.h>
 
 #include <ctime>
 #include <cmath>

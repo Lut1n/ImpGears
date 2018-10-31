@@ -45,8 +45,9 @@ void interlace(const imp::LayeredImage& src, std::vector<Ty>& out, const std::ve
 
 int main(int argc, char* argv[])
 {
-	imp::LayeredImage image;
-	image.build( 8,11,{1,1,1,1} );	// refacto chnl size
+	using Img = imp::LayeredImage;
+	Img image;
+	image.build( 8,11,{Img::b8,Img::b16,Img::b8,Img::b8} );	// refacto chnl size
 	
 	std::cout << "channel count = " << image.chnlCount() << std::endl;
 	
@@ -64,8 +65,8 @@ int main(int argc, char* argv[])
 	 std::cout << "should be (70,80,90,100)" << std::endl;
 	 
 	 
-	 imp::LayeredImage image2;
-	 image2.build(4,4,{1,1,1,1} );
+	 Img image2;
+	 image2.build(4,4,{Img::b8,Img::b16,Img::b8,Img::b8} );
 	 image2.fill(imp::Vec4(54,234,75,255));
 	 
 	 std::cout << "before draw :" << std::endl;

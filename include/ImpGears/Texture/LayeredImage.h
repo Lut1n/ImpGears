@@ -12,10 +12,15 @@ class IMP_API LayeredImage : public Object
     public:
 
 	// ----------------------------------------------------------
-	using b8 = std::uint8_t;
-	using b16 = std::uint16_t;
-	using b32 = std::uint32_t;
-	using b64 = std::uint64_t;
+	using b8_t = std::uint8_t;
+	using b16_t = std::uint16_t;
+	using b32_t = std::uint32_t;
+	using b64_t = std::uint64_t;
+	
+	static int b8;
+	static int b16;
+	static int b32;
+	static int b64;
 	
 	// ----------------------------------------------------------
 	class Channel

@@ -5,6 +5,7 @@
 #include <Core/Vec.h>
 
 #include <vector>
+#include <cstring>
 
 IMPGEARS_BEGIN
 
@@ -23,6 +24,7 @@ class IMP_API Dimension : public Vec<Dim,int>
 	Dimension(const int* buf) : Vec<Dim,int>(buf) {}
 };
 
+using IntRect = Vec<4,int>;
 
 template<int Dim, typename Ty>
 class IMP_API Grid : public Object
@@ -56,7 +58,7 @@ class IMP_API Grid : public Object
 	
 	Dimension<Dim> vector(unsigned int index) const
 	{
-		int f=rawsize();
+		int f=_buffer.size();
 		Dimension<Dim> r;
 		for(int i=0;i<_size.size();++i)
 		{
@@ -72,11 +74,6 @@ class IMP_API Grid : public Object
 		_buffer[index(pos)] = val;
 	}
 	
-	void set(const Dimension<Dim>& pos, const Grid<Dim,Ty>& other)
-	{
-		
-	}
-	
 	Ty get(const Dimension<Dim>& pos) const
 	{
 		return _buffer[index(pos)];
@@ -84,20 +81,56 @@ class IMP_API Grid : public Object
 	
 	Dimension<Dim> size() const { return _size; }
 	
-	int rawsize() const
+	void fill(Ty val)
 	{
-		return _buffer.size();
+		for(unsigned int i=0;i<_buffer.size();++i) _buffer[i]=val;
 	}
+	
+	const std::vector<Ty>& buffer() const {return _buffer;}
 	
 protected:
 	
 	Dimension<Dim>	_size;
+	
+	// index order
+	// (0,0) = 0
+	// (0,1) = 1
+	// (1,0) = _size[1]
 	std::vector<Ty>	_buffer;
 };
 
 
 template<typename Ty>
-using Layer = Grid<2,Ty>;
+class IMP_API Layer : public Grid<2,Ty>
+{
+public:
+	Meta_Class(Layer)
+	
+	Layer(const Dimension<2>& size)
+		: Grid<2,Ty>(size){}
+	
+	
+	void set(const Dimension<2>& pos, Ty val)
+	{
+		Grid<2,Ty>::set(pos,val);
+	}
+	
+	void set(const Layer& src, const IntRect& dScope)
+	{
+		const int x=0,y=1,w=2,h=3;
+		
+		for(int i=0; i<dScope[h]; ++i)
+		{
+			std::uint32_t sIndex = src.index(Dimension<2>(i,0));
+			std::uint32_t dIndex = this->index(Dimension<2>(dScope[y]+i,dScope[x]));
+
+			std::uint32_t len = std::max(0,std::min(dScope[x]+dScope[w], this->_size[x]) - dScope[x]);
+			// std::cout << "memcpy " << sIndex << " to " << dIndex << " len=" << len << std::endl;
+
+			std::memcpy(&(this->_buffer[dIndex]), &(src._buffer[sIndex]), len);
+		}
+	}
+};
 
 template<typename Ty>
 using Chunk = Grid<3,Ty>;

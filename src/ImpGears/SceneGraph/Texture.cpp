@@ -57,6 +57,44 @@ void Texture::loadFromImageData(const ImageData* data)
 }
 
 //--------------------------------------------------------------
+void Texture::loadFromLayeredImage(const LayeredImage::Ptr data, IntRect mask)
+{
+	unsigned int chnls = data->chnlCount();
+	chnls = std::min(chnls,(unsigned int)mask.size());
+	
+	PixelFormat format = PixelFormat_Unknown;
+	if(chnls == 1) format = PixelFormat_R8;
+	if(chnls == 2) format = PixelFormat_RG16;
+	if(chnls == 3) format = PixelFormat_RGB8;
+	if(chnls == 4) format = PixelFormat_RGBA8;
+	
+	if(format == PixelFormat_Unknown)
+	{
+		std::cerr << "[impError] loadFromLayeredImage - unknown format" << std::endl;
+		return;
+	}
+	
+    build(data->width(), data->height(), format);
+	
+	
+	std::uint8_t* buf = m_data.getData();
+	unsigned int outIndex = 0;
+	
+	for(int i=0; i<(int)data->height(); ++i)
+	{
+		for(int j=0; j<(int)data->width(); ++j)
+		{
+			imp::Vec4 val = data->get(j,i);
+			for(unsigned int k=0;k<chnls;++k)buf[outIndex + mask[k] ] = val[k];
+			outIndex += chnls;
+		}
+	}
+	
+	updateVideoParams();
+    updateVideoMemory();
+}
+
+//--------------------------------------------------------------
 void Texture::build(std::uint32_t width, std::uint32_t height, PixelFormat format)
 {
 	std::uint32_t bpp = 32;

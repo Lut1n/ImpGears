@@ -3,6 +3,7 @@
 
 #include <Core/Object.h>
 #include <SceneGraph/ImageData.h>
+#include <Texture/LayeredImage.h>
 
 #include <string>
 
@@ -39,6 +40,10 @@ class IMP_API Texture : public Object
         /// \param data - A pointer to the data buffer.
         /// \param memoryMode - The memory mode.
         void loadFromImageData(const ImageData* data);
+
+        /// \brief Loads the texture from Layered Image.
+        /// \param data - A pointer to the data buffer.
+        void loadFromLayeredImage(const LayeredImage::Ptr data,IntRect mask = {0,1,2,3});
 
         /// \brief Creates a texture.
         /// \param width - The width of the texture.

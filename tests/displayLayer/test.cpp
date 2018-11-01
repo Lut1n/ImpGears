@@ -20,13 +20,13 @@ int main(int argc, char* argv[])
 	imp::GraphicRenderer::Ptr renderer = imp::GraphicRenderer::create();
 
     imp::LayeredImage::Ptr data = imp::LayeredImage::create();
-    data->build(8,11);
+    data->build(12,8,3);
 	drawMonster(data);
 	imp::Texture::Ptr texture = imp::Texture::create();
+	texture->setSmooth(true);
     texture->loadFromLayeredImage(data);
 	window.setTitle("Monster Layer");
 
-	
 	{
 		imp::ImageData::Ptr data = imp::ImageData::create();
 		texture->getImageData(data.get());
@@ -52,9 +52,8 @@ int main(int argc, char* argv[])
     screen->getGraphicState()->setShader(defaultShader);
     
 	imp::Uniform::Ptr u_tex = imp::Uniform::create("u_colorTexture", imp::Uniform::Type_1i);
-	u_tex->set((int)texture->getVideoID());
-	// defaultShader->addUniform(u_tex);
-	
+	u_tex->set(0);
+	defaultShader->addUniform(u_tex);
 	
     renderer->setSceneRoot(screen);
     camera->addSubNode(screen);
@@ -64,15 +63,11 @@ int main(int argc, char* argv[])
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)// || event.type == sf::Event::KeyPressed)
-                window.close();
+            if (event.type == sf::Event::Closed) window.close();
         }
 		
-		defaultShader->enable();
 		texture->bind();
-		// defaultShader->setTextureUniform("u_colorTexture", texture.get());
         renderer->renderScene();
-		// screen->render();
 
 		window.display();
 	}
@@ -107,52 +102,52 @@ void drawMonster(imp::LayeredImage::Ptr data)
 	data->fill(bg);
 	 
 	 imp::Vec4 monsterColor(255,100,20,255);
-	 data->set(0,3,monsterColor);
-	 data->set(0,4,monsterColor);
-	 data->set(0,6,monsterColor);
-	 data->set(0,7,monsterColor);
-	 data->set(1,0,monsterColor);
-	 data->set(1,2,monsterColor);
-	 data->set(1,8,monsterColor);
-	 data->set(1,10,monsterColor);
-	 data->set(2,0,monsterColor);
-	 data->set(2,2,monsterColor);
-	 data->set(2,3,monsterColor);
-	 data->set(2,4,monsterColor);
-	 data->set(2,5,monsterColor);
-	 data->set(2,6,monsterColor);
-	 data->set(2,7,monsterColor);
-	 data->set(2,8,monsterColor);
-	 data->set(2,10,monsterColor);
 	 data->set(3,0,monsterColor);
-	 data->set(3,1,monsterColor);
+	 data->set(4,0,monsterColor);
+	 data->set(6,0,monsterColor);
+	 data->set(7,0,monsterColor);
+	 data->set(0,1,monsterColor);
+	 data->set(2,1,monsterColor);
+	 data->set(8,1,monsterColor);
+	 data->set(10,1,monsterColor);
+	 data->set(0,2,monsterColor);
+	 data->set(2,2,monsterColor);
 	 data->set(3,2,monsterColor);
-	 data->set(3,3,monsterColor);
-	 data->set(3,4,monsterColor);
-	 data->set(3,5,monsterColor);
-	 data->set(3,6,monsterColor);
-	 data->set(3,7,monsterColor);
-	 data->set(3,8,monsterColor);
-	 data->set(3,9,monsterColor);
-	 data->set(3,10,monsterColor);
-	 data->set(4,1,monsterColor);
 	 data->set(4,2,monsterColor);
-	 data->set(4,4,monsterColor);
-	 data->set(4,5,monsterColor);
-	 data->set(4,6,monsterColor);
-	 data->set(4,8,monsterColor);
-	 data->set(4,9,monsterColor);
 	 data->set(5,2,monsterColor);
-	 data->set(5,3,monsterColor);
-	 data->set(5,4,monsterColor);
-	 data->set(5,5,monsterColor);
-	 data->set(5,6,monsterColor);
-	 data->set(5,7,monsterColor);
-	 data->set(5,8,monsterColor);
-	 data->set(6,3,monsterColor);
-	 data->set(6,7,monsterColor);
+	 data->set(6,2,monsterColor);
 	 data->set(7,2,monsterColor);
-	 data->set(7,8,monsterColor);
+	 data->set(8,2,monsterColor);
+	 data->set(10,2,monsterColor);
+	 data->set(0,3,monsterColor);
+	 data->set(1,3,monsterColor);
+	 data->set(2,3,monsterColor);
+	 data->set(3,3,monsterColor);
+	 data->set(4,3,monsterColor);
+	 data->set(5,3,monsterColor);
+	 data->set(6,3,monsterColor);
+	 data->set(7,3,monsterColor);
+	 data->set(8,3,monsterColor);
+	 data->set(9,3,monsterColor);
+	 data->set(10,3,monsterColor);
+	 data->set(1,4,monsterColor);
+	 data->set(2,4,monsterColor);
+	 data->set(4,4,monsterColor);
+	 data->set(5,4,monsterColor);
+	 data->set(6,4,monsterColor);
+	 data->set(8,4,monsterColor);
+	 data->set(9,4,monsterColor);
+	 data->set(2,5,monsterColor);
+	 data->set(3,5,monsterColor);
+	 data->set(4,5,monsterColor);
+	 data->set(5,5,monsterColor);
+	 data->set(6,5,monsterColor);
+	 data->set(7,5,monsterColor);
+	 data->set(8,5,monsterColor);
+	 data->set(3,6,monsterColor);
+	 data->set(7,6,monsterColor);
+	 data->set(2,7,monsterColor);
+	 data->set(8,7,monsterColor);
 }
 
 

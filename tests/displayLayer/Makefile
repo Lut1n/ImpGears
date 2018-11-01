@@ -14,7 +14,7 @@ all: test
 test: test.o
 	$(CXX) -o test test.o $(LDFLAGS)
 
-test.o: viewer.cpp
+test.o: test.cpp
 	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c test.cpp -o test.o
 
 .PHONY : clean

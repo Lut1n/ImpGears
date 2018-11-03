@@ -57,6 +57,11 @@ class IMP_API Matrix4 : public Object
         /// \param c - the column
         /// \param l - the line
         float getValue(std::uint32_t c, std::uint32_t l) const;
+		
+		float operator()(std::uint32_t c,std::uint32_t l) const
+		{
+			return getValue(c,l);
+		}
 
         static const Matrix4 getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue);
         static const Matrix4 getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue);

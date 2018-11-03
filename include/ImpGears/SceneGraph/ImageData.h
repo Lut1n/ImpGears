@@ -53,6 +53,8 @@ class IMP_API ImageData : public Object
 
 	Vec4 getPixel(std::uint32_t x, std::uint32_t y) const;
 	void setPixel(std::uint32_t x, std::uint32_t y, const Vec4& pixel);
+	
+	void setPixel(std::uint32_t x, std::uint32_t y, const Vec3& pixel) {setPixel(x,y,Vec4(pixel));}
 
 	Vec4 getRepeatPixel(std::uint32_t x, std::uint32_t y) const;
 	void setRepeatPixel(std::uint32_t x, std::uint32_t y, const Vec4& pixel);

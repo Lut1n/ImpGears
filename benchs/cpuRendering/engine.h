@@ -171,10 +171,11 @@ void renderVertex(std::vector<float>& buf, std::vector<float>& col, imp::ImageDa
       
     for(unsigned int i=0; i<buf.size(); i+= 9)
     {
-        
         Triangle vert_out[10];
+        // Triangle vert_out[Varying_Count];
         Triangle ndc = vertCallback(&buf[i],&col[i], vert_out); // varArr[Varying_MVPVert];// * win;
-        interpo2.init(vert_out[Varying_MVPVert],vert_out);
+        // interpo2.init(vert_out[Varying_MVPVert],vert_out);
+        interpo2.init(ndc,vert_out);
         renderFragment(ndc, target, back, fragCallback);
           
         std::cout << "\rrender mesh : " << std::floor(i*100/buf.size()) << "% ";

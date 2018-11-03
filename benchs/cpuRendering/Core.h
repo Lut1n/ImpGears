@@ -87,7 +87,7 @@ struct Triangle
     Triangle(Vec3* buf) { for(int i=0;i<3;++i) (*this)[i] = buf[i]; }
     Triangle(float* buf) { for(int i=0;i<3;++i) (*this)[i] = Vec3(buf[i*3+0],buf[i*3+1],buf[i*3+2]); }
       
-    Triangle operator*(imp::Matrix4& mat4) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = Vec4(me[i])*mat4; return res; }
+    Triangle operator*(imp::Matrix4& mat4) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = Vec3(Vec4(me[i])*mat4); return res; }
     Triangle operator*(Vec3& v3) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = me[i]*v3; return res; }
     Triangle operator+(Vec3& v3) { Triangle res, &me=*this; for(int i=0;i<3;++i)res[i] = me[i]+v3; return res; }
     

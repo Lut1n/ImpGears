@@ -24,8 +24,9 @@ class IMP_API Vec : public Object
 		
 		template <typename ... Args>
 		Vec(Ty v0, Args... vn) { set(v0,vn...); }
-
-		Vec(const Vec& v) { set(v.data()); }
+		
+		template<int Dim2>
+		Vec(const Vec<Dim2,Ty>& v) { set<Dim2>(v); }
 
 		Vec(const Ty* buf) { set(buf); }
 
@@ -34,8 +35,12 @@ class IMP_API Vec : public Object
 		Vec operator*(Ty scalar) const { Vec res(*this); FOR_I( res[i]*=scalar; ) return res; }
 
 		Vec operator/(Ty scalar) const { Vec res(*this); FOR_I( res[i]/=scalar; ) return res; }
-
-		const Vec& operator=(const Vec& other) { FOR_I( _data[i]=other[i]; ) return *this; }
+		
+		template<int Dim2>
+		const Vec& operator=(const Vec<Dim2,Ty>& other) { set<Dim2>(other); return *this; }
+		
+		template<int Dim2>
+		operator Vec<Dim2,Ty>() const { return Vec<Dim2,Ty>(*this); }
 
 		Vec operator+(const Vec& other) const { Vec res(*this); FOR_I( res[i]+=other[i]; ) return res; }
 
@@ -57,9 +62,12 @@ class IMP_API Vec : public Object
 		const Vec& operator-=(const Vec& other) { FOR_I( _data[i]-=other[i]; ) return *this; }
 		const Vec& operator/=(Ty scalar) { FOR_I( _data[i]/=scalar; ) return *this; }
 		
+		template<int Dim2>
+		void set(const Vec<Dim2,Ty>& v) { if(Dim2>=Dim) set(v.data()); else {set((Ty)0);set(v.data(),Dim2);} }
+		
 		void set(Ty v) { FOR_I( _data[i]=v; ) }
 
-		void set(const Ty* buf) { FOR_I( _data[i]=buf[i]; ) }
+		void set(const Ty* buf, int s=Dim) { FOR_I( if(i<s)_data[i]=buf[i]; ) }
 		
 		template <typename ... Args>
 		void set(Ty v0, Args... vn) { std::vector<Ty> ls = {vn...}; _data[0]=v0; for(int i=1;i<Dim;++i)_data[i]=ls[i-1]; }

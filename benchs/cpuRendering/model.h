@@ -183,7 +183,7 @@ struct DefaultRenderFrag : public FragCallback
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
+		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
 		float curr_depth = targetArr[1]->getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
@@ -210,8 +210,8 @@ struct DefaultRenderFrag : public FragCallback
 			 
 			Vec3 base_color = light_color * interpo.get(Varying_Color);
 			clamp(base_color);
-			Vec4 depth(new_depth,new_depth,new_depth,255);
-			targetArr[0]->setPixel(x,y,base_color * 255);
+			Vec4 depth(new_depth,new_depth,new_depth,255.f);
+			targetArr[0]->setPixel(x,y,base_color * 255.f);
 			targetArr[1]->setPixel(x,y,depth);
 		}
 	}
@@ -222,7 +222,7 @@ struct TerrRenderFrag : public FragCallback
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
+		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
 		float curr_depth = targetArr[1]->getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
@@ -251,8 +251,8 @@ struct TerrRenderFrag : public FragCallback
 			 
 			Vec3 base_color = light_color * interpo.get(Varying_Color);
 			clamp(base_color);
-			Vec4 depth(new_depth,new_depth,new_depth,255);
-			targetArr[0]->setPixel(x,y,base_color * 255);
+			Vec4 depth(new_depth,new_depth,new_depth,255.f);
+			targetArr[0]->setPixel(x,y,base_color * 255.f);
 			targetArr[1]->setPixel(x,y,depth);
 		}
 	}
@@ -264,13 +264,13 @@ struct LightRenderFrag : public FragCallback
 	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.0;
+		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
 		float curr_depth = targetArr[1]->getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
 			Vec4 white(1,1,1,1);
-			Vec4 depth(new_depth,new_depth,new_depth,255);
-			targetArr[0]->setPixel(x,y,white * 255);
+			Vec4 depth(new_depth,new_depth,new_depth,255.f);
+			targetArr[0]->setPixel(x,y,white * 255.f);
 			targetArr[1]->setPixel(x,y,depth);
 		}
 	}

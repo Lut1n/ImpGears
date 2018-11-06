@@ -12,11 +12,12 @@ inline double frac(double x)
 	return x - std::floor(x);
 }
 
+/*
 inline imp::Vec3 mix(const imp::Vec3& v1, const imp::Vec3& v2, double f)
 {
 	return (v2-v1)*f + v1;
 }
-
+*/
 
 Geometry::Geometry()
 {
@@ -90,7 +91,7 @@ void Geometry::rotX(float a)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].rotX(a);
+		 _vertices[i]*=Matrix3::rotationX(a);
 	}
 }
 
@@ -98,7 +99,7 @@ void Geometry::rotY(float a)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].rotY(a);
+		 _vertices[i]*=Matrix3::rotationY(a);
 	}
 }
 
@@ -106,7 +107,7 @@ void Geometry::rotZ(float a)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		 _vertices[i].rotZ(a);
+		 _vertices[i]*=Matrix3::rotationZ(a);
 	}
 }
 
@@ -116,11 +117,12 @@ void Geometry::optimize()
 
 void Geometry::fillBuffer(std::vector<float>& buffer)
 {
+	buffer.resize(_vertices.size() * 3);
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		buffer.push_back( _vertices[i].x() );
-		buffer.push_back( _vertices[i].y() );
-		buffer.push_back( _vertices[i].z() );
+		buffer[3*i+0] = _vertices[i].x();
+		buffer[3*i+1] = _vertices[i].y();
+		buffer[3*i+2] = _vertices[i].z();
 	}
 }
 
@@ -237,13 +239,13 @@ Geometry Geometry::createTetrahedron(unsigned int subdivisionCount)
 	imp::Vec3 p3(0.0,0.0,-1.0);
 	imp::Vec3 p4(0.0,0.0,-1.0);
 	
-	p1.rotY(rad120);
+	p1*=Matrix3::rotationY(rad120);
 	
-	p2.rotY(rad120);
-	p2.rotZ(-rad120);
+	p2*=Matrix3::rotationY(rad120);
+	p2*=Matrix3::rotationZ(-rad120);
 	
-	p3.rotY(rad120);
-	p3.rotZ(rad120);
+	p3*=Matrix3::rotationY(rad120);
+	p3*=Matrix3::rotationZ(rad120);
 	
 	Geometry pir = generateTriangle(subdivisionCount, p1, p2, p3) + generateTriangle(subdivisionCount, p1, p4, p2) + generateTriangle(subdivisionCount, p2, p4, p3) + generateTriangle(subdivisionCount, p3, p4, p1);
 	
@@ -267,13 +269,13 @@ Geometry Geometry::createPyramid(unsigned int baseDivision, unsigned int subdivi
 		imp::Vec3 p3 = p1;
 		imp::Vec3 p4 = p1;
 		
-		p2.rotY(rad120);
-		p3.rotY(rad120);
-		p4.rotY(rad120);
+		p2*=Matrix3::rotationY(rad120);
+		p3*=Matrix3::rotationY(rad120);
+		p4*=Matrix3::rotationY(rad120);
 		p4.set( 0.0, 0.0, p4.z() );
 		
-		p2.rotZ(step);
-		p3.rotZ(step+radStep);
+		p2*=Matrix3::rotationZ(step);
+		p3*=Matrix3::rotationZ(step+radStep);
 		
 		pir += generateTriangle(subdivisionCount, p1, p2, p3);
 		pir += generateTriangle(subdivisionCount, p3, p2, p4);

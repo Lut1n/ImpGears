@@ -87,7 +87,7 @@ float IMP_API min(float a, float b);
 
 float IMP_API max(float a, float b);
 
-float IMP_API clamp(float x, float edge0, float edge1);
+float IMP_API clamp(float x, float edge0=0.0, float edge1=1.0);
 
 float IMP_API floor(float v);
 

@@ -6,6 +6,18 @@
 #include <SFML/Graphics.hpp>
 #include <SceneGraph/ScreenVertex.h>
 
+
+void log(imp::Matrix4& mat)
+{
+	std::cout << "[matrix4]" << std::endl;
+	std::cout << "|" << mat(0,0) << "\t|" << mat(1,0) << "\t|" << mat(2,0) << "\t|" << mat(3,0) << "\t|" << std::endl;
+	std::cout << "|" << mat(0,1) << "\t|" << mat(1,1) << "\t|" << mat(2,1) << "\t|" << mat(3,1) << "\t|" << std::endl;
+	std::cout << "|" << mat(0,2) << "\t|" << mat(1,2) << "\t|" << mat(2,2) << "\t|" << mat(3,2) << "\t|" << std::endl;
+	std::cout << "|" << mat(0,3) << "\t|" << mat(1,3) << "\t|" << mat(2,3) << "\t|" << mat(3,3) << "\t|" << std::endl;
+}
+
+
+
 #include <Utils/FileInfo.h>
 
 std::string loadShader(const char* filename);
@@ -46,8 +58,8 @@ int main(int argc, char* argv[])
     
     renderer->setRenderParameters(screenParameters);
     
-	imp::Camera::Ptr camera = imp::Camera::create();
-    camera->getGraphicState()->setParameters(screenParameters);
+	// imp::Camera::Ptr camera = imp::Camera::create();
+    // camera->getGraphicState()->setParameters(screenParameters);
     
     screen->getGraphicState()->setShader(defaultShader);
     
@@ -55,9 +67,19 @@ int main(int argc, char* argv[])
 	u_tex->set(0);
 	defaultShader->addUniform(u_tex);
 	
+	imp::Uniform::Ptr u_view = imp::Uniform::create("u_view", imp::Uniform::Type_Mat4v);
+	u_view->set(&i4);
+	defaultShader->addUniform(u_view);
+	
     renderer->setSceneRoot(screen);
-    camera->addSubNode(screen);
+    // camera->addSubNode(screen);
     
+	imp::Matrix4 proj = screenParameters->getProjectionMatrix();
+	imp::Matrix4 model = screen->getModelMatrix();
+	
+	log(proj);
+	log(model);
+	
 	while (window.isOpen())
 	{
         sf::Event event;

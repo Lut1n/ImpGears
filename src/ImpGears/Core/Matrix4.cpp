@@ -100,6 +100,7 @@ const Matrix4 Matrix4::operator*(float scalar) const
 }
 
 //--------------------------------------------------------------
+/*
 const Vec3 Matrix4::operator*(const Vec3& vec) const
 {
     Vec3 result;
@@ -112,6 +113,7 @@ const Vec3 Matrix4::operator*(const Vec3& vec) const
 
     return result;
 }
+*/
 
 //--------------------------------------------------------------
 const Matrix4 Matrix4::getTranspose() const

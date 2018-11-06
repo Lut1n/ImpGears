@@ -31,20 +31,24 @@ class IMP_API Vec4 : public Vec<4,float>
 	float& z() { return _data[2]; }
 	float& w() { return _data[3]; }
 	
+	const Vec4& operator*=(const Vec4& other) { Vec::operator*=(other); return *this; }
+	
+	const Vec4& operator*=(const Matrix4& mat4)
+	{ 
+		set(x()*mat4(0,0) + y()*mat4(1,0) + z()*mat4(2,0) + w()*mat4(3,0),
+			x()*mat4(0,1) + y()*mat4(1,1) + z()*mat4(2,1) + w()*mat4(3,1),
+			x()*mat4(0,2) + y()*mat4(1,2) + z()*mat4(2,2) + w()*mat4(3,2),
+			x()*mat4(0,3) + y()*mat4(1,3) + z()*mat4(2,3) + w()*mat4(3,3));
+
+		return *this;
+	}
+	
 	Vec4 operator*(float scalar) const { return Vec::operator*(scalar); }
 	
-	//--------------------------------------------------------------
 	Vec4 operator*(const Matrix4& mat4)
 	{
-		Vec4 result;
-
-		result.set(
-			x()*mat4(1,1) + y()*mat4(2,1) + z()*mat4(3,1) + w()*mat4(4,1),
-			x()*mat4(1,2) + y()*mat4(2,2) + z()*mat4(3,2) + w()*mat4(4,2),
-			x()*mat4(1,3) + y()*mat4(2,3) + z()*mat4(3,3) + w()*mat4(4,3),
-			x()*mat4(1,4) + y()*mat4(2,4) + z()*mat4(3,4) + w()*mat4(4,4)
-		);
-
+		Vec4 result(*this);
+		result *= mat4;
 		return result;
 	}
 };

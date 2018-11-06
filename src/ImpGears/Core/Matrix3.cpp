@@ -29,9 +29,15 @@ Matrix3::Matrix3(const Matrix4& Matrix4)
     }
 }
 
-Matrix3::Matrix3(const float values[9])
+Matrix3::Matrix3(const float values[9], bool transpose)
 {
     memcpy(m_values, values, sizeof(float)*9);
+	
+    if(transpose)
+    {
+        Matrix3 copy(*this);
+        *this = copy.getTranspose();
+    }
 }
 
 Matrix3::~Matrix3()
@@ -114,6 +120,7 @@ Matrix3 Matrix3::operator*(float scalar) const
     return Matrix3(*this) *= scalar;
 }
 
+/*
 imp::Vec3 Matrix3::operator*(const imp::Vec3& vector) const
 {
     imp::Vec3 result;
@@ -128,6 +135,7 @@ imp::Vec3 Matrix3::operator*(const imp::Vec3& vector) const
 
     return result;
 }
+*/
 
 float Matrix3::getDet() const
 {
@@ -209,7 +217,7 @@ Matrix4 Matrix3::asMatrix4() const
     return matrix4;
 }
 
-const Matrix3 Matrix3::getRotationMatrixX(float rad)
+Matrix3 Matrix3::rotationX(float rad)
 {
     ///     1           0           0
     ///     0           std::cos(a)      -std::sin(a)
@@ -221,10 +229,10 @@ const Matrix3 Matrix3::getRotationMatrixX(float rad)
         0.f,        std::sin(rad),      std::cos(rad)
     };
 
-    return Matrix3(values);
+    return Matrix3(values,true);
 }
 
-const Matrix3 Matrix3::getRotationMatrixY(float rad)
+Matrix3 Matrix3::rotationY(float rad)
 {
     ///     std::cos(a)      0           std::sin(a)
     ///     0           1           0
@@ -236,10 +244,10 @@ const Matrix3 Matrix3::getRotationMatrixY(float rad)
         -std::sin(rad),     0.f,        std::cos(rad)
     };
 
-    return Matrix3(values);
+    return Matrix3(values,true);
 }
 
-const Matrix3 Matrix3::getRotationMatrixZ(float rad)
+Matrix3 Matrix3::rotationZ(float rad)
 {
     ///     std::cos(a)      -std::sin(a)     0
     ///     std::sin(a)      std::cos(a)      0
@@ -251,7 +259,7 @@ const Matrix3 Matrix3::getRotationMatrixZ(float rad)
         0.f,            0.f,                1.f
     };
 
-    return Matrix3(values);
+    return Matrix3(values,true);
 }
 
 const Matrix3 Matrix3::getIdentity()

@@ -32,7 +32,7 @@ class IMP_API Matrix4 : public Object
         const Matrix4& operator*=(float scalar);
         const Matrix4 operator*(float scalar) const;
 
-        const Vec3 operator*(const Vec3& vec) const;
+        // const Vec3 operator*(const Vec3& vec) const;
 
         const Matrix4 getTranspose() const;
 

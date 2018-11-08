@@ -12,26 +12,27 @@
 #include <SFML/Graphics.hpp>
 
 #include <Utils/FileInfo.h>
-  
+
 #include <ctime>
 #include <vector>
 #include <map>
 
-using Vec4 = imp::Vec4;
-using Vec3 = imp::Vec3;
 
-#include "Core.h"
-  
+using namespace imp;
+
+
 #define CONFIG_NEAR 0.1
 #define CONFIG_FAR 100.0
 #define CONFIG_FOV 60.0
-#define CONFIG_WIDTH 500.0
-#define CONFIG_HEIGHT 500.0
-  
-  
-  
-  
-  
+// #define CONFIG_WIDTH 128.0
+// #define CONFIG_HEIGHT 128.0
+#define CONFIG_WIDTH 512.0
+#define CONFIG_HEIGHT 512.0
+// #define CONFIG_WIDTH 64.0
+// #define CONFIG_HEIGHT 64.0
+
+
+
 struct RenderState
 {
     imp::Matrix4 projection;
@@ -56,7 +57,7 @@ Light light_1;
 #define Varying_MVert 2
 #define Varying_MVVert 3
 #define Varying_MVPVert 4
-// #define Varying_Count 5
+#define Varying_Count 5
 
 #include "engine.h"
 #include "model.h"
@@ -138,10 +139,17 @@ struct Screen
 
 };
 
+std::vector<Vec3> asVec3Buf(const std::vector<float>& fBuf)
+{
+	std::vector<Vec3> out; out.resize(fBuf.size() / 3);
+	for(int i=0;i<(int)out.size();++i) out[i] = Vec3(fBuf[i*3+0],fBuf[i*3+1],fBuf[i*3+2]);
+	return out;
+}
+
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-    Vec3 cam_position(0.0, 20.0, 0.0);
+    Vec3 cam_position(10.0, 0.0, 3.0);
     Vec3 cam_target(0.0, 0.0, 0.0);
     Vec3 cam_up(0.0, 0.0, 1.0);
     Vec3 rock_center(0.0,0.0,0.0);
@@ -155,6 +163,58 @@ int main(int argc, char* argv[])
     light_1.attn = 0.7;
     
     std::vector<float> quad;
+	
+	//		OK
+	//
+	//     x
+	//    xxx
+	//   xxxxx
+	//  xxxxxxx
+	// xxxxxxxxx
+	//
+    /*quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(00);
+    quad.push_back(1.0); quad.push_back(-1.0); quad.push_back(0.0);
+    quad.push_back(0.0); quad.push_back(1.0); quad.push_back(0.0);*/
+	
+	//		OK
+	//
+	//         x
+	//       xxx
+	//     xxxxx
+	//   xxxxxxx
+	// xxxxxxxxx
+	//
+    /*quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(0.0);
+    quad.push_back(1.0); quad.push_back(-1.0); quad.push_back(0.0);
+    quad.push_back(1.0); quad.push_back(1.0); quad.push_back(0.0);*/
+	
+	//		OK2
+	//
+	//         x
+	//       xxx
+	//     xxxxx
+	//   xxxx
+	// xx
+	//
+    /*quad.push_back(1.0); quad.push_back(0.0); quad.push_back(0.0);
+    quad.push_back(1.0); quad.push_back(1.0); quad.push_back(0.0);
+    quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(0.0);*/
+	
+	//		?
+	//
+	//       x
+	//      xxxx
+	//     xxxxxxx
+	//    xxxxxxxxx
+	//   xxxxxxx
+	//  xxxx
+	// xx
+	//
+    /*quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(0.0);
+    quad.push_back(1.0); quad.push_back(0.0); quad.push_back(0.0);
+    quad.push_back(0.0); quad.push_back(1.0); quad.push_back(0.0);*/
+	
+	
     quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(0.0);
     quad.push_back(1.0); quad.push_back(-1.0); quad.push_back(0.0);
     quad.push_back(1.0); quad.push_back(1.0); quad.push_back(0.0);
@@ -163,27 +223,45 @@ int main(int argc, char* argv[])
     quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(0.0);
     std::vector<float> qcolor; qcolor.resize(18, 0.5);
        
-    std::vector<float> planeGeo = generatePlane(rock_center, 10.0, 30);
+    std::vector<float> planeGeo = generatePlane(rock_center, 10.0, 10);
     std::vector<float> planeCol = generateColors2(planeGeo);
+	// std::cout << "planeCol = " << planeCol.size() << std::endl;
      
-    std::vector<float> rockGeo = generateRock(rock_center, 3.0, 100);
+    std::vector<float> rockGeo = generateRock(rock_center, 1.0, 20);
     std::vector<float> rockCol = generateColors(rockGeo);
      
-    //std::vector<float> hatGeo = generateHat(rock_center, 4.0, 100);
-    //std::vector<float> hatCol = generateColors4(hatGeo);
+    std::vector<float> hatGeo = generateHat(rock_center, 2.0, 20);
+    std::vector<float> hatCol = generateColors4(hatGeo);
     
     std::vector<float> torchGeo = generateTorch(rock_center, 0.2, 10);
     std::vector<float> torchCol = generateColors3(torchGeo);
-       
-    imp::ImageData target, backbuffer;
-    target.build(CONFIG_WIDTH, CONFIG_HEIGHT, imp::PixelFormat_BGR8, nullptr);
-    backbuffer.build(CONFIG_WIDTH, CONFIG_HEIGHT, imp::PixelFormat_BGR8, nullptr);
-       
+	
+	imp::ImageData targets[2];
+    // imp::ImageData target, backbuffer;
+    targets[0].build(CONFIG_WIDTH, CONFIG_HEIGHT, imp::PixelFormat_BGR8, nullptr);
+    targets[1].build(CONFIG_WIDTH, CONFIG_HEIGHT, imp::PixelFormat_BGR8, nullptr);
     double a = 0.0;
-    // std::time_t start = time(nullptr);
 	
 	Screen* screen = new Screen();
 
+	std::vector<Vec3> vertexQuad = asVec3Buf(quad);
+	std::vector<Vec3> colorQuad = asVec3Buf(qcolor);
+	
+	std::vector<Vec3> vertexPlane = asVec3Buf(planeGeo);
+	std::vector<Vec3> colorPlane = asVec3Buf(planeCol);
+	
+	std::vector<Vec3> vertexRock = asVec3Buf(rockGeo);
+	std::vector<Vec3> colorRock = asVec3Buf(rockCol);
+	
+	std::vector<Vec3> vertexHat = asVec3Buf(hatGeo);
+	std::vector<Vec3> colorHat = asVec3Buf(hatCol);
+	
+	std::vector<Vec3> vertexBall = asVec3Buf(torchGeo);
+	std::vector<Vec3> colorBall = asVec3Buf(torchCol);
+	
+	int frames = 0;
+	sf::Clock c;
+	
 	while (screen->window->isOpen())
 	{
 		sf::Event event;
@@ -196,26 +274,40 @@ int main(int argc, char* argv[])
 		screen->renderer->renderScene();
 
 		screen->window->display();
-		a += 0.1;
+		a += 0.02;
+		if(a > 2.0*3.141592) a = 0.0;
 		
 		imp::Matrix4 rot = imp::Matrix4::getRotationMat(0.0, 0.0, a);
-		cam_position = (Vec3)(Vec4(0.0, 10.0, 5.0,1.0) * rot);
-		state.view = imp::Matrix4::getViewMat(cam_position, cam_target, cam_up);
+		Vec3 cam  = Vec3(Vec4(cam_position) * rot);
+		state.view = imp::Matrix4::getViewMat(cam, cam_target, cam_up);
 		
-		renderVertex(quad,qcolor,target,backbuffer, clearVert, clearFrag);
-			
-		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, -2.0);
-		renderVertex(planeGeo, planeCol, target, backbuffer,defaultVert, terrFrag);
+		// renderVertex(vertexQuad,colorQuad,targets, clearVert, clearFrag);
+		targets[0].fill(Vec4(100.0,100.0,255.0,255.0));
+		targets[1].fill(Vec4(255.0,255.0,255.0,255.0));
+		
+		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, -1.0);
+		renderVertex(vertexPlane, colorPlane, targets,defaultVert, terrFrag);
+		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 0.0);
+		renderVertex(vertexRock, colorRock, targets,defaultVert, defaultFrag);
 		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 1.0);
-		renderVertex(rockGeo, rockCol, target, backbuffer,defaultVert, defaultFrag);
-		// state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 3.0);
-		// renderVertex(hatGeo, hatCol, target, backbuffer,defaultVert, defaultFrag);
-		state.model = imp::Matrix4::getTranslationMat(2.0, 2.0, -1.0);
-		renderVertex(torchGeo, torchCol, target, backbuffer,defaultVert, lightFrag);
-			
-		screen->texture->loadFromImageData(&target);
+		renderVertex(vertexHat, colorHat, targets,defaultVert, defaultFrag);
+		state.model = imp::Matrix4::getTranslationMat(2.0, 2.0, -0.5);
+		renderVertex(vertexBall, colorBall, targets,defaultVert, lightFrag);
+		
+		// state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 1.0);
+		// renderVertex(testGeo, testCol, target, backbuffer,defaultVert, defaultFrag);
+		
+		screen->texture->loadFromImageData(&targets[0]);
 		// BmpLoader::saveToFile(&target, "test.bmp");
-		// start = time(nullptr);
+		// return 0;
+		frames++;
+		
+		if(c.getElapsedTime().asMilliseconds() > 1000.0)
+		{
+			std::cout << "FPS : " << frames << std::endl;
+			frames = 0;
+			c.restart();
+		}
 	}
    
     return 0;

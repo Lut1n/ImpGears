@@ -1,3 +1,7 @@
+
+
+#define TARGET_RGB 0
+#define TARGET_DEPTH 1
     
 // -----------------------------------------------------------------------------------------------------------------------  
 std::vector<float> generateTorch(const Vec3& center, float radius, int sub)
@@ -19,7 +23,7 @@ std::vector<float> generateRock(const Vec3& center, float radius, int sub)
     std::vector<float> vertexBuffer;
        
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
-    geometry.sphericalNormalization(0.7);
+    geometry.sphericalNormalization(0.5);
     geometry.scale(Vec3(radius * 0.7,radius * 0.7,radius * 1.5));
     geometry.noiseBump(6, 0.7, 1.0, 0.2);
     geometry.fillBuffer(vertexBuffer);
@@ -34,7 +38,7 @@ std::vector<float> generateHat(const Vec3& center, float radius, int sub)
     std::vector<float> vertexBuffer;
        
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
-    geometry.sphericalNormalization(1.0);
+    geometry.sphericalNormalization(0.7);
     geometry.scale(Vec3(radius,radius,radius*0.3));
     geometry.noiseBump(6, 0.7, 1.0, 0.2);
     geometry.fillBuffer(vertexBuffer);
@@ -63,7 +67,7 @@ std::vector<float> generatePlane(const Vec3& center, float radius, int sub)
 std::vector<float> generateColors(std::vector<float>& buf)
 {
     std::vector<float> colorBuffer;
-    colorBuffer.reserve(buf.size());
+    colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
@@ -95,7 +99,7 @@ std::vector<float> generateColors(std::vector<float>& buf)
 std::vector<float> generateColors2(std::vector<float>& buf)
 {
     std::vector<float> colorBuffer;
-    colorBuffer.reserve(buf.size());
+    colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
@@ -126,7 +130,7 @@ std::vector<float> generateColors2(std::vector<float>& buf)
 std::vector<float> generateColors3(std::vector<float>& buf)
 {
     std::vector<float> colorBuffer;
-    colorBuffer.reserve(buf.size());
+    colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
@@ -148,7 +152,7 @@ std::vector<float> generateColors3(std::vector<float>& buf)
 std::vector<float> generateColors4(std::vector<float>& buf)
 {
     std::vector<float> colorBuffer;
-    colorBuffer.reserve(buf.size());
+    colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
@@ -180,80 +184,78 @@ std::vector<float> generateColors4(std::vector<float>& buf)
 // -----------------------------------------------------------------------------------------------------------------------
 struct DefaultRenderFrag : public FragCallback
 {
-	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
+	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
-		float curr_depth = targetArr[1]->getPixel(x, y)[0];
+		float new_depth = (std::min(1.0, abs(uniforms.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
+		float curr_depth = targets[1].getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
 			Vec3 zero(0.0,0.0,0.0);
-			Vec3 normal = interpo.get(Varying_Vert); normal.normalize();
-			Vec3 light_dir = light_1.position - interpo.get(Varying_MVert);
+			Vec3 normal = uniforms.get(Varying_Vert); normal.normalize();
+			Vec3 light_dir = light_1.position - uniforms.get(Varying_MVert);
 			light_dir.normalize();
 			 
 			const float* md = state.view.getData();
-			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
+			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - uniforms.get(Varying_MVert); cam_dir.normalize();
 			 
 			float a = light_dir.dot(normal);
-			clamp(a,0.0,1.0);
+			a = clamp(a,0.0,1.0);
 			 
 			Vec3 reflection = (normal * 2.0 * a) - light_dir;
 			 
 			float s = reflection.dot(cam_dir);
-			clamp(s,0.0,1.0);
+			s = clamp(s,0.0,1.0);
 			 
-			Vec3 spec = Vec3(1.0,1.0,1.0)*s;
+			Vec3 spec(s);
 			 
 			Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
-			clamp(light_color);
+			light_color = clamp(light_color,0.f,1.f);
 			 
-			Vec3 base_color = light_color * interpo.get(Varying_Color);
-			clamp(base_color);
+			Vec3 base_color = light_color * uniforms.get(Varying_Color);
+			base_color = clamp(base_color,0.f,1.f);
 			Vec4 depth(new_depth,new_depth,new_depth,255.f);
-			targetArr[0]->setPixel(x,y,base_color * 255.f);
-			targetArr[1]->setPixel(x,y,depth);
+			targets[0].setPixel(x,y,base_color * 255.f);
+			targets[1].setPixel(x,y,depth);
 		}
 	}
 };
 // -----------------------------------------------------------------------------------------------------------------------
 struct TerrRenderFrag : public FragCallback
 {
-	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
+	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
-		float curr_depth = targetArr[1]->getPixel(x, y)[0];
+		float new_depth = (std::min(1.0, abs(uniforms.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
+		float curr_depth = targets[1].getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
 			Vec3 zero(0.0,0.0,0.0);
 			Vec3 normal(0.0,0.0,1.0);
-			Vec3 light_dir = light_1.position - interpo.get(Varying_MVert);
+			Vec3 light_dir = light_1.position - uniforms.get(Varying_MVert);
 			light_dir.normalize();
 			 
 			const float* md = state.view.getData();
-			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - interpo.get(Varying_MVert); cam_dir.normalize();
+			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - uniforms.get(Varying_MVert); cam_dir.normalize();
 			 
 			float a = light_dir.dot(normal);
-			a = a<0.0?0.0:a;
-			a = a>1.0?1.0:a;
+			a = clamp(a,0.0,1.0);
 			 
 			Vec3 reflection = (normal * 2.0 * a) - light_dir;
 			 
 			float s = reflection.dot(cam_dir);
-			s = s<0.0?0.0:s;
-			s = s>1.0?1.0:s;
+			s = clamp(s,0.0,1.0);
 			 
-			Vec3 spec = Vec3(1.0,1.0,1.0)*s;
+			Vec3 spec(s);
 			 
 			Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
-			clamp(light_color);
+			light_color = clamp(light_color,0.f,1.f);
 			 
-			Vec3 base_color = light_color * interpo.get(Varying_Color);
-			clamp(base_color);
+			Vec3 base_color = light_color * uniforms.get(Varying_Color);
+			base_color =clamp(base_color,0.f,1.f);
 			Vec4 depth(new_depth,new_depth,new_depth,255.f);
-			targetArr[0]->setPixel(x,y,base_color * 255.f);
-			targetArr[1]->setPixel(x,y,depth);
+			targets[0].setPixel(x,y,base_color * 255.f);
+			targets[1].setPixel(x,y,depth);
 		}
 	}
 };
@@ -261,17 +263,17 @@ struct TerrRenderFrag : public FragCallback
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightRenderFrag : public FragCallback
 {
-	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
+	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(interpo2.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
-		float curr_depth = targetArr[1]->getPixel(x, y)[0];
+		float new_depth = (std::min(1.0, abs(uniforms.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
+		float curr_depth = targets[1].getPixel(x, y)[0];
 		if( new_depth < curr_depth)
 		{
-			Vec4 white(1,1,1,1);
+			Vec4 white(1.f);
 			Vec4 depth(new_depth,new_depth,new_depth,255.f);
-			targetArr[0]->setPixel(x,y,white * 255.f);
-			targetArr[1]->setPixel(x,y,depth);
+			targets[0].setPixel(x,y,white * 255.f);
+			targets[1].setPixel(x,y,depth);
 		}
 	}
 };
@@ -279,50 +281,54 @@ struct LightRenderFrag : public FragCallback
 // -----------------------------------------------------------------------------------------------------------------------
  struct DefaultVertCallback : public VertCallback
  {
-    virtual Triangle operator()(float* vert_in, float* vert_in2, Triangle* vert_out)
+    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, UniformBuffer& out_uniforms)
     {
         imp::Matrix4 mv = state.model * state.view;
         imp::Matrix4 mvp = mv * state.projection;
         Vec3 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0);
         Vec3 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0);
         
-        vert_out[Varying_Vert] = Triangle(vert_in);
-        vert_out[Varying_MVert] = vert_out[Varying_Vert] * state.model;
-        vert_out[Varying_MVVert] = vert_out[Varying_Vert] * mv;
-        vert_out[Varying_MVPVert] = (vert_out[Varying_Vert] * mvp * win) + win2;
-        vert_out[Varying_Color] = Triangle(vert_in2);
-        
-        return vert_out[Varying_MVPVert];
+		Vec4 vertex = Vec4(vert_in);
+		Vec3 mvertex = Vec3(vertex * state.model);
+		Vec3 mvvertex = Vec3(vertex * mv);
+		Vec3 mvpvertex = Vec3(vertex * mvp);
+		mvpvertex *= win; mvpvertex += win2;
+		
+		out_uniforms.set(Varying_Vert,vert_in);
+		out_uniforms.set(Varying_MVert,mvertex);
+		out_uniforms.set(Varying_MVVert,mvvertex);
+		out_uniforms.set(Varying_MVPVert,mvpvertex);
+		out_uniforms.set(Varying_Color,vert_in2);
     }
  };
  
 // -----------------------------------------------------------------------------------------------------------------------
  struct ClearVertCallback : public VertCallback
  {
-    virtual Triangle operator()(float* vert_in, float* vert_in2, Triangle* vert_out)
+    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, UniformBuffer& out_uniforms)
     {
         Vec3 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0);
         Vec3 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0);
-        
-        vert_out[Varying_Vert] = Triangle(vert_in);
-        vert_out[Varying_MVert] = Triangle(vert_in);
-        vert_out[Varying_MVVert] = Triangle(vert_in);
-        vert_out[Varying_MVPVert] = (vert_out[Varying_Vert] * win) + win2;
-        vert_out[Varying_Color] = Triangle(vert_in2);
-        
-        return vert_out[Varying_MVPVert];
+		
+		Vec3 mvpvertex = vert_in * win; mvpvertex += win2;
+		
+		out_uniforms.set(Varying_Vert,vert_in);
+		out_uniforms.set(Varying_MVert,vert_in);
+		out_uniforms.set(Varying_MVVert,vert_in);
+		out_uniforms.set(Varying_MVPVert,mvpvertex);
+		out_uniforms.set(Varying_Color,vert_in2);
     }
  };
  
 // -----------------------------------------------------------------------------------------------------------------------
 struct ClearFragCallback : public FragCallback
 {
-	virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)
+	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
 	{
         Vec4 col(0.7,0.7,1.0,1.0);
         Vec4 depth(1.0,1.0,1.0,1.0);
-		targetArr[0]->setPixel(x,y,col * 255);
-		targetArr[1]->setPixel(x,y,depth * 255);
+		targets[0].setPixel(x,y,col * 255);
+		targets[1].setPixel(x,y,depth * 255);
 	}
 };
  

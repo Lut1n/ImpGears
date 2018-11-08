@@ -34,6 +34,8 @@ class IMP_API Vec3 : public Vec<3,float>
 		return *this;
 	}
 	
+	Vec3 operator*(const Vec3& other) const { return Vec::operator*(other); }
+	
 	Vec3 operator*(float scalar) const { return Vec::operator*(scalar); }
 	
 	Vec3 operator*(const Matrix3& mat3)

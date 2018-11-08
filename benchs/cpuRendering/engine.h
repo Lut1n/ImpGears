@@ -1,184 +1,212 @@
+#include <Geometry/ProceduralGeometry.h>
+#include <SceneGraph/BmpLoader.h>
+#include <Core/Vec4.h>
+#include <Core/Perlin.h>
+#include <Core/Math.h>
+#include <Texture/ImageUtils.h>
+  
+#include <ctime>
+#include <vector>
+#include <map>
 
+int s_counter = 0;
+
+void log(const Vec3& v)
+{
+	std::cout << "vec[" << v[0] << "; " << v[1] << "; " << v[2] << "]" << std::endl;
+}
+
+void log(const std::vector<Vec3>& v)
+{
+	std::cout << "buffer (len=" << v.size() << ") [" << std::endl;
+	for(int i=0;i<(int)v.size();++i) log(v[i]);
+	std::cout << "]" << std::endl;
+}
+
+void log(const Vec3* v, int N)
+{
+	std::cout << "array (len=" << N << ") [" << std::endl;
+	for(int i=0;i<N;++i) log(v[i]);
+	std::cout << "]" << std::endl;
+}
 
 // -----------------------------------------------------------------------------------------------------------------------
-struct Varying
+struct UniformBuffer
 {
     std::map<int, int> _adr;
-    std::vector<float> _buf;
+    std::vector<Vec3> _buf;
     
-    void set(int id, float* buf, int size)
+    void set(int id, Vec3& buf)
     {
-		if(_adr.find(id) == _adr.end())
-        {
-            _adr[id] = _buf.size();
-            _buf.resize(_buf.size()+size);
-        }
-        int adr = _adr[id];
-        for(int i=0;i<size;++i)_buf[adr+i] = buf[i];
+		if(!contains(id)) alloc(id,1);
+		// std::cout << "set id " << id << " at " << _adr[id] << " in " << _buf.size() << std::endl;
+		_buf[_adr[id]] = buf;
     }
     
-    float* get(int id)
-    {
-        return &(_buf[_adr[id]]);
-    }
+    bool contains(int id) { return _adr.find(id) != _adr.end(); }
     
-    void lerp(const Varying& v1, const Varying& v2, float delta)
-    {
-        if(_buf.size() != v1._buf.size()) { _adr = v1._adr; _buf.resize(v1._buf.size()); }
-        
-        for(std::uint32_t i=0; i<v1._buf.size(); ++i) _buf[i] = mix(v1._buf[i],v2._buf[i],delta);
-    }
-};
-
-struct Interpolator
-{
-    SortMap sortmap, sortmap2;
-    Varying var[3], xvar[2], varX;
-    Triangle triangleBuf[10], tupleBuf[10], srcVertex, iLine;
-    Vec3 singleBuf[10];
-    
-    int lastX, lastY;
-    bool lastAdv;
-    
-    void setVarying(Triangle* varArr)
-    {
-        for(int id=0;id<5;++id)
-        {
-            triangleBuf[id] = varArr[id];
-            sortmap.apply(triangleBuf[id]);
-            foreach(3, var[i].set(id, triangleBuf[id][i].data(),3) );
-        }
-    }
-    void setVarying2(Triangle* varArr)
-    {
-        for(int id=0;id<5;++id)
-        {
-            tupleBuf[id] = varArr[id];
-            sortmap2.apply(tupleBuf[id]);
-            foreach(2, xvar[i].set(id, tupleBuf[id][i].data(),3) );
-        }
-    }
-    
-    void init(const Triangle& npc, Triangle* varArr)
-    {
-        lastX = -1;
-        lastY = -1;
-        lastAdv = false;
-        srcVertex = npc;
-        sortmap.init(srcVertex[0].y(),srcVertex[1].y(),srcVertex[2].y());
-        setVarying(varArr);
-        sortmap.apply(srcVertex);
-    }
-	
-	void computeIntersect(int side, int p1, int p2, float x)
+    void alloc(int id, int size)
 	{
-        float rel = clamp(step(srcVertex[p1].y(), srcVertex[p2].y(), x));
-        varX.lerp(var[p1], var[p2], rel);
-        iLine[side] = mix(srcVertex[p1],srcVertex[p2],rel);
-        foreach((int)varX._adr.size(), tupleBuf[i][side] = varX.get(i) );
+		int index = _buf.size();
+		_buf.resize(index+size);
+		_adr[id] = index;
 	}
     
-    void advanceY(int x)
-    {        
-		int a = 1; int b = 2;
-		if(x < srcVertex[1].y()) {a=0; b=1;}
-		
-		computeIntersect(0, 0, 2, x);
-		computeIntersect(1, a, b, x);
-        
-        sortmap2.init(iLine[0].x(),iLine[1].x());
-        
-        setVarying2(tupleBuf);
-        sortmap2.apply(iLine);
-    }
+    Vec3 get(int id) { return _buf[_adr[id]]; }
     
-    bool advanceX(int x)
+    void mix(const UniformBuffer& v1, const UniformBuffer& v2, float delta)
     {
-        float rel = step(iLine[0].x(),iLine[1].x(), x);
-        
-        //check if rel > 0 and rel < 1
-        if(rel >= 0.0 && rel <= 1.0)
-        {
-            Varying varX; varX.lerp(xvar[0], xvar[1], rel);
-            
-            for(int id=0; id<5; ++id) singleBuf[id] = varX.get(id);
-            return true;
-        }
-        return false;
-    }
-    
-    bool advance(int x, int y)
-    {
-        if(y != lastY) { advanceY(y); lastY = y; }
-        if(x!= lastX) { lastAdv = advanceX(x); lastX = x; }
-        return lastAdv;
-    }
-    
-    Vec3& get(int id)
-    {
-        return singleBuf[id];
+        _adr = v1._adr; _buf.resize(v1._buf.size());
+        for(int i=0; i<(int)_buf.size(); ++i) _buf[i] = imp::mix( v1._buf[i], v2._buf[i], delta );
     }
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
  struct VertCallback
  {
-    virtual Triangle operator()(float* vert_in, float* vert_in2, Triangle* vert_out)  = 0;
+    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, UniformBuffer& out_uniforms)  = 0;
  };
 // -----------------------------------------------------------------------------------------------------------------------
  struct FragCallback
  {
-    virtual void operator()(Interpolator& interpo,int x, int y, imp::ImageData** targetArr)  = 0;
+    virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets) = 0;
  };
- 
-// -----------------------------------------------------------------------------------------------------------------------
-Vec4 getDrawClipping(Triangle& tri)
-{
-    Vec4 bounds = tri.getBounds();
-    bounds[0] = std::max(bounds[0], state.viewport[0]);
-    bounds[1] = std::min(bounds[1], state.viewport[2]);
-    bounds[2] = std::max(bounds[2], state.viewport[1]);
-    bounds[3] = std::min(bounds[3], state.viewport[3]);
-     
-    return bounds;
-}
-
-Interpolator interpo2;
 
 // -----------------------------------------------------------------------------------------------------------------------
-void renderFragment(Triangle& mvpVertex, imp::ImageData& target, imp::ImageData& back, FragCallback& fragCallback)
+struct Rasterizer
 {
-    Vec4 clipping = getDrawClipping(mvpVertex);
-       
-    // scanline algorithm
-    for(int j=clipping[2]; j<clipping[3]; ++j)
-    {
-        for(int i=clipping[0]; i<clipping[1]; ++i)
-        {
-            if(interpo2.advance(i,j))
-            {
-				 imp::ImageData* targetArr[2]; targetArr[0] = &target; targetArr[1] = &back;
-				 fragCallback(interpo2,i,j,targetArr);
-            }
-        }
-    }
-}
-   
+	static void drawWire(Vec3* vertices, UniformBuffer* uniformBufs, imp::ImageData* targets, FragCallback& fragCallback)
+	{
+		UniformBuffer uniforms;
+		Vec3 dirv = vertices[1] - vertices[0];
+		float len = dirv.length();
+		
+		for(int t=0;t<std::floor(len)+1;++t)
+		{
+			float rel = clamp((float)t/(float)len);
+			Vec3 position = imp::mix(vertices[0],vertices[1],rel);
+			int x = std::floor(position.x());
+			int y = std::floor(position.y());
+			if(x < 0 || x>=(int)targets[0].getWidth() || y<0 || y>=(int)targets[0].getHeight()) continue;
+			
+			uniforms.mix(uniformBufs[0], uniformBufs[1], rel);
+			fragCallback(x,y,uniforms,targets);
+		}
+	}
+	
+	static void drawHorizontalLine(Vec3* vertices, UniformBuffer* uniformBufs, imp::ImageData* targets, FragCallback& fragCallback)
+	{
+		if(vertices[0].y() < 0.0 || vertices[0].y() >= targets[0].getHeight()) return;
+
+		int left=0,right=1;
+		if(vertices[left].x() > vertices[right].x()){left=1;right=0;}
+		
+		UniformBuffer uniforms;
+		for(int x=std::floor(vertices[left].x());x<std::floor(vertices[right].x())+1;++x)
+		{
+			if(x < 0) continue;
+			if(x >= (int)targets[0].getWidth()) return;
+			
+			float rel = clamp(linearstep(vertices[left].x(),vertices[right].x(), (float)x));
+			uniforms.mix(uniformBufs[left], uniformBufs[right], rel);
+			fragCallback(x,(int)vertices[0].y(),uniforms,targets);
+		}
+	}
+	
+	static void drawTriangle(Vec3* vertices, UniformBuffer* uniformBufs, imp::ImageData* targets, FragCallback& fragCallback)
+	{
+		int bottom=0,center=1,top=2;
+        if(vertices[bottom].y()>vertices[center].y()) swap(bottom,center);
+		if(vertices[bottom].y()>vertices[top].y()) swap(bottom,top);
+		if(vertices[center].y()>vertices[top].y()) swap(center,top);
+		
+		for(int y=std::floor(vertices[bottom].y());y<std::floor(vertices[top].y())+1;++y)
+		{
+			int a=center,b=top;
+			if(y < vertices[center].y()) {a=bottom; b=center;}
+			
+			// float rel = 0.5;
+			float rel0 = clamp(linearstep(vertices[a].y(), vertices[b].y(), (float)y));
+			float rel1 = clamp(linearstep(vertices[bottom].y(), vertices[top].y(), (float)y));
+			
+			UniformBuffer uniforms[2];
+			uniforms[0].mix(uniformBufs[a],uniformBufs[b],rel0);
+			uniforms[1].mix(uniformBufs[bottom],uniformBufs[top],rel1);
+			
+			Vec3 line[2];
+			line[0] = imp::mix(vertices[a],vertices[b],rel0);
+			line[1] = imp::mix(vertices[bottom],vertices[top],rel1);
+
+			drawHorizontalLine(line,uniforms,targets,fragCallback);
+		}
+	}
+	
+	static void drawTriangleWF(Vec3* vertices, UniformBuffer* uniformBufs, imp::ImageData* targets, FragCallback& fragCallback)
+	{
+		Vec3 line1[2], line2[2], line3[2];
+		UniformBuffer uniforms1[2], uniforms2[2], uniforms3[2];
+		
+		line1[0] = vertices[0]; line1[1] = vertices[1];
+		line2[0] = vertices[0]; line2[1] = vertices[2];
+		line3[0] = vertices[1]; line3[1] = vertices[2];
+		
+		uniforms1[0] = uniformBufs[0]; uniforms1[1] = uniformBufs[1];
+		uniforms2[0] = uniformBufs[0]; uniforms2[1] = uniformBufs[2];
+		uniforms3[0] = uniformBufs[1]; uniforms3[1] = uniformBufs[2];
+		
+		drawWire(line1,uniforms1,targets,fragCallback);
+		drawWire(line2,uniforms2,targets,fragCallback);
+		drawWire(line3,uniforms3,targets,fragCallback);
+	}
+};
+
 // -----------------------------------------------------------------------------------------------------------------------
-void renderVertex(std::vector<float>& buf, std::vector<float>& col, imp::ImageData& target, imp::ImageData& back, VertCallback& vertCallback, FragCallback& fragCallback)
+void vertexOperations(std::vector<Vec3>& buf, std::vector<Vec3>& col, std::vector<UniformBuffer>& buf_out, VertCallback& vertCallback)
+{
+	for(int i=0;i<(int)buf.size();++i) vertCallback(buf[i],col[i],buf_out[i]);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------
+void fragOperations(std::vector<UniformBuffer>& buf, imp::ImageData* targets, FragCallback& fragCallback)
+{
+	for(int i=0;i<(int)buf.size();i+=3)
+	{
+		UniformBuffer* uniforms = &buf[i];
+		
+		Vec3 vertices[3];
+		vertices[0] = uniforms[0].get(Varying_MVPVert);
+		vertices[1] = uniforms[1].get(Varying_MVPVert);
+		vertices[2] = uniforms[2].get(Varying_MVPVert);
+		// std::cout << "log mvp : " << std::endl; log(vertices, 3);
+		
+		Rasterizer::drawTriangle(vertices, uniforms, targets, fragCallback);
+	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------
+void renderVertex(std::vector<Vec3>& buf, std::vector<Vec3>& col, imp::ImageData* targets, VertCallback& vertCallback, FragCallback& fragCallback)
 {       
-    std::cout << "render mesh : 0%";
-      
-    for(unsigned int i=0; i<buf.size(); i+= 9)
-    {
-        Triangle vert_out[10];
-        // Triangle vert_out[Varying_Count];
-        Triangle ndc = vertCallback(&buf[i],&col[i], vert_out); // varArr[Varying_MVPVert];// * win;
-        // interpo2.init(vert_out[Varying_MVPVert],vert_out);
-        interpo2.init(ndc,vert_out);
-        renderFragment(ndc, target, back, fragCallback);
-          
-        std::cout << "\rrender mesh : " << std::floor(i*100/buf.size()) << "% ";
-    }
-    std::cout << "done" << std::endl;
+    // std::cout << "render mesh : 0%";  
+    // std::cout << "start" << std::endl;
+	
+	std::vector<UniformBuffer> uniforms; uniforms.resize(3);
+	
+	
+	// int i = 0;
+	for(int i=0;i<(int)buf.size();i+=3)
+	{
+		std::vector<Vec3> vertices = {buf[i+0], buf[i+1], buf[i+2]};
+		std::vector<Vec3> colors = {col[i+0], col[i+1], col[i+2]};
+		
+		// log(vertices);
+		// log(colors);
+		
+		vertexOperations(vertices,colors, uniforms, vertCallback);
+		fragOperations(uniforms,targets,fragCallback);
+		// std::cout << "\rrender mesh : " << (i+3)*100.0/buf.size() << "% ";
+	}
+	// std::cout << "\rrender mesh : 100%";  
+	
+    // std::cout << "done" << std::endl;
+	s_counter++;
 }

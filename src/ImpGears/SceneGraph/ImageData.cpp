@@ -397,8 +397,8 @@ void ImageData::convert(const ImageData& srcData, PixelFormat targetFormat)
 //--------------------------------------------------------------
 void ImageData::fill(const Vec4& color)
 {
-	std::cout << "fill : size=" << m_bufferSize << "; chanl=" << m_channels << "; format=" << m_format << "\n";
-	std::cout << "color=" << color[0] << " " << color[1] << " " << color[2] << "\n";
+	// std::cout << "fill : size=" << m_bufferSize << "; chanl=" << m_channels << "; format=" << m_format << "\n";
+	// std::cout << "color=" << color[0] << " " << color[1] << " " << color[2] << "\n";
 	for(std::uint32_t i=0; i<m_bufferSize; i+=m_channels)
 	{
 		if(m_format == PixelFormat_RGB8)

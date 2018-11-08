@@ -32,12 +32,6 @@ IMP_API Vec<Dim,Ty> clamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 = (
 	return r;
 }
 
-template<int Dim,typename Ty>
-IMP_API Vec<Dim,Ty> mix(const Vec<Dim,Ty>& a, const Vec<Dim,Ty>& b, Ty delta)
-{
-    return (b - a)*delta + a;
-}
-
 template<typename Ty>
 IMP_API Ty step(Ty edge, Ty x)
 {
@@ -47,11 +41,13 @@ IMP_API Ty step(Ty edge, Ty x)
 template<typename Ty>
 IMP_API Ty linearstep(Ty edge0, Ty edge1, Ty x)
 {
-    return (x-edge0)/(edge1-edge0);
+	Ty range = (edge1-edge0);
+	if(range == (Ty)0) return (Ty)0;
+    else return (x-edge0)/range;
 }
 
 template<typename Ty>
-IMP_API Ty mix(const Ty& a, const Ty& b, Ty delta)
+IMP_API Ty mix(const Ty& a, const Ty& b, float delta)
 {
     return (b - a)*delta + a;
 }

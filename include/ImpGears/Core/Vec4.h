@@ -40,8 +40,12 @@ class IMP_API Vec4 : public Vec<4,float>
 			x()*mat4(0,2) + y()*mat4(1,2) + z()*mat4(2,2) + w()*mat4(3,2),
 			x()*mat4(0,3) + y()*mat4(1,3) + z()*mat4(2,3) + w()*mat4(3,3));
 
+		Vec::operator/=(w());
+		
 		return *this;
 	}
+	
+	Vec4 operator*(const Vec4& other) const { return Vec::operator*(other); }
 	
 	Vec4 operator*(float scalar) const { return Vec::operator*(scalar); }
 	

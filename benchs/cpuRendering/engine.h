@@ -180,7 +180,14 @@ void fragOperations(std::vector<UniformBuffer>& buf, imp::ImageData* targets, Fr
 		vertices[1] = uniforms[1].get(Varying_MVPVert);
 		vertices[2] = uniforms[2].get(Varying_MVPVert);
 		
-		Rasterizer::drawTriangle(vertices, uniforms, targets, fragCallback);
+		Vec3 p1p2 = vertices[1] - vertices[0];
+		Vec3 p1p3 = vertices[2] - vertices[0];
+		Vec3 dir = p1p2.cross(p1p3);
+		
+		if(dir[2] < 0.0)
+		{
+			Rasterizer::drawTriangle(vertices, uniforms, targets, fragCallback);
+		}
 	}
 }
 

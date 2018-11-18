@@ -10,7 +10,7 @@ std::vector<float> generateTorch(const Vec3& center, float radius, int sub)
        
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(1.0);
-    geometry.scale(Vec3(radius,radius,radius));
+    geometry.scale(Vec3(radius));
     geometry.fillBuffer(vertexBuffer);
      
     std::cout << "torch geometry : " << vertexBuffer.size()/3 << " vertices" << std::endl;
@@ -54,7 +54,7 @@ std::vector<float> generatePlane(const Vec3& center, float radius, int sub)
        
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(1.0);
-    geometry.scale(Vec3(radius,radius,0.1));
+    geometry.scale(Vec3(radius,radius,radius*0.25));
     geometry.noiseBump(6, 0.7, 1.0, 0.3);
     geometry.fillBuffer(vertexBuffer);
      
@@ -181,100 +181,76 @@ std::vector<float> generateColors4(std::vector<float>& buf)
     return colorBuffer;
 }
  
+ 
 // -----------------------------------------------------------------------------------------------------------------------
-struct DefaultRenderFrag : public FragCallback
+struct DepthTestFrag : public FragCallback
 {
-	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets) = 0;
+	
+	void phong(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets, const Vec3& normal)
 	{
-		// depth test
-		float new_depth = (std::min(1.0, abs(uniforms.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
-		float curr_depth = targets[1].getPixel(x, y)[0];
-		if( new_depth < curr_depth)
-		{
-			Vec3 zero(0.0,0.0,0.0);
-			Vec3 normal = uniforms.get(Varying_Vert); normal.normalize();
-			Vec3 light_dir = light_1.position - uniforms.get(Varying_MVert);
-			light_dir.normalize();
-			 
-			const float* md = state.view.getData();
-			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - uniforms.get(Varying_MVert); cam_dir.normalize();
-			 
-			float a = light_dir.dot(normal);
-			a = clamp(a,0.0,1.0);
-			 
-			Vec3 reflection = (normal * 2.0 * a) - light_dir;
-			 
-			float s = reflection.dot(cam_dir);
-			s = clamp(s,0.0,1.0);
-			 
-			Vec3 spec(s);
-			 
-			Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
-			light_color = clamp(light_color,0.f,1.f);
-			 
-			Vec3 base_color = light_color * uniforms.get(Varying_Color);
-			base_color = clamp(base_color,0.f,1.f);
-			Vec4 depth(new_depth,new_depth,new_depth,255.f);
-			targets[0].setPixel(x,y,base_color * 255.f);
-			targets[1].setPixel(x,y,depth);
-		}
+		Vec3 light_pos = light_1.position;
+		Vec3 frag_pos = uniforms.get(Varying_MVert);
+		const float* md = state.view.getData();
+		Vec3 cam_pos(md[12],md[13],md[14]);
+		
+		Vec3 light_dir = light_pos - frag_pos;
+		Vec3 cam_dir = cam_pos - frag_pos;
+		light_dir.normalize();
+		cam_dir.normalize();
+		 
+		float a = clamp( light_dir.dot(normal) );
+		Vec3 reflection = (normal * 2.0 * a) - light_dir;
+		float s = clamp( reflection.dot(cam_dir) );
+		
+		float light_lvl = clamp( 0.2 + 0.6*a + pow(s, 8) );
+		Vec3 base_color = clamp( Vec3(light_lvl) * uniforms.get(Varying_Color) );
+		targets[TARGET_RGB].setPixel(x,y,base_color * 255.f);
 	}
-};
-// -----------------------------------------------------------------------------------------------------------------------
-struct TerrRenderFrag : public FragCallback
-{
+	
 	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
 	{
 		// depth test
-		float new_depth = (std::min(1.0, abs(uniforms.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
-		float curr_depth = targets[1].getPixel(x, y)[0];
-		if( new_depth < curr_depth)
+		float depth = -uniforms.get(Varying_MVVert).z();
+		
+		float depthPx = clamp( linearstep(0.1f, 20.f, depth )  )* 255.0;
+		float curr_depth = targets[TARGET_DEPTH].getPixel(x, y)[0];
+		if( depthPx < curr_depth)
 		{
-			Vec3 zero(0.0,0.0,0.0);
-			Vec3 normal(0.0,0.0,1.0);
-			Vec3 light_dir = light_1.position - uniforms.get(Varying_MVert);
-			light_dir.normalize();
-			 
-			const float* md = state.view.getData();
-			Vec3 cam_dir(md[12],md[13],md[14]); cam_dir = (cam_dir) - uniforms.get(Varying_MVert); cam_dir.normalize();
-			 
-			float a = light_dir.dot(normal);
-			a = clamp(a,0.0,1.0);
-			 
-			Vec3 reflection = (normal * 2.0 * a) - light_dir;
-			 
-			float s = reflection.dot(cam_dir);
-			s = clamp(s,0.0,1.0);
-			 
-			Vec3 spec(s);
-			 
-			Vec3 light_color = Vec3(0.1,0.1,0.1) + Vec3(0.7,0.7,0.7)*a + pow(spec, 8);
-			light_color = clamp(light_color,0.f,1.f);
-			 
-			Vec3 base_color = light_color * uniforms.get(Varying_Color);
-			base_color =clamp(base_color,0.f,1.f);
-			Vec4 depth(new_depth,new_depth,new_depth,255.f);
-			targets[0].setPixel(x,y,base_color * 255.f);
-			targets[1].setPixel(x,y,depth);
+			apply(x, y, uniforms, targets);
+			
+			Vec4 depth(depthPx);
+			targets[TARGET_DEPTH].setPixel(x,y,depth);
 		}
 	}
 };
  
 // -----------------------------------------------------------------------------------------------------------------------
-struct LightRenderFrag : public FragCallback
+struct DefaultRenderFrag : public DepthTestFrag
 {
-	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
 	{
-		// depth test
-		float new_depth = (std::min(1.0, abs(uniforms.get(Varying_MVVert).z()-0.1) / 20.0)) * 255.f;
-		float curr_depth = targets[1].getPixel(x, y)[0];
-		if( new_depth < curr_depth)
-		{
-			Vec4 white(1.f);
-			Vec4 depth(new_depth,new_depth,new_depth,255.f);
-			targets[0].setPixel(x,y,white * 255.f);
-			targets[1].setPixel(x,y,depth);
-		}
+		Vec3 normal = uniforms.get(Varying_Vert); normal.normalize();
+		phong(x,y,uniforms, targets, normal);
+	}
+};
+// -----------------------------------------------------------------------------------------------------------------------
+struct TerrRenderFrag : public DepthTestFrag
+{
+	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+	{
+		Vec3 normal(0.0,0.0,1.0);
+		phong(x,y,uniforms, targets, normal);
+	}
+};
+ 
+// -----------------------------------------------------------------------------------------------------------------------
+struct LightRenderFrag : public DepthTestFrag
+{
+	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+	{
+		Vec4 white(255.f);
+		targets[0].setPixel(x,y,white);
 	}
 };
 
@@ -327,8 +303,8 @@ struct ClearFragCallback : public FragCallback
 	{
         Vec4 col(0.7,0.7,1.0,1.0);
         Vec4 depth(1.0,1.0,1.0,1.0);
-		targets[0].setPixel(x,y,col * 255);
-		targets[1].setPixel(x,y,depth * 255);
+		targets[TARGET_RGB].setPixel(x,y,col * 255);
+		targets[TARGET_DEPTH].setPixel(x,y,depth * 255);
 	}
 };
  

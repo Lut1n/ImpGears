@@ -120,6 +120,7 @@ struct Rasterizer
 		if(vertices[bottom].y()>vertices[top].y()) swap(bottom,top);
 		if(vertices[center].y()>vertices[top].y()) swap(center,top);
 		
+		// for(int y=std::floor(vertices[bottom].y());y<std::floor(vertices[top].y())+1;y+=2)
 		for(int y=std::floor(vertices[bottom].y());y<std::floor(vertices[top].y())+1;++y)
 		{
 			int a=center,b=top;
@@ -138,6 +139,7 @@ struct Rasterizer
 			line[1] = imp::mix(vertices[bottom],vertices[top],rel1);
 
 			drawHorizontalLine(line,uniforms,targets,fragCallback);
+			// drawWire(line,uniforms,targets,fragCallback);
 		}
 	}
 	
@@ -177,7 +179,6 @@ void fragOperations(std::vector<UniformBuffer>& buf, imp::ImageData* targets, Fr
 		vertices[0] = uniforms[0].get(Varying_MVPVert);
 		vertices[1] = uniforms[1].get(Varying_MVPVert);
 		vertices[2] = uniforms[2].get(Varying_MVPVert);
-		// std::cout << "log mvp : " << std::endl; log(vertices, 3);
 		
 		Rasterizer::drawTriangle(vertices, uniforms, targets, fragCallback);
 	}

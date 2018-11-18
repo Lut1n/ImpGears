@@ -24,13 +24,13 @@ using namespace imp;
 #define CONFIG_NEAR 0.1
 #define CONFIG_FAR 100.0
 #define CONFIG_FOV 60.0
-// #define CONFIG_WIDTH 128.0
-// #define CONFIG_HEIGHT 128.0
-#define CONFIG_WIDTH 512.0
-#define CONFIG_HEIGHT 512.0
-// #define CONFIG_WIDTH 64.0
-// #define CONFIG_HEIGHT 64.0
 
+#define SQ_RESOLUTION 256.0
+#define GEO_SUBDIV 4
+
+
+#define CONFIG_WIDTH SQ_RESOLUTION
+#define CONFIG_HEIGHT SQ_RESOLUTION
 
 
 struct RenderState
@@ -223,17 +223,17 @@ int main(int argc, char* argv[])
     quad.push_back(-1.0); quad.push_back(-1.0); quad.push_back(0.0);
     std::vector<float> qcolor; qcolor.resize(18, 0.5);
        
-    std::vector<float> planeGeo = generatePlane(rock_center, 10.0, 10);
+    std::vector<float> planeGeo = generatePlane(rock_center, 4.0, 2*GEO_SUBDIV);
     std::vector<float> planeCol = generateColors2(planeGeo);
 	// std::cout << "planeCol = " << planeCol.size() << std::endl;
      
-    std::vector<float> rockGeo = generateRock(rock_center, 1.0, 20);
+    std::vector<float> rockGeo = generateRock(rock_center, 1.0, 2*GEO_SUBDIV);
     std::vector<float> rockCol = generateColors(rockGeo);
      
-    std::vector<float> hatGeo = generateHat(rock_center, 2.0, 20);
+    std::vector<float> hatGeo = generateHat(rock_center, 2.0, 2*GEO_SUBDIV);
     std::vector<float> hatCol = generateColors4(hatGeo);
     
-    std::vector<float> torchGeo = generateTorch(rock_center, 0.2, 10);
+    std::vector<float> torchGeo = generateTorch(rock_center, 0.2, std::min(10,1*GEO_SUBDIV));
     std::vector<float> torchCol = generateColors3(torchGeo);
 	
 	imp::ImageData targets[2];
@@ -285,13 +285,13 @@ int main(int argc, char* argv[])
 		targets[0].fill(Vec4(100.0,100.0,255.0,255.0));
 		targets[1].fill(Vec4(255.0,255.0,255.0,255.0));
 		
-		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, -1.0);
+		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, -2.0);
 		renderVertex(vertexPlane, colorPlane, targets,defaultVert, terrFrag);
 		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 0.0);
 		renderVertex(vertexRock, colorRock, targets,defaultVert, defaultFrag);
 		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 1.0);
 		renderVertex(vertexHat, colorHat, targets,defaultVert, defaultFrag);
-		state.model = imp::Matrix4::getTranslationMat(2.0, 2.0, -0.5);
+		state.model = imp::Matrix4::getTranslationMat(1.0, 1.0, 0.0);
 		renderVertex(vertexBall, colorBall, targets,defaultVert, lightFrag);
 		
 		// state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 1.0);

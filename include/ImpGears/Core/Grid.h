@@ -37,7 +37,11 @@ class IMP_API Grid : public Object
 	{
 		unsigned int s = 1;
 		_size = size;
-		for(int i=0;i<_size.size();++i) s*=_size[i];
+        int f = 1;
+		for(int i=0;i<Dim;++i){
+            s*=_size[i];
+            _rowFactor[Dim-1-i]=f; f*=_size[Dim-1-i];
+        }
 		_buffer.resize(s);
 	}
 	
@@ -45,15 +49,7 @@ class IMP_API Grid : public Object
 	
 	unsigned int index(const Dimension<Dim>& pos) const
 	{
-		int f=1;
-		unsigned int r=0;
-		
-		for(int i=_size.size()-1;i>=0;--i)
-		{
-			r+=pos[i]*f;
-			f*=_size[i];
-		}
-		return r;
+        return _rowFactor.dot(pos);
 	}
 	
 	Dimension<Dim> vector(unsigned int index) const
@@ -87,10 +83,12 @@ class IMP_API Grid : public Object
 	}
 	
 	const std::vector<Ty>& buffer() const {return _buffer;}
+	Ty* data() {return _buffer.data();}
 	
 protected:
 	
 	Dimension<Dim>	_size;
+    Dimension<Dim>  _rowFactor;
 	
 	// index order
 	// (0,0) = 0

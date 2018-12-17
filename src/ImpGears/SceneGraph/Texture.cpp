@@ -56,6 +56,23 @@ void Texture::loadFromImageData(const ImageData* data)
     updateVideoMemory();
 }
 
+
+void Texture::loadFromImage(const Image::Ptr img)
+{
+    if(img->channels() == 3)
+    {
+        build(img->width(), img->height(), PixelFormat_RGB8);
+        m_data.build(img->width(), img->height(), PixelFormat_RGB8, img->asGrid()->data());
+    }
+    else if(img->channels() == 4)
+    {
+        build(img->width(), img->height(), PixelFormat_RGBA8);
+        m_data.build(img->width(), img->height(), PixelFormat_RGBA8, img->asGrid()->data());
+    }
+	updateVideoParams();
+    updateVideoMemory();
+}
+
 //--------------------------------------------------------------
 void Texture::loadFromLayeredImage(const LayeredImage::Ptr data, IntRect mask)
 {

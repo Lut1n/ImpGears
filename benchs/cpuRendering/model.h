@@ -4,79 +4,58 @@
 #define TARGET_DEPTH 1
     
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateTorch(const Vec3& center, float radius, int sub)
+std::vector<Vec3> generateTorch(const Vec3& center, float radius, int sub)
 {
-    std::vector<float> vertexBuffer;
-       
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(1.0);
     geometry.scale(Vec3(radius));
-    geometry.fillBuffer(vertexBuffer);
-     
-    std::cout << "torch geometry : " << vertexBuffer.size()/3 << " vertices" << std::endl;
        
-    return vertexBuffer;
+    return geometry._vertices;
 }     
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateRock(const Vec3& center, float radius, int sub)
+std::vector<Vec3> generateRock(const Vec3& center, float radius, int sub)
 {
-    std::vector<float> vertexBuffer;
-       
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(0.5);
     geometry.scale(Vec3(radius * 0.7,radius * 0.7,radius * 1.5));
     geometry.noiseBump(6, 0.7, 1.0, 0.2);
-    geometry.fillBuffer(vertexBuffer);
-     
-    std::cout << "rock geometry : " << vertexBuffer.size()/3 << " vertices" << std::endl;
        
-    return vertexBuffer;
+    return geometry._vertices;
 }   
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateHat(const Vec3& center, float radius, int sub)
+std::vector<Vec3> generateHat(const Vec3& center, float radius, int sub)
 {
-    std::vector<float> vertexBuffer;
-       
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(0.7);
     geometry.scale(Vec3(radius,radius,radius*0.3));
     geometry.noiseBump(6, 0.7, 1.0, 0.2);
-    geometry.fillBuffer(vertexBuffer);
-     
-    std::cout << "hat geometry : " << vertexBuffer.size()/3 << " vertices" << std::endl;
        
-    return vertexBuffer;
+    return geometry._vertices;
 }
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generatePlane(const Vec3& center, float radius, int sub)
+std::vector<Vec3> generatePlane(const Vec3& center, float radius, int sub)
 {
-    std::vector<float> vertexBuffer;
-       
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(1.0);
     geometry.scale(Vec3(radius,radius,radius*0.25));
     geometry.noiseBump(6, 0.7, 1.0, 0.3);
-    geometry.fillBuffer(vertexBuffer);
-     
-    std::cout << "plane geometry : " << vertexBuffer.size()/3 << " vertices" << std::endl;
        
-    return vertexBuffer;
+    return geometry._vertices;
 }
    
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateColors(std::vector<float>& buf)
+std::vector<Vec3> generateColors(std::vector<Vec3>& buf)
 {
-    std::vector<float> colorBuffer;
+    std::vector<Vec3> colorBuffer;
     colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
-    for(unsigned int i=0; i<buf.size(); i+= 3)
+    for(unsigned int i=0; i<buf.size(); ++i)
     {
-        Vec3 v(buf[i+0],buf[i+1],buf[i+2]);
-        float disturb = imp::perlinOctave(v.x(), v.y(), v.z(), 8, 0.7, 1.0/32.0) * 2.0 - 1.0;
+        float disturb = imp::perlinOctave(buf[i].x(), buf[i].y(), buf[i].z(), 8, 0.7, 1.0/32.0) * 2.0 - 1.0;
          
-        float a = std::atan2(buf[i+0],buf[i+1]);
+        float a = std::atan2(buf[i].x(),buf[i].y());
          
         float signal = (1.0+std::sin((a + disturb*4.0) * 16.0))*0.5;
          
@@ -85,9 +64,7 @@ std::vector<float> generateColors(std::vector<float>& buf)
          
         Vec3 finalColor = (colorB - colorA)*signal + colorA;
          
-        colorBuffer[i+0] = finalColor.x();
-        colorBuffer[i+1] = finalColor.y();
-        colorBuffer[i+2] = finalColor.z();
+        colorBuffer[i] = finalColor;
           
         std::cout << "\rgenerate color buffer : " << std::floor(i*100/buf.size()) << "% ";
     }
@@ -96,18 +73,17 @@ std::vector<float> generateColors(std::vector<float>& buf)
     return colorBuffer;
 }
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateColors2(std::vector<float>& buf)
+std::vector<Vec3> generateColors2(std::vector<Vec3>& buf)
 {
-    std::vector<float> colorBuffer;
+    std::vector<Vec3> colorBuffer;
     colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
-    for(unsigned int i=0; i<buf.size(); i+= 3)
+    for(unsigned int i=0; i<buf.size(); ++i)
     {
-        Vec3 v(buf[i+0],buf[i+1],buf[i+2]);
         // float disturb = (perlin(v * (1.0/4.0)))*2.0 - 1.0;
-        float disturb = (imp::perlinOctave(v.x(), v.y(), v.z(), 8, 0.7, 1.0/32.0) + 0.5) * 4.0;
+        float disturb = (imp::perlinOctave(buf[i].x(), buf[i].y(), buf[i].z(), 8, 0.7, 1.0/32.0) + 0.5) * 4.0;
         // disturb=disturb<0.0?0.0:disturb;
         // disturb=disturb>1.0?1.0:disturb;
          
@@ -116,9 +92,7 @@ std::vector<float> generateColors2(std::vector<float>& buf)
          
         Vec3 finalColor = (colorB - colorA)*disturb + colorA;
          
-        colorBuffer[i+0] = finalColor.x();
-        colorBuffer[i+1] = finalColor.y();
-        colorBuffer[i+2] = finalColor.z();
+        colorBuffer[i] = finalColor;
           
         std::cout << "\rgenerate color buffer : " << std::floor(i*100/buf.size()) << "% ";
     }
@@ -127,20 +101,17 @@ std::vector<float> generateColors2(std::vector<float>& buf)
     return colorBuffer;
 }
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateColors3(std::vector<float>& buf)
+std::vector<Vec3> generateColors3(std::vector<Vec3>& buf)
 {
-    std::vector<float> colorBuffer;
+    std::vector<Vec3> colorBuffer;
     colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
-    for(unsigned int i=0; i<buf.size(); i+= 3)
+    Vec3 color(1.0,1.0,1.0);
+    for(unsigned int i=0; i<buf.size(); ++i)
     {
-        Vec3 finalColor(1.0,1.0,1.0);
-         
-        colorBuffer[i+0] = finalColor.x();
-        colorBuffer[i+1] = finalColor.y();
-        colorBuffer[i+2] = finalColor.z();
+        colorBuffer[i] = color;
           
         std::cout << "\rgenerate color buffer : " << std::floor(i*100/buf.size()) << "% ";
     }
@@ -149,19 +120,18 @@ std::vector<float> generateColors3(std::vector<float>& buf)
     return colorBuffer;
 }
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<float> generateColors4(std::vector<float>& buf)
+std::vector<Vec3> generateColors4(std::vector<Vec3>& buf)
 {
-    std::vector<float> colorBuffer;
+    std::vector<Vec3> colorBuffer;
     colorBuffer.resize(buf.size());
       
     std::cout << "generate color buffer : 0%";
       
-    for(unsigned int i=0; i<buf.size(); i+= 3)
+    for(unsigned int i=0; i<buf.size(); ++i)
     {
-        Vec3 v(buf[i+0],buf[i+1],buf[i+2]);
-        float disturb = imp::perlinOctave(v.x(), v.y(), v.z(), 8, 0.7, 1.0/32.0) * 2.0 - 1.0;
+        float disturb = imp::perlinOctave(buf[i].x(), buf[i].y(), buf[i].z(), 8, 0.7, 1.0/32.0) * 2.0 - 1.0;
          
-        float a = std::atan2(buf[i+0],buf[i+1]);
+        float a = std::atan2(buf[i].x(),buf[i].y());
          
         float signal = (1.0+std::sin((a + disturb*4.0) * 16.0))*0.5;
          
@@ -170,9 +140,7 @@ std::vector<float> generateColors4(std::vector<float>& buf)
          
         Vec3 finalColor = mix(colorA,colorB,signal);
          
-        colorBuffer[i+0] = finalColor.x();
-        colorBuffer[i+1] = finalColor.y();
-        colorBuffer[i+2] = finalColor.z();
+        colorBuffer[i] = finalColor;
           
         std::cout << "\rgenerate color buffer : " << std::floor(i*100/buf.size()) << "% ";
     }
@@ -180,14 +148,34 @@ std::vector<float> generateColors4(std::vector<float>& buf)
       
     return colorBuffer;
 }
- 
+
+// -----------------------------------------------------------------------------------------------------------------------
+struct DepthFrag : public imp::FragCallback
+{
+    Meta_Class(DepthFrag)
+    
+    Rasterizer* _rast;
+    
+    DepthFrag(Rasterizer* rast)
+        : _rast(rast)
+    {}
+        
+    virtual void exec(ImageBuf& targets, const Vec3& pt, Uniforms* uniforms = nullptr)
+    {
+        float depth = -uniforms->get(Varying_MVVert).z();
+        Vec4 color = _rast->_defaultColor * clamp( linearstep(0.1f, 20.f, depth)  );
+        color[3] = 255;
+        targets[TARGET_RGB]->setPixel(pt[0],pt[1],color);
+    }
+};
  
 // -----------------------------------------------------------------------------------------------------------------------
-struct DepthTestFrag : public FragCallback
+struct DepthTestFrag : public imp::FragCallback
 {
-	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets) = 0;
+    Meta_Class(DepthTestFrag)
+	virtual void apply(int x, int y, Uniforms& uniforms, Image::Ptr* targets) = 0;
 	
-	void phong(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets, const Vec3& normal)
+	void phong(int x, int y, Uniforms& uniforms, Image::Ptr* targets, const Vec3& normal)
 	{
 		Vec3 light_pos = light_1.position;
 		Vec3 frag_pos = uniforms.get(Varying_MVert);
@@ -204,23 +192,30 @@ struct DepthTestFrag : public FragCallback
 		float s = clamp( reflection.dot(cam_dir) );
 		
 		float light_lvl = clamp( 0.2 + 0.6*a + pow(s, 8) );
-		Vec3 base_color = clamp( Vec3(light_lvl) * uniforms.get(Varying_Color) );
-		targets[TARGET_RGB].setPixel(x,y,base_color * 255.f);
+		Vec4 base_color = Vec4(clamp( Vec3(light_lvl) * uniforms.get(Varying_Color) ));
+        base_color *= 255.f;
+		targets[TARGET_RGB]->setPixel(x,y,base_color);
 	}
 	
-	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, Uniforms* uniforms = nullptr)
+    {
+        depthTest(pt[0],pt[1],*uniforms,targets.data());
+    }
+	
+	virtual void depthTest(int x, int y, Uniforms& uniforms, Image::Ptr* targets)
 	{
 		// depth test
 		float depth = -uniforms.get(Varying_MVVert).z();
 		
 		float depthPx = clamp( linearstep(0.1f, 20.f, depth )  )* 255.0;
-		float curr_depth = targets[TARGET_DEPTH].getPixel(x, y)[0];
+        Vec4 depthV = targets[TARGET_DEPTH]->getPixel(x, y);
+		float curr_depth = depthV[0];
 		if( depthPx < curr_depth)
 		{
 			apply(x, y, uniforms, targets);
 			
 			Vec4 depth(depthPx);
-			targets[TARGET_DEPTH].setPixel(x,y,depth);
+			targets[TARGET_DEPTH]->setPixel(x,y,depth);
 		}
 	}
 };
@@ -228,7 +223,8 @@ struct DepthTestFrag : public FragCallback
 // -----------------------------------------------------------------------------------------------------------------------
 struct DefaultRenderFrag : public DepthTestFrag
 {
-	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+    Meta_Class(DefaultRenderFrag)
+	virtual void apply(int x, int y, Uniforms& uniforms, Image::Ptr* targets)
 	{
 		Vec3 normal = uniforms.get(Varying_Vert); normal.normalize();
 		phong(x,y,uniforms, targets, normal);
@@ -237,7 +233,8 @@ struct DefaultRenderFrag : public DepthTestFrag
 // -----------------------------------------------------------------------------------------------------------------------
 struct TerrRenderFrag : public DepthTestFrag
 {
-	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+    Meta_Class(TerrRenderFrag)
+	virtual void apply(int x, int y, Uniforms& uniforms, Image::Ptr* targets)
 	{
 		Vec3 normal(0.0,0.0,1.0);
 		phong(x,y,uniforms, targets, normal);
@@ -247,17 +244,18 @@ struct TerrRenderFrag : public DepthTestFrag
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightRenderFrag : public DepthTestFrag
 {
-	virtual void apply(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
+    Meta_Class(LightRenderFrag)
+	virtual void apply(int x, int y, Uniforms& uniforms, Image::Ptr* targets)
 	{
 		Vec4 white(255.f);
-		targets[0].setPixel(x,y,white);
+		targets[0]->setPixel(x,y,white);
 	}
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
  struct DefaultVertCallback : public VertCallback
  {
-    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, UniformBuffer& out_uniforms)
+    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, Uniforms& out_uniforms)
     {
         imp::Matrix4 mv = state.model * state.view;
         imp::Matrix4 mvp = mv * state.projection;
@@ -281,7 +279,7 @@ struct LightRenderFrag : public DepthTestFrag
 // -----------------------------------------------------------------------------------------------------------------------
  struct ClearVertCallback : public VertCallback
  {
-    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, UniformBuffer& out_uniforms)
+    virtual void operator()(Vec3& vert_in, Vec3& vert_in2, Uniforms& out_uniforms)
     {
         Vec3 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0);
         Vec3 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0);
@@ -297,20 +295,20 @@ struct LightRenderFrag : public DepthTestFrag
  };
  
 // -----------------------------------------------------------------------------------------------------------------------
-struct ClearFragCallback : public FragCallback
+struct ClearFragCallback : public imp::FragCallback
 {
-	virtual void operator()(int x, int y, UniformBuffer& uniforms, imp::ImageData* targets)
-	{
-        Vec4 col(0.7,0.7,1.0,1.0);
-        Vec4 depth(1.0,1.0,1.0,1.0);
-		targets[TARGET_RGB].setPixel(x,y,col * 255);
-		targets[TARGET_DEPTH].setPixel(x,y,depth * 255);
-	}
+    Meta_Class(ClearFragCallback)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, Uniforms* uniforms = nullptr)
+    {
+		targets[TARGET_RGB]->setPixel(pt[0],pt[1],Vec4(0.7,0.7,1.0,1.0) * 255);
+		targets[TARGET_DEPTH]->setPixel(pt[0],pt[1],Vec4(255));
+    }
 };
  
  DefaultVertCallback defaultVert;
- DefaultRenderFrag defaultFrag;
- LightRenderFrag lightFrag;
- TerrRenderFrag terrFrag;
+ DefaultRenderFrag::Ptr defaultFrag;
+ LightRenderFrag::Ptr lightFrag;
+ TerrRenderFrag::Ptr terrFrag;
  ClearVertCallback clearVert;
- ClearFragCallback clearFrag;
+ ClearFragCallback::Ptr clearFrag;
+ DepthFrag::Ptr depthFrag;

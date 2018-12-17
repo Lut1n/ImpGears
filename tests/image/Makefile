@@ -7,11 +7,11 @@ else
 	CXXFLAGS=-Wall -std=c++11
 endif
 
-LDFLAGS= libimpgears.so
+LDFLAGS= ../../libimpgears.so
 
-all: gridtest
+all: test
 
-gridtest: test.o
+test: test.o
 	$(CXX) -o test test.o -L /usr/lib $(LDFLAGS)
 
 test.o: test.cpp

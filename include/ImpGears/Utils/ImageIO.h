@@ -27,11 +27,11 @@ public:
     ImageIO();
     ~ImageIO();
     
-    static void save(const Image& image, std::string filename);
-    static void save(const Image& image, std::string filename, const Options& opts);
+    static void save(const Image::Ptr image, std::string filename);
+    static void save(const Image::Ptr image, std::string filename, const Options& opts);
 
-    static void load(Image& image, std::string filename);
-    static void load(Image& image, std::string filename, const Options& opts);
+    static Image::Ptr load(std::string filename);
+    static Image::Ptr load(std::string filename, const Options& opts);
 };
 
 IMPGEARS_END

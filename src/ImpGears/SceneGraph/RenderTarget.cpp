@@ -39,10 +39,10 @@ void RenderTarget::createBufferTarget(std::uint32_t width, std::uint32_t height,
     for(std::uint32_t i=0; i<textureCount; ++i)
     {
         m_colorTextures[i] = new Texture();
-        m_colorTextures[i]->build(width, height, PixelFormat_RGBA8);
+        // m_colorTextures[i]->build(width, height, PixelFormat_RGBA8);
         m_colorTextures[i]->setSmooth(false);
         m_colorTextures[i]->setRepeated(false);
-        m_colorTextures[i]->synchronize();
+        m_colorTextures[i]->update();
         m_colorTextures[i]->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, m_colorTextures[i]->getVideoID(), 0);
 		drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
@@ -54,10 +54,10 @@ void RenderTarget::createBufferTarget(std::uint32_t width, std::uint32_t height,
     if(m_hasDepthBuffer)
     {
         m_depthTexture = new Texture();
-        m_depthTexture->build(width, height, PixelFormat_R16);
+        // m_depthTexture->build(width, height, PixelFormat_R16);
         m_depthTexture->setSmooth(false);
         m_depthTexture->setRepeated(false);
-        m_depthTexture->synchronize();
+        m_depthTexture->update();
         m_depthTexture->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->getVideoID(), 0);
         GL_CHECKERROR("set depth buffer");

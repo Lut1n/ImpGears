@@ -2,8 +2,6 @@
 #define IMP_TEXTURE_H
 
 #include <Core/Object.h>
-#include <SceneGraph/ImageData.h>
-#include <Texture/LayeredImage.h>
 #include <Graphics/Image.h>
 
 #include <string>
@@ -28,81 +26,39 @@ class IMP_API Texture : public Object
         Texture(const std::string& name = "");
 
         virtual ~Texture();
-
-        /// \brief Loads the texture from memory.
-        /// \param data - A pointer to the data buffer.
-        /// \param width - The width of the texture.
-        /// \param height - The height of the texture.
-        /// \param format - The pixel format.
-        /// \param memoryMode - The memory mode.
-        void loadFromMemory(char* data, std::uint32_t width, std::uint32_t height, PixelFormat format = PixelFormat_RGBA8);
-
-        /// \brief Loads the texture from pixel buffer.
-        /// \param data - A pointer to the data buffer.
-        /// \param memoryMode - The memory mode.
-        void loadFromImageData(const ImageData* data);
-
-        /// \brief Loads the texture from Layered Image.
-        /// \param data - A pointer to the data buffer.
-        void loadFromLayeredImage(const LayeredImage::Ptr data,IntRect mask = {0,1,2,3});
+		
+        void loadFromMemory(std::uint8_t* data, std::uint32_t width, std::uint32_t height, int chnls = 3);
         
         void loadFromImage(const Image::Ptr data);
-
-        /// \brief Creates a texture.
-        /// \param width - The width of the texture.
-        /// \param height - The height of the texture.
-        /// \param format - The pixel format.
-        /// \param memoryMode - The memory mode.
-		void build(std::uint32_t width, std::uint32_t height, PixelFormat format = PixelFormat_RGBA8);
-
-		/// \brief Destroy a texture
-		void destroy();
-
-        void getImageData(ImageData* data) const;
-
-        void notifyTextureRendering(){m_videoMemLastModified = true;}
-		void synchronize();
 
         void bind() const;
         void unbind() const;
 
-		std::uint32_t getVideoID() const{return m_videoID;}
+		std::uint32_t getVideoID() const{return _videoID;}
 
-        bool isSmooth() const{return m_isSmooth;}
-        void setSmooth(bool smooth){m_isSmooth = smooth; updateVideoParams();}
+        bool isSmooth() const{return _isSmooth;}
+        void setSmooth(bool smooth){_isSmooth = smooth; update();}
 
-        bool isRepeated() const{return m_isRepeated;}
-        void setRepeated(bool repeated){m_isRepeated = repeated; updateVideoParams();}
+        bool isRepeated() const{return _isRepeated;}
+        void setRepeated(bool repeated){_isRepeated = repeated; update();}
 
-        bool hasMimap() const{return m_hasMipmap;}
-        void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){m_hasMipmap = mipmap; m_mipmapMaxLevel = maxLevel; updateVideoParams();}
+        bool hasMimap() const{return _hasMipmap;}
+        void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){_hasMipmap = mipmap; _mipmapMaxLevel = maxLevel; update();}
 
-        void setMemorySyncMode(MemorySyncMode mode){m_syncMode = mode;}
-
-        std::uint32_t getWidth() const {return m_data.getWidth();}
-        std::uint32_t getHeight() const {return m_data.getHeight();}
+        void update();
 
     protected:
     private:
 
-		void updateVideoMemory();
-        void updateVideoParams();
-		void updateLocalMemory();
+        std::uint32_t _videoID;
 
-        ImageData m_data;
+		bool _isSmooth;
+		bool _isRepeated;
+		bool _hasMipmap;
 
-        std::uint32_t m_videoID;
-
-        MemorySyncMode m_syncMode;
-        bool m_videoMemLastModified;
-
-		bool m_isSmooth;
-		bool m_isRepeated;
-		bool m_hasMipmap;
-
-		std::uint32_t m_mipmapMaxLevel;
+		std::uint32_t _mipmapMaxLevel;
 		
-		std::string m_name;
+		std::string _name;
 };
 
 

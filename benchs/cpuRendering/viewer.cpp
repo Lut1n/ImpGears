@@ -10,7 +10,6 @@
 #include <Core/Vec4.h>
 #include <Core/Matrix4.h>
 #include <Core/Perlin.h>
-#include <Texture/ImageUtils.h>
 #include <fstream>
 
 #include <SFML/Graphics.hpp>

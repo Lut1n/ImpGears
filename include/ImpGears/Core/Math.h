@@ -24,11 +24,48 @@ IMP_API double SquareSignal(double t, double maxPeriodRatio = 0.5);
 
 IMP_API double TriangleSignal(double t, double maxPeriodRatio = 0.5);
 
+template<typename Ty>
+IMP_API Ty min(Ty a, Ty b)
+{
+	return a<b?a:b;
+}
+
+template<typename Ty>
+IMP_API Ty max(Ty a, Ty b)
+{
+	return a>b?a:b;
+}
+
+template<typename Ty>
+IMP_API Ty clamp(Ty x, Ty edge0 = (Ty)0, Ty edge1 = (Ty)1)
+{
+	return x>edge1?edge1:(x<edge0?edge0:x);
+}
+
+template<typename Ty>
+IMP_API Ty floor(Ty v)
+{
+	return (Ty)static_cast<long long>(v);
+}
+
+template<typename Ty>
+IMP_API Ty frac(Ty v)
+{
+	return v - floor(v);
+}
+
+template<typename Ty>
+IMP_API Ty smoothstep(Ty edge0, Ty edge1, float delta)
+{
+    Ty x = clamp<Ty>(delta, 0.0, 1.0); 
+    return x*x*(3.0 - 2.0*x);
+}
+
 template<int Dim,typename Ty>
-IMP_API Vec<Dim,Ty> clamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 = (Ty)1.0)
+IMP_API Vec<Dim,Ty> dotClamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 = (Ty)1.0)
 {
 	Vec<Dim,Ty> r;
-	for(int i=0;i<Dim;++i)r[i]=std::min(std::max(edge0,x[i]),edge1);
+	for(int i=0;i<Dim;++i)r[i]=clamp<Ty>(x[i],edge0,edge1);
 	return r;
 }
 
@@ -50,6 +87,14 @@ template<typename Ty>
 IMP_API Ty mix(const Ty& a, const Ty& b, float delta)
 {
     return (b - a)*delta + a;
+}
+
+template<typename Ty>
+IMP_API Ty mix2d(Ty oo, Ty xo, Ty oy, Ty xy, float deltaX, float deltaY)
+{
+	Ty lx1 = mix<Ty>(oo, xo, deltaX);
+	Ty lx2 = mix<Ty>(oy, xy, deltaX);
+	return mix<Ty>(lx1, lx2, deltaY);
 }
 
 template <typename Ty>

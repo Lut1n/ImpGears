@@ -1,6 +1,5 @@
 #include <Core/Math.h>
 #include <Graphics/Rasterizer.h>
-#include <Texture/ImageUtils.h>
 
 IMPGEARS_BEGIN
 

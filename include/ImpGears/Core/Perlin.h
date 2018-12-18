@@ -2,7 +2,6 @@
 #define IMP_PERLINTECH_H
 
 #include <Core/Object.h>
-#include <SceneGraph/ImageData.h>
 
 #include <cstring>
 #include <cmath>

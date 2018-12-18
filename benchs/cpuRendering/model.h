@@ -192,7 +192,7 @@ struct DepthTestFrag : public imp::FragCallback
 		float s = clamp( reflection.dot(cam_dir) );
 		
 		float light_lvl = clamp( 0.2 + 0.6*a + pow(s, 8) );
-		Vec4 base_color = Vec4(clamp( Vec3(light_lvl) * uniforms.get(Varying_Color) ));
+		Vec4 base_color = Vec4(dotClamp( Vec3(light_lvl) * uniforms.get(Varying_Color) ));
         base_color *= 255.f;
 		targets[TARGET_RGB]->setPixel(x,y,base_color);
 	}

@@ -15,7 +15,7 @@ viewer: viewer.o
 	$(CXX) -o viewer viewer.o -L /usr/lib $(LDFLAGS)
 
 viewer.o: viewer.cpp
-	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -I /usr/include -c viewer.cpp -o viewer.o
+	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c viewer.cpp -o viewer.o
 	
 .PHONY : clean
 

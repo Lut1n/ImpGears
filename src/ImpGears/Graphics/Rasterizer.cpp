@@ -1,6 +1,8 @@
 #include <Core/Math.h>
 #include <Graphics/Rasterizer.h>
 
+#include <utility>	// std::swap
+
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
@@ -170,8 +172,15 @@ void Rasterizer::hLine(const Vec3& p1, const Vec3& p2)
     for(int x=std::floor(pts[l].x());x<std::floor(pts[r].x())+1;++x)
     {
         float rel = imp::clamp(imp::linearstep(pts[l].x(),pts[r].x(), (float)x));
-        uniforms.mix(_uniforms[l], _uniforms[r], rel);
-        _fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),&uniforms);
+		if(_uniforms.size() >= 2)
+		{
+			uniforms.mix(_uniforms[l], _uniforms[r], rel);
+			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),&uniforms);
+		}
+		else
+		{
+			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()));
+		}
     }
 }
 
@@ -185,9 +194,9 @@ void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
     Vec3 vertices[3] = {p1,p2,p3};
     
     int bottom=0,center=1,top=2;
-    if(vertices[bottom].y()>vertices[center].y()) imp::swap(bottom,center);
-    if(vertices[bottom].y()>vertices[top].y()) imp::swap(bottom,top);
-    if(vertices[center].y()>vertices[top].y()) imp::swap(center,top);
+    if(vertices[bottom].y()>vertices[center].y()) std::swap(bottom,center);
+    if(vertices[bottom].y()>vertices[top].y()) std::swap(bottom,top);
+    if(vertices[center].y()>vertices[top].y()) std::swap(center,top);
     
     for(int y=std::floor(vertices[bottom].y());y<std::floor(vertices[top].y())+1;++y)
     {
@@ -197,13 +206,16 @@ void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
         float rel0 = imp::clamp(imp::linearstep(vertices[a].y(), vertices[b].y(), (float)y));
         float rel1 = imp::clamp(imp::linearstep(vertices[bottom].y(), vertices[top].y(), (float)y));
         
-        uniforms[0].mix(local[a],local[b],rel0);
-        uniforms[1].mix(local[bottom],local[top],rel1);
-        
         line[0] = imp::mix(vertices[a],vertices[b],rel0);
         line[1] = imp::mix(vertices[bottom],vertices[top],rel1);
-
-        setUniforms2(uniforms[0],uniforms[1]);
+        
+		if(local.size() >= 3)
+		{
+			uniforms[0].mix(local[a],local[b],rel0);
+			uniforms[1].mix(local[bottom],local[top],rel1);
+			setUniforms2(uniforms[0],uniforms[1]);
+		}
+		
         hLine(line[0],line[1]);
     }
 }

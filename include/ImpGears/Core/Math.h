@@ -97,12 +97,6 @@ IMP_API Ty mix2d(Ty oo, Ty xo, Ty oy, Ty xy, float deltaX, float deltaY)
 	return mix<Ty>(lx1, lx2, deltaY);
 }
 
-template <typename Ty>
-IMP_API void swap(Ty& a, Ty& b)
-{
-    Ty t=a; a=b; b=t;
-}
-
 template<typename Ty>
 IMP_API Ty pow(const Ty& x, int p)
 {

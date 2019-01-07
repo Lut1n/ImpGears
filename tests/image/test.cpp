@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     rast.dot(imp::Vec3(offset+2.0,4.0,0.0));
     
     hsym(*image.get(),fgcol);
-    imp::ImageIO::save(*image.get(),"out.tga");
+    imp::ImageIO::save(image,"out.tga");
     
     return 0;
 }

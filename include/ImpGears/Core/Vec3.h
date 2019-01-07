@@ -12,6 +12,10 @@ class IMP_API Vec3 : public Vec<3,float>
 {
 	public:
 	
+	static const Vec3 X;
+	static const Vec3 Y;
+	static const Vec3 Z;
+	
 	Meta_Class(Vec3)
 	
 	Vec3() : Vec() {}

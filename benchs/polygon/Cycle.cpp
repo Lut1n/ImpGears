@@ -168,8 +168,12 @@ int Cycle::getEdgeCnt(const Vec3& v) const
 
 Vec3 Cycle::previous(const Vec3& v) const
 {
-	for(int i=0;i<count();++i)if(v==vertex(i))return vertex(i-1);
-	return Vec3(0.0);
+	return vertex(index(v)-1);
+}
+
+Vec3 Cycle::next(const Vec3& v) const
+{
+	return vertex(index(v)+1);
 }
 
 Vec3 Cycle::gravity() const
@@ -449,4 +453,25 @@ bool Intersection::contains(const Cache& cache, const Vec3& v)
 {
 	for(const auto& i:cache)if(i.ipoint==v)return true;
 	return false;
+}
+
+int Cycle::windingNumber() const
+{
+	float rad = 0.0;
+	for(int i=0;i<count();++i)rad += tan(i).angleFrom(tan(i-1));
+	return rad/(2*3.141592);
+}
+
+void Cycle::reverse()
+{
+	Vertices cpy = vertices;
+	vertices.clear();
+	for(auto it=cpy.rbegin();it!=cpy.rend();it++)vertices.push_back(*it);
+}
+
+Vertices Intersection::getVertices(const Cache& cache)
+{
+	Vertices vert;
+	for(const auto& i:cache) vert.push_back(i.ipoint);
+	return vert;
 }

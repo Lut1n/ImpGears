@@ -54,6 +54,7 @@ struct Cycle
 	Vertices getConnexes(const Vec3& v) const;
 	int getEdgeCnt(const Vec3& v) const;
 	Vec3 previous(const Vec3& v) const;
+	Vec3 next(const Vec3& v) const;
 	
 	Vec3 gravity() const;
 	std::vector<int> degrees() const;
@@ -74,6 +75,8 @@ struct Cycle
 	
 	std::vector<Cycle> triangulate() const;
 	
+	int windingNumber() const;
+	void reverse();
 };
 
 struct Intersection
@@ -86,6 +89,8 @@ struct Intersection
 	Intersection(Edge e1, Edge e2);
 	bool operator==(Intersection other);
 	bool compute();
+	
+	static Vertices getVertices(const Cache& cache);
 	
 	static bool resolve(Cycle& target, const Cycle& other, Cache& precomputed);
 	static bool resolve2(Cycle& cy1, Cycle& cy2, Cache& precomputed);

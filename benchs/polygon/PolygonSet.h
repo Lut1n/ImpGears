@@ -11,16 +11,17 @@ struct PolygonSet
 	
 	using CycleSet = std::vector<Cycle>;
 	
-	CycleSet _exterior;
-	CycleSet _interior;
+	CycleSet _cycles;
 	
 	PolygonSet(const Cycle& basic);
 	PolygonSet(const CycleSet& bound);
 	PolygonSet(const CycleSet& bound, const CycleSet& hole);
 	PolygonSet();
 
+	void resolveHoles();
 	void breakHoles(int exti, int inti);
 	void addCycle(const Cycle& cy, bool hole=false);
+	void addCycles(const CycleSet& other);
 	
 	static bool contains(const CycleSet& cycles, const Vec3& v);
 	

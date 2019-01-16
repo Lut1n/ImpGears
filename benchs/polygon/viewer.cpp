@@ -111,11 +111,11 @@ int main(int argc, char* argv[])
 	polygon2_bis.rotation(-2.5);
 	polygon2_bis  += Vec3(100,110,0);
 	
-	PolygonSet holed; holed._exterior.push_back(cycle1);
+	PolygonSet holed; holed.addCycle(cycle1);
 	cycle1 -= Vec3(300,200,0);
 	cycle1 *= 0.3;
 	cycle1 += Vec3(310,250,0);
-	holed._interior.push_back(cycle1);
+	holed.addCycle(cycle1,true);
 	
 	saw *= Vec3(5,5,0);
 	sawCut *= Vec3(5,5,0);
@@ -133,22 +133,31 @@ int main(int argc, char* argv[])
 	saw3 += Vec3(350,200,0);
 	sawCut3 += Vec3(370,200,0);
 	
-	PolygonSet poly2sub = PolygonSet(polygon2)-PolygonSet(polygon2_bis);// ens_sub(polygon2, polygon2_bis);
-	// poly2sub.breakHoles(0,0);
+	std::cout << "windingNumber poly2 bis = " << polygon2_bis.windingNumber() << std::endl;
+	std::cout << "windingNumber saw = " << saw.windingNumber() << std::endl;
+	std::cout << "windingNumber sawCut2 = " << sawCut2.windingNumber() << std::endl;
+	
+	PolygonSet poly2sub = PolygonSet(polygon2)+PolygonSet(polygon2_bis);
+	std::cout << "break hole poly2sub :" << std::endl;
+	poly2sub.resolveHoles();
 	PolygonSet cutedSaw = PolygonSet(saw)-PolygonSet(sawCut);
-	PolygonSet forgedSaw = PolygonSet(saw2)+PolygonSet(sawCut2);
-	std::cout << "saw2 cnt = "  <<forgedSaw._exterior.size() << "; " << forgedSaw._interior.size() << std::endl;
-	forgedSaw.breakHoles(0,0);
-
-	holed.breakHoles(0,0);
+	PolygonSet forgedSaw = PolygonSet(saw2)*PolygonSet(sawCut2);
+	std::cout << "saw2 cnt = "  <<forgedSaw._cycles.size() << std::endl;
+	std::cout << "break hole cutedSaw :" << std::endl;
+	cutedSaw.resolveHoles();
+	std::cout << "break hole forgedSaw :" << std::endl;
+	forgedSaw.resolveHoles();
+	std::cout << "break hole holed :" << std::endl;
+	holed.resolveHoles();
+	
 	render(rast,holed,imp::Vec4(250,208,20,255));
-	render(rast,polygon3,imp::Vec4(250,208,20,255));
+	render(rast,polygon3,imp::Vec4(10,100,10,255));
 	render(rast,cutedSaw,imp::Vec4(20,20,250,255));
 	render(rast,forgedSaw,imp::Vec4(20,20,250,255));
 	rast.setFragCallback(cell);
 	render(rast,saw3,imp::Vec4(20,20,250,255),true);
 	render(rast,sawCut3,imp::Vec4(250,20,20,255),true);
-	render(rast,poly2sub,imp::Vec4(250,208,20,255));
+	render(rast,poly2sub,imp::Vec4(250,208,20,255),false,1.0);
 	
 	texture.update(image->asGrid()->data());
 	
@@ -280,7 +289,10 @@ void render(imp::Rasterizer& rast, const Cycle& polygon, Vec4 color, bool wirefr
 
 void render(imp::Rasterizer& rast, const PolygonSet& poly, Vec4 color, bool wireframe, float sml)
 {
-	for(auto cy : poly._exterior)render(rast,cy,color, wireframe, sml);
-	for(auto& cy : poly._interior)render(rast,cy,Vec4(255,255,255,510)-color);
-	// render(rast,poly._exterior[1],color);
+	for(auto cy : poly._cycles)
+	{
+		Vec4 col = color;
+		if(cy.windingNumber() < 0)col = Vec4(255,255,255,510)-color;
+		render(rast,cy,col, wireframe, sml);
+	}
 }

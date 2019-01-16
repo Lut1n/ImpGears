@@ -8,13 +8,13 @@ PolygonSet::PolygonSet(const Cycle& basic)
 
 PolygonSet::PolygonSet(const CycleSet& bound)
 {
-	_exterior = bound;
+	for(const auto& cy:bound)addCycle(cy,false);
 }
 
 PolygonSet::PolygonSet(const CycleSet& bound, const CycleSet& hole)
 {
-	_exterior = bound;
-	_interior = hole;
+	for(const auto& cy:bound)addCycle(cy,false);
+	for(const auto& cy:hole)addCycle(cy,true);
 }
 
 PolygonSet::PolygonSet()
@@ -54,10 +54,10 @@ bool find2Link(Cycle& cy1, Cycle& cy2, Edge& link1, Edge& link2)
 
 void PolygonSet::breakHoles(int exti, int inti)
 {
-	Cycle ce = _exterior[exti].boundary();
-	Cycle ci = _interior[inti].boundary();
-	_exterior.clear();
-	_interior.clear();
+	std::cout << "break hole " << exti << "; " << inti << std::endl;
+	Cycle ce = _cycles[exti].boundary();
+	Cycle ci = _cycles[inti].boundary();
+	_cycles.clear();
 
 	// find 1 exterior node and 1 interior
 	Edge link1,link2;
@@ -81,41 +81,94 @@ void PolygonSet::breakHoles(int exti, int inti)
 
 void PolygonSet::addCycle(const Cycle& cy, bool hole)
 {
-	if(hole)_interior.push_back(cy);
-	else _exterior.push_back(cy);
+	Cycle cpy = cy;
+	if(hole && cy.windingNumber() > 0)cpy.reverse();
+	if(!hole && cy.windingNumber() < 0)cpy.reverse();
+	_cycles.push_back(cpy);
 }
 
-Cycle cycleFinder(const Cycle& icyA, const Cycle& icyB, const Intersection::Cache& precomputed, const Edge& startEdge, bool op)
+void PolygonSet::addCycles(const CycleSet& other)
+{
+	for(const auto& cy : other)_cycles.push_back(cy);
+}
+
+PolygonSet PolygonSet::operator-(const PolygonSet& other) const
+{
+	PolygonSet result;
+	for(auto& cy1:_cycles)
+		for(auto& cy2:other._cycles)
+	{
+		PolygonSet local = applyOp(cy1,cy2, OpType_NOT);
+		result.addCycles(local._cycles);
+	}
+	return result;
+}
+
+PolygonSet PolygonSet::operator+(const PolygonSet& other) const
+{
+	PolygonSet result;
+	for(auto& cy1:_cycles)
+		for(auto& cy2:other._cycles)
+	{
+		PolygonSet local = applyOp(cy1,cy2, OpType_OR);
+		result.addCycles(local._cycles);
+	}
+	return result;
+}
+
+PolygonSet PolygonSet::operator*(const PolygonSet& other) const
+{
+	PolygonSet result;
+	for(auto& cy1:_cycles)
+		for(auto& cy2:other._cycles)
+	{
+		PolygonSet local = applyOp(cy1,cy2, OpType_AND);
+		result.addCycles(local._cycles);
+	}
+	return result;
+}
+
+bool isEnter(const Vec3& p,const Cycle& src,const Cycle& other)
+{
+	Vec3 testP = src.next(p);
+	if(other.composes(testP))testP=(p+testP)*0.5;
+	return other.contains(testP);
+}
+
+Cycle pathFinder(const Cycle& cycleA, const Cycle& cycleB, const Vec3& start, bool aOut, bool reverseB)
 {
 	Cycle result;
-	bool src = icyA.composes(startEdge.p2);
+	bool src = false;
 	
-	Edge currEdge = startEdge;
-	Vec3 tan = currEdge.p2 - currEdge.p1;
+	Vec3 curr = start;
 	do
 	{
-		result.addVertex(currEdge.p2);
-		if(currEdge.p2 == startEdge.p1)break;
-		if(Intersection::contains(precomputed,currEdge.p2))src=!src;
-		Vec3 next;
-		if(src) next = icyA.findNextByAngle(currEdge,tan,op);
-		else next =  icyB.findNextByAngle(currEdge,tan,op);
-		currEdge = Edge(currEdge.p2,next);
-		tan = currEdge.p2 - currEdge.p1;
+		result.addVertex(curr);
+		if(cycleA.composes(curr) && cycleB.composes(curr))
+		{
+			bool p1EnterP2 = isEnter(curr,cycleA,cycleB);
+			src=(p1EnterP2 != aOut);
+		}
+		if(src)curr = cycleA.next(curr);
+		else if(reverseB)curr = cycleB.previous(curr);
+		else curr = cycleB.next(curr);
 	}
-	while(currEdge.p2 != startEdge.p2);
+	while(curr != start);
 	
 	return result;
 }
 
-void findAllCycleFrom(const Cycle& cycle1, const Cycle& cycle2, const Intersection::Cache& cache, bool op, PolygonSet::CycleSet& cycles)
+
+
+void findAllPathFrom(const Cycle& cycle1, const Cycle& cycle2, const Intersection::Cache& cache, PolygonSet::OpType op, PolygonSet::CycleSet& cycles)
 {
-	for(int i=0;i<cycle1.count();++i)
+	bool aOut = op==PolygonSet::OpType_OR || op==PolygonSet::OpType_NOT;
+	bool reverseB = op==PolygonSet::OpType_NOT;
+	Vertices iPoints = Intersection::getVertices(cache);
+	for(auto node : iPoints)
 	{
-		Edge e = cycle1.edge(i);
-		if(Intersection::contains(cache,e.p2) || cycle2.contains(e.p2))continue;
-		if(PolygonSet::contains(cycles, e.p2))continue;
-		Cycle result = cycleFinder(cycle1,cycle2,cache,e,op);
+		if(PolygonSet::contains(cycles, node))continue;
+		Cycle result = pathFinder(cycle1,cycle2,node,aOut,reverseB);
 		cycles.push_back(result);
 	}
 }
@@ -148,66 +201,39 @@ PolygonSet PolygonSet::applyOp(const Cycle& cycleA, const Cycle& cycleB, OpType 
 	}
 	
 	CycleSet cycles;
-	findAllCycleFrom(simplA,simplB,computedInter,opType==PolygonSet::OpType_OR,cycles);
+	findAllPathFrom(simplA,simplB,computedInter,opType,cycles);
 	
 	if(opType==OpType_OR)
-	{
-		findAllCycleFrom(simplB,simplA,computedInter,true,cycles);
-		
-		for(auto& cy1:cycles)
-		{
-			bool hole = false;
-			for(auto& cy2:cycles)
-			{
-				if(cy1.vertex(0)==cy2.vertex(0)) continue;
-				if(cy2.contains(cy1)){hole=true;break;}
-			}
-			result.addCycle(cy1,hole);
-		}
-	}
-	else
-	{
-		result = PolygonSet(cycles);
-	}
+		findAllPathFrom(simplB,simplA,computedInter,opType,cycles);
+	
+	result.addCycles(cycles);
 	
 	return result;
 }
 
-PolygonSet PolygonSet::operator-(const PolygonSet& other) const
+void PolygonSet::resolveHoles()
 {
-	PolygonSet result;
-	for(auto& cy1:_exterior)
-		for(auto& cy2:other._exterior)
+	// only one hole. todo multiple holes
+	int i=0,i2=0;
+	for(auto& cy1 : _cycles)
 	{
-		PolygonSet local = applyOp(cy1,cy2, OpType_NOT);
-		for(auto& cy:local._exterior)result.addCycle(cy,false);
-		for(auto& cy:local._interior)result.addCycle(cy,true);
+		i++;
+		if(cy1.windingNumber() > 0)continue;
+		
+		for(auto& cy2 : _cycles)
+		{
+			i2++;
+			if(cy2.windingNumber() < 0)continue;
+			std::cout << "test " << (i-1) << " in " << (i2-1) << std::endl; 
+			if(cy2.contains(cy1))
+			{
+				breakHoles(i2-1,i-1);
+				return;
+			}
+		}
 	}
-	return result;
 }
 
-PolygonSet PolygonSet::operator+(const PolygonSet& other) const
-{
-	PolygonSet result;
-	for(auto& cy1:_exterior)
-		for(auto& cy2:other._exterior)
-	{
-		PolygonSet local = applyOp(cy1,cy2, OpType_OR);
-		for(auto& cy:local._exterior)result.addCycle(cy,false);
-		for(auto& cy:local._interior)result.addCycle(cy,true);
-	}
-	return result;
-}
 
-PolygonSet PolygonSet::operator*(const PolygonSet& other) const
-{
-	PolygonSet result;
-	/*for(auto& cy1:_exterior)
-		for(auto& cy2:other._exterior)
-	{
-		PolygonSet local = applyOp(cy1,cy2, OpType_AND);
-		for(auto& cy:local._exterior)result.addCycle(cy,false);
-		for(auto& cy:local._interior)result.addCycle(cy,true);
-	}*/
-	return result;
-}
+
+

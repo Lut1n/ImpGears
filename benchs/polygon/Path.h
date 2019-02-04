@@ -1,5 +1,5 @@
-#ifndef cycle_def
-#define cycle_def
+#ifndef path_def
+#define path_def
 
 #include <Core/Vec3.h>
 #include <Core/Vec4.h>
@@ -9,7 +9,6 @@
 
 using Vec3 = imp::Vec3;
 using Vec4 = imp::Vec4;
-using Vertices = std::vector<Vec3>;
 
 std::string asstring(const Vec3& v);
 
@@ -22,23 +21,19 @@ struct Edge
 	bool connectedTo(const Edge& other);
 };
 
-struct Cycle
+struct Path
 {
-	Vertices vertices;
+	using BufType = std::vector<Vec3>;
+	BufType vertices;
 	
-	Cycle();
-	Cycle(const Vertices& vert);
-	virtual ~Cycle();
-	
-	void operator+=(Vec3 mv);
-	void operator-=(Vec3 mv);
-	void operator*=(Vec3 mv);
-	void operator/=(Vec3 mv);
-	void rotation(float rad);
+	Path();
+	Path(const BufType& vert);
+	virtual ~Path();
 	
 	void addVertex(Vec3 vt);
-	void addVertices(Vertices toInsert);
-	void addFrom(const Cycle& other, int a, int b, int dir = 1);
+	void addVertices(const BufType& toInsert);
+	void addFrom(const Path& cycle);
+	Path subPath(int from, int to, bool reverse = false) const;
 	int cycleIndex(int i) const;
 	Vec3& vertex(int i);
 	const Vec3& vertex(int i) const;
@@ -49,9 +44,7 @@ struct Cycle
 	void dump() const;
 	
 	bool composes(const Vec3& v) const;
-	bool contains(const Vec3& v) const;
-	bool contains(const Cycle& c) const;
-	Vertices getConnexes(const Vec3& v) const;
+	BufType getConnexes(const Vec3& v) const;
 	int getEdgeCnt(const Vec3& v) const;
 	Vec3 previous(const Vec3& v) const;
 	Vec3 next(const Vec3& v) const;
@@ -64,16 +57,16 @@ struct Cycle
 	void erase(std::vector<int> toErase);
 	
 	// keep only the surrounding shape of the polygons
-	Cycle boundary() const;
-	Cycle simplify() const;
+	Path boundary() const;
+	Path simplify() const;
 	
 	Vec3 leftExtremity() const;
 	
 	Vec3 findNextByAngle(const Edge& curr, const Vec3& tangent,bool maxi=true) const;
 	
-	Cycle extractTriangle();
+	Path extractTriangle();
 	
-	std::vector<Cycle> triangulate() const;
+	std::vector<Path> triangulate() const;
 	
 	int windingNumber() const;
 	void reverse();
@@ -81,6 +74,7 @@ struct Cycle
 
 struct Intersection
 {
+	using BufType = std::vector<Vec3>;
 	using Cache = std::vector<Intersection>;
 
 	Edge edge[2];
@@ -90,19 +84,19 @@ struct Intersection
 	bool operator==(Intersection other);
 	bool compute();
 	
-	static Vertices getVertices(const Cache& cache);
+	static BufType getVertices(const Cache& cache);
 	
-	static bool resolve(Cycle& target, const Cycle& other, Cache& precomputed);
-	static bool resolve2(Cycle& cy1, Cycle& cy2, Cache& precomputed);
-	static bool selfResolve(Cycle& cy, Cache& precomputed);
+	static bool resolve(Path& target, const Path& other, Cache& precomputed);
+	static bool resolve2(Path& cy1, Path& cy2, Cache& precomputed);
+	static bool selfResolve(Path& cy, Cache& precomputed);
 	
-	static bool resolve(Cycle& target, const Cycle& other);
-	static bool resolve2(Cycle& cy1, Cycle& cy2);
-	static bool selfResolve(Cycle& cy);
+	static bool resolve(Path& target, const Path& other);
+	static bool resolve2(Path& cy1, Path& cy2);
+	static bool selfResolve(Path& cy);
 
-	static bool isCrossing(const Cycle& target, const Edge& e, bool excludeNode=true);
+	static bool isCrossing(const Path& target, const Edge& e, bool excludeNode=true);
 	
 	static bool contains(const Cache& cache, const Vec3& v);
 };
 
-#endif //cycle_def
+#endif //path_def

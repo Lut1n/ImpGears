@@ -1,20 +1,21 @@
-#include "Cycle.h"
+#include "Path.h"
 
 #include <map>
+#include <cstdlib>
 
 std::string asstring(const Vec3& v) {std::stringstream s; s << "["<<v[0]<<";"<<v[1]<<";"<<v[2]<<"]"; return s.str();}
 
 
-Cycle::Cycle()
+Path::Path()
 {
 }
 
-Cycle::Cycle(const Vertices& vert)
+Path::Path(const BufType& vert)
 {
 	vertices = vert;
 }
 
-Cycle::~Cycle()
+Path::~Path()
 {
 }
 
@@ -23,58 +24,35 @@ float sign(float a)
 	return a<0.0?-1.0:1.0;
 }
 
-void Cycle::operator+=(Vec3 mv)
-{
-	int N = vertices.size();
-	for(int i=0;i<N;++i) vertices[i] += mv;
-}
-
-void Cycle::operator-=(Vec3 mv)
-{
-	int N = vertices.size();
-	for(int i=0;i<N;++i) vertices[i] -= mv;
-}
-
-void Cycle::operator*=(Vec3 mv)
-{
-	int N = vertices.size();
-	for(int i=0;i<N;++i) vertices[i] *= mv;
-}
-
-void Cycle::operator/=(Vec3 mv)
-{
-	int N = vertices.size();
-	for(int i=0;i<N;++i) vertices[i] /= mv;
-}
-
-void Cycle::rotation(float rad)
-{
-	int N = vertices.size();
-	for(int i=0;i<N;++i) vertices[i] *= imp::Matrix3::rotationZ(rad);
-}
-
-void Cycle::addVertex(Vec3 vt)
+void Path::addVertex(Vec3 vt)
 {
 	vertices.push_back(vt);
 }
 
-void Cycle::addVertices(Vertices toInsert)
+void Path::addVertices(const BufType& toInsert)
 {
 	for(auto v:toInsert)addVertex(v);
 }
 
-void Cycle::addFrom(const Cycle& other, int a, int b, int dir)
+void Path::addFrom(const Path& cycle)
 {
-	dir = dir>0?1:-1;
-	for(int i=a; i!=b; i+=dir)
-	{
-		i=other.cycleIndex(i); if(i==b)break;
-		addVertex(other.vertex(i));
-	}
-	addVertex(other.vertex(b));
+	addVertices(cycle.vertices);
 }
 
-int Cycle::cycleIndex(int i) const
+Path Path::subPath(int from, int to, bool reverse) const
+{
+	Path res;
+	int inc = reverse?-1:1;
+	for(int i=from; i!=to; i+=inc)
+	{
+		i=cycleIndex(i);if(i==to)break;
+		res.addVertex(vertex(i));
+	}
+	res.addVertex(vertex(to));
+	return res;
+}
+
+int Path::cycleIndex(int i) const
 {
 	int N = count();
 	while(i>=N)i-=N;
@@ -82,71 +60,50 @@ int Cycle::cycleIndex(int i) const
 	return i;
 }
 
-Vec3& Cycle::vertex(int i)
+Vec3& Path::vertex(int i)
 {
 	return vertices[cycleIndex(i)];
 }
 
-const Vec3& Cycle::vertex(int i) const
+const Vec3& Path::vertex(int i) const
 {
 	return vertices[cycleIndex(i)];
 }
 
-int Cycle::index(const Vec3& v) const
+int Path::index(const Vec3& v) const
 {
 	auto it = std::find(vertices.begin(),vertices.end(),v);
 	return it-vertices.begin();
 }
 
-Vec3 Cycle::tan(int i) const
+Vec3 Path::tan(int i) const
 {
 	Vec3 dir = vertex(i)-vertex(i-1); dir.normalize();
 	return dir;
 }
 
-Edge Cycle::edge(int i) const
+Edge Path::edge(int i) const
 {
 	return Edge(vertex(i-1),vertex(i));
 }
 
-int Cycle::count() const
+int Path::count() const
 {
 	return vertices.size();
 }
 
-void Cycle::dump() const
+void Path::dump() const
 {
 	std::cout << "dump polygon :" << std::endl;
 	for(auto vert : vertices)std::cout << asstring(vert) << std::endl;
 }
 
-bool Cycle::composes(const Vec3& v) const
+bool Path::composes(const Vec3& v) const
 {
 	return std::find(vertices.begin(),vertices.end(),v) != vertices.end();
 }
 
-bool Cycle::contains(const Vec3& v) const
-{
-	int cpt = 0;
-	
-	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,0.0);
-	Edge ray(ext,v);
-	for(int i=0;i<count();++i)
-	{
-		Intersection inter(edge(i), ray);
-		if(inter.compute())++cpt;
-	}
-	
-	return (cpt%2)>0;
-}
-
-bool Cycle::contains(const Cycle& c) const
-{
-	for(auto v: c.vertices)if(contains(v)==false)return false;
-	return true;
-}
-
-Vertices Cycle::getConnexes(const Vec3& v) const
+Path::BufType Path::getConnexes(const Vec3& v) const
 {
 	std::vector<Vec3> res;
 	for(int i=0;i<count();++i)
@@ -160,44 +117,44 @@ Vertices Cycle::getConnexes(const Vec3& v) const
 	return res;
 }
 
-int Cycle::getEdgeCnt(const Vec3& v) const
+int Path::getEdgeCnt(const Vec3& v) const
 {
-	Vertices vert = getConnexes(v);
+	BufType vert = getConnexes(v);
 	return vert.size();
 }
 
-Vec3 Cycle::previous(const Vec3& v) const
+Vec3 Path::previous(const Vec3& v) const
 {
 	return vertex(index(v)-1);
 }
 
-Vec3 Cycle::next(const Vec3& v) const
+Vec3 Path::next(const Vec3& v) const
 {
 	return vertex(index(v)+1);
 }
 
-Vec3 Cycle::gravity() const
+Vec3 Path::gravity() const
 {
 	Vec3 total;
 	for(auto v:vertices)total+=v;
 	return total/count();
 }
 
-std::vector<int> Cycle::degrees() const
+std::vector<int> Path::degrees() const
 {
 	std::vector<int> res;
 	for(auto v:vertices) res.push_back(getConnexes(v).size());
 	return res;
 }
 
-void Cycle::erase(std::vector<int> toErase)
+void Path::erase(std::vector<int> toErase)
 {
 	for(auto& i : toErase)i=cycleIndex(i);
 	std::sort(toErase.begin(),toErase.end(),std::greater<int>());
 	for(auto e : toErase)vertices.erase(vertices.begin()+e);
 }
 
-Vec3 Cycle::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) const
+Vec3 Path::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) const
 {
 	std::vector<Vec3> cnx = getConnexes(curr.p2);
 	std::map<float,Vec3> found;
@@ -214,9 +171,9 @@ Vec3 Cycle::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) co
 	return best;
 }
 
-Cycle Cycle::boundary() const
+Path Path::boundary() const
 {
-	Cycle result;
+	Path result;
 	Vec3 first = leftExtremity();
 	
 	Edge currEdge(first,first);
@@ -234,27 +191,27 @@ Cycle Cycle::boundary() const
 }
 
 
-Cycle Cycle::simplify() const
+Path Path::simplify() const
 {
-	Cycle cpy = *this;
+	Path cpy = *this;
 	Intersection::selfResolve(cpy);
 	return cpy.boundary();
 }
 
-Vec3 Cycle::leftExtremity() const
+Vec3 Path::leftExtremity() const
 {
 	Vec3 res = vertices[0];
 	for(auto v:vertices)if(v[0]<res[0])res=v;
 	return res;
 }
 
-bool Cycle::areConnected(const Vec3& v1, const Vec3& v2) const
+bool Path::areConnected(const Vec3& v1, const Vec3& v2) const
 {
 	std::vector<Vec3> co=getConnexes(v1);
 	return std::find(co.begin(),co.end(),v2)!=co.end();
 }
 
-bool Cycle::areConnected(const Vec3& v1, const Vec3& v2, const Vec3& v3) const
+bool Path::areConnected(const Vec3& v1, const Vec3& v2, const Vec3& v3) const
 {
 	std::vector<Vec3> co1=getConnexes(v1);
 	std::vector<Vec3> co2=getConnexes(v2);
@@ -266,7 +223,7 @@ bool Cycle::areConnected(const Vec3& v1, const Vec3& v2, const Vec3& v3) const
 	return test1 && test2 && test3;
 }
 
-Cycle Cycle::extractTriangle()
+Path Path::extractTriangle()
 {
 	std::vector<int> deg = degrees();
 	std::map<float,int> found;
@@ -295,17 +252,17 @@ Cycle Cycle::extractTriangle()
 	if(areConnected(tri[0],tri[1],tri[2])) erase({best,best-1,best-2});
 	else erase({best-1});
 	
-	return Cycle(tri);
+	return Path(tri);
 }
 
-std::vector<Cycle> Cycle::triangulate() const
+std::vector<Path> Path::triangulate() const
 {
-	Cycle cpy = *this;
-	std::vector<Cycle> res;
+	Path cpy = *this;
+	std::vector<Path> res;
 	while(cpy.count() != 0)
 	{
-		Cycle extracted;
-		if(cpy.count()==3){extracted=cpy; cpy=Cycle();}
+		Path extracted;
+		if(cpy.count()==3){extracted=cpy; cpy=Path();}
 		else extracted = cpy.extractTriangle();
 		res.push_back(extracted);
 	}
@@ -366,15 +323,15 @@ bool Intersection::compute()
 	return false;
 }
 
-bool Intersection::resolve(Cycle& target, const Cycle& other, Cache& precomputed)
+bool Intersection::resolve(Path& target, const Path& other, Cache& precomputed)
 {
-	Cycle targetCpy = target;
-	target = Cycle();
+	Path targetCpy = target;
+	target = Path();
 	
 	for(int i=0;i<targetCpy.count();++i)
 	{
 		Edge e1 = targetCpy.edge(i);
-		Vertices toInsert;
+		BufType toInsert;
 		
 		for(int j=0;j<other.count();++j)
 		{
@@ -401,9 +358,9 @@ bool Intersection::resolve(Cycle& target, const Cycle& other, Cache& precomputed
 	return target.count() > targetCpy.count();
 }
 
-bool Intersection::resolve2(Cycle& cy1, Cycle& cy2, Cache& precomputed)
+bool Intersection::resolve2(Path& cy1, Path& cy2, Cache& precomputed)
 {
-	Cycle cpy = cy1;
+	Path cpy = cy1;
 	
 	bool r1 = resolve(cy1,cy2,precomputed);
 	bool r2 = resolve(cy2,cpy,precomputed);
@@ -411,32 +368,32 @@ bool Intersection::resolve2(Cycle& cy1, Cycle& cy2, Cache& precomputed)
 	return r1 || r2;
 }
 
-bool Intersection::selfResolve(Cycle& cy, Cache& precomputed)
+bool Intersection::selfResolve(Path& cy, Cache& precomputed)
 {
-	Cycle cpy = cy;
+	Path cpy = cy;
 	bool res = resolve(cy,cpy,precomputed);
 	return res;
 }
 
-bool Intersection::resolve(Cycle& target, const Cycle& other)
+bool Intersection::resolve(Path& target, const Path& other)
 {
 	Cache tmp;
 	return resolve(target,other,tmp);
 }
 
-bool Intersection::resolve2(Cycle& cy1, Cycle& cy2)
+bool Intersection::resolve2(Path& cy1, Path& cy2)
 {
 	Cache tmp;
 	return resolve2(cy1,cy2,tmp);
 }
 
-bool Intersection::selfResolve(Cycle& cy)
+bool Intersection::selfResolve(Path& cy)
 {
 	Cache tmp;
 	return selfResolve(cy,tmp);
 }
 
-bool Intersection::isCrossing(const Cycle& target, const Edge& e, bool excludeNode)
+bool Intersection::isCrossing(const Path& target, const Edge& e, bool excludeNode)
 {
 	for(int i=0;i<target.count();++i)
 	{
@@ -455,23 +412,23 @@ bool Intersection::contains(const Cache& cache, const Vec3& v)
 	return false;
 }
 
-int Cycle::windingNumber() const
+int Path::windingNumber() const
 {
 	float rad = 0.0;
 	for(int i=0;i<count();++i)rad += tan(i).angleFrom(tan(i-1));
 	return rad/(2*3.141592);
 }
 
-void Cycle::reverse()
+void Path::reverse()
 {
-	Vertices cpy = vertices;
+	BufType cpy = vertices;
 	vertices.clear();
 	for(auto it=cpy.rbegin();it!=cpy.rend();it++)vertices.push_back(*it);
 }
 
-Vertices Intersection::getVertices(const Cache& cache)
+Intersection::BufType Intersection::getVertices(const Cache& cache)
 {
-	Vertices vert;
+	BufType vert;
 	for(const auto& i:cache) vert.push_back(i.ipoint);
 	return vert;
 }

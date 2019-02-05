@@ -266,12 +266,12 @@ class Stars : public imp::VBOData, public imp::SceneNode
             
 			cube.fillBuffer( _vertexBuffer );
 
-			imp::Uint32 vertexBuffSize = _vertexBuffer.size()*sizeof(float);
+			std::uint32_t vertexBuffSize = _vertexBuffer.size()*sizeof(float);
 
 			requestVBO(vertexBuffSize);
 			setVertices(_vertexBuffer.data(), vertexBuffSize);
 			
-			setScale(imp::Vector3(10.0,10.0,10.0));
+			setScale(imp::Vec3(10.0,10.0,10.0));
 			
 			 setPrimitive(Primitive_Points);
 		}
@@ -304,12 +304,12 @@ class Spheroid : public imp::VBOData, public imp::SceneNode
             
 			cube.fillBuffer( _vertexBuffer );
 
-			imp::Uint32 vertexBuffSize = _vertexBuffer.size()*sizeof(float);
+			std::uint32_t vertexBuffSize = _vertexBuffer.size()*sizeof(float);
 
 			requestVBO(vertexBuffSize);
 			setVertices(_vertexBuffer.data(), vertexBuffSize);
 			
-			setScale(imp::Vector3(size,size,size));
+			setScale(imp::Vec3(size,size,size));
 			
 			 setPrimitive(Primitive_Triangles);
 		}
@@ -351,14 +351,10 @@ struct ViewerState
 	ViewerState()
 	{	
 		
-		// screen render target
-		screenTarget .reset( new imp::RenderTarget() );
-		screenTarget->createScreenTarget(800,600);
-		
 		camera.reset( new imp::Camera() );
 		camera->initFrustum(800, 600, 60.0*3.14159f/180.f, 0.1, 128.0);
-		camera->setPosition(imp::Vector3(0.0f, 0.0f, 1.5f));
-		camera->setTarget(imp::Vector3(0.0f, 0.0f, 0.0f));
+		camera->setPosition(imp::Vec3(0.0f, 0.0f, 1.5f));
+		camera->setTarget(imp::Vec3(0.0f, 0.0f, 0.0f));
 		
 		renderer.reset(new imp::GraphicRenderer() );
 		// renderer->setCenterCursor(false);
@@ -424,7 +420,7 @@ int main(int argc, char* argv[])
 		
 	
         double d = sin(clock.getElapsedTime().asMilliseconds() / 1000.0);
-        v_state.camera->setPosition(imp::Vector3(0.0f, 0.0f, 1.0 + (d+1.0) * 3.0));
+        v_state.camera->setPosition(imp::Vec3(0.0f, 0.0f, 1.0 + (d+1.0) * 3.0));
 		
 		// rendering
 		v_state.renderer->renderScene();

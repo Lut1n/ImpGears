@@ -1,28 +1,39 @@
-#ifndef path_def
-#define path_def
+#ifndef IMP_PATH_H
+#define IMP_PATH_H
 
 #include <Core/Vec3.h>
 #include <Core/Vec4.h>
 #include <Core/Math.h>
 #include <sstream>
 
+IMPGEARS_BEGIN
 
-using Vec3 = imp::Vec3;
-using Vec4 = imp::Vec4;
-
-std::string asstring(const Vec3& v);
-
-struct Edge
+//--------------------------------------------------------------
+class IMP_API Edge : public Object
 {
-	Vec3 p1,p2;
+	public:
+	
+    Vec3 _p1, _p2;
+	
+	Meta_Class(Edge)
+	
 	Edge();
-	Edge(Vec3 p1,Vec3 p2);
+	
+	Edge(const Edge& other);
+	
+	Edge(const Vec3& p1, const Vec3& p2);
+	
 	bool operator==(const Edge& other);
 	bool connectedTo(const Edge& other);
 };
 
-struct Path
+//--------------------------------------------------------------
+class IMP_API Path : public Object
 {
+	public:
+	
+	Meta_Class(Path)
+	
 	using BufType = std::vector<Vec3>;
 	BufType vertices;
 	
@@ -72,8 +83,13 @@ struct Path
 	void reverse();
 };
 
-struct Intersection
+//--------------------------------------------------------------
+class IMP_API Intersection : public Object
 {
+	public:
+	
+	Meta_Class(Intersection)
+		
 	using BufType = std::vector<Vec3>;
 	using Cache = std::vector<Intersection>;
 
@@ -99,4 +115,6 @@ struct Intersection
 	static bool contains(const Cache& cache, const Vec3& v);
 };
 
-#endif //path_def
+IMPGEARS_END
+
+#endif //IMP_PATH_H

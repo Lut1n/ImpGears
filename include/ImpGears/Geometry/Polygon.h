@@ -1,6 +1,8 @@
 #ifndef IMP_POLYGON_H
 #define IMP_POLYGON_H
 
+#include <Geometry/Path.h>
+
 #include <Core/Object.h>
 #include <Core/Math.h>
 #include <Core/Vec3.h>
@@ -9,94 +11,48 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API Edge : public Object
-{
-	public:
-	
-    imp::Vec3 _p1;
-    imp::Vec3 _p2;
-    imp::Vec3 _n;
-	
-	Meta_Class(Edge)
-	
-	Edge(){}
-	
-	Edge(const Edge& other)
-		: _p1(other._p1)
-		, _p2(other._p2)
-		, _n(other._n)
-	{}
-	
-	Edge(const imp::Vec3& p1, const imp::Vec3& p2, const imp::Vec3& n)
-		: _p1(p1)
-		, _p2(p2)
-		, _n(n)
-	{}
-	
-	void operator=(const Edge& other)
-	{
-		_p1 = other._p1;
-		_p2 = other._p2;
-		_n = other._n;
-	}
-    
-    bool operator==(const Edge& other) const
-    {
-        return _p1==other._p1 && _p2==other._p2;
-    }
-	
-	bool intersection(const Edge& other, imp::Vec3& ipoint) const;
-};
-
-	
 typedef std::vector<Edge> EdgeBuffer;
 
 class IMP_API Polygon : public Object
 {
 	public:
 	
-	EdgeBuffer	_edges;
-	
-	mutable imp::Vec3 _boundsA;
-	mutable imp::Vec3 _boundsB;
-	
 	Meta_Class(Polygon)
 	
-	Polygon(){}
+	Path _path;
 	
-	virtual ~Polygon(){}
+	Polygon();
+	Polygon(const Path& vert);
+	virtual ~Polygon();
 	
-	void computeBounds() const;
+	void operator+=(const Vec3& mv);
+	void operator-=(const Vec3& mv);
+	void operator*=(const Vec3& mv);
+	void operator/=(const Vec3& mv);
+	void rotation(float rad);
 	
-	bool inside(const imp::Vec3& point) const;
+	Vec3 tan(int i) const;
+	Edge edge(int i) const;
 	
-	bool inside(const Edge& edge) const;
-	bool outside(const Edge& edge) const;
+	bool inside(const Vec3& v) const;
+	bool inside(const Polygon& c) const;
 	
-	float distance(const imp::Vec3& point) const;
+	Vec3 gravity() const;
 	
-	bool intersection(const Edge& edge, imp::Vec3& ipoint) const;
+	// keep only the surrounding shape of the polygons
+	Polygon boundary() const;
+	Polygon simplify() const;
 	
-	void push_back(const Edge& edge)
-	{
-		_edges.push_back(edge);
-	}
+	Vec3 leftExtremity() const;
 	
-	unsigned int size() const
-	{
-		return _edges.size();
-	}
+	Vec3 findNextByAngle(const Edge& curr, const Vec3& tangent,bool maxi=true) const;
 	
-	Edge& operator[](unsigned int i)
-	{
-		return _edges[i];
-	}
+	Polygon extractTriangle();
 	
-	const Edge& operator[](unsigned int i) const
-	{
-		return _edges[i];
-	}
+	std::vector<Polygon> triangulate() const;
 	
+	int windingNumber() const;
+	void reverse();
 };
 
 IMPGEARS_END

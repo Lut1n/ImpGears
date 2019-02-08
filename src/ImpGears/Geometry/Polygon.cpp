@@ -1,216 +1,223 @@
 #include <Geometry/Polygon.h>
 
 #include <map>
-#include <vector>
-#include <cmath>
-#include <iostream>
+#include <cstdlib>
 
 IMPGEARS_BEGIN
 
-/*
-
-bool operator==(const imp::Vec3& v1, const imp::Vec3& v2)
+//--------------------------------------------------------------
+Polygon::Polygon()
 {
-    return v1.x() == v2.x() && v1.y() == v2.y() && v1.z() == v2.z();
-}*/
-
-std::ostream& operator<<(std::ostream& os, const imp::Vec3& v)
-{  
-    os << "[" << v.x() << ";" << v.y() << ";" << v.z() << "]";  
-    return os;  
-}  
-
-imp::Vec3 mix(const imp::Vec3& a, const imp::Vec3& b, float f)
-{
-    return a + (b-a) * f;
 }
 
 //--------------------------------------------------------------
-bool Edge::intersection(const Edge& other, imp::Vec3& ipoint) const
+Polygon::Polygon(const Path& path)
 {
-	const Edge& s1 = *this;
-	const Edge& s2 = other;
-	
-	imp::Vec3 p12 = s1._p2 - s1._p1;
-    imp::Vec3 a = s2._p1 - s1._p1;
-    imp::Vec3 b = s2._p2 - s1._p1;
-    
-    imp::Vec3 tan = p12;
-    tan.normalize();
-    
-    imp::Vec3 bitan = imp::Vec3(0.0,0.0,1.0).cross( tan );
-	bitan.normalize();
-    
-    float da = a.dot(bitan);
-    float db = b.dot(bitan);
-    if( da * db <= 0.0 ) // one on each side
-    {
-        float t = da / (da - db);
-        ipoint = mix(a, b, t);
-        
-        float di = ipoint.dot(tan);
-        if(di > 0.0 && di < p12.length())
-        {
-			ipoint = s1._p1 + ipoint;
-            return true;
-        }
-    }
-    
-    return false;
+	_path = path;
 }
-
-void Polygon::computeBounds() const
-{
-	if(_edges.size() > 0)
-	{
-		_boundsA = _edges[0]._p1;
-		_boundsB = _edges[0]._p1;
-	}
-	
-	for(unsigned int i=0; i<_edges.size(); i++)
-    {
-		if( _edges[i]._p1.x() < _boundsA.x()
-			|| _edges[i]._p1.y() < _boundsA.y()  )
-		{
-			_boundsA = _edges[i]._p1;
-		}
-		if( _edges[i]._p2.x() < _boundsA.x()
-			|| _edges[i]._p2.y() < _boundsA.y()  )
-		{
-			_boundsA = _edges[i]._p2;
-		}
-		if( _edges[i]._p1.x() > _boundsB.x()
-			|| _edges[i]._p1.y() > _boundsB.y()  )
-		{
-			_boundsB = _edges[i]._p1;
-		}
-		if( _edges[i]._p2.x() > _boundsB.x()
-			|| _edges[i]._p2.y() > _boundsB.y()  )
-		{
-			_boundsB = _edges[i]._p2;
-		}
-	}
-}
-
 
 //--------------------------------------------------------------
-bool Polygon::inside(const imp::Vec3& p) const
-{	
-    computeBounds();
-	imp::Vec3 offPolygonSet = (_boundsB - _boundsA);
-	offPolygonSet.normalize();
-	imp::Vec3 target = _boundsB + offPolygonSet;
-	
-	Edge fakeSeg;
-	fakeSeg._p1 = p;
-	fakeSeg._p2 = target;
-	
-	std::map<double, imp::Vec3> _distNormals;
-	
-	for(unsigned int i=0; i<_edges.size(); i++)
-    {
-		imp::Vec3 ipoint;
-		if( fakeSeg.intersection(_edges[i], ipoint) )
-		{
-			_distNormals[(ipoint - p).length()] = _edges[i]._n;
-		}
-	}
-	
-	std::map<double, imp::Vec3>::iterator it = _distNormals.begin();
-	if(it != _distNormals.end())
-	{
-		imp::Vec3 n = it->second;
-		imp::Vec3 dir = target-p;
-		if(dir.dot(n) >= 0.0)
-		{
-			return true;
-		}
-	}
-	
-	return false;
+Polygon::~Polygon()
+{
 }
 
+//--------------------------------------------------------------
+void Polygon::operator+=(const Vec3& mv)
+{
+	int N = _path.count();
+	for(int i=0;i<N;++i) _path.vertices[i] += mv;
+}
 
 //--------------------------------------------------------------
-float Polygon::distance(const imp::Vec3& p) const
+void Polygon::operator-=(const Vec3& mv)
 {
-	float res = 1e20;
-	float ares = res;
-	bool bench_test = false;
+	int N = _path.count();
+	for(int i=0;i<N;++i) _path.vertices[i] -= mv;
+}
+
+//--------------------------------------------------------------
+void Polygon::operator*=(const Vec3& mv)
+{
+	int N = _path.count();
+	for(int i=0;i<N;++i) _path.vertices[i] *= mv;
+}
+
+//--------------------------------------------------------------
+void Polygon::operator/=(const Vec3& mv)
+{
+	int N = _path.count();
+	for(int i=0;i<N;++i) _path.vertices[i] /= mv;
+}
+
+//--------------------------------------------------------------
+void Polygon::rotation(float rad)
+{
+	int N = _path.count();
+	for(int i=0;i<N;++i) _path.vertices[i] *= imp::Matrix3::rotationZ(rad);
+}
+
+//--------------------------------------------------------------
+Vec3 Polygon::tan(int i) const
+{
+	Vec3 dir = _path.vertex(i)-_path.vertex(i-1); dir.normalize();
+	return dir;
+}
+
+//--------------------------------------------------------------
+Edge Polygon::edge(int i) const
+{
+	return Edge(_path.vertex(i-1),_path.vertex(i));
+}
+
+//--------------------------------------------------------------
+bool Polygon::inside(const Vec3& v) const
+{
+	// Vec3(std::rand(),std::rand(),0.0);
 	
-	for(unsigned int i=0; i<_edges.size(); i++)
-    {
-		imp::Vec3 pp1 = (p - _edges[i]._p1);
-		imp::Vec3 p12 = (_edges[i]._p2 - _edges[i]._p1);
-		imp::Vec3 tan = p12;
-		tan.normalize();
-		
-		float projp = pp1.dot(tan);
-		
-		if(projp <= 0.0 || projp > p12.length())
-			continue;
-		
-		float local = (p - _edges[i]._p1).dot(_edges[i]._n);
-		float alocal = std::abs(local);
-		
-		if(alocal < ares)
-		{
-			res = local;
-			ares = alocal;
-			bench_test = true;
-		}
-	}
+	int cpt = 0;
 	
-	if(!bench_test)
+	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,0.0); //Vec3((double)std::rand()/RAND_MAX,(double)std::rand()/RAND_MAX,0.0)*10.0;
+	Edge ray(ext,v);
+	for(int i=0;i<_path.count();++i)
 	{
-		return 1.0;
+		Intersection inter(edge(i), ray);
+		if(inter.compute())++cpt;
 	}
 	
+	return (cpt%2)>0;
+}
+
+//--------------------------------------------------------------
+bool Polygon::inside(const Polygon& c) const
+{
+	for(auto v: c._path.vertices)if(inside(v)==false)return false;
+	return true;
+}
+
+//--------------------------------------------------------------
+Vec3 Polygon::gravity() const
+{
+	Vec3 total;
+	for(auto v:_path.vertices)total+=v;
+	return total/_path.count();
+}
+
+//--------------------------------------------------------------
+Vec3 Polygon::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) const
+{
+	std::vector<Vec3> cnx = _path.getConnexes(curr._p2);
+	std::map<float,Vec3> found;
+	for(auto v : cnx)
+	{
+		if(v == curr._p1)continue;
+		float angle = Vec3(v-curr._p2).angleFrom(tangent);
+		found[angle] = v;
+	}
+	
+	Vec3 best = found.begin()->second;
+	if(maxi) best = found.rbegin()->second;
+	
+	return best;
+}
+
+//--------------------------------------------------------------
+Polygon Polygon::boundary() const
+{
+	Path result;
+	Vec3 first = leftExtremity();
+	
+	Edge currEdge(first,first);
+	Vec3 tan = imp::Vec3::X;
+	do
+	{
+		result.addVertex(currEdge._p2);
+		Vec3 next = findNextByAngle(currEdge, tan, true);
+		currEdge = Edge(currEdge._p2,next);
+		tan = currEdge._p2 - currEdge._p1;
+	}
+	while(currEdge._p2 != first);
+	
+	return Polygon(result);
+}
+
+//--------------------------------------------------------------
+Polygon Polygon::simplify() const
+{
+	Path cpy = _path;
+	Intersection::selfResolve(cpy);
+	return Polygon(cpy).boundary();
+}
+
+//--------------------------------------------------------------
+Vec3 Polygon::leftExtremity() const
+{
+	Vec3 res = _path.vertices[0];
+	for(auto v:_path.vertices)if(v[0]<res[0])res=v;
 	return res;
 }
 
 //--------------------------------------------------------------
-bool Polygon::outside(const Edge& seg) const
+Polygon Polygon::extractTriangle()
 {
-	bool d1 = inside(seg._p1);
-	bool d2 = inside(seg._p2);
-	
-	return !d1 && !d2;
-}
-
-
-//--------------------------------------------------------------
-bool Polygon::inside(const Edge& seg) const
-{
-	bool d1 = inside(seg._p1);
-	bool d2 = inside(seg._p2);
-	
-	return d1 && d2;
-}
-
-//--------------------------------------------------------------
-bool Polygon::intersection(const Edge& edge, imp::Vec3& ipoint) const
-{
-	for(unsigned int i=0; i<_edges.size(); i++)
-    {
-		// exclude case of edge vertex == polygon vertex
-        if( (_edges[i]._p1 == edge._p1)
-			|| (_edges[i]._p2 == edge._p1)
-			|| (_edges[i]._p1 == edge._p2)
-			|| (_edges[i]._p2 == edge._p2) ) 
-        {
-            continue;
-        }
-        
-		if( edge.intersection(_edges[i], ipoint) )
-		{
-			// intersect with at least one edge of the polygon
-			return true;
-		}
+	std::vector<int> deg = _path.degrees();
+	std::map<float,int> found;
+	for(int i=0;i<_path.count();++i)
+	{
+		int i1 = _path.cycleIndex(i-2);
+		int i2 = _path.cycleIndex(i-1);
+		int i3 = _path.cycleIndex(i);
+		bool bridge = deg[i2]>2;
+		// bool bridgeA = deg[i]>2;
+		// bool bridgeB = deg[i3]>2;
+		if(bridge)continue;// || (bridgeA && bridgeB)) continue;
+		
+		Edge edge(_path.vertex(i1),_path.vertex(i3));
+		if(Intersection::isCrossing(_path,edge))continue;
+		
+		Vec3 ref = tan(i2);
+		float na = tan(i3).angleFrom(ref);
+		found[na]=i3;
 	}
 	
-	return false;
+	int best = found.begin()->second;
+	
+	std::vector<Vec3> tri={_path.vertex(best),_path.vertex(best-1),_path.vertex(best-2)};
+	
+	if(_path.areConnected(tri[0],tri[1],tri[2])) _path.erase({best,best-1,best-2});
+	else _path.erase({best-1});
+	
+	return Polygon(tri);
 }
 
+//--------------------------------------------------------------
+std::vector<Polygon> Polygon::triangulate() const
+{
+	Polygon cpy = *this;
+	std::vector<Polygon> res;
+	while(cpy._path.count() != 0)
+	{
+		Polygon extracted;
+		if(cpy._path.count()==3){extracted=cpy; cpy=Polygon();}
+		else extracted = cpy.extractTriangle();
+		res.push_back(extracted);
+	}
+	return res;
+}
+
+//--------------------------------------------------------------
+int Polygon::windingNumber() const
+{
+	float rad = 0.0;
+	for(int i=0;i<_path.count();++i)rad += tan(i).angleFrom(tan(i-1));
+	return rad/(2*3.141592);
+}
+
+//--------------------------------------------------------------
+void Polygon::reverse()
+{
+	Path cpy = _path;
+	_path = Path();
+	for(auto it=cpy.vertices.rbegin();it!=cpy.vertices.rend();it++)_path.vertices.push_back(*it);
+}
 
 IMPGEARS_END

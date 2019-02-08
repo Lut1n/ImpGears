@@ -1,44 +1,117 @@
-#include "Path.h"
+#include <Geometry/Path.h>
 
 #include <map>
 #include <cstdlib>
 
+IMPGEARS_BEGIN
+
+//--------------------------------------------------------------
 std::string asstring(const Vec3& v) {std::stringstream s; s << "["<<v[0]<<";"<<v[1]<<";"<<v[2]<<"]"; return s.str();}
 
+//--------------------------------------------------------------
+Edge::Edge()
+{}
 
+//--------------------------------------------------------------
+Edge::Edge(const Edge& other)
+	: _p1(other._p1)
+	, _p2(other._p2)
+{}
+
+//--------------------------------------------------------------
+Edge::Edge(const Vec3& p1,const Vec3& p2)
+	: _p1(p1)
+	, _p2(p2)
+{}
+
+//--------------------------------------------------------------
+bool Edge::operator==(const Edge& other)
+{
+	return (other._p1==_p1 && other._p2==_p2) || (other._p1==_p2 && other._p2==_p1);
+}
+
+//--------------------------------------------------------------
+bool Edge::connectedTo(const Edge& other)
+{
+	return other._p1==_p1 || other._p1==_p2 || other._p2==_p1 || other._p2==_p2;
+}
+
+//--------------------------------------------------------------
+/*bool Edge::intersection(const Edge& other, Vec3& ipoint) const
+{
+	const Edge& s1 = *this;
+	const Edge& s2 = other;
+	
+	Vec3 p12 = s1._p2 - s1._p1;
+    Vec3 a = s2._p1 - s1._p1;
+    Vec3 b = s2._p2 - s1._p1;
+    
+    Vec3 tan = p12;
+    tan.normalize();
+    
+    Vec3 bitan = Vec3(0.0,0.0,1.0).cross( tan );
+	bitan.normalize();
+    
+    float da = a.dot(bitan);
+    float db = b.dot(bitan);
+    if( da * db <= 0.0 ) // one on each side
+    {
+        float t = da / (da - db);
+        ipoint = mix(a, b, t);
+        
+        float di = ipoint.dot(tan);
+        if(di > 0.0 && di < p12.length())
+        {
+			ipoint = s1._p1 + ipoint;
+            return true;
+        }
+    }
+    
+    return false;
+}*/
+
+
+//--------------------------------------------------------------
 Path::Path()
 {
 }
 
+//--------------------------------------------------------------
 Path::Path(const BufType& vert)
 {
 	vertices = vert;
 }
 
+//--------------------------------------------------------------
 Path::~Path()
 {
 }
 
+//--------------------------------------------------------------
 float sign(float a)
 {
 	return a<0.0?-1.0:1.0;
 }
 
+//--------------------------------------------------------------
 void Path::addVertex(Vec3 vt)
 {
 	vertices.push_back(vt);
 }
 
+//--------------------------------------------------------------
 void Path::addVertices(const BufType& toInsert)
 {
 	for(auto v:toInsert)addVertex(v);
 }
 
+//--------------------------------------------------------------
 void Path::addFrom(const Path& cycle)
 {
 	addVertices(cycle.vertices);
 }
 
+//--------------------------------------------------------------
 Path Path::subPath(int from, int to, bool reverse) const
 {
 	Path res;
@@ -52,6 +125,7 @@ Path Path::subPath(int from, int to, bool reverse) const
 	return res;
 }
 
+//--------------------------------------------------------------
 int Path::cycleIndex(int i) const
 {
 	int N = count();
@@ -60,49 +134,58 @@ int Path::cycleIndex(int i) const
 	return i;
 }
 
+//--------------------------------------------------------------
 Vec3& Path::vertex(int i)
 {
 	return vertices[cycleIndex(i)];
 }
 
+//--------------------------------------------------------------
 const Vec3& Path::vertex(int i) const
 {
 	return vertices[cycleIndex(i)];
 }
 
+//--------------------------------------------------------------
 int Path::index(const Vec3& v) const
 {
 	auto it = std::find(vertices.begin(),vertices.end(),v);
 	return it-vertices.begin();
 }
 
+//--------------------------------------------------------------
 Vec3 Path::tan(int i) const
 {
 	Vec3 dir = vertex(i)-vertex(i-1); dir.normalize();
 	return dir;
 }
 
+//--------------------------------------------------------------
 Edge Path::edge(int i) const
 {
 	return Edge(vertex(i-1),vertex(i));
 }
 
+//--------------------------------------------------------------
 int Path::count() const
 {
 	return vertices.size();
 }
 
+//--------------------------------------------------------------
 void Path::dump() const
 {
 	std::cout << "dump polygon :" << std::endl;
 	for(auto vert : vertices)std::cout << asstring(vert) << std::endl;
 }
 
+//--------------------------------------------------------------
 bool Path::composes(const Vec3& v) const
 {
 	return std::find(vertices.begin(),vertices.end(),v) != vertices.end();
 }
 
+//--------------------------------------------------------------
 Path::BufType Path::getConnexes(const Vec3& v) const
 {
 	std::vector<Vec3> res;
@@ -117,22 +200,26 @@ Path::BufType Path::getConnexes(const Vec3& v) const
 	return res;
 }
 
+//--------------------------------------------------------------
 int Path::getEdgeCnt(const Vec3& v) const
 {
 	BufType vert = getConnexes(v);
 	return vert.size();
 }
 
+//--------------------------------------------------------------
 Vec3 Path::previous(const Vec3& v) const
 {
 	return vertex(index(v)-1);
 }
 
+//--------------------------------------------------------------
 Vec3 Path::next(const Vec3& v) const
 {
 	return vertex(index(v)+1);
 }
 
+//--------------------------------------------------------------
 Vec3 Path::gravity() const
 {
 	Vec3 total;
@@ -140,6 +227,7 @@ Vec3 Path::gravity() const
 	return total/count();
 }
 
+//--------------------------------------------------------------
 std::vector<int> Path::degrees() const
 {
 	std::vector<int> res;
@@ -147,6 +235,7 @@ std::vector<int> Path::degrees() const
 	return res;
 }
 
+//--------------------------------------------------------------
 void Path::erase(std::vector<int> toErase)
 {
 	for(auto& i : toErase)i=cycleIndex(i);
@@ -154,14 +243,15 @@ void Path::erase(std::vector<int> toErase)
 	for(auto e : toErase)vertices.erase(vertices.begin()+e);
 }
 
+//--------------------------------------------------------------
 Vec3 Path::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) const
 {
-	std::vector<Vec3> cnx = getConnexes(curr.p2);
+	std::vector<Vec3> cnx = getConnexes(curr._p2);
 	std::map<float,Vec3> found;
 	for(auto v : cnx)
 	{
-		if(v == curr.p1)continue;
-		float angle = Vec3(v-curr.p2).angleFrom(tangent);
+		if(v == curr._p1)continue;
+		float angle = Vec3(v-curr._p2).angleFrom(tangent);
 		found[angle] = v;
 	}
 	
@@ -171,26 +261,27 @@ Vec3 Path::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) con
 	return best;
 }
 
+//--------------------------------------------------------------
 Path Path::boundary() const
 {
 	Path result;
 	Vec3 first = leftExtremity();
 	
 	Edge currEdge(first,first);
-	Vec3 tan = imp::Vec3::X;
+	Vec3 tan = Vec3::X;
 	do
 	{
-		result.addVertex(currEdge.p2);
+		result.addVertex(currEdge._p2);
 		Vec3 next = findNextByAngle(currEdge, tan, true);
-		currEdge = Edge(currEdge.p2,next);
-		tan = currEdge.p2 - currEdge.p1;
+		currEdge = Edge(currEdge._p2,next);
+		tan = currEdge._p2 - currEdge._p1;
 	}
-	while(currEdge.p2 != first);
+	while(currEdge._p2 != first);
 	
 	return result;
 }
 
-
+//--------------------------------------------------------------
 Path Path::simplify() const
 {
 	Path cpy = *this;
@@ -198,6 +289,7 @@ Path Path::simplify() const
 	return cpy.boundary();
 }
 
+//--------------------------------------------------------------
 Vec3 Path::leftExtremity() const
 {
 	Vec3 res = vertices[0];
@@ -205,12 +297,14 @@ Vec3 Path::leftExtremity() const
 	return res;
 }
 
+//--------------------------------------------------------------
 bool Path::areConnected(const Vec3& v1, const Vec3& v2) const
 {
 	std::vector<Vec3> co=getConnexes(v1);
 	return std::find(co.begin(),co.end(),v2)!=co.end();
 }
 
+//--------------------------------------------------------------
 bool Path::areConnected(const Vec3& v1, const Vec3& v2, const Vec3& v3) const
 {
 	std::vector<Vec3> co1=getConnexes(v1);
@@ -223,6 +317,7 @@ bool Path::areConnected(const Vec3& v1, const Vec3& v2, const Vec3& v3) const
 	return test1 && test2 && test3;
 }
 
+//--------------------------------------------------------------
 Path Path::extractTriangle()
 {
 	std::vector<int> deg = degrees();
@@ -255,6 +350,7 @@ Path Path::extractTriangle()
 	return Path(tri);
 }
 
+//--------------------------------------------------------------
 std::vector<Path> Path::triangulate() const
 {
 	Path cpy = *this;
@@ -269,40 +365,50 @@ std::vector<Path> Path::triangulate() const
 	return res;
 }
 
-Edge::Edge(){}
-Edge::Edge(Vec3 p1,Vec3 p2):p1(p1),p2(p2){}
-
-bool Edge::operator==(const Edge& other)
+//--------------------------------------------------------------
+int Path::windingNumber() const
 {
-	return (other.p1==p1 && other.p2==p2) || (other.p1==p2 && other.p2==p1);
+	float rad = 0.0;
+	for(int i=0;i<count();++i)rad += tan(i).angleFrom(tan(i-1));
+	return rad/(2*3.141592);
 }
 
-bool Edge::connectedTo(const Edge& other)
+//--------------------------------------------------------------
+void Path::reverse()
 {
-	return other.p1==p1 || other.p1==p2 || other.p2==p1 || other.p2==p2;
+	BufType cpy = vertices;
+	vertices.clear();
+	for(auto it=cpy.rbegin();it!=cpy.rend();it++)vertices.push_back(*it);
 }
 
-Intersection::Intersection(){}
+//--------------------------------------------------------------
+Intersection::Intersection()
+{}
+
+//--------------------------------------------------------------
 Intersection::Intersection(Edge e1, Edge e2)
 {
 	edge[0]=e1;
 	edge[1]=e2;
 }
+
+//--------------------------------------------------------------
 bool Intersection::operator==(Intersection other)
 {
 	return (edge[0]==other.edge[0] && edge[1]==other.edge[1]) || (edge[0]==other.edge[1] && edge[1]==other.edge[0]) ;
 }
 
+//--------------------------------------------------------------
 bool Intersection::compute()
 {
-	imp::Vec3 p12 = edge[0].p2 - edge[0].p1;
-	imp::Vec3 a = edge[1].p1 - edge[0].p1;
-	imp::Vec3 b = edge[1].p2 - edge[0].p1;
+	Vec3 p12 = edge[0]._p2 - edge[0]._p1;
+	Vec3 a = edge[1]._p1 - edge[0]._p1;
+	Vec3 b = edge[1]._p2 - edge[0]._p1;
 	
-	imp::Vec3 tan = p12;
+	Vec3 tan = p12;
 	tan.normalize();
 	
-	imp::Vec3 bitan = imp::Vec3::Z.cross( tan );
+	Vec3 bitan = Vec3::Z.cross( tan );
 	bitan.normalize();
 	
 	float da = a.dot(bitan);
@@ -310,12 +416,12 @@ bool Intersection::compute()
 	if( sign(da) != sign(db) ) // one on each side
 	{
 		float t = da / (da - db);
-		ipoint = imp::mix(a, b, t);
+		ipoint = mix(a, b, t);
 		
 		float di = ipoint.dot(tan);
 		if(di > 0.0 && di < p12.length())
 		{
-			ipoint = edge[0].p1 + ipoint;
+			ipoint = edge[0]._p1 + ipoint;
 			return true;
 		}
 	}
@@ -323,6 +429,7 @@ bool Intersection::compute()
 	return false;
 }
 
+//--------------------------------------------------------------
 bool Intersection::resolve(Path& target, const Path& other, Cache& precomputed)
 {
 	Path targetCpy = target;
@@ -336,7 +443,7 @@ bool Intersection::resolve(Path& target, const Path& other, Cache& precomputed)
 		for(int j=0;j<other.count();++j)
 		{
 			Edge e2 = other.edge(j);	
-			if(e1.p1==e2.p1 || e1.p1==e2.p2 || e1.p2==e2.p1 || e1.p2==e2.p2)continue;
+			if(e1._p1==e2._p1 || e1._p1==e2._p2 || e1._p2==e2._p1 || e1._p2==e2._p2)continue;
 			
 			Intersection inter(e1,e2);
 			auto found = std::find(precomputed.begin(),precomputed.end(),inter);
@@ -347,17 +454,18 @@ bool Intersection::resolve(Path& target, const Path& other, Cache& precomputed)
 			if(needInsert)toInsert.push_back(inter.ipoint);
 		}
 		
-		// sort and insert by distance to e1.p1
-		Vec3 ref = e1.p1;
+		// sort and insert by distance to e1._p1
+		Vec3 ref = e1._p1;
 		auto cmp=[ref](Vec3& v1,Vec3& v2){return (v1-ref).length()<(v2-ref).length();};
 		std::sort(toInsert.begin(),toInsert.end(),cmp);
 		target.addVertices(toInsert);
-		target.addVertex(e1.p2);
+		target.addVertex(e1._p2);
 	}
 	
 	return target.count() > targetCpy.count();
 }
 
+//--------------------------------------------------------------
 bool Intersection::resolve2(Path& cy1, Path& cy2, Cache& precomputed)
 {
 	Path cpy = cy1;
@@ -368,6 +476,7 @@ bool Intersection::resolve2(Path& cy1, Path& cy2, Cache& precomputed)
 	return r1 || r2;
 }
 
+//--------------------------------------------------------------
 bool Intersection::selfResolve(Path& cy, Cache& precomputed)
 {
 	Path cpy = cy;
@@ -375,30 +484,34 @@ bool Intersection::selfResolve(Path& cy, Cache& precomputed)
 	return res;
 }
 
+//--------------------------------------------------------------
 bool Intersection::resolve(Path& target, const Path& other)
 {
 	Cache tmp;
 	return resolve(target,other,tmp);
 }
 
+//--------------------------------------------------------------
 bool Intersection::resolve2(Path& cy1, Path& cy2)
 {
 	Cache tmp;
 	return resolve2(cy1,cy2,tmp);
 }
 
+//--------------------------------------------------------------
 bool Intersection::selfResolve(Path& cy)
 {
 	Cache tmp;
 	return selfResolve(cy,tmp);
 }
 
+//--------------------------------------------------------------
 bool Intersection::isCrossing(const Path& target, const Edge& e, bool excludeNode)
 {
 	for(int i=0;i<target.count();++i)
 	{
 		Edge e1 = target.edge(i);
-		if(excludeNode && (e1.p1==e.p1 || e1.p2==e.p1 || e1.p1==e.p2 || e1.p2==e.p2)) continue;
+		if(excludeNode && (e1._p1==e._p1 || e1._p2==e._p1 || e1._p1==e._p2 || e1._p2==e._p2)) continue;
 		
 		Intersection inter(e1,e);
 		if(inter.compute())return true;
@@ -406,29 +519,20 @@ bool Intersection::isCrossing(const Path& target, const Edge& e, bool excludeNod
 	return false;
 }
 
+//--------------------------------------------------------------
 bool Intersection::contains(const Cache& cache, const Vec3& v)
 {
 	for(const auto& i:cache)if(i.ipoint==v)return true;
 	return false;
 }
 
-int Path::windingNumber() const
-{
-	float rad = 0.0;
-	for(int i=0;i<count();++i)rad += tan(i).angleFrom(tan(i-1));
-	return rad/(2*3.141592);
-}
-
-void Path::reverse()
-{
-	BufType cpy = vertices;
-	vertices.clear();
-	for(auto it=cpy.rbegin();it!=cpy.rend();it++)vertices.push_back(*it);
-}
-
+//--------------------------------------------------------------
 Intersection::BufType Intersection::getVertices(const Cache& cache)
 {
 	BufType vert;
 	for(const auto& i:cache) vert.push_back(i.ipoint);
 	return vert;
 }
+
+
+IMPGEARS_END

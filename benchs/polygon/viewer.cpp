@@ -1,70 +1,23 @@
 #include <SFML/Graphics.hpp>
 
-#include "SimplePolygon.h"
-#include "ComplexPolygon.h"
+#include <Geometry/Polygon.h>
+#include <Geometry/ComplexPolygon.h>
 
 #include <Graphics/Rasterizer.h>
 #include <Graphics/Image.h>
 #include <Core/Perlin.h>
 
-
-struct MyFrag : public imp::FragCallback
-{
-    Meta_Class(MyFrag)
-	
-	imp::Rasterizer* rast;
-	
-	MyFrag(imp::Rasterizer* rast):rast(rast){}
-	
-    virtual void exec(imp::ImageBuf& targets, const Vec3& pt, imp::Uniforms* uniforms = nullptr)
-	{
-		double v = imp::perlinOctave(pt[0]/500.0, pt[1]/500.0, 0.0, 6, 0.7, 10.0);
-		Vec4 color(v,v,v,0);
-		color += 1.0; color *= 0.5;
-		color[3]=1.0;
-		color *= rast->_defaultColor;
-		
-		for(auto img:targets)img->setPixel(pt[0],pt[1],color);
-	}
-};
-
-struct CellFrag : public imp::FragCallback
-{
-    Meta_Class(CellFrag)
-	
-	imp::Rasterizer* rast;
-	SimplePolygon* cy;
-	
-	void setSimplePolygon(SimplePolygon* _cy){cy=_cy;}
-	
-	CellFrag(imp::Rasterizer* rast):rast(rast){}
-	
-    virtual void exec(imp::ImageBuf& targets, const Vec3& pt, imp::Uniforms* uniforms = nullptr)
-	{
-		float mx = 0.0;
-		float val = (cy->_path.vertices[0]-pt).length2();
-		for(auto v : cy->_path.vertices)
-		{
-			float len = (pt-v).length2();
-			if(len < val) val=len;
-			else if(len > mx) mx=len;
-		}
-		
-		val /= mx;
-		// val = 1.0 - val;
-		Vec4 color(val,val,val,1.0);
-		// color += 1.0; color *= 0.5;
-		// color[3]=1.0;
-		color *= rast->_defaultColor;
-		
-		for(auto img:targets)img->setPixel(pt[0],pt[1],color);
-	}
-};
-
+using Vec3 = imp::Vec3;
+using Vec4 = imp::Vec4;
+using Edge = imp::Edge;
+using Path = imp::Path;
+using SimplePolygon = imp::Polygon;
+using ComplexPolygon = imp::ComplexPolygon;
+using CPO = imp::ComplexPolygon;
 
 
 SimplePolygon generateSaw();
-SimplePolygon generateCirle(float radius, int sub=10);
+ComplexPolygon circle(float radius, int sub=10);
 SimplePolygon generateButterfly(float radius, float angle);
 SimplePolygon generateAnvil(float radius, float angle);
 void smaller(SimplePolygon& poly,float scale=0.8);
@@ -73,88 +26,115 @@ void draw(imp::Rasterizer& rast, SimplePolygon& poly);
 void drawFan(imp::Rasterizer& rast, SimplePolygon& poly, float smaller=1.0);
 void render(imp::Rasterizer& rast, const SimplePolygon& polygon, Vec4 color, bool wireframe=false, float sml=1.0);
 void render(imp::Rasterizer& rast, const ComplexPolygon& poly, Vec4 color, bool wireframe=false, float sml=1.0);
-CellFrag::Ptr cell;
+
+
+imp::Rasterizer rast; 
+void display(CPO& poly, int l, int t, bool wf = false)
+{
+	Vec3 center(((float)l+0.5)*800/4,((float)t+0.5)*600/4,0);
+	CPO toDisplay = poly; toDisplay += center;
+	render(rast,toDisplay,imp::Vec4(0,255,0,255),wf);
+}
+
+ComplexPolygon glyph(Vec3 center1, float d1, Vec3 center2, float d2)
+{
+	ComplexPolygon c1 = circle(d1,4); c1.rotation(3.14/4);
+	ComplexPolygon c2 = circle(d2,4); c2.rotation(3.14/4);
+	c1 += Vec3(center1);
+	c2 += Vec3(center2);
+	return c1 - c2;
+}
 
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-	int width=500,height=500;
+	int width=800,height=600;
 	
 	sf::RenderWindow window(sf::VideoMode(width, height), "SimplePolygon bench", sf::Style::Default, sf::ContextSettings(24));
 	sf::Texture texture;
 	texture.create(width, height);
 	sf::Sprite sprite;
 	sprite.setTexture(texture);
+	// sprite.setPosition(0,600);
+	// sprite.setScale(1,-1);
 	
 	imp::Image::Ptr image = imp::Image::create(width,height,4);
     imp::Vec4 bgcol(50,128,200,255);
 	image->fill(bgcol);
-	
-	imp::Rasterizer rast;
 	rast.setTarget(image);
-	MyFrag::Ptr frag = MyFrag::create(&rast);
-	cell = CellFrag::create(&rast);
-	rast.setFragCallback(frag);
 	
-	SimplePolygon cycle1 = generateCirle(100,10);
-	SimplePolygon saw = generateSaw();
-	SimplePolygon polygon2 = generateAnvil(100.0, 30.0);
-	SimplePolygon polygon3 = generateButterfly(100,30.0);
-	SimplePolygon polygon2_bis = polygon2;
-	Path sawCutData;
-	sawCutData.vertices.push_back(Vec3(-5.0,-20.0,0.0));
-	sawCutData.vertices.push_back(Vec3(5.0,-20.0,0.0));
-	sawCutData.vertices.push_back(Vec3(0.0,20.0,0.0));
-	sawCutData.vertices.push_back(Vec3(-2.0,7.0,0.0));
-	SimplePolygon sawCut(sawCutData);
+	float div = 800/4;
+	float div2 = 600/4;
+	Vec3 t1(div,0,0), t2(div*2,0,0),t3(div*3,0,0);
+	Vec3 b1(div,600,0),b2(div*2,600,0),b3(div*3,600,0);
+	Vec3 l1(0,div2,0),l2(0,div2*2,0),l3(0,div2*3,0);
+	Vec3 r1(800,div2,0),r2(800,div2*2,0),r3(800,div2*3,0);
+	rast.line(t1, b1);
+	rast.line(t2, b2);
+	rast.line(t3, b3);
+	rast.line(l1, r1);
+	rast.line(l2, r2);
+	rast.line(l3, r3);
 	
-	polygon2  += Vec3(100,200,0);
-	cycle1  += Vec3(300,200,0);
-	polygon3  += Vec3(100,400,0);
-	polygon2_bis.rotation(-2.5);
-	polygon2_bis  += Vec3(100,110,0);
+	CPO glyph_union = glyph(Vec3(0.0,0.0,0.0), 20, Vec3(0.0,-7.0,0.0), 10);
+	CPO glyph_diff = glyph(Vec3(0.0,0.0,0.0), 20, Vec3(-5.0,5.0,0.0), 15);
+	CPO glyph_inter = glyph(Vec3(0.0,0.0,0.0), 20, Vec3(0.0,7.0,0.0), 10);
+	display(glyph_union, 1, 0);
+	display(glyph_diff, 2, 0);
+	display(glyph_inter, 3, 0);
 	
-	ComplexPolygon holed(cycle1._path);
-	cycle1 -= Vec3(300,200,0);
-	cycle1 *= 0.3;
-	cycle1.rotation(45.5);
-	cycle1 += Vec3(315,250,0);
 	
-	holed = holed - ComplexPolygon(cycle1._path);
 	
-	saw *= Vec3(5,5,0);
-	sawCut *= Vec3(5,5,0);
+	CPO cp1,cp2;
+	Vec3 center(400,300,0);
 	
-	SimplePolygon saw2 = saw;
-	SimplePolygon sawCut2 = sawCut;
+	CPO prim = circle(70,4) - circle(50,4);
+	CPO part1 = prim;
+	CPO part2 = prim; part2 *= Vec3(0.5,0.5,0.5);
 	
-	SimplePolygon saw3 = saw;
-	SimplePolygon sawCut3 = sawCut;
+	cp1 = part1; cp2 = part2;
+	cp1 -= Vec3(30,0,0);  cp2 += Vec3(30,0,0);
+	CPO ttover_p1 = cp1;
+	CPO ttover_p2 = cp2;
+	CPO ttover_add = cp1 + cp2;
+	CPO ttover_sub = cp1 - cp2;
+	CPO ttover_int = cp1 * cp2;
 	
-	saw += Vec3(350,400,0);
-	sawCut += Vec3(370,400,0);
-	saw2 += Vec3(100,400,0);
-	sawCut2 += Vec3(120,400,0);
-	saw3 += Vec3(350,200,0);
-	sawCut3 += Vec3(370,200,0);
+	cp1 = part1; cp2 = part2;
+	cp1 -= Vec3(35,0,0);  cp2 += Vec3(62,0,0);
+	CPO bover_p1 = cp1;
+	CPO bover_p2 = cp2;
+	CPO bover_add = cp1 + cp2;
+	CPO bover_sub = cp1 - cp2;
+	CPO bover_int = cp1 * cp2;
 	
-	ComplexPolygon poly2sub = ComplexPolygon(polygon2._path)+ComplexPolygon(polygon2_bis._path);
-	ComplexPolygon cutedSaw = ComplexPolygon(saw._path)-ComplexPolygon(sawCut._path);
-	ComplexPolygon forgedSaw = ComplexPolygon(saw2._path)+ComplexPolygon(sawCut2._path);
+	cp1 = part1; cp2 = part2;
+	cp1 += Vec3(0,0,0);  cp2 += Vec3(18,0,0);
+	CPO hover_p1 = cp1;
+	CPO hover_p2 = cp2;
+	CPO hover_add = cp1 + cp2;
+	CPO hover_sub = cp1 - cp2;
+	CPO hover_int = cp1 * cp2;
 	
-	poly2sub = poly2sub.resolveHoles();
-	cutedSaw = cutedSaw.resolveHoles();
-	forgedSaw = forgedSaw.resolveHoles();
-	holed = holed.resolveHoles();
+	display(ttover_p1,0,1,true); display(ttover_p2,0,1,true);
+	display(ttover_add, 1,1);	// crash
+	display(ttover_sub, 2,1);
+	display(ttover_int, 3,1);
 	
-	render(rast,holed,imp::Vec4(250,208,20,255));
-	render(rast,polygon3,imp::Vec4(10,100,10,255));
-	render(rast,cutedSaw,imp::Vec4(20,20,250,255));
-	render(rast,forgedSaw,imp::Vec4(20,20,250,255),false,1.0);
-	render(rast,poly2sub,imp::Vec4(250,208,20,255),false,1.0);
-	rast.setFragCallback(cell);
-	render(rast,saw3,imp::Vec4(20,20,250,255),true);
-	render(rast,sawCut3,imp::Vec4(250,20,20,255),true);
+	display(bover_p1,0,2,true); display(bover_p2,0,2,true);
+	display(bover_add, 1,2);
+	display(bover_sub, 2,2);
+	display(bover_int, 3,2);
+	
+	display(hover_p1,0,3,true); display(hover_p2,0,3,true);
+	display(hover_add, 1,3);
+	display(hover_sub, 2,3);		// crash
+	display(hover_int, 3,3);
+	
+	// cp1 += center;
+	// cp2 += center;
+	// render(rast,cp1,imp::Vec4(0,255,0,255),false);
+	// render(rast,cp2,imp::Vec4(0,255,0,255),false);
 	
 	texture.update(image->asGrid()->data());
 	
@@ -192,7 +172,7 @@ SimplePolygon generateSaw()
 	return SimplePolygon(cy);
 }
 
-SimplePolygon generateCirle(float radius, int sub)
+ComplexPolygon circle(float radius, int sub)
 {
 	Path polygon;
 	for(int i=0;i<sub;++i)
@@ -201,7 +181,10 @@ SimplePolygon generateCirle(float radius, int sub)
 		imp::Vec3 p = Vec3(std::cos(r),std::sin(r),0) * radius;
 		polygon.addVertex(p);
 	}
-	return SimplePolygon(polygon);
+	
+	std::vector<Path> buf; buf.push_back(polygon);
+	
+	return ComplexPolygon(buf);
 }
 
 SimplePolygon generateButterfly(float radius, float angle)
@@ -274,11 +257,13 @@ void render(imp::Rasterizer& rast, const SimplePolygon& polygon, Vec4 color, boo
 	SimplePolygon cy = polygon.simplify();
 	// draw(rast,cy);
 	std::vector<SimplePolygon> geometries = cy.triangulate();	// get triangles to render
-	for(auto geo : geometries) {smaller(geo,sml);cell->setSimplePolygon(&geo);if(wireframe)draw(rast,geo); else drawPlain(rast,geo);}
+	for(auto geo : geometries) {smaller(geo,sml);if(wireframe)draw(rast,geo); else drawPlain(rast,geo);}
 }
 
-void render(imp::Rasterizer& rast, const ComplexPolygon& poly, Vec4 color, bool wireframe, float sml)
+void render(imp::Rasterizer& rast, const ComplexPolygon& input, Vec4 color, bool wireframe, float sml)
 {
+	ComplexPolygon poly = input.resolveHoles();
+	
 	for(auto cy : poly._cycles)
 	{
 		Vec4 col = color;

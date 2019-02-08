@@ -1,12 +1,22 @@
-#include "Path.h"
+#ifndef IMP_COMPLEXPOLYGON_H
+#define IMP_COMPLEXPOLYGON_H
 
-struct ComplexPolygon
+#include <Geometry/Path.h>
+
+IMPGEARS_BEGIN
+
+class IMP_API ComplexPolygon : public Object
 {
+	public:
+	
+	Meta_Class(ComplexPolygon)
+	
 	enum OpType
 	{
 		OpType_OR,
 		OpType_AND,
-		OpType_NOT
+		OpType_A_NOT_B,
+		OpType_B_NOT_A
 	};
 	
 	enum Orientation
@@ -24,6 +34,12 @@ struct ComplexPolygon
 	ComplexPolygon(const PathSet& bound);
 	ComplexPolygon(const PathSet& bound, const PathSet& hole);
 	ComplexPolygon();
+	
+	void operator+=(const Vec3& mv);
+	void operator-=(const Vec3& mv);
+	void operator*=(const Vec3& mv);
+	void operator/=(const Vec3& mv);
+	void rotation(float rad);
 
 	ComplexPolygon resolveHoles() const;
 	static PathSet breakHoles(const Path& body, const Path& hole,const PathSet& set2test);
@@ -33,10 +49,13 @@ struct ComplexPolygon
 	static bool contains(const PathSet& cycles, const Vec3& v);
 	
 	static ComplexPolygon applyOp(const Path& cycleA, const Path& cycleB, OpType op);
+	static ComplexPolygon applyOp2(const PathSet& setA, const PathSet& setB, OpType op);
 	
 	ComplexPolygon operator-(const ComplexPolygon& other) const;
 	ComplexPolygon operator+(const ComplexPolygon& other) const;
 	ComplexPolygon operator*(const ComplexPolygon& other) const;
 };
 
+IMPGEARS_END
 
+#endif // IMP_COMPLEXPOLYGON_H

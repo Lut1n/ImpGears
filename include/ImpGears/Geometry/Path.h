@@ -23,8 +23,8 @@ class IMP_API Edge : public Object
 	
 	Edge(const Vec3& p1, const Vec3& p2);
 	
-	bool operator==(const Edge& other);
-	bool connectedTo(const Edge& other);
+	bool operator==(const Edge& other) const;
+	bool connectedTo(const Edge& other) const;
 };
 
 //--------------------------------------------------------------
@@ -81,6 +81,9 @@ class IMP_API Path : public Object
 	
 	int windingNumber() const;
 	void reverse();
+	
+	bool inside(const Vec3& v) const;
+	bool inside(const Path& c) const;
 };
 
 //--------------------------------------------------------------

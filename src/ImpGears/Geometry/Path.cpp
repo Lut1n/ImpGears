@@ -25,51 +25,16 @@ Edge::Edge(const Vec3& p1,const Vec3& p2)
 {}
 
 //--------------------------------------------------------------
-bool Edge::operator==(const Edge& other)
+bool Edge::operator==(const Edge& other) const
 {
 	return (other._p1==_p1 && other._p2==_p2) || (other._p1==_p2 && other._p2==_p1);
 }
 
 //--------------------------------------------------------------
-bool Edge::connectedTo(const Edge& other)
+bool Edge::connectedTo(const Edge& other) const
 {
 	return other._p1==_p1 || other._p1==_p2 || other._p2==_p1 || other._p2==_p2;
 }
-
-//--------------------------------------------------------------
-/*bool Edge::intersection(const Edge& other, Vec3& ipoint) const
-{
-	const Edge& s1 = *this;
-	const Edge& s2 = other;
-	
-	Vec3 p12 = s1._p2 - s1._p1;
-    Vec3 a = s2._p1 - s1._p1;
-    Vec3 b = s2._p2 - s1._p1;
-    
-    Vec3 tan = p12;
-    tan.normalize();
-    
-    Vec3 bitan = Vec3(0.0,0.0,1.0).cross( tan );
-	bitan.normalize();
-    
-    float da = a.dot(bitan);
-    float db = b.dot(bitan);
-    if( da * db <= 0.0 ) // one on each side
-    {
-        float t = da / (da - db);
-        ipoint = mix(a, b, t);
-        
-        float di = ipoint.dot(tan);
-        if(di > 0.0 && di < p12.length())
-        {
-			ipoint = s1._p1 + ipoint;
-            return true;
-        }
-    }
-    
-    return false;
-}*/
-
 
 //--------------------------------------------------------------
 Path::Path()
@@ -382,6 +347,29 @@ void Path::reverse()
 }
 
 //--------------------------------------------------------------
+bool Path::inside(const Vec3& v) const
+{
+	int cpt = 0;
+	
+	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,0.0);
+	Edge ray(ext,v);
+	for(int i=0;i<count();++i)
+	{
+		Intersection inter(edge(i), ray);
+		if(inter.compute())++cpt;
+	}
+	
+	return (cpt%2)>0;
+}
+
+//--------------------------------------------------------------
+bool Path::inside(const Path& c) const
+{
+	for(auto v:c.vertices)if(inside(v)==false)return false;
+	return true;
+}
+
+//--------------------------------------------------------------
 Intersection::Intersection()
 {}
 
@@ -428,7 +416,6 @@ bool Intersection::compute()
 	
 	return false;
 }
-
 //--------------------------------------------------------------
 bool Intersection::resolve(Path& target, const Path& other, Cache& precomputed)
 {
@@ -533,6 +520,5 @@ Intersection::BufType Intersection::getVertices(const Cache& cache)
 	for(const auto& i:cache) vert.push_back(i.ipoint);
 	return vert;
 }
-
 
 IMPGEARS_END

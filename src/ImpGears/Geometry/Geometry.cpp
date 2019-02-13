@@ -1,4 +1,4 @@
-#include <Geometry/ProceduralGeometry.h>
+#include <Geometry/Geometry.h>
 
 #include <cmath>
 

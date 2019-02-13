@@ -13,7 +13,20 @@ Polygon::Polygon()
 //--------------------------------------------------------------
 Polygon::Polygon(const Path& path)
 {
-	_path = path;
+	addPath(path,PathType_Shape);
+}
+
+//--------------------------------------------------------------
+Polygon::Polygon(const PathSet& shapes)
+{
+	for(const auto& shp:shapes)addPath(shp,PathType_Shape);
+}
+
+//--------------------------------------------------------------
+Polygon::Polygon(const PathSet& shapes, const PathSet& holes)
+{
+	for(const auto& shp:shapes)addPath(shp,PathType_Shape);
+	for(const auto& shp:holes)addPath(shp,PathType_Hole);
 }
 
 //--------------------------------------------------------------
@@ -22,202 +35,247 @@ Polygon::~Polygon()
 }
 
 //--------------------------------------------------------------
-void Polygon::operator+=(const Vec3& mv)
+void Polygon::operator+=(const Vec3& vec)
 {
-	int N = _path.count();
-	for(int i=0;i<N;++i) _path.vertices[i] += mv;
+	for(auto& p : _paths)
+		for(int i=0;i<p.count();++i) p.vertices[i] += vec;
 }
 
 //--------------------------------------------------------------
-void Polygon::operator-=(const Vec3& mv)
+void Polygon::operator-=(const Vec3& vec)
 {
-	int N = _path.count();
-	for(int i=0;i<N;++i) _path.vertices[i] -= mv;
+	for(auto& p : _paths)
+		for(int i=0;i<p.count();++i) p.vertices[i] -= vec;
 }
 
 //--------------------------------------------------------------
-void Polygon::operator*=(const Vec3& mv)
+void Polygon::operator*=(const Vec3& vec)
 {
-	int N = _path.count();
-	for(int i=0;i<N;++i) _path.vertices[i] *= mv;
+	for(auto& p : _paths)
+		for(int i=0;i<p.count();++i) p.vertices[i] *= vec;
 }
 
 //--------------------------------------------------------------
-void Polygon::operator/=(const Vec3& mv)
+void Polygon::operator/=(const Vec3& vec)
 {
-	int N = _path.count();
-	for(int i=0;i<N;++i) _path.vertices[i] /= mv;
+	for(auto& p : _paths)
+		for(int i=0;i<p.count();++i) p.vertices[i] /= vec;
 }
 
 //--------------------------------------------------------------
 void Polygon::rotation(float rad)
 {
-	int N = _path.count();
-	for(int i=0;i<N;++i) _path.vertices[i] *= imp::Matrix3::rotationZ(rad);
-}
-
-//--------------------------------------------------------------
-Vec3 Polygon::tan(int i) const
-{
-	Vec3 dir = _path.vertex(i)-_path.vertex(i-1); dir.normalize();
-	return dir;
-}
-
-//--------------------------------------------------------------
-Edge Polygon::edge(int i) const
-{
-	return Edge(_path.vertex(i-1),_path.vertex(i));
+	for(auto& p : _paths)
+		for(int i=0;i<p.count();++i) p.vertices[i] *= imp::Matrix3::rotationZ(rad);
 }
 
 //--------------------------------------------------------------
 bool Polygon::inside(const Vec3& v) const
 {
-	// Vec3(std::rand(),std::rand(),0.0);
-	
-	int cpt = 0;
-	
-	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,0.0); //Vec3((double)std::rand()/RAND_MAX,(double)std::rand()/RAND_MAX,0.0)*10.0;
-	Edge ray(ext,v);
-	for(int i=0;i<_path.count();++i)
+	bool insideOneShape = false;
+	for(auto p : _paths)
 	{
-		Intersection inter(edge(i), ray);
-		if(inter.compute())++cpt;
+		if(!p.inside(v)) continue;
+		if(p.windingNumber()>0) insideOneShape = true;
+		else return false;
 	}
 	
-	return (cpt%2)>0;
+	return insideOneShape;
 }
 
 //--------------------------------------------------------------
-bool Polygon::inside(const Polygon& c) const
+bool Polygon::inside(const Path& path) const
 {
-	for(auto v: c._path.vertices)if(inside(v)==false)return false;
+	bool insideOneShape = false;
+	for(auto p : _paths)
+	{
+		if(!p.inside(path)) continue;
+		if(p.windingNumber()>0) insideOneShape = true;
+		else return false;
+	}
+	
+	return insideOneShape;
+}
+
+//--------------------------------------------------------------
+bool Polygon::inside(const Polygon& poly) const
+{
+	for(auto p : poly._paths) if(!inside(p)) return false;
 	return true;
 }
 
 //--------------------------------------------------------------
-Vec3 Polygon::gravity() const
+bool Polygon::contains(const PathSet& cycles, const Vec3& v)
 {
-	Vec3 total;
-	for(auto v:_path.vertices)total+=v;
-	return total/_path.count();
+	for(auto& cy : cycles)if(cy.composes(v))return true;
+	return false;
 }
 
 //--------------------------------------------------------------
-Vec3 Polygon::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) const
+void Polygon::addPath(const Path& cy, PathType ptype)
 {
-	std::vector<Vec3> cnx = _path.getConnexes(curr._p2);
-	std::map<float,Vec3> found;
-	for(auto v : cnx)
+	Path scy = cy.simplify();
+	
+	if(ptype != PathType_Unchange)
 	{
-		if(v == curr._p1)continue;
-		float angle = Vec3(v-curr._p2).angleFrom(tangent);
-		found[angle] = v;
+		PathType currType = scy.windingNumber()>0?PathType_Shape:PathType_Hole;
+		if(currType != ptype)scy.reverse();
 	}
-	
-	Vec3 best = found.begin()->second;
-	if(maxi) best = found.rbegin()->second;
-	
-	return best;
+	_paths.push_back(scy);
 }
 
 //--------------------------------------------------------------
-Polygon Polygon::boundary() const
+void Polygon::addPaths(const PathSet& other)
+{
+	for(const auto& cy : other)_paths.push_back(cy);
+}
+
+//--------------------------------------------------------------
+Polygon Polygon::operator-(const Polygon& other) const
+{
+	return applyOp2(*this, other, OpType_A_NOT_B);
+}
+
+//--------------------------------------------------------------
+Polygon Polygon::operator+(const Polygon& other) const
+{
+	return applyOp2(*this, other, OpType_OR);
+}
+
+//--------------------------------------------------------------
+Polygon Polygon::operator*(const Polygon& other) const
+{
+	return applyOp2(*this, other, OpType_AND);
+}
+
+//--------------------------------------------------------------
+void analyticResolution2(const Path& pathA, const Polygon& setB, Polygon::OpType opType, Polygon& result)
+{	
+	using Vec2i = Vec<2,int>;
+	bool aInsideB = setB.inside(pathA);
+
+	Vec2i res;
+	if(opType == Polygon::OpType_OR)
+		res = aInsideB ? Vec2i(0,0) : Vec2i(1,-1);
+	
+	if(opType == Polygon::OpType_A_NOT_B)
+		res = aInsideB ? Vec2i(0,0) : Vec2i(1,-1);
+	
+	if(opType == Polygon::OpType_B_NOT_A)
+		res = aInsideB ? Vec2i(-1,1) : Vec2i(0,0);
+	
+	if(opType == Polygon::OpType_AND)
+		res = aInsideB ? Vec2i(1,-1) : Vec2i(0,0);
+	
+	int rInd = pathA.windingNumber()>0 ? 0 : 1;
+	
+	if(res[rInd] != 0)
+		result.addPath(pathA,res[rInd]>0?Polygon::PathType_Shape:Polygon::PathType_Hole);
+}
+
+//--------------------------------------------------------------
+int findComposite(const Vec3& curr, const Polygon& set)
+{
+	int i=0;
+	for(auto c : set._paths) { if(c.composes(curr))return i; i++; }
+	return -1;
+}
+
+//--------------------------------------------------------------
+bool isEnter2(const Vec3& p,const Path& src,const Path& other)
+{
+	Vec3 testP = src.next(p);
+	if(other.composes(testP))testP=(p+testP)*0.5;
+	
+	bool goInsidePoly = other.inside(testP);
+	bool targetIsPlain = other.windingNumber() > 0;
+	
+	return goInsidePoly == targetIsPlain;
+}
+
+//--------------------------------------------------------------
+Path pathFinder2(const Polygon& cycleA, const Polygon& cycleB, 
+				 std::vector<Vec3>& iPoints, const Vec3& start, bool aOut, bool reverseB)
 {
 	Path result;
-	Vec3 first = leftExtremity();
+	bool src = false;
 	
-	Edge currEdge(first,first);
-	Vec3 tan = imp::Vec3::X;
+	Vec3 curr = start;
+	int itA = findComposite(start,cycleA);
+	int itB = findComposite(start,cycleB);
 	do
 	{
-		result.addVertex(currEdge._p2);
-		Vec3 next = findNextByAngle(currEdge, tan, true);
-		currEdge = Edge(currEdge._p2,next);
-		tan = currEdge._p2 - currEdge._p1;
+		result.addVertex(curr);
+		auto it = std::find(iPoints.begin(),iPoints.end(),curr);
+		if(it != iPoints.end())
+		{
+			iPoints.erase(it);
+			itA = findComposite(curr,cycleA);
+			itB = findComposite(curr,cycleB);
+			bool _p1EnterP2 = isEnter2(curr,cycleA._paths[itA],cycleB._paths[itB]);
+			src=(_p1EnterP2 != aOut);
+		}
+		if(src)curr = cycleA._paths[itA].next(curr);
+		else if(reverseB)curr = cycleB._paths[itB].previous(curr);
+		else curr = cycleB._paths[itB].next(curr);
 	}
-	while(currEdge._p2 != first);
+	while(curr != start);
 	
-	return Polygon(result);
+	return Path(result);
 }
 
 //--------------------------------------------------------------
-Polygon Polygon::simplify() const
+void findAllPathFrom2(const Polygon& poly1, const Polygon& poly2, const Intersection::Cache& cache, Polygon::OpType op, PathSet& cycles)
 {
-	Path cpy = _path;
-	Intersection::selfResolve(cpy);
-	return Polygon(cpy).boundary();
-}
-
-//--------------------------------------------------------------
-Vec3 Polygon::leftExtremity() const
-{
-	Vec3 res = _path.vertices[0];
-	for(auto v:_path.vertices)if(v[0]<res[0])res=v;
-	return res;
-}
-
-//--------------------------------------------------------------
-Polygon Polygon::extractTriangle()
-{
-	std::vector<int> deg = _path.degrees();
-	std::map<float,int> found;
-	for(int i=0;i<_path.count();++i)
+	bool aOut = op==Polygon::OpType_OR || op==Polygon::OpType_A_NOT_B;
+	bool reverseB = op==Polygon::OpType_A_NOT_B;
+	std::vector<Vec3> iPoints = Intersection::getVertices(cache);
+	
+	while(iPoints.size() > 0)
 	{
-		int i1 = _path.cycleIndex(i-2);
-		int i2 = _path.cycleIndex(i-1);
-		int i3 = _path.cycleIndex(i);
-		bool bridge = deg[i2]>2;
-		// bool bridgeA = deg[i]>2;
-		// bool bridgeB = deg[i3]>2;
-		if(bridge)continue;// || (bridgeA && bridgeB)) continue;
-		
-		Edge edge(_path.vertex(i1),_path.vertex(i3));
-		if(Intersection::isCrossing(_path,edge))continue;
-		
-		Vec3 ref = tan(i2);
-		float na = tan(i3).angleFrom(ref);
-		found[na]=i3;
+		Vec3 node = iPoints[0];
+		Path result = pathFinder2(poly1,poly2,iPoints,node,aOut,reverseB);
+		cycles.push_back(result);
 	}
-	
-	int best = found.begin()->second;
-	
-	std::vector<Vec3> tri={_path.vertex(best),_path.vertex(best-1),_path.vertex(best-2)};
-	
-	if(_path.areConnected(tri[0],tri[1],tri[2])) _path.erase({best,best-1,best-2});
-	else _path.erase({best-1});
-	
-	return Polygon(tri);
 }
 
 //--------------------------------------------------------------
-std::vector<Polygon> Polygon::triangulate() const
+Polygon Polygon::applyOp2(const Polygon& setA, const Polygon& setB, OpType opType)
 {
-	Polygon cpy = *this;
-	std::vector<Polygon> res;
-	while(cpy._path.count() != 0)
+	Polygon result;
+	
+	Polygon cpyA = setA;
+	Polygon cpyB = setB;
+	Intersection::Cache cache;
+	
+	std::vector<bool> analyticNeedA(cpyA._paths.size(),true);
+	std::vector<bool> analyticNeedB(cpyB._paths.size(),true);
+	for(int iA=0;iA<(int)cpyA._paths.size();++iA)
+		for(int iB=0;iB<(int)cpyB._paths.size();++iB)
 	{
-		Polygon extracted;
-		if(cpy._path.count()==3){extracted=cpy; cpy=Polygon();}
-		else extracted = cpy.extractTriangle();
-		res.push_back(extracted);
+		bool xAB = Intersection::resolve2(cpyA._paths[iA],cpyB._paths[iB],cache);
+		if(xAB){analyticNeedA[iA]=false;analyticNeedB[iB]=false;}
 	}
-	return res;
-}
-
-//--------------------------------------------------------------
-int Polygon::windingNumber() const
-{
-	float rad = 0.0;
-	for(int i=0;i<_path.count();++i)rad += tan(i).angleFrom(tan(i-1));
-	return rad/(2*3.141592);
-}
-
-//--------------------------------------------------------------
-void Polygon::reverse()
-{
-	Path cpy = _path;
-	_path = Path();
-	for(auto it=cpy.vertices.rbegin();it!=cpy.vertices.rend();it++)_path.vertices.push_back(*it);
+	
+	for(int i=0;i<(int)analyticNeedA.size();++i)
+	{
+		if(analyticNeedA[i]){analyticResolution2(cpyA._paths[i],setB,opType,result);}
+	}
+	OpType op = opType; if(op == OpType_A_NOT_B)op=OpType_B_NOT_A;
+	for(int i=0;i<(int)analyticNeedB.size();++i)
+	{
+		if(analyticNeedB[i]){analyticResolution2(cpyB._paths[i],setA,op,result);}
+	}
+	
+	if(cache.size() > 0)
+	{
+		PathSet cycles;
+		findAllPathFrom2(cpyA,cpyB,cache,opType,cycles);
+		result.addPaths(cycles);
+	}
+	
+	return result;
 }
 
 IMPGEARS_END
+

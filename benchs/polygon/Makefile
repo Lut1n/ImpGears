@@ -17,7 +17,7 @@ viewer: viewer.o
 
 viewer.o: viewer.cpp
 	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c viewer.cpp -o viewer.o
-
+	
 .PHONY : clean
 
 clean:

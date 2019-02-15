@@ -18,23 +18,27 @@ double Rand(double min, double max, double precision)
     std::int64_t iMin = (std::int64_t)(min/precision);
     std::int64_t iMax = (std::int64_t)(max/precision);
 
-    std::int64_t iRand = std::rand()%(iMax-iMin)+iMin;
+	double r = (double)std::rand() / (double)RAND_MAX;
+    std::int64_t iRand = r*(iMax-iMin)+iMin;
 
     return (double)(iRand)*precision;
 }
 
+//--------------------------------------------------------------
 double Frac(double t)
 {
 	float res = t -  std::floor(t);
 	return res;
 }
 
+//--------------------------------------------------------------
 double Hermite(double t)
 {
 	double t2 = t*t;
 	return 3*t2 - 2*t*t2;
 }
 
+//--------------------------------------------------------------
 double Quintic(double t)
 {
 	double t3 = t*t*t;
@@ -42,11 +46,13 @@ double Quintic(double t)
 	return 6*t*t4 - 15*t4 + 10*t3;
 }
 
+//--------------------------------------------------------------
 double Lerp(double a, double b, double t)
 {
 	return t*(b-a) + a;
 }
 
+//--------------------------------------------------------------
 double Sin(double t, double maxPeriodRatio)
 {
 	const double PI = 3.141592;
@@ -69,6 +75,7 @@ double Sin(double t, double maxPeriodRatio)
 	return std::sin(t);
 }
 
+//--------------------------------------------------------------
 double SquareSignal(double t, double maxPeriodRatio)
 {
 	const double PI = 3.141592;
@@ -85,6 +92,7 @@ double SquareSignal(double t, double maxPeriodRatio)
 	return result;
 }
 
+//--------------------------------------------------------------
 double TriangleSignal(double t, double maxPeriodRatio)
 {
 	const double PI = 3.141592;

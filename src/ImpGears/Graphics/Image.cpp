@@ -40,8 +40,8 @@ Image::~Image(){}
 //--------------------------------------------------------------
 void Image::setPixel(int x, int y, const Vec4& col)
 {
-    y = std::min(std::max(y,0),_dims[0]);
-    x = std::min(std::max(x,0),_dims[1]);
+    y = std::min(std::max(y,0),_dims[0]-1);
+    x = std::min(std::max(x,0),_dims[1]-1);
     
     int idx=_grid->index(Dimension<3>(y,x,0));
     dotcpy((&_buffer[idx]),col,_dims[2]);
@@ -50,8 +50,8 @@ void Image::setPixel(int x, int y, const Vec4& col)
 //--------------------------------------------------------------
 Vec4 Image::getPixel(int x, int y) const
 {
-    y = std::min(std::max(y,0),_dims[0]);
-    x = std::min(std::max(x,0),_dims[1]);
+    y = std::min(std::max(y,0),_dims[0]-1);
+    x = std::min(std::max(x,0),_dims[1]-1);
     
     Vec4 col;
     int idx=_grid->index(Dimension<3>(y,x,0));

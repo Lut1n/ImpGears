@@ -97,11 +97,13 @@ class IMP_API Intersection : public Object
 	using Cache = std::vector<Intersection>;
 
 	Edge edge[2];
+	Vec3 refNormal;
 	Vec3 ipoint;
 	Intersection();
 	Intersection(Edge e1, Edge e2);
 	bool operator==(Intersection other);
 	bool compute();
+	void setNormal(const Vec3& n);
 	
 	static BufType getVertices(const Cache& cache);
 	

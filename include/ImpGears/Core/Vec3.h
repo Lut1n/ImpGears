@@ -57,10 +57,10 @@ class IMP_API Vec3 : public Vec<3,float>
 			_data[0]*v[1] - _data[1]*v[0]);
 	}
 	
-	float angleFrom(Vec3 ref)
+	float angleFrom(Vec3 ref, Vec3 axe = Z)
 	{
 		ref.normalize();
-		Vec3 btn = Z.cross(ref);
+		Vec3 btn = axe.cross(ref);
 		return std::atan2(dot(btn),dot(ref));
 	}
 	

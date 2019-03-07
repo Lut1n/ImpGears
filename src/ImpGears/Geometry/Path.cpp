@@ -351,7 +351,7 @@ bool Path::inside(const Vec3& v) const
 {
 	int cpt = 0;
 	
-	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,0.0);
+	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,10.0);
 	Edge ray(ext,v);
 	for(int i=0;i<count();++i)
 	{
@@ -371,11 +371,14 @@ bool Path::inside(const Path& c) const
 
 //--------------------------------------------------------------
 Intersection::Intersection()
-{}
+{
+	refNormal = Vec3::Z;
+}
 
 //--------------------------------------------------------------
 Intersection::Intersection(Edge e1, Edge e2)
 {
+	refNormal = Vec3::Z;
 	edge[0]=e1;
 	edge[1]=e2;
 }
@@ -396,7 +399,7 @@ bool Intersection::compute()
 	Vec3 tan = p12;
 	tan.normalize();
 	
-	Vec3 bitan = Vec3::Z.cross( tan );
+	Vec3 bitan = refNormal.cross( tan );
 	bitan.normalize();
 	
 	float da = a.dot(bitan);
@@ -416,6 +419,13 @@ bool Intersection::compute()
 	
 	return false;
 }
+
+//--------------------------------------------------------------
+void Intersection::setNormal(const Vec3& n)
+{
+	refNormal = n;
+}
+
 //--------------------------------------------------------------
 bool Intersection::resolve(Path& target, const Path& other, Cache& precomputed)
 {

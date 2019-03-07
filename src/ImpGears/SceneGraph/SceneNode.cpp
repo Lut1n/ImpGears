@@ -84,11 +84,11 @@ void SceneNode::commitTransformation()
     if(m_localMatrixHasChanged)
     {
         m_localModelMatrix =
-            Matrix4::getTranslationMat(position.x(), position.y(), position.z())
+            Matrix4::getScaleMat(scale.x(), scale.y(), scale.z())
             * Matrix4::getRotationMat(rx, 0.f, 0.f)
             * Matrix4::getRotationMat(0.f, ry, 0.f)
             * Matrix4::getRotationMat(0.f, 0.f, rz)
-            * Matrix4::getScaleMat(scale.x(), scale.y(), scale.z());
+            * Matrix4::getTranslationMat(position.x(), position.y(), position.z());
 
         m_localNormalMatrix =
             Matrix4::getRotationMat(rx, 0.f, 0.f)

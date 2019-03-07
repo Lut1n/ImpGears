@@ -1,4 +1,4 @@
-#include <Geometry/ProceduralGeometry.h>
+#include <Geometry/Geometry.h>
 // #include <SceneGraph/BmpLoader.h>
 #include <SceneGraph/DefaultShader.h>
 #include <SceneGraph/GraphicRenderer.h>
@@ -28,8 +28,8 @@ using namespace imp;
 #define CONFIG_FAR 100.0
 #define CONFIG_FOV 60.0
 
-#define SQ_RESOLUTION 128
-#define GEO_SUBDIV 1
+#define SQ_RESOLUTION 512
+#define GEO_SUBDIV 4
 #define USE_BMPFORMAT false
 
 

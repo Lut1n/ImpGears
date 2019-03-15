@@ -6,8 +6,14 @@ IMPGEARS_BEGIN
 struct Triplet
 {
 	Vec3 p1,p2,p3;
+	Vec3 normal;
 	Triplet(){}
-	Triplet(Vec3 p1,Vec3 p2,Vec3 p3) : p1(p1),p2(p2),p3(p3){}
+	Triplet(Vec3 p1,Vec3 p2,Vec3 p3) : p1(p1),p2(p2),p3(p3)
+	{
+		Vec3 t1 = p2 - p1; t1.normalize();
+		Vec3 t2 = p3 - p1; t2.normalize();
+		normal = t1.cross(t2); normal.normalize();
+	}
 	bool contains(Vec3 p) const	{return p==p1||p==p2||p==p3;}
 	bool operator==(const Triplet& other) const	{return contains(other.p1) && contains(other.p2) && contains(other.p3);}
 	bool connectedTo(const Triplet& other) const
@@ -36,8 +42,8 @@ struct Triplet
 		Vec3 tbv1 = common[0] - opposite[1];
 		Vec3 tbv2 = common[1] - opposite[1];
 		
-		float alpha = std::abs( tav1.angleFrom(tav2) );
-		float beta = std::abs( tbv1.angleFrom(tbv2) );
+		float alpha = std::abs( tav1.angleFrom(tav2,normal) );
+		float beta = std::abs( tbv1.angleFrom(tbv2,normal) );
 		
 		float TT = alpha + beta;
 		const static float EPSILON = 0.01;
@@ -144,6 +150,80 @@ Polygon edges2Triangles(const std::vector<Edge>& edges,const Polygon& poly)
 }
 
 //--------------------------------------------------------------
+Polygon edges2Triangles(const std::vector<Edge>& edges)
+{
+	std::vector<Triplet> buf;
+	
+	for(auto e1:edges)
+	{
+		for(auto e2:edges)
+		{
+			if(e1 == e2)continue;
+			if(!e1.connectedTo(e2)) continue;
+			
+			Edge e3;
+			if(e1._p1==e2._p1) e3 = Edge(e1._p2,e2._p2);
+			else if(e1._p1==e2._p2) e3 = Edge(e1._p2,e2._p1);
+			else if(e1._p2==e2._p1) e3 = Edge(e1._p1,e2._p2);
+			else if(e1._p2==e2._p2) e3 = Edge(e1._p1,e2._p1);
+			
+			bool fnd = std::find(edges.begin(),edges.end(),e3) != edges.end();
+			if(!fnd)continue;
+			
+			Triplet t; t.p1=e1._p1;t.p2=e1._p2;
+			if(e2._p1==e1._p1 || e2._p1==e1._p2)t.p3=e2._p2;
+			else t.p3=e2._p1;
+			
+			if(std::find(buf.begin(),buf.end(),t)==buf.end())buf.push_back(t);
+		}
+	}
+	
+	delaunay(buf);
+	
+	PathSet res;
+	for(auto t:buf)
+	{
+		Path p;p.addVertex(t.p1);p.addVertex(t.p2);p.addVertex(t.p3);
+		res.push_back(p);
+	}
+	Polygon poly; poly.addPaths(res);
+	
+	return poly;
+}
+
+//--------------------------------------------------------------
+std::vector<Edge> points2Edges(const std::vector<Vec3>& pts, Vec3 n)
+{
+	std::vector<Edge> edges;
+	std::vector<Vec3> points = pts;
+	
+	for(int i=0;i<(int)points.size();++i)
+		for(int j=0;j<(int)points.size();++j)
+	{
+		if(i==j) continue;
+		
+		Edge e(points[i], points[j]);
+
+		// check if edge is not already selected
+		auto found = std::find(edges.begin(),edges.end(),e);
+		if(found != edges.end())continue;
+		
+		// check if edge is not intersecting with other edges
+		bool xPoly = false;
+		for(auto e2:edges)
+		{
+			if(e.connectedTo(e2))continue;
+			if(Intersection(e,e2).compute()){xPoly=true;break;}
+		}
+		if(xPoly)continue;
+		
+		edges.push_back(e);
+	}
+	
+	return edges;
+}
+
+//--------------------------------------------------------------
 std::vector<Edge> poly2Edges(const Polygon& poly)
 {
 	std::vector<Edge> edges;
@@ -193,6 +273,20 @@ Polygon Triangulation::triangulate(const Polygon& poly)
 {
 	std::vector<Edge> edges = poly2Edges(poly);
 	return edges2Triangles(edges,poly);
+}
+
+//--------------------------------------------------------------
+Path::BufType Triangulation::triangulate(const Path& shape)
+{
+	Path::BufType res;
+	std::vector<Edge> edges = points2Edges(shape.data(),shape.normal());
+	Polygon respoly = edges2Triangles(edges);
+	for(auto p : respoly._paths)
+	{
+		// if(p.windingNumber() < 0) p.reverse();
+		for(auto v : p.vertices) res.push_back(v);
+	}
+	return res;
 }
 
 IMPGEARS_END

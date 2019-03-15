@@ -185,6 +185,28 @@ Vec3 Path::next(const Vec3& v) const
 }
 
 //--------------------------------------------------------------
+Vec3 Path::normal() const
+{
+	Vec3 n = Vec3::Z;
+	if(count() >= 3)
+	{
+		Vec3 t1 = tan(0);
+		for(int i=1;i<count();++i)
+		{
+			Vec3 t2 = vertex(i) - vertex(0);
+			t2.normalize();
+			if(abs(t1.dot(t2)) < 0.7)
+			{
+				n = t1.cross(t2);
+				n.normalize();
+				break;
+			}
+		}
+	}
+	return n;
+}
+
+//--------------------------------------------------------------
 Vec3 Path::gravity() const
 {
 	Vec3 total;
@@ -211,12 +233,13 @@ void Path::erase(std::vector<int> toErase)
 //--------------------------------------------------------------
 Vec3 Path::findNextByAngle(const Edge& curr, const Vec3& tangent, bool maxi) const
 {
+	Vec3 n = Vec3::Z; // normal();
 	std::vector<Vec3> cnx = getConnexes(curr._p2);
 	std::map<float,Vec3> found;
 	for(auto v : cnx)
 	{
 		if(v == curr._p1)continue;
-		float angle = Vec3(v-curr._p2).angleFrom(tangent);
+		float angle = Vec3(v-curr._p2).angleFrom(tangent,n);
 		found[angle] = v;
 	}
 	
@@ -285,6 +308,7 @@ bool Path::areConnected(const Vec3& v1, const Vec3& v2, const Vec3& v3) const
 //--------------------------------------------------------------
 Path Path::extractTriangle()
 {
+	Vec3 n = Vec3::Z; // normal();
 	std::vector<int> deg = degrees();
 	std::map<float,int> found;
 	for(int i=0;i<count();++i)
@@ -301,7 +325,7 @@ Path Path::extractTriangle()
 		if(Intersection::isCrossing(*this,edge))continue;
 		
 		Vec3 ref = tan(i2);
-		float na = tan(i3).angleFrom(ref);
+		float na = tan(i3).angleFrom(ref,n);
 		found[na]=i3;
 	}
 	
@@ -333,8 +357,9 @@ std::vector<Path> Path::triangulate() const
 //--------------------------------------------------------------
 int Path::windingNumber() const
 {
+	Vec3 n = Vec3::Z; // normal();
 	float rad = 0.0;
-	for(int i=0;i<count();++i)rad += tan(i).angleFrom(tan(i-1));
+	for(int i=0;i<count();++i)rad += tan(i).angleFrom(tan(i-1),n);
 	return rad/(2*3.141592);
 }
 
@@ -353,9 +378,11 @@ bool Path::inside(const Vec3& v) const
 	
 	Vec3 ext = leftExtremity() - Vec3(10.0,10.0,10.0);
 	Edge ray(ext,v);
+	Vec3 n = normal();
 	for(int i=0;i<count();++i)
 	{
 		Intersection inter(edge(i), ray);
+		inter.setNormal(n);
 		if(inter.compute())++cpt;
 	}
 	
@@ -367,6 +394,30 @@ bool Path::inside(const Path& c) const
 {
 	for(auto v:c.vertices)if(inside(v)==false)return false;
 	return true;
+}
+
+//--------------------------------------------------------------
+const Path::BufType& Path::data() const
+{
+	return vertices;
+}
+
+//--------------------------------------------------------------
+Path::BufType& Path::data()
+{
+	return vertices;
+}
+
+//--------------------------------------------------------------
+Vec3& Path::operator[](int i)
+{
+	return vertex(i);
+}
+
+//--------------------------------------------------------------
+Vec3 Path::operator[](int i) const
+{
+	return vertex(i);
 }
 
 //--------------------------------------------------------------

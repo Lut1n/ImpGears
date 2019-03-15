@@ -59,6 +59,7 @@ class IMP_API Path : public Object
 	int getEdgeCnt(const Vec3& v) const;
 	Vec3 previous(const Vec3& v) const;
 	Vec3 next(const Vec3& v) const;
+	Vec3 normal() const;
 	
 	Vec3 gravity() const;
 	std::vector<int> degrees() const;
@@ -84,6 +85,12 @@ class IMP_API Path : public Object
 	
 	bool inside(const Vec3& v) const;
 	bool inside(const Path& c) const;
+	
+	const BufType& data() const;
+	BufType& data();
+	
+	Vec3& operator[](int i);
+	Vec3 operator[](int i) const;
 };
 
 //--------------------------------------------------------------

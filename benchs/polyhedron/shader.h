@@ -83,9 +83,9 @@ void main()
 	float fog_max = 3.0;
 	float fog = min(v_depth,fog_max) / fog_max;
 	
-	float c = fractal(v_pos,4,2.0,0.7,1.0) * 1.5;
+	float c = fractal(v_pos,8,4.0,0.7,2.0);
 	c = clamp(c,0.0,1.0);
 	
-	gl_FragData[0] = vec4(u_color*(1.0-fog)*c,1.0);
+	gl_FragData[0] = vec4(u_color*(1.0-fog)*c,0.5);
 }
 );

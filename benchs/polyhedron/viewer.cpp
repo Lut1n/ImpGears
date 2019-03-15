@@ -4,7 +4,8 @@
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/VBOData.h>
 
-#include "equation.h"
+#include <Geometry/Polyhedron.h>
+using namespace imp;
 
 #include <SFML/Graphics.hpp>
 
@@ -120,10 +121,10 @@ class Spheroid : public VBOData, public SceneNode
 			wf = wireframe;
 		}
 		
-        Spheroid(const BufV3& buf, bool wireframe = false)
+        Spheroid(const Polyhedron& buf, bool wireframe = false)
 		{
 			loaded = false;
-			geo._vertices = buf;
+			buf.getTriangles(geo._vertices);
 			
 			_shader = Shader::create(vertexSimple.c_str(), fragSimple.c_str());
 			u_color = Uniform::create("u_color", Uniform::Type_3f);
@@ -132,6 +133,22 @@ class Spheroid : public VBOData, public SceneNode
 			_shader->addUniform(u_color);
 			getGraphicState()->setShader(_shader);
 			wf = wireframe;
+		}
+		
+		void reduceEachTriangle(float f)
+		{
+			std::vector<Vec3>& ph1 = geo._vertices;
+			for(int i=0;i<(int)ph1.size();i+=3)
+			{
+				Vec3 mid = ph1[i+0] + ph1[i+1] + ph1[i+2]; mid *= (1.0/3.0);
+				
+				for(int j=0;j<3;++j)
+				{
+					Vec3 d = ph1[i+j] - mid;
+					d *= f;
+					ph1[i+j] = mid + d;
+				}
+			}
 		}
 		
 		void setColor(const Vec3& color)
@@ -203,7 +220,7 @@ struct Graph
 		renderer->getRenderParameters()->setFaceCullingMode(RenderParameters::FaceCullingMode_None);
 		renderer->getRenderParameters()->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
 		renderer->getRenderParameters()->setViewport(0.0,0.0,500.0,500.0);
-		renderer->getRenderParameters()->setLineWidth(10.0);
+		renderer->getRenderParameters()->setLineWidth(3.0);
 	}
 	
 	void add(SceneNode::Ptr node)

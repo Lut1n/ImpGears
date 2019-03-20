@@ -20,10 +20,11 @@ inline imp::Vec3 mix(const imp::Vec3& v1, const imp::Vec3& v2, double f)
 */
 
 Geometry::Geometry()
-{
-}
+	: _prim(Primitive_Lines)
+	{}
 
 Geometry::Geometry(const Geometry& other)
+	: _prim(other._prim)
 {
 	_vertices = other._vertices;
 	// _normals = other._normals;
@@ -39,9 +40,10 @@ void Geometry::operator=(const Geometry& other)
 
 void Geometry::operator+=(const Geometry& other)
 {
-	for(unsigned int i=0; i<other._vertices.size();++i)
+	add(other._vertices);
+	//for(unsigned int i=0; i<other._vertices.size();++i)
 	{
-		_vertices.push_back(other._vertices[i]);
+		// _vertices.push_back(other._vertices[i]);
 		// _normals.push_back(other._normals[i]);
 	}
 	/*int indiceCount = _indices.size();
@@ -283,5 +285,147 @@ Geometry Geometry::createPyramid(unsigned int baseDivision, unsigned int subdivi
 	
 	return pir;
 }
+
+void Geometry::setPrimitive(Primitive p) {_prim=p;}
+Geometry::Primitive Geometry::getPrimitive() const {return _prim;}
+
+void Geometry::operator+=(const Vec3& v){for(int i=0;i<size();++i)at(i)+=v;}
+void Geometry::operator-=(const Vec3& v){for(int i=0;i<size();++i)at(i)-=v;}
+void Geometry::operator*=(const Vec3& v){for(int i=0;i<size();++i)at(i)*=v;}
+void Geometry::operator*=(float f){for(int i=0;i<size();++i)at(i)*=f;}
+
+int Geometry::size() const {return _vertices.size();}
+Vec3& Geometry::at(int i){if(i<0)i=0;if(i>=size())i=size()-1; return _vertices[i];}
+const Vec3& Geometry::at(int i) const {if(i<0)i=0;if(i>=size())i=size()-1; return _vertices[i];}
+Vec3& Geometry::operator[](int i){return at(i);}
+const Vec3& Geometry::operator[](int i) const {return at(i);}
+
+void Geometry::add(const Vec3& v){_vertices.push_back(v);}
+void Geometry::add(const BufType& buf){for(auto v:buf)_vertices.push_back(v);}
+
+
+void Geometry::intoCCW( Geometry& buf )
+{
+	for(int i=0;i<(int)buf.size();i+=3)
+	{
+		Vec3 p1 = buf[i+0];
+		Vec3 p2 = buf[i+1];
+		Vec3 p3 = buf[i+2];
+		
+		Vec3 t12=p2-p1, t13=p3-p1;
+		bool ccw = t13.angleFrom(t12,p1) > 0; // ok for convex shape
+		if(!ccw) 
+		{
+			buf[i+1]=p3;
+			buf[i+2]=p2;
+		}
+	}
+}
+
+Geometry Geometry::intoLineBuf(const Geometry& buf)
+{
+	Geometry res;
+	for(int i=0;i<(int)buf.size();i+=3)
+	{
+		Vec3 p1 = buf[i+0];
+		Vec3 p2 = buf[i+1];
+		Vec3 p3 = buf[i+2];
+		
+		res.add( {p1,p2} );
+		res.add( {p1,p3} );
+		res.add( {p2,p3} );
+	}
+	return res;
+}
+
+Geometry Geometry::sphere(int sub, float size)
+{
+	Geometry geo = createTetrahedron(sub);
+	geo.sphericalNormalization(1.0);
+	geo*=size;
+	geo.setPrimitive(Primitive_Triangles);
+	return geo;
+}
+
+Geometry Geometry::extrude(const Path& base, float len, float ratioTop, int sub)
+{
+	Geometry res;
+	
+	int size = base.count();
+	int i2 = size-1;
+	for(int i=0;i<size;++i)
+	{
+		for(int j=0;j<sub+1;++j)
+		{
+			float f1 = j/(float)(sub+1);
+			float f2 = (j+1)/(float)(sub+1);
+			
+			float h1 = f1*len;
+			float h2 = f2*len;
+			
+			float r1 = mix(1.0f,ratioTop,f1);
+			float r2 = mix(1.0f,ratioTop,f2);
+			
+			Vec3 bt1 = base[i]*r1 + Vec3(0.0,0.0,h1);
+			Vec3 bt2 = base[i2]*r1 + Vec3(0.0,0.0,h1);
+			Vec3 tp1 = base[i]*r2 + Vec3(0.0,0.0,h2);
+			Vec3 tp2 = base[i2]*r2 + Vec3(0.0,0.0,h2);
+			
+			res.add( {bt2,bt1,tp2} );
+			res.add( {tp1,tp2,bt1} );
+		}
+		
+		// bottom
+		res.add( {Vec3(0.0),base[i2],base[i]} );
+			
+		// top
+		if(ratioTop > 0.0)
+		{
+			res.add(Vec3(0.0,0.0,len));
+			res.add(base[i2]*ratioTop + Vec3(0.0,0.0,len));
+			res.add(base[i]*ratioTop + Vec3(0.0,0.0,len));
+		}
+		
+		i2=i;
+	}
+	
+	// res+=base;
+	// res+=top;
+	res.setPrimitive(Primitive_Triangles);
+	return res;
+}
+
+Geometry Geometry::cylinder(int sub, float len, float radius)
+{
+	
+	Path base = Path::circle(sub,radius);
+	Geometry res = extrude(base, len,1.0,0);
+	return res;
+}
+
+
+Geometry Geometry::cone(int sub, float len, float radius1, float radius2)
+{
+	
+	Path base = Path::circle(sub,radius1);
+	Geometry res = extrude(base, len,radius2/radius1,0);
+	return res;
+}
+
+void Geometry::reduceTriangles(float f)
+{
+	if(_prim == Primitive_Triangles)
+	{
+		for(int i=0;i<size();i+=3)
+		{
+			Vec3 mid = at(i) + at(i+1) + at(i+2);
+			mid *= 1.0/3.0;
+			at(i) = ((at(i) - mid) * f) + mid;
+			at(i+1) = ((at(i+1) - mid) * f) + mid;
+			at(i+2) = ((at(i+2) - mid) * f) + mid;
+		}
+	}
+}
+
 
 IMPGEARS_END

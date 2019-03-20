@@ -91,6 +91,8 @@ class IMP_API Path : public Object
 	
 	Vec3& operator[](int i);
 	Vec3 operator[](int i) const;
+	
+	static Path circle(int sub, float radius);
 };
 
 //--------------------------------------------------------------

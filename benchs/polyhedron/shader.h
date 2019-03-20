@@ -1,8 +1,9 @@
-
+#define GLSL_CODE( code ) #code
 
 //--------------------------------------------------------------
-std::string vertexSimple = IMP_GLSL_SRC
+std::string vertexSimple = GLSL_CODE
 (
+
 uniform mat4 u_projection;
 uniform mat4 u_view;
 uniform mat4 u_model;
@@ -19,11 +20,13 @@ void main()
 	gl_Position = u_projection * mv_pos;
 	v_depth = length(mv_pos.xyz);
 }
+
 );
 
 //--------------------------------------------------------------
-std::string fragSimple = IMP_GLSL_SRC
+std::string fragSimple = GLSL_CODE
 (
+
 // varying vec3 v_vertex;
 varying float v_depth;
 varying vec3 v_pos;
@@ -83,9 +86,11 @@ void main()
 	float fog_max = 3.0;
 	float fog = min(v_depth,fog_max) / fog_max;
 	
-	float c = fractal(v_pos,8,4.0,0.7,2.0);
+	float c = fractal(v_pos,8,8.0,0.7,1.0);
+	c *= 1.0;
 	c = clamp(c,0.0,1.0);
 	
-	gl_FragData[0] = vec4(u_color*(1.0-fog)*c,0.5);
+	gl_FragData[0] = vec4(u_color*(1.0-fog)*c,1.0);
 }
+
 );

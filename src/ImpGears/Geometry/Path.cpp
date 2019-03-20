@@ -421,6 +421,20 @@ Vec3 Path::operator[](int i) const
 }
 
 //--------------------------------------------------------------
+Path Path::circle(int sub, float radius)
+{
+	Path normbase;
+	if(sub<3)sub=3;
+	for(int i=0;i<sub;++i)
+	{
+		float f = (float)i/(float)sub;
+		float a = f * 2.0 * 3.141592;
+		normbase.addVertex(Vec3(cos(a),sin(a),0.0) * radius);
+	}
+	return normbase;
+}
+
+//--------------------------------------------------------------
 Intersection::Intersection()
 {
 	refNormal = Vec3::Z;

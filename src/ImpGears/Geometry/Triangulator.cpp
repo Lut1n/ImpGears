@@ -60,6 +60,8 @@ struct Triplet
 		}
 		return false;
 	}
+	
+	bool isDegenerated() const {return p1==p2 || p1==p3 || p2==p3;}
 };
 
 //--------------------------------------------------------------
@@ -178,7 +180,7 @@ Polygon edges2Triangles(const std::vector<Edge>& edges)
 		}
 	}
 	
-	delaunay(buf);
+	// delaunay(buf);
 	
 	PathSet res;
 	for(auto t:buf)
@@ -213,7 +215,9 @@ std::vector<Edge> points2Edges(const std::vector<Vec3>& pts, Vec3 n)
 		for(auto e2:edges)
 		{
 			if(e.connectedTo(e2))continue;
-			if(Intersection(e,e2).compute()){xPoly=true;break;}
+			Intersection xtion(e,e2); xtion.setNormal(n);
+			if(xtion.compute()){xPoly=true;break;}
+			// if(Intersection(e,e2).compute()){xPoly=true;break;}
 		}
 		if(xPoly)continue;
 		

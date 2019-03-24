@@ -53,6 +53,11 @@ void SceneNode::renderAll()
     Matrix4 modelMat = getModelMatrix();
     Matrix4 normalMat = getNormalMatrix();
 	
+    for(auto node : subSceneNodes)
+	{
+        node->setParentModelMatrices(modelMat, normalMat);
+	}
+	
 	GraphicRenderer* renderer = GraphicRenderer::getInstance();
 	GraphicStatesManager& states = renderer->getStateManager();
 	
@@ -61,19 +66,20 @@ void SceneNode::renderAll()
 	{
 		states.getShader()->setModel(modelMat);
 		if(imp::Camera::getActiveCamera())
+		{
+			imp::Camera::getActiveCamera()->lookAt();
 			states.getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );
+		}
 		if(states.getParameters())
 			states.getShader()->setProjection( states.getParameters()->getProjectionMatrix() );
 	}
 	
     render();
 
-    for(SceneNodeIt it = subSceneNodes.begin(); it != subSceneNodes.end(); it++)
-    {
-        SceneNode* sub = it->get();
-        sub->setParentModelMatrices(modelMat, normalMat);
-        sub->renderAll();
-    }
+    for(auto node : subSceneNodes)
+	{
+		node->renderAll();
+	}
 	
 	states.popState();
 }
@@ -119,7 +125,7 @@ void SceneNode::calculateRotation(){
 }
 
 //--------------------------------------------------------------
-const Matrix4 SceneNode::getModelMatrix()
+Matrix4 SceneNode::getModelMatrix()
 {
     commitTransformation();
 
@@ -127,7 +133,7 @@ const Matrix4 SceneNode::getModelMatrix()
 }
 
 //--------------------------------------------------------------
-const Matrix4 SceneNode::getNormalMatrix()
+Matrix4 SceneNode::getNormalMatrix()
 {
     commitTransformation();
 

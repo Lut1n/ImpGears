@@ -53,14 +53,14 @@ class IMP_API SceneNode : public Object
 
         void renderAll();
 
-        const imp::Vec3 getPosition() const{return position;}
-        const imp::Vec3 getOrientation() const{return orientation;}
+        Vec3 getPosition() const{return position;}
+        Vec3 getOrientation() const{return orientation;}
 
         bool renderIsActivated() const{return renderActivated;}
         void setRenderActivated(bool activated){renderActivated = activated;}
 
-        const Matrix4 getModelMatrix();
-        const Matrix4 getNormalMatrix();
+        Matrix4 getModelMatrix();
+        Matrix4 getNormalMatrix();
         const void setParentModelMatrices(const Matrix4& pModelMat, const Matrix4& pNormalMat)
         {
             m_parentModelMatrix = pModelMat;
@@ -83,7 +83,9 @@ class IMP_API SceneNode : public Object
 
         void calculateRotation();
 		
-		std::shared_ptr<GraphicState> _state;
+		GraphicState::Ptr _state;
+
+        Vec3 scale;
 
     private:
         SceneNodeList subSceneNodes;
@@ -92,8 +94,6 @@ class IMP_API SceneNode : public Object
 
         imp::Vec3 position;
         imp::Vec3 orientation;
-
-        Vec3 scale;
 
         bool renderActivated;
 

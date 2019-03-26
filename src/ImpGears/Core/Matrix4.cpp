@@ -58,15 +58,15 @@ const Matrix4& Matrix4::operator*=(const Matrix4& other)
 {
     Matrix4 original(*this);
 
-    for(std::uint32_t l=0; l<4; ++l)
+    for(std::uint32_t c=0; c<4; ++c)
     {
-        for(std::uint32_t c=0; c<4; ++c)
+        for(std::uint32_t l=0; l<4; ++l)
         {
             float r = 0.f;
             for(std::uint32_t n = 0; n<4; ++n)
-                r += original.getValue(l,n) * other.getValue(n,c);
+                r += original.getValue(c,n) * other.getValue(n,l);
 
-            setValue(l,c,r);
+            setValue(c,l,r);
         }
     }
 
@@ -206,13 +206,13 @@ const float* Matrix4::getData() const
 }
 
 //--------------------------------------------------------------
-void Matrix4::setValue(std::uint32_t c, std::uint32_t l, float v)
+void Matrix4::setValue(int c, int l, float v)
 {
     m_data[c*4+l] = v;
 }
 
 //--------------------------------------------------------------
-float Matrix4::getValue(std::uint32_t c, std::uint32_t l) const
+float Matrix4::getValue(int c, int l) const
 {
     return m_data[c*4+l];
 }

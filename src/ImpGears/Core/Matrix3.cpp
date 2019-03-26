@@ -44,12 +44,12 @@ Matrix3::~Matrix3()
 {
 }
 
-void Matrix3::setValue(std::uint32_t l, std::uint32_t c, float value)
+void Matrix3::setValue(int c, int l, float value)
 {
     m_values[c*3+l] = value;
 }
 
-float Matrix3::getValue(std::uint32_t l, std::uint32_t c) const
+float Matrix3::getValue(int c, int l) const
 {
     return m_values[c*3+l];
 }
@@ -81,8 +81,8 @@ Matrix3& Matrix3::operator*=(const Matrix3& other)
 {
     const Matrix3 before(*this);
 
-    for(std::uint32_t l=0;l<3;l++)
-    for(std::uint32_t c=0;c<3;c++){
+    for(std::uint32_t c=0;c<3;c++)
+    for(std::uint32_t l=0;l<3;l++){
 
         m_values[c*3+l] = 0.f;
         for(std::uint32_t k=0; k<3;k++)
@@ -207,12 +207,10 @@ Matrix4 Matrix3::asMatrix4() const
     Matrix4 matrix4 = Matrix4::getIdentityMat();
 
     for(int c=0; c<3; ++c)
-    {
         for(int l=0; l<3; ++l)
         {
-            matrix4.setValue(c, l, getValue(l,c));
+            matrix4.setValue(c,l, getValue(c,l));
         }
-    }
 
     return matrix4;
 }

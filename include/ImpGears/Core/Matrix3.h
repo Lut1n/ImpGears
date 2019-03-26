@@ -19,12 +19,12 @@ class IMP_API Matrix3 : public Object
         Matrix3(const float values[9], bool transpose = false);
         virtual ~Matrix3();
 
-        void setValue(std::uint32_t l, std::uint32_t c, float value);
-        float getValue(std::uint32_t l, std::uint32_t c) const;
+        void setValue(int c, int l, float value);
+        float getValue(int c, int l) const;
 		
-		float operator()(std::uint32_t l,std::uint32_t c) const
+		float operator()(int c, int l) const
 		{
-			return getValue(l,c);
+			return getValue(c,l);
 		}
 
         Matrix3& operator=(const Matrix3& other);

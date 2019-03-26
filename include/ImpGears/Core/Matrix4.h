@@ -51,14 +51,14 @@ class IMP_API Matrix4 : public Object
         /// \brief Set a value
         /// \param c - the column
         /// \param l - the line
-        void setValue(std::uint32_t c, std::uint32_t l, float v);
+        void setValue(int c, int l, float v);
 
         /// \brief Get a value
         /// \param c - the column
         /// \param l - the line
-        float getValue(std::uint32_t c, std::uint32_t l) const;
+        float getValue(int c, int l) const;
 		
-		float operator()(std::uint32_t c,std::uint32_t l) const
+		float operator()(int c, int l) const
 		{
 			return getValue(c,l);
 		}

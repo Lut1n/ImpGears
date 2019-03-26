@@ -30,13 +30,14 @@ GraphicRenderer::GraphicRenderer()
     
     // default parameters values
     _parameters.reset(new RenderParameters());
-    _parameters->setPerspectiveProjection(60.0, 4.0/3.0, 0.1, 128.0);
+    _parameters->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
     _parameters->setClearColor(imp::Vec3(0.0, 0.0, 0.0));
     _parameters->setClearDepth( 1.0 );
     _parameters->setBlendMode(imp::RenderParameters::BlendMode_SrcAlphaBased);
     _parameters->setFog(RenderParameters::ParamState_Disable);
-    _parameters->setFaceCullingMode(RenderParameters::FaceCullingMode_Back);
-    _parameters->setViewport(0.0,0.0,800.0,400.0);
+    _parameters->setFaceCullingMode(RenderParameters::FaceCullingMode_None);
+    _parameters->setViewport(0.0,0.0,500.0,500.0);
+    _parameters->setLineWidth(1.0);
     
     _state.reset(new GraphicState());
     _state->setParameters(_parameters);

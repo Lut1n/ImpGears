@@ -4,6 +4,7 @@
 #include <Core/Object.h>
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
+#include <Core/Vec4.h>
 
 #include <SceneGraph/OpenGL.h>
 
@@ -76,7 +77,7 @@ class IMP_API RenderParameters : public Object
 		ParamState _fogState;
         float _lineWidth;
 		
-		float _viewport[4];
+		Vec4 _viewport;
 		
 		bool _clearColorChanged;
 		bool _clearDepthChanged;

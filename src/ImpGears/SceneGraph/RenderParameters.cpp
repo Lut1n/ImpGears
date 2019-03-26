@@ -3,21 +3,23 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-RenderParameters::RenderParameters():
-    m_faceCullingMode(FaceCullingMode_Back),
-    m_blendMode(BlendMode_SrcAlphaBased),
-	_clearColorChanged(false),
-	_clearDepthChanged(false),
-	_faceCullingChanged(false),
-	_blendModeChanged(false),
-	_fogChanged(false),
-	_viewportChanged(false),
-	_lineWidthChanged(false)
+RenderParameters::RenderParameters()
+	: m_clearColor(0.0)
+	, _clearDepth(1.0)
+	, m_projectionMatrix(Matrix4::_identity)
+	, m_faceCullingMode(FaceCullingMode_None)
+	, m_blendMode(BlendMode_SrcAlphaBased)
+	, _fogState(ParamState_Disable)
+	, _lineWidth(1.0)
+	, _viewport(0.0,0.0,1.0,1.0)
+	, _clearColorChanged(false)
+	, _clearDepthChanged(false)
+	, _faceCullingChanged(false)
+	, _blendModeChanged(false)
+	, _fogChanged(false)
+	, _viewportChanged(false)
+	, _lineWidthChanged(false)
 {
-    m_clearColor = Vec3(1.f, 1.f, 1.f); //alpha = 1.f
-	_clearDepth = 1.f;
-	_fogState = ParamState_Disable;
-    m_projectionMatrix = Matrix4::getPerspectiveProjectionMat(45.f, 4.f/3.f, 0.1f, 100.f);
 }
 
 //--------------------------------------------------------------
@@ -37,10 +39,7 @@ RenderParameters::RenderParameters(const RenderParameters& other):
     m_projectionMatrix = other.m_projectionMatrix;
 	_clearDepth = other._clearDepth;
 	_fogState = other._fogState;
-	_viewport[0] = other._viewport[0];
-	_viewport[1] = other._viewport[1];
-	_viewport[2] = other._viewport[2];
-	_viewport[3] = other._viewport[3];
+	_viewport = other._viewport;
 }
 
 //--------------------------------------------------------------
@@ -66,10 +65,7 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
 	_blendModeChanged = other._blendModeChanged;
 	_fogChanged = other._fogChanged;
 	
-	_viewport[0] = other._viewport[0];
-	_viewport[1] = other._viewport[1];
-	_viewport[2] = other._viewport[2];
-	_viewport[3] = other._viewport[3];
+	_viewport = other._viewport;
 
 
     return *this;
@@ -200,10 +196,7 @@ void RenderParameters::setClearDepth(float depth)
 //--------------------------------------------------------------
 void RenderParameters::setViewport(float x, float y, float width, float height)
 {
-	_viewport[0] = x;
-	_viewport[1] = y;
-	_viewport[2] = width;
-	_viewport[3] = height;
+	_viewport = Vec4(x,y,width,height);
 	_viewportChanged = true;
 }
 

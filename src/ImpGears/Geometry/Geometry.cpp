@@ -34,6 +34,7 @@ Geometry::Geometry(const Geometry& other)
 void Geometry::operator=(const Geometry& other)
 {
 	_vertices = other._vertices;
+	_prim = other._prim;
 	// _normals = other._normals;
 	//_indices = other._indices;
 }

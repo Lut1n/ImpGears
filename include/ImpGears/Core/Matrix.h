@@ -26,8 +26,8 @@ public:
 
 	const Matrix& operator=(const Matrix& other){ set(other.data(),false); return *this; }
 	
-	const float& operator()(int c, int r) const;
-	float& operator()(int c, int r);
+	const float& operator()(int c, int r) const {return at(c,r);}
+	float& operator()(int c, int r) {return at(c,r);}
 	
 	const float* data() const {return _data;}
 	float* data() {return _data;}
@@ -74,25 +74,13 @@ float& Matrix<Cn,Rn,Ty>::at(int c, int r)
 }
 
 template<int Cn,int Rn, typename Ty>
-const float& Matrix<Cn,Rn,Ty>::operator()(int c, int r) const
-{
-	return _data[c*Rn+r];
-}
-
-template<int Cn,int Rn, typename Ty>
-float& Matrix<Cn,Rn,Ty>::operator()(int c, int r)
-{
-	return _data[c*Rn+r];
-}
-
-template<int Cn,int Rn, typename Ty>
 void Matrix<Cn,Rn,Ty>::set(const float* buf, bool transp)
 {
 	int index=0;
 	for(int c=0;c<Cn;++c)
 		for(int r=0;r<Rn;++r)
 		{
-			float& val = transp? at(c,r) : at(r,c);
+			float& val = transp? at(r,c) : at(c,r);
 			val = buf[index++];
 		}
 }

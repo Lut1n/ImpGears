@@ -1,61 +1,40 @@
 #ifndef IMP_MATRIX3_H
 #define IMP_MATRIX3_H
 
-#include <Core/Object.h>
+#include <Core/Matrix.h>
 
 IMPGEARS_BEGIN
 
-class Matrix4;
-
-class IMP_API Matrix3 : public Object
+class IMP_API Matrix3 : public Matrix<3,3,float>
 {
-    public:
-	
-		Meta_Class(Matrix3)
-	
-        Matrix3();
-        Matrix3(const Matrix3& other);
-        Matrix3(const Matrix4& Matrix4);
-        Matrix3(const float values[9], bool transpose = false);
-        virtual ~Matrix3();
+public:
 
-        void setValue(int c, int l, float value);
-        float getValue(int c, int l) const;
-		
-		float operator()(int c, int l) const
-		{
-			return getValue(c,l);
-		}
+	Meta_Class(Matrix3)
 
-        Matrix3& operator=(const Matrix3& other);
-        Matrix3& operator+=(const Matrix3& other);
-        Matrix3& operator-=(const Matrix3& other);
-        Matrix3& operator*=(const Matrix3& other);
-        Matrix3& operator*=(float scalar);
+	Matrix3();
+	Matrix3(const Matrix<3,3,float>& other);
+	Matrix3(const Matrix<4,4,float>& matrix4);
+	Matrix3(const float* buf, bool transp = false);
+	virtual ~Matrix3();
 
-        Matrix3 operator+(const Matrix3& other) const;
-        Matrix3 operator-(const Matrix3& other) const;
-        Matrix3 operator*(const Matrix3& other) const;
-        Matrix3 operator*(float scalar) const;
-		
-        // imp::Vec3 operator*(const imp::Vec3& vector) const;
+	Matrix3& operator+=(const Matrix3& other);
+	Matrix3& operator-=(const Matrix3& other);
+	Matrix3& operator*=(const Matrix3& other);
+	Matrix3& operator*=(float scalar);
 
-        float getDet() const;
-        Matrix3 getTranspose() const;
-        Matrix3 getInverse() const;
+	Matrix3 operator+(const Matrix3& other) const;
+	Matrix3 operator-(const Matrix3& other) const;
+	Matrix3 operator*(const Matrix3& other) const;
+	Matrix3 operator*(float scalar) const;
 
-        Matrix4 asMatrix4() const;
+	float getDet() const;
+	Matrix3 getInverse() const;
 
-        static Matrix3 rotationX(float rad);
-        static Matrix3 rotationY(float rad);
-        static Matrix3 rotationZ(float rad);
+	Matrix<4,4,float> asMatrix4() const;
 
-        static const Matrix3 getIdentity();
-
-    protected:
-    private:
-
-    float m_values[9];
+	static Matrix3 rotationX(float rad);
+	static Matrix3 rotationY(float rad);
+	static Matrix3 rotationZ(float rad);
 };
 
 IMPGEARS_END

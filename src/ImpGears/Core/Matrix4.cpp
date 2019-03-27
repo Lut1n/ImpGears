@@ -33,19 +33,14 @@ Matrix4::~Matrix4()
 //--------------------------------------------------------------
 const Matrix4& Matrix4::operator*=(const Matrix4& other)
 {
-    Matrix4 original(*this);
+    Matrix4 last(*this);
 
-    for(std::uint32_t c=0; c<4; ++c)
-    {
-        for(std::uint32_t l=0; l<4; ++l)
+    for(int c=0; c<4; ++c)
+        for(int r=0; r<4; ++r)
         {
-            float r = 0.f;
-            for(std::uint32_t n = 0; n<4; ++n)
-                r += original.at(c,n) * other.at(n,l);
-
-            at(c,l)=r;
+            at(c,r) = 0.0;
+            for(int n = 0; n<4; ++n) at(c,r) += last(n,r) * other(c,n);
         }
-    }
 
     return *this;
 }

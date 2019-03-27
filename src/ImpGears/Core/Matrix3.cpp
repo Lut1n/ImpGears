@@ -7,64 +7,37 @@
 
 IMPGEARS_BEGIN
 
-#define IDX(x,y)m_values[y*3+x]
+#define IDX(x,y)_data[y*3+x]
 
 Matrix3::Matrix3()
+	: Matrix<3,3,float>()
 {
-    for(std::uint32_t i=0; i<9; ++i)
-        m_values[i] = 0.f;
 }
 
-Matrix3::Matrix3(const Matrix3& other)
+Matrix3::Matrix3(const Matrix<3,3,float>& other)
+	: Matrix<3,3,float>(other)
 {
-    memcpy(m_values, other.m_values, sizeof(float)*9);
 }
 
-Matrix3::Matrix3(const Matrix4& Matrix4)
+Matrix3::Matrix3(const Matrix<4,4,float>& matrix4)
 {
-    const float* value4 = Matrix4.data();
     for(int c=0; c<3; ++c)
-    {
-        memcpy(&(m_values[c*3]), &(value4[c*4]), sizeof(float)*3);
-    }
+		for(int r=0;r<3;++r) at(c,r)=matrix4(c,r);
 }
 
-Matrix3::Matrix3(const float values[9], bool transpose)
+Matrix3::Matrix3(const float* buf, bool transp)
+	: Matrix<3,3,float>(buf,transp)
 {
-    memcpy(m_values, values, sizeof(float)*9);
-	
-    if(transpose)
-    {
-        Matrix3 copy(*this);
-        *this = copy.getTranspose();
-    }
 }
 
 Matrix3::~Matrix3()
 {
 }
 
-void Matrix3::setValue(int c, int l, float value)
-{
-    m_values[c*3+l] = value;
-}
-
-float Matrix3::getValue(int c, int l) const
-{
-    return m_values[c*3+l];
-}
-
-Matrix3& Matrix3::operator=(const Matrix3& other)
-{
-    memcpy(m_values, other.m_values, sizeof(float)*9);
-
-    return *this;
-}
-
 Matrix3& Matrix3::operator+=(const Matrix3& other)
 {
     for(std::uint32_t i=0; i<9; ++i)
-        m_values[i] += other.m_values[i];
+        _data[i] += other._data[i];
 
     return *this;
 }
@@ -72,22 +45,21 @@ Matrix3& Matrix3::operator+=(const Matrix3& other)
 Matrix3& Matrix3::operator-=(const Matrix3& other)
 {
     for(std::uint32_t i=0; i<9; ++i)
-        m_values[i] -= other.m_values[i];
+        _data[i] -= other._data[i];
 
     return *this;
 }
 
 Matrix3& Matrix3::operator*=(const Matrix3& other)
 {
-    const Matrix3 before(*this);
+    const Matrix3 last(*this);
 
-    for(std::uint32_t c=0;c<3;c++)
-    for(std::uint32_t l=0;l<3;l++){
-
-        m_values[c*3+l] = 0.f;
-        for(std::uint32_t k=0; k<3;k++)
-            m_values[c*3+l] += ( before.m_values[c*3+k] * other.m_values[k*3+l] );
-    }
+    for(int c=0;c<3;c++)
+		for(int r=0;r<3;r++)
+		{
+			at(c,r) = 0.f;
+			for(int k=0; k<3;k++) at(c,r) += last(k,r) * other(c,k);
+		}
 
     return *this;
 }
@@ -95,7 +67,7 @@ Matrix3& Matrix3::operator*=(const Matrix3& other)
 Matrix3& Matrix3::operator*=(float scalar)
 {
     for(std::uint32_t i=0; i<9; ++i)
-        m_values[i] *= scalar;
+        _data[i] *= scalar;
 
     return *this;
 }
@@ -120,23 +92,6 @@ Matrix3 Matrix3::operator*(float scalar) const
     return Matrix3(*this) *= scalar;
 }
 
-/*
-imp::Vec3 Matrix3::operator*(const imp::Vec3& vector) const
-{
-    imp::Vec3 result;
-
-    imp::Vec3 line1(m_values[0], m_values[1], m_values[2]);
-    imp::Vec3 line2(m_values[3], m_values[4], m_values[5]);
-    imp::Vec3 line3(m_values[6], m_values[7], m_values[8]);
-
-    result.x() = line1.dot(vector);
-    result.y() = line2.dot(vector);
-    result.z() = line3.dot(vector);
-
-    return result;
-}
-*/
-
 float Matrix3::getDet() const
 {
     /**
@@ -156,18 +111,6 @@ float Matrix3::getDet() const
     - IDX(2,2)*IDX(1,0)*IDX(0,1);
 
     return result;
-}
-
-Matrix3 Matrix3::getTranspose() const
-{
-    Matrix3 transpose(*this);
-
-    for(std::uint32_t i=0;i<3;i++){
-    for(std::uint32_t j=0;j<3;j++){
-        transpose.setValue(i,j, getValue(j,i));
-    }}
-
-    return transpose;
 }
 
 Matrix3 Matrix3::getInverse() const
@@ -197,17 +140,17 @@ Matrix3 Matrix3::getInverse() const
 
     Matrix3 mat(result);
     float matDet = mat.getDet();
-    mat = mat.getTranspose();
+    mat.transpose();
 
     return mat * (1.f/matDet);
 }
 
-Matrix4 Matrix3::asMatrix4() const
+Matrix<4,4,float> Matrix3::asMatrix4() const
 {
-    Matrix4 matrix4;
+    Matrix<4,4,float> matrix4;
 
     for(int c=0; c<3; ++c)
-        for(int l=0; l<3; ++l) matrix4(c,l) = getValue(c,l);
+        for(int r=0; r<3; ++r) matrix4(c,r) = at(c,r);
 
     return matrix4;
 }
@@ -257,12 +200,4 @@ Matrix3 Matrix3::rotationZ(float rad)
     return Matrix3(values,true);
 }
 
-const Matrix3 Matrix3::getIdentity()
-{
-    const float values[9] = { 1.f, 0.f, 0.f,
-                        0.f, 1.f, 0.f,
-                        0.f, 0.f, 1.f};
-
-    return Matrix3(values);
-}
 IMPGEARS_END

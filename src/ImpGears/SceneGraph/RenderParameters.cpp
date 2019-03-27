@@ -6,7 +6,7 @@ IMPGEARS_BEGIN
 RenderParameters::RenderParameters()
 	: m_clearColor(0.0)
 	, _clearDepth(1.0)
-	, m_projectionMatrix(Matrix4::_identity)
+	, m_projectionMatrix(Matrix4())
 	, m_faceCullingMode(FaceCullingMode_None)
 	, m_blendMode(BlendMode_SrcAlphaBased)
 	, _fogState(ParamState_Disable)

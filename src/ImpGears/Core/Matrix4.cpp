@@ -5,52 +5,29 @@
 
 IMPGEARS_BEGIN
 
-static const float IDENTITY_DATA[16] = {
-	1.f,    0.f,    0.f,    0.f,
-	0.f,    1.f,    0.f,    0.f,
-	0.f,    0.f,    1.f,    0.f,
-	0.f,    0.f,    0.f,    1.f
-};
-
-const Matrix4 Matrix4::_identity(IDENTITY_DATA);
-
-#define IDX(x,y)m_data[(y-1)*4+(x-1)]
+#define IDX(x,y)_data[(y-1)*4+(x-1)]
 
 //--------------------------------------------------------------
 Matrix4::Matrix4()
+	: Matrix<4,4,float>()
 {
-    memset(m_data, 0, 16*sizeof(float));
 }
 
 //--------------------------------------------------------------
-Matrix4::Matrix4(const Matrix4& other)
+Matrix4::Matrix4(const Matrix<4,4,float>& other)
+	: Matrix<4,4,float>(other)
 {
-    setData(other.m_data);
 }
 
 //--------------------------------------------------------------
-Matrix4::Matrix4(const float* data, bool transpose)
+Matrix4::Matrix4(const float* buf, bool transp)
+	: Matrix<4,4,float>(buf,transp)
 {
-    setData(data);
-
-    if(transpose)
-    {
-        Matrix4 copy(*this);
-        *this = copy.getTranspose();
-    }
 }
 
 //--------------------------------------------------------------
 Matrix4::~Matrix4()
 {
-}
-
-//--------------------------------------------------------------
-const Matrix4& Matrix4::operator=(const Matrix4& other)
-{
-    setData(other.m_data);
-
-    return *this;
 }
 
 //--------------------------------------------------------------
@@ -64,9 +41,9 @@ const Matrix4& Matrix4::operator*=(const Matrix4& other)
         {
             float r = 0.f;
             for(std::uint32_t n = 0; n<4; ++n)
-                r += original.getValue(c,n) * other.getValue(n,l);
+                r += original.at(c,n) * other.at(n,l);
 
-            setValue(c,l,r);
+            at(c,l)=r;
         }
     }
 
@@ -84,8 +61,7 @@ const Matrix4 Matrix4::operator*(const Matrix4& other) const
 //--------------------------------------------------------------
 const Matrix4& Matrix4::operator*=(float scalar)
 {
-    for(std::uint32_t i=0; i<16; ++i)
-        m_data[0] *= scalar;
+    for(int i=0; i<16;++i) _data[i] *= scalar;
 
     return *this;
 }
@@ -97,38 +73,6 @@ const Matrix4 Matrix4::operator*(float scalar) const
     result*=scalar;
 
     return result;
-}
-
-//--------------------------------------------------------------
-/*
-const Vec3 Matrix4::operator*(const Vec3& vec) const
-{
-    Vec3 result;
-
-    result.set(
-                  vec.x()*IDX(1,1) + vec.y()*IDX(2,1) + vec.z()*IDX(3,1) + IDX(4,1),
-                  vec.x()*IDX(1,2) + vec.y()*IDX(2,2) + vec.z()*IDX(3,2) + IDX(4,2),
-                  vec.x()*IDX(1,3) + vec.y()*IDX(2,3) + vec.z()*IDX(3,3) + IDX(4,3)
-                  );
-
-    return result;
-}
-*/
-
-//--------------------------------------------------------------
-const Matrix4 Matrix4::getTranspose() const
-{
-    Matrix4 transposed(*this);
-
-    for(std::uint32_t i=0; i<4; ++i)
-    {
-        for(std::uint32_t j=0; j<4; ++j)
-        {
-            transposed.setValue(i, j, getValue(j,i));
-        }
-    }
-
-    return transposed;
 }
 
 //--------------------------------------------------------------
@@ -191,30 +135,6 @@ const Matrix4 Matrix4::getInverse() const
     resultMat*=(1.f/getDet());
 
     return resultMat;
-}
-
-//--------------------------------------------------------------
-void Matrix4::setData(const float* data)
-{
-    memcpy(m_data, data, 16*sizeof(float));
-}
-
-//--------------------------------------------------------------
-const float* Matrix4::getData() const
-{
-    return m_data;
-}
-
-//--------------------------------------------------------------
-void Matrix4::setValue(int c, int l, float v)
-{
-    m_data[c*4+l] = v;
-}
-
-//--------------------------------------------------------------
-float Matrix4::getValue(int c, int l) const
-{
-    return m_data[c*4+l];
 }
 
 //--------------------------------------------------------------
@@ -291,12 +211,6 @@ const Matrix4 Matrix4::getViewMat(const Vec3& pos, const Vec3& target, const Vec
     };
 
     return Matrix4(data);
-}
-
-//--------------------------------------------------------------
-const Matrix4& Matrix4::getIdentityMat()
-{
-    return _identity;
 }
 
 //--------------------------------------------------------------

@@ -19,11 +19,11 @@ SceneNode::SceneNode():
     renderActivated(true),
     m_localMatrixHasChanged(true)
 {
-    m_parentModelMatrix = Matrix4::getIdentityMat();
-    m_parentNormalMatrix = Matrix4::getIdentityMat();
+    m_parentModelMatrix = Matrix4();
+    m_parentNormalMatrix = Matrix4();
 
-    m_localModelMatrix = Matrix4::getIdentityMat();
-    m_localNormalMatrix = Matrix4::getIdentityMat();
+    m_localModelMatrix = Matrix4();
+    m_localNormalMatrix = Matrix4();
 
     scale = Vec3(1.f, 1.f, 1.f);
 }

@@ -22,7 +22,7 @@ Matrix3::Matrix3(const Matrix3& other)
 
 Matrix3::Matrix3(const Matrix4& Matrix4)
 {
-    const float* value4 = Matrix4.getData();
+    const float* value4 = Matrix4.data();
     for(int c=0; c<3; ++c)
     {
         memcpy(&(m_values[c*3]), &(value4[c*4]), sizeof(float)*3);
@@ -204,13 +204,10 @@ Matrix3 Matrix3::getInverse() const
 
 Matrix4 Matrix3::asMatrix4() const
 {
-    Matrix4 matrix4 = Matrix4::getIdentityMat();
+    Matrix4 matrix4;
 
     for(int c=0; c<3; ++c)
-        for(int l=0; l<3; ++l)
-        {
-            matrix4.setValue(c,l, getValue(c,l));
-        }
+        for(int l=0; l<3; ++l) matrix4(c,l) = getValue(c,l);
 
     return matrix4;
 }

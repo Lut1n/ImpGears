@@ -128,7 +128,7 @@ void Uniform::updateUniform(const Shader& program) const
 	}*/
 	else if(type == Type_Mat4v)
 	{
-		glUniformMatrix4fv(uniformLocation, 1, false, value.value_mat4v->getData());
+		glUniformMatrix4fv(uniformLocation, 1, false, value.value_mat4v->data());
 	}
 	else if(type == Type_Sampler)
 	{
@@ -268,7 +268,7 @@ void Shader::setMatrix4Uniform(const char* name, const Matrix4& Matrix4)
     if(location == -1)
         fprintf(stderr, "impError : location of uniform (%s) failed\n", name);
     GL_CHECKERROR("Matrix4 location");
-    glUniformMatrix4fv(location, 1, false, Matrix4.getData());
+    glUniformMatrix4fv(location, 1, false, Matrix4.data());
     GLenum errorState = glGetError();
     if(errorState != GL_NO_ERROR)
 	{

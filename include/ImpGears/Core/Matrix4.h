@@ -1,86 +1,42 @@
 #ifndef IMP_MATRIX4_H
 #define IMP_MATRIX4_H
 
-#include <Core/Object.h>
+#include <Core/Matrix.h>
 #include <Core/Vec3.h>
 
 IMPGEARS_BEGIN
 
-/// \brief Defines an openGL matrix4x4 wrapper.
-class IMP_API Matrix4 : public Object
+class IMP_API Matrix4 : public Matrix<4,4,float>
 {
-    public:
-	
-		Meta_Class(Matrix4)
+public:
 
-        Matrix4();
+	Meta_Class(Matrix4)
 
-        Matrix4(const Matrix4& other);
+	Matrix4();
+	Matrix4(const Matrix<4,4,float>& other);
+	Matrix4(const float* buf, bool transp = false);
+	virtual ~Matrix4();
 
-        /// \brief Constructor ustd::sing float buffer.
-        /// \param data - The Matrix4 data (column major).
-        /// \param transpose - The Matrix4 data must be transposed.
-        Matrix4(const float* data, bool transpose = false);
+	const Matrix4& operator*=(const Matrix4& other);
+	const Matrix4 operator*(const Matrix4& other) const;
 
-        virtual ~Matrix4();
+	const Matrix4& operator*=(float scalar);
+	const Matrix4 operator*(float scalar) const;
 
-        const Matrix4& operator=(const Matrix4& other);
+	float getDet() const;
 
-        const Matrix4& operator*=(const Matrix4& other);
-        const Matrix4 operator*(const Matrix4& other) const;
+	const Matrix4 getInverse() const;
 
-        const Matrix4& operator*=(float scalar);
-        const Matrix4 operator*(float scalar) const;
-
-        // const Vec3 operator*(const Vec3& vec) const;
-
-        const Matrix4 getTranspose() const;
-
-        float getDet() const;
-
-        const Matrix4 getInverse() const;
-
-        /// \brief Sets the Matrix4 with float buffer.
-        /// \param data - The Matrix4 data (column major).
-        void setData(const float* data);
-
-        /// \brief Gets the Matrix4 float buffer.
-        /// \return The internal Matrix4 data (column major).
-        const float* getData() const;
-
-        /// \brief Set a value
-        /// \param c - the column
-        /// \param l - the line
-        void setValue(int c, int l, float v);
-
-        /// \brief Get a value
-        /// \param c - the column
-        /// \param l - the line
-        float getValue(int c, int l) const;
-		
-		float operator()(int c, int l) const
-		{
-			return getValue(c,l);
-		}
-
-        static const Matrix4 getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue);
-        static const Matrix4 getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue);
-        static const Matrix4 getOrthographicProjectionMat(float width, float height, float nearValue, float farValue);
-        static const Matrix4 getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up);
-        static const Matrix4& getIdentityMat();
-        static const Matrix4 getTranslationMat(float tx, float ty, float tz);
-        static const Matrix4 getRotationMat(float rx, float ry, float rz);
-        static const Matrix4 getRotationXAxisMat(float rx);
-        static const Matrix4 getRotationYAxisMat(float ry);
-        static const Matrix4 getRotationZAxisMat(float rz);
-        static const Matrix4 getScaleMat(float sx, float sy, float sz);
-		
-		static const Matrix4 _identity;
-
-    protected:
-    private:
-
-        float m_data[16];
+	static const Matrix4 getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue);
+	static const Matrix4 getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue);
+	static const Matrix4 getOrthographicProjectionMat(float width, float height, float nearValue, float farValue);
+	static const Matrix4 getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up);
+	static const Matrix4 getTranslationMat(float tx, float ty, float tz);
+	static const Matrix4 getRotationMat(float rx, float ry, float rz);
+	static const Matrix4 getRotationXAxisMat(float rx);
+	static const Matrix4 getRotationYAxisMat(float ry);
+	static const Matrix4 getRotationZAxisMat(float rz);
+	static const Matrix4 getScaleMat(float sx, float sy, float sz);
 };
 
 IMPGEARS_END

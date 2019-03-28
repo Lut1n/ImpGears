@@ -19,13 +19,8 @@ public:
 
 	Matrix3& operator+=(const Matrix3& other);
 	Matrix3& operator-=(const Matrix3& other);
-	Matrix3& operator*=(const Matrix3& other);
-	Matrix3& operator*=(float scalar);
-
 	Matrix3 operator+(const Matrix3& other) const;
 	Matrix3 operator-(const Matrix3& other) const;
-	Matrix3 operator*(const Matrix3& other) const;
-	Matrix3 operator*(float scalar) const;
 
 	float getDet() const;
 	Matrix3 getInverse() const;

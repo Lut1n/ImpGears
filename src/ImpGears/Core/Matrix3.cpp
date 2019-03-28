@@ -50,28 +50,6 @@ Matrix3& Matrix3::operator-=(const Matrix3& other)
     return *this;
 }
 
-Matrix3& Matrix3::operator*=(const Matrix3& other)
-{
-    const Matrix3 last(*this);
-
-    for(int c=0;c<3;c++)
-		for(int r=0;r<3;r++)
-		{
-			at(c,r) = 0.f;
-			for(int k=0; k<3;k++) at(c,r) += last(k,r) * other(c,k);
-		}
-
-    return *this;
-}
-
-Matrix3& Matrix3::operator*=(float scalar)
-{
-    for(std::uint32_t i=0; i<9; ++i)
-        _data[i] *= scalar;
-
-    return *this;
-}
-
 Matrix3 Matrix3::operator+(const Matrix3& other) const
 {
     return Matrix3(*this) += other;
@@ -80,16 +58,6 @@ Matrix3 Matrix3::operator+(const Matrix3& other) const
 Matrix3 Matrix3::operator-(const Matrix3& other) const
 {
     return Matrix3(*this) -= other;
-}
-
-Matrix3 Matrix3::operator*(const Matrix3& other) const
-{
-    return Matrix3(*this) *= other;
-}
-
-Matrix3 Matrix3::operator*(float scalar) const
-{
-    return Matrix3(*this) *= scalar;
 }
 
 float Matrix3::getDet() const

@@ -1,4 +1,5 @@
 #include <Geometry/Polygon.h>
+#include <Core/Matrix3.h>
 
 #include <map>
 #include <cstdlib>

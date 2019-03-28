@@ -13,10 +13,13 @@ public:
 	Meta_Class(Matrix4)
 
 	Matrix4();
-	Matrix4(const Matrix<4,4,float>& other);
+	template<int Cn2, int Rn2>
+	Matrix4(const Matrix<Cn2,Rn2,float>& mat) : Matrix(mat) {}
 	Matrix4(const float* buf, bool transp = false);
 	virtual ~Matrix4();
 
+	const Matrix4& operator=(const Matrix& other){ Matrix::operator=(other); return *this; }
+	
 	float getDet() const;
 
 	Matrix4 getInverse() const;

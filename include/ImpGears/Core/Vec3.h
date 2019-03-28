@@ -2,7 +2,6 @@
 #define IMP_VEC3_H
 
 #include <Core/Vec.h>
-#include <Core/Matrix3.h>
 
 #include <cmath>
 
@@ -12,42 +11,24 @@ class IMP_API Vec3 : public Vec<3,float>
 {
 	public:
 	
+	Meta_Class(Vec3)
+	
 	static const Vec3 X;
 	static const Vec3 Y;
 	static const Vec3 Z;
 	
-	Meta_Class(Vec3)
-	
 	Vec3() : Vec() {}
 	Vec3(float v) : Vec(v) {}
 	Vec3(float x, float y, float z) : Vec(x,y,z) {}
-	Vec3(const Vec& v) : Vec(v) {}
 	Vec3(const float* buf) : Vec(buf) {}
-
-	void set(float x, float y, float z) { Vec::set(x,y,z); }
-	void setRadial(float theta, float phi) { /*todo*/ }
 	
-	const Vec3& operator*=(const Vec3& other) { Vec::operator*=(other); return *this; }
+	template<int Dim2>
+	Vec3(const Vec<Dim2,float>& v, float dv=1) : Vec<3,float>(v,dv) {}
 	
-	const Vec3& operator*=(const Matrix3& mat3)
-	{ 
-		set(x()*mat3(0,0) + y()*mat3(1,0) + z()*mat3(2,0),
-			x()*mat3(0,1) + y()*mat3(1,1) + z()*mat3(2,1),
-			x()*mat3(0,2) + y()*mat3(1,2) + z()*mat3(2,2));
-
-		return *this;
-	}
+	template<int Dim2>
+	const Vec3& operator=(const Vec<Dim2,float>& other) { Vec<3,float>::operator=(other); return *this; }
 	
-	Vec3 operator*(const Vec3& other) const { return Vec::operator*(other); }
-	
-	Vec3 operator*(float scalar) const { return Vec::operator*(scalar); }
-	
-	Vec3 operator*(const Matrix3& mat3)
-	{
-		Vec3 result(*this);
-		result *= mat3;
-		return result;
-	}
+	void set(float x, float y, float z) { Vec<3,float>::set(x,y,z); }
 	
 	Vec3 cross(const Vec3& v) const
 	{

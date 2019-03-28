@@ -2,18 +2,23 @@
 #define IMP_MATRIX_H
 
 #include <Core/Object.h>
+#include <Core/Vec.h>
 
 IMPGEARS_BEGIN
 
 template<int Cn, int Rn, typename Ty>
 class IMP_API Matrix : public Object
 {
+	// Column major
+	// Prefix notation
+	
 public:
 
 	Meta_Class(Matrix)
 
 	Matrix();
-	Matrix(const Matrix& mat);
+	template<int Cn2, int Rn2>
+	Matrix(const Matrix<Cn2,Rn2,Ty>& mat);
 	Matrix(const Ty* buf, bool transp = false) { set(buf,transp); }
 	virtual ~Matrix();
 
@@ -22,7 +27,7 @@ public:
 	
 	void set(const Ty* buf, bool transp = false);
 	
-	void transpose();
+	Matrix<Rn,Cn,Ty> transpose() const;
 	
 	Matrix operator*(const Matrix& other) const;
 	Matrix& operator*=(const Matrix& other);
@@ -30,8 +35,8 @@ public:
 	Matrix operator*(Ty scalar) const;
 	Matrix& operator*=(Ty scalar);
 	
-	// template<int Cn2,int Rn2>
-	// Matrix<Cn,Rn2,Ty> operator*(const Matrix<Cn2,Rn2,Ty>& other) const;
+	template<int Cn2,int Rn2>
+	Matrix<Cn,Rn2,Ty> operator*(const Matrix<Cn2,Rn2,Ty>& other) const;
 
 	const Matrix& operator=(const Matrix& other){ set(other.data(),false); return *this; }
 	
@@ -62,9 +67,24 @@ Matrix<Cn,Rn,Ty>::Matrix()
 
 //--------------------------------------------------------------
 template<int Cn,int Rn, typename Ty>
-Matrix<Cn,Rn,Ty>::Matrix(const Matrix& mat)
+template<int Cn2, int Rn2>
+Matrix<Cn,Rn,Ty>::Matrix(const Matrix<Cn2,Rn2,Ty>& mat)
 {
-	set(mat.data(),false);
+	if(Cn==Cn2 && Rn==Rn2)
+	{
+		set(mat.data(),false);
+	}
+	else
+	{
+		for(int c=0;c<Cn;++c)
+			for(int r=0;r<Rn;++r) 
+			{
+				if(c>=Cn2 || r>=Rn2)
+					at(c,r) = (c==r)? (Ty)1 : (Ty)0;
+				else
+					at(c,r) = mat(c,r);
+			}
+	}
 }
 
 //--------------------------------------------------------------
@@ -92,21 +112,26 @@ template<int Cn,int Rn, typename Ty>
 void Matrix<Cn,Rn,Ty>::set(const Ty* buf, bool transp)
 {
 	int index=0;
-	for(int c=0;c<Cn;++c)
-		for(int r=0;r<Rn;++r)
-		{
-			Ty& val = transp? at(r,c) : at(c,r);
-			val = buf[index++];
-		}
+	if(transp)
+	{
+		for(int r=0;r<Rn;++r) 
+			for(int c=0;c<Cn;++c) at(c,r) = buf[index++];
+	}
+	else
+	{
+		for(int c=0;c<Cn;++c)
+			for(int r=0;r<Rn;++r) at(c,r) = buf[index++];
+	}
 }
 
 //--------------------------------------------------------------
 template<int Cn,int Rn, typename Ty>
-void Matrix<Cn,Rn,Ty>::transpose()
+Matrix<Rn,Cn,Ty> Matrix<Cn,Rn,Ty>::transpose() const
 {
-	Matrix<Cn,Rn,Ty> copy(*this);
+	Matrix<Rn,Cn,Ty> res;
 	for(int c=0;c<Cn;++c)
-		for(int r=0;r<Rn;++r) at(c,r) = copy(r,c);
+		for(int r=0;r<Rn;++r) res(r,c) = at(c,r);
+	return res;
 }
 
 //--------------------------------------------------------------
@@ -125,7 +150,7 @@ Matrix<Cn,Rn,Ty>& Matrix<Cn,Rn,Ty>::operator*=(const Matrix& other)
 		for(int r=0; r<Rn; ++r)
 		{
 			at(c,r) = 0.0;
-			for(int k=0;k<Cn;++k) at(c,r) += last(k,r) * other(c,k);
+			for(int k=0;k<Cn;++k) at(c,r) += last(c,k) * other(k,r);
 		}
 	return *this;
 }
@@ -145,6 +170,50 @@ Matrix<Cn,Rn,Ty>& Matrix<Cn,Rn,Ty>::operator*=(Ty scalar)
 	for(int c=0; c<Cn; ++c)
 		for(int r=0; r<Rn; ++r) at(c,r) *= scalar;
 	return *this;
+}
+
+//--------------------------------------------------------------
+template<int Cn,int Rn, typename Ty>
+template<int Cn2,int Rn2>
+Matrix<Cn,Rn2,Ty> Matrix<Cn,Rn,Ty>::operator*(const Matrix<Cn2,Rn2,Ty>& other) const
+{
+	Matrix<Cn,Rn2,Ty> res;
+	if( Cn2!=Rn ) return res;
+	
+	for(int c=0; c<Cn; ++c)
+		for(int r=0; r<Rn2; ++r)
+		{
+			res(c,r) = (Ty)0;
+			for(int k=0;k<Rn;++k) res(c,r) += at(c,k) * other(k,r);
+		}
+
+	return res;
+}
+
+//--------------------------------------------------------------
+template<int Dim, typename Ty>
+Vec<Dim,Ty>& operator*=(Vec<Dim,Ty>& vec, const Matrix<Dim,Dim,Ty>& mat)
+{
+	Vec<Dim,Ty> last(vec);
+	for(int r=0; r<Dim; ++r)
+	{
+		vec[r] = (Ty)0;
+		for(int k=0;k<Dim;++k) vec[r] += last[k] * mat(k,r);
+	}
+	return vec;
+}
+
+//--------------------------------------------------------------
+template<int Cn,int Rn, typename Ty>
+Vec<Rn,Ty> operator*(const Vec<Cn,Ty>& vec, const Matrix<Cn,Rn,Ty>& mat)
+{
+	Vec<Rn,Ty> res;
+	for(int r=0; r<Rn; ++r)
+	{
+		res[r] = (Ty)0;
+		for(int k=0;k<Cn;++k) res[r] += vec[k] * mat(k,r);
+	}
+	return res;
 }
 
 IMPGEARS_END

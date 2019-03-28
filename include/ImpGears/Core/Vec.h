@@ -70,7 +70,11 @@ class IMP_API Vec : public Object
 		void set(const Ty* buf, int s=Dim,Ty dv=(Ty)1) { FOR_I( _data[i]=(i<s)?buf[i]:dv; ) }
 		
 		template <typename ... Args>
-		void set(Ty v0, Args... vn) { std::vector<Ty> ls = {vn...}; _data[0]=v0; for(int i=1;i<Dim;++i)_data[i]=ls[i-1]; }
+		void set(Ty v0, Args... vn)
+		{
+			std::vector<Ty> ls = {v0,vn...}; int dim=std::min((int)ls.size(),Dim);
+			for(int i=0;i<dim;++i) _data[i] = ls[i];
+		}
 
 		Ty& operator[](unsigned int i) { return _data[i]; }
 

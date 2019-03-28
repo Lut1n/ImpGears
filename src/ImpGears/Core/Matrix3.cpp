@@ -14,17 +14,6 @@ Matrix3::Matrix3()
 {
 }
 
-Matrix3::Matrix3(const Matrix<3,3,float>& other)
-	: Matrix<3,3,float>(other)
-{
-}
-
-Matrix3::Matrix3(const Matrix<4,4,float>& matrix4)
-{
-    for(int c=0; c<3; ++c)
-		for(int r=0;r<3;++r) at(c,r)=matrix4(c,r);
-}
-
 Matrix3::Matrix3(const float* buf, bool transp)
 	: Matrix<3,3,float>(buf,transp)
 {
@@ -111,16 +100,6 @@ Matrix3 Matrix3::getInverse() const
     mat.transpose();
 
     return mat * (1.f/matDet);
-}
-
-Matrix<4,4,float> Matrix3::asMatrix4() const
-{
-    Matrix<4,4,float> matrix4;
-
-    for(int c=0; c<3; ++c)
-        for(int r=0; r<3; ++r) matrix4(c,r) = at(c,r);
-
-    return matrix4;
 }
 
 Matrix3 Matrix3::rotationX(float rad)

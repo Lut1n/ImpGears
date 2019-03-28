@@ -25,8 +25,8 @@ void Camera::lookAt()
 	Matrix4 transform =
 		Matrix4::getScaleMat(scale.x(), scale.y(), scale.z())
 		* Matrix4::getRotationMat(getRx(), getRy(), getRz());
-	Vec3 abs_pos = getPosition() * getModelMatrix();
-	Vec3 abs_tgt = _target * getModelMatrix();
+	Vec3 abs_pos = Vec4(getPosition()) * getModelMatrix();
+	Vec3 abs_tgt = Vec4(_target) * getModelMatrix();
 	_viewMatrix = Matrix4::getViewMat(abs_pos, abs_tgt, _upDir);
 }
 

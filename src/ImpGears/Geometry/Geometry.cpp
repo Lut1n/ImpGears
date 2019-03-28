@@ -1,8 +1,8 @@
 #include <Geometry/Geometry.h>
+#include <Core/Matrix3.h>
+#include <Core/Perlin.h>
 
 #include <cmath>
-
-#include <Core/Perlin.h>
 
 IMPGEARS_BEGIN
 

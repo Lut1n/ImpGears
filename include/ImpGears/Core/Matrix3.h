@@ -12,10 +12,12 @@ public:
 	Meta_Class(Matrix3)
 
 	Matrix3();
-	Matrix3(const Matrix<3,3,float>& other);
-	Matrix3(const Matrix<4,4,float>& matrix4);
+	template<int Cn2, int Rn2>
+	Matrix3(const Matrix<Cn2,Rn2,float>& mat) : Matrix(mat) {}
 	Matrix3(const float* buf, bool transp = false);
 	virtual ~Matrix3();
+	
+	const Matrix3& operator=(const Matrix& other){ Matrix::operator=(other); return *this; }
 
 	Matrix3& operator+=(const Matrix3& other);
 	Matrix3& operator-=(const Matrix3& other);
@@ -24,8 +26,6 @@ public:
 
 	float getDet() const;
 	Matrix3 getInverse() const;
-
-	Matrix<4,4,float> asMatrix4() const;
 
 	static Matrix3 rotationX(float rad);
 	static Matrix3 rotationY(float rad);

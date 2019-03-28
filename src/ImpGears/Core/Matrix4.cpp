@@ -14,12 +14,6 @@ Matrix4::Matrix4()
 }
 
 //--------------------------------------------------------------
-Matrix4::Matrix4(const Matrix<4,4,float>& other)
-	: Matrix<4,4,float>(other)
-{
-}
-
-//--------------------------------------------------------------
 Matrix4::Matrix4(const float* buf, bool transp)
 	: Matrix<4,4,float>(buf,transp)
 {

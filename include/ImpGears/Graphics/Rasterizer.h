@@ -1,10 +1,12 @@
 #ifndef IMP_RASTERIZER_H
 #define IMP_RASTERIZER_H
 
+#include <Core/Math.h>
+#include <Core/Vec3.h>
+#include <Graphics/Image.h>
+
 #include <map>
 #include <vector>
-#include <Graphics/Image.h>
-#include <Core/Math.h>
 
 IMPGEARS_BEGIN
     

@@ -18,7 +18,7 @@ std::vector<Vec3> generateRock(const Vec3& center, float radius, int sub)
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(0.5);
     geometry.scale(Vec3(radius * 0.7,radius * 0.7,radius * 1.5));
-    geometry.noiseBump(6, 0.7, 1.0, 0.2);
+    // geometry.noiseBump(6, 0.7, 1.0, 0.2);
        
     return geometry._vertices;
 }   
@@ -28,7 +28,7 @@ std::vector<Vec3> generateHat(const Vec3& center, float radius, int sub)
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(0.7);
     geometry.scale(Vec3(radius,radius,radius*0.3));
-    geometry.noiseBump(6, 0.7, 1.0, 0.2);
+    // geometry.noiseBump(6, 0.7, 1.0, 0.2);
        
     return geometry._vertices;
 }
@@ -38,7 +38,7 @@ std::vector<Vec3> generatePlane(const Vec3& center, float radius, int sub)
     imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
     geometry.sphericalNormalization(1.0);
     geometry.scale(Vec3(radius,radius,radius*0.25));
-    geometry.noiseBump(6, 0.7, 1.0, 0.3);
+    // geometry.noiseBump(6, 0.7, 1.0, 0.3);
        
     return geometry._vertices;
 }
@@ -179,7 +179,7 @@ struct DepthTestFrag : public imp::FragCallback
 	{
 		Vec3 light_pos = light_1.position;
 		Vec3 frag_pos = uniforms.get(Varying_MVert);
-		const float* md = state.view.getData();
+		const float* md = state.view.data();
 		Vec3 cam_pos(md[12],md[13],md[14]);
 		
 		Vec3 light_dir = light_pos - frag_pos;
@@ -259,13 +259,18 @@ struct LightRenderFrag : public DepthTestFrag
     {
         imp::Matrix4 mv = state.model * state.view;
         imp::Matrix4 mvp = mv * state.projection;
-        Vec3 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0);
-        Vec3 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0);
+        Vec4 win(state.viewport[2]*0.5, state.viewport[3]*0.5, 1.0, 1.0);
+        Vec4 win2(state.viewport[2]*0.5, state.viewport[3]*0.5, 0.0, 0.0);
         
-		Vec4 vertex = Vec4(vert_in);
-		Vec3 mvertex = Vec3(vertex * state.model);
-		Vec3 mvvertex = Vec3(vertex * mv);
-		Vec3 mvpvertex = Vec3(vertex * mvp);
+		Vec4 vertex = vert_in;
+		Vec4 mvertex = vertex * state.model;
+		Vec4 mvvertex = vertex * mv;
+		Vec4 mvpvertex = vertex * mvp;
+		
+		mvertex /= mvertex.w();
+		mvvertex /= mvvertex.w();
+		mvpvertex /= mvpvertex.w();
+		
 		mvpvertex *= win; mvpvertex += win2;
 		
 		out_uniforms.set(Varying_Vert,vert_in);

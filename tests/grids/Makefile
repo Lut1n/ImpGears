@@ -7,7 +7,7 @@ else
 	CXXFLAGS=-Wall -std=c++11
 endif
 
-LDFLAGS= libimpgears.so
+LDFLAGS= ../../libimpgears.so
 
 all: test
 

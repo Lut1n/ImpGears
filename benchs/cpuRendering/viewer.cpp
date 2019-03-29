@@ -4,6 +4,7 @@
 #include <SceneGraph/GraphicRenderer.h>
 #include <SceneGraph/RenderTarget.h>
 #include <SceneGraph/ScreenVertex.h>
+#include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
 #include <Graphics/Rasterizer.h>
 
@@ -28,8 +29,8 @@ using namespace imp;
 #define CONFIG_FAR 100.0
 #define CONFIG_FOV 60.0
 
-#define SQ_RESOLUTION 512
-#define GEO_SUBDIV 4
+#define SQ_RESOLUTION 128
+#define GEO_SUBDIV 1
 #define USE_BMPFORMAT false
 
 
@@ -172,8 +173,8 @@ int main(int argc, char* argv[])
     Vec3 rock_center(0.0,0.0,0.0);
       
     state.viewport = Vec4(0.0,0.0,CONFIG_WIDTH,CONFIG_HEIGHT);
-    state.projection = imp::Matrix4::getPerspectiveProjectionMat(CONFIG_FOV, CONFIG_WIDTH/CONFIG_HEIGHT, CONFIG_NEAR, CONFIG_FAR);
-    state.view = imp::Matrix4::getViewMat(cam_position, cam_target, cam_up);
+    state.projection = imp::Matrix4::perspectiveProj(CONFIG_FOV, CONFIG_WIDTH/CONFIG_HEIGHT, CONFIG_NEAR, CONFIG_FAR);
+    state.view = imp::Matrix4::view(cam_position, cam_target, cam_up);
      
     light_1.position = Vec3(2.0,2.0,-1.0);
     light_1.color = Vec3(1.0,1.0,1.0);
@@ -233,20 +234,20 @@ int main(int argc, char* argv[])
 		a += 0.02;
 		if(a > 2.0*3.141592) a = 0.0;
 		
-		imp::Matrix4 rot = imp::Matrix4::getRotationMat(0.0, 0.0, a);
+		imp::Matrix4 rot = imp::Matrix4::rotationZ(a);
 		Vec3 cam  = Vec3(Vec4(cam_position) * rot);
-		state.view = imp::Matrix4::getViewMat(cam, cam_target, cam_up);
+		state.view = imp::Matrix4::view(cam, cam_target, cam_up);
 		
         targets[0]->fill(fillColor);
         targets[1]->fill(fillDepth);
         
-		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, -2.0);
+		state.model = imp::Matrix4::translation(0.0, 0.0, -2.0);
 		renderVertex(vertexPlane, colorPlane, targets,defaultVert, terrFrag);
-		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 0.0);
+		state.model = imp::Matrix4::translation(0.0, 0.0, 0.0);
 		renderVertex(vertexRock, colorRock, targets,defaultVert, defaultFrag);
-		state.model = imp::Matrix4::getTranslationMat(0.0, 0.0, 1.0);
+		state.model = imp::Matrix4::translation(0.0, 0.0, 1.0);
 		renderVertex(vertexHat, colorHat, targets,defaultVert, defaultFrag);
-		state.model = imp::Matrix4::getTranslationMat(1.0, 1.0, 0.0);
+		state.model = imp::Matrix4::translation(1.0, 1.0, 0.0);
 		renderVertex(vertexBall, colorBall, targets,defaultVert, lightFrag);
 		
         screen->texture->loadFromImage(targets[0]);

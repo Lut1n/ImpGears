@@ -83,7 +83,7 @@ float fractal(vec3 xyz, int octave, float freq, float persist, float force)
 
 void main()
 {
-	float fog_max = 3.0;
+	float fog_max = 5.0;
 	float fog = min(v_depth,fog_max) / fog_max;
 	
 	float c = fractal(v_pos,8,8.0,0.7,1.0);

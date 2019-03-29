@@ -14,7 +14,7 @@ all: viewer
 viewer: viewer.o
 	$(CXX) -o viewer viewer.o $(LDFLAGS)
 
-viewer.o: viewer.cpp initGraph.cpp shader.h
+viewer.o: viewer.cpp shader.h
 	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c viewer.cpp -o viewer.o
 
 .PHONY : clean

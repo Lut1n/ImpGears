@@ -153,13 +153,13 @@ Matrix4 Matrix4::view(const Vec3& pos, const Vec3& target, const Vec3& up)
     Vec3 yAxis = zAxis.cross(xAxis);
 
     const float data[16] = {
-        xAxis.x(),                   yAxis.x(),                     zAxis.x(),                    0.f,
-        xAxis.y(),                   yAxis.y(),                     zAxis.y(),                    0.f,
-        xAxis.z(),                   yAxis.z(),                     zAxis.z(),                    0.f,
-        -xAxis.dot(pos),         -yAxis.dot(pos),           -zAxis.dot(pos),          1.f
+        xAxis.x(),                   xAxis.y(),                     xAxis.z(),                    -xAxis.dot(pos),
+        yAxis.x(),                   yAxis.y(),                     yAxis.z(),                    -yAxis.dot(pos),
+        zAxis.x(),                   zAxis.y(),                     zAxis.z(),                    -zAxis.dot(pos),
+        0.0,                         0.0,                           0.0,                          1.f
     };
 
-    return Matrix4(data);
+    return Matrix4(data,true);
 }
 
 //--------------------------------------------------------------

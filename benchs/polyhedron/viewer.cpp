@@ -8,71 +8,6 @@ using namespace imp;
 
 #include "shader.h"
 
-void snake(Geometry& geo)
-{
-	for(int i=0;i<(int)geo.size();++i)
-	{
-		Vec3& vertex = geo[i];
-		vertex.x() += std::cos(vertex.z() * 3.141592) * 0.1;
-		vertex.y() += std::sin(vertex.z() * 3.141592) * 0.1;
-	}
-}
-
-struct Graph
-{
-	GraphicRenderer::Ptr renderer;
-	Camera::Ptr camera;
-	SceneNode::Ptr root;
-	
-	Graph()
-	{
-		renderer = GraphicRenderer::create();
-		root = GeoNode::create(Geometry(),false);
-		
-		camera = Camera::create();
-		camera->setPosition(Vec3(1.5f, 0.0f, 0.0f));
-		camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
-		
-		// root = camera;
-		add(camera);
-		
-		renderer->setSceneRoot(root);
-		renderer->getRenderParameters()->setFaceCullingMode(RenderParameters::FaceCullingMode_None);
-		renderer->getRenderParameters()->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
-		renderer->getRenderParameters()->setViewport(0.0,0.0,500.0,500.0);
-		renderer->getRenderParameters()->setLineWidth(1.0);
-		renderer->getRenderParameters()->setClearColor(Vec3(0.2,0.2,0.2));
-	}
-	
-	void add(SceneNode::Ptr node)
-	{
-		root->addSubNode(node);
-	}
-	
-	void sphere(const Geometry& geo, Vec3 color = Vec3(1.0), bool wireframe = false)
-	{
-		GeoNode::Ptr ph = GeoNode::create(geo,wireframe);
-		ph->setColor(color);
-		add(ph);
-	}
-	
-	void wire(const Vec3& p1, const Vec3& p2, const Vec3& color)
-	{
-		Geometry geo; geo.add( {p1,p2} ); geo.setPrimitive(Geometry::Primitive_Lines);
-		GeoNode::Ptr solid = GeoNode::create(geo,true);
-		solid->setColor(color);
-		add(solid);
-	}
-	
-	void point(const Vec3& position, const Vec3& color)
-	{
-		Geometry geo = Geometry::sphere(2, 0.02); geo += position;
-		GeoNode::Ptr solid = GeoNode::create(geo,false);
-		solid->setColor(color);
-		add(solid);
-	}
-};
-
 int main(int argc, char* argv[])
 {
 	sf::Clock clock;
@@ -80,8 +15,55 @@ int main(int argc, char* argv[])
 	sf::RenderWindow window(sf::VideoMode(500, 500), "My window", sf::Style::Default, sf::ContextSettings(24));
 	window.setFramerateLimit(60);
 	
-	Graph graph;
-	#include "initGraph.cpp"
+	
+	GraphicRenderer::Ptr graph = GraphicRenderer::create();
+	SceneNode::Ptr root = GeoNode::create(Geometry(),false);
+	graph->setSceneRoot(root);
+	
+	Camera::Ptr camera = Camera::create();
+	camera->setPosition(Vec3(0.0f, 0.0f, 0.0f));
+	camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
+	root->addSubNode(camera);
+	
+	Geometry lineVol = Geometry::cylinder(10,1.0,0.02);
+	Geometry arrowVol = Geometry::cone(10,0.1,0.05,0.0);
+	arrowVol += Vec3::Z;
+	Geometry zAxe = arrowVol + lineVol;
+	Geometry xAxe = zAxe; xAxe.rotY(1.57);
+	Geometry yAxe = zAxe; yAxe.rotX(-1.57);
+	Geometry coords = xAxe + yAxe + zAxe;
+	coords.setPrimitive(Geometry::Primitive_Triangles);
+	coords *= 0.2;
+
+	Geometry point = Geometry::sphere(4, 0.1);
+	point.setPrimitive(Geometry::Primitive_Triangles);
+
+	GeoNode::Ptr node1 = GeoNode::create(coords, false);
+	node1->setColor(Vec3(1.0,1.0,0.0));
+	node1->setPosition(Vec3(0.3,0.0,-0.2));
+
+	GeoNode::Ptr node2 = GeoNode::create(coords, false);
+	node2->setColor(Vec3(1.0,0.0,0.0));
+	node2->setPosition(Vec3(0.0,0.0,0.0));
+	root->addSubNode(node2);
+	
+	GeoNode::Ptr node3 = GeoNode::create(coords, false);
+	node3->setColor(Vec3(0.0,1.0,0.0));
+	node3->setPosition(Vec3(0.0,0.0,0.3));
+	node3->setRotation(3.14 * 0.1, 0.0, 3.14 * 0.25);
+	node2->addSubNode(node3);
+	
+	GeoNode::Ptr node4 = GeoNode::create(coords, false);
+	node4->setColor(Vec3(0.0,0.0,1.0));
+	node4->setPosition(Vec3(0.0,0.0,0.3));
+	node4->setRotation(3.14 * 0.1, 0.0, 3.14 * 0.25);
+	node3->addSubNode(node4);
+	
+	camera->addSubNode(node1);
+
+	/*GeoNode::Ptr node3 = GeoNode::create(point, false);
+	node3->setColor(Vec3(1.0,0.2,0.2));
+	root->addSubNode(node3);*/
 	
     while (window.isOpen())
     {
@@ -95,11 +77,12 @@ int main(int argc, char* argv[])
         if(clock.getElapsedTime().asSeconds() > 2.0*3.14) clock.restart();
 		double t = clock.getElapsedTime().asMilliseconds() / 1000.0;
 		
-        graph.camera->setPosition(Vec3(cos(t)*2.0,sin(t)*2.0,1.0));
-		graph.camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
+        camera->setPosition(Vec3(cos(-t)*2.0,sin(-t)*2.0,(sin(t))*0.5));
+		camera->setTarget(Vec3(0.0,0.0,(sin(t))*0.5 ));
+		node1->setPosition(Vec3(cos(t)*0.3,sin(t)*0.3,0.0));
 		
 		// rendering
-		graph.renderer->renderScene();
+		graph->renderScene();
 		
 		window.display();
     }

@@ -78,8 +78,6 @@ class IMP_API SceneNode : public Object
         static int nbDisplayed;
 
     protected:
-
-        void calculateRotation();
 		
 		GraphicState::Ptr _state;
 

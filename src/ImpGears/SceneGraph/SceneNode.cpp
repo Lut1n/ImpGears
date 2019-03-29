@@ -111,24 +111,6 @@ void SceneNode::commitTransformation()
 }
 
 //--------------------------------------------------------------
-void SceneNode::calculateRotation()
-{
-    orientation.normalize();
-
-    float convertion = 180.f/3.14159265359f;
-
-    float x2 = orientation.x()*orientation.x();
-    float y2 = orientation.y()*orientation.y();
-    float xy = sqrt(x2+y2);
-
-    rx = 0.f; //Rotation sur axe frontal
-    ry = -convertion * atan2f(orientation.z(), xy);
-    rz = convertion * atan2f(orientation.y(), orientation.x());
-
-    m_localMatrixHasChanged = true;
-}
-
-//--------------------------------------------------------------
 Matrix4 SceneNode::getModelMatrix()
 {
     commitTransformation();

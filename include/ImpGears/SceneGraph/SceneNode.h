@@ -2,19 +2,13 @@
 #define IMP_SCENENODE_H
 
 #include <Core/Object.h>
-#include <list>
-#include <memory>
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
-
 #include <SceneGraph/GraphicState.h>
 
+#include <list>
+
 IMPGEARS_BEGIN
-
-class SceneNode;
-
-typedef std::list< std::shared_ptr<SceneNode> > SceneNodeList;
-typedef SceneNodeList::iterator SceneNodeIt;
 
 /// \brief Defines a scene node. Has to be added to a scene for rendering.
 class IMP_API SceneNode : public Object
@@ -23,6 +17,10 @@ class IMP_API SceneNode : public Object
 	
 		Meta_Class(SceneNode)
 	
+
+		using SceneNodeList = std::list<SceneNode::Ptr>;
+		using SceneNodeIt = SceneNodeList::iterator;
+
         SceneNode();
         virtual ~SceneNode();
 
@@ -44,8 +42,8 @@ class IMP_API SceneNode : public Object
             this->orientation = orientation;
         }
 		
-        void addSubNode(const std::shared_ptr<SceneNode>& sceneNode);
-        void removeSubNode(const std::shared_ptr<SceneNode>& sceneNode);
+        void addSubNode(const SceneNode::Ptr& sceneNode);
+        void removeSubNode(const SceneNode::Ptr& sceneNode);
 
         float getRx() const{return rx;}
         float getRy() const{return ry;}
@@ -73,7 +71,7 @@ class IMP_API SceneNode : public Object
             m_localMatrixHasChanged = true;
         }
 		
-		virtual std::shared_ptr<GraphicState> getGraphicState();
+		virtual GraphicState::Ptr getGraphicState();
 
         void commitTransformation();
 

@@ -5,7 +5,6 @@
 #include <Core/Matrix4.h>
 
 #include <SceneGraph/SceneNode.h>
-#include <SceneGraph/Camera.h>
 #include <SceneGraph/RenderParameters.h>
 
 IMPGEARS_BEGIN
@@ -22,15 +21,15 @@ class IMP_API GraphicRenderer : public Object
 
         void renderScene();
 
-        void setRenderParameters(std::shared_ptr<RenderParameters>& parameters){_parameters = parameters; _state->setParameters(parameters);}
-		std::shared_ptr<RenderParameters> getRenderParameters() const {return _parameters;}
+        void setRenderParameters(RenderParameters::Ptr& parameters){_parameters = parameters; _state->setParameters(parameters);}
+		RenderParameters::Ptr getRenderParameters() const {return _parameters;}
 
 
         static GraphicRenderer* getInstance(){return instance;}
 
         void setCenterCursor(bool center){centerCursor = center;}
 
-		void setSceneRoot(const std::shared_ptr<SceneNode>& root){_root = root; }
+		void setSceneRoot(const SceneNode::Ptr& root){_root = root; }
         SceneNode* getSceneRoot(){return _root.get();}
 
         //void setProjectionMatrix(const Matrix4& projMat) {m_projMat = projMat;}
@@ -40,9 +39,9 @@ class IMP_API GraphicRenderer : public Object
 
     protected:
 
-        std::shared_ptr<GraphicState> _state;
-		std::shared_ptr<RenderParameters> _parameters;
-        std::shared_ptr<SceneNode> _root;
+        GraphicState::Ptr _state;
+		RenderParameters::Ptr _parameters;
+        SceneNode::Ptr _root;
 
         static void setInstance(GraphicRenderer* inst){instance = inst;}
 

@@ -165,7 +165,7 @@ class IMP_API Shader : public Object
 
         static Shader* m_instance;
 		
-		std::vector< std::shared_ptr<Uniform> > _parameters;
+		std::vector<Uniform::Ptr> _parameters;
 };
 
 IMPGEARS_END

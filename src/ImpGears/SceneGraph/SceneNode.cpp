@@ -1,6 +1,8 @@
 #include <SceneGraph/GraphicRenderer.h>
 #include <SceneGraph/SceneNode.h>
 #include <SceneGraph/OpenGL.h>
+#include <SceneGraph/Camera.h>
+
 #include <iostream>
 
 #include <cmath>
@@ -29,17 +31,19 @@ SceneNode::SceneNode():
 }
 
 //--------------------------------------------------------------
-SceneNode::~SceneNode(){
-
+SceneNode::~SceneNode()
+{
 }
 
 //--------------------------------------------------------------
-void SceneNode::addSubNode(const std::shared_ptr<SceneNode>& sceneNode){
+void SceneNode::addSubNode(const SceneNode::Ptr& sceneNode)
+{
     subSceneNodes.push_back( sceneNode );
 }
 
 //--------------------------------------------------------------
-void SceneNode::removeSubNode(const std::shared_ptr<SceneNode>& sceneNode){
+void SceneNode::removeSubNode(const SceneNode::Ptr& sceneNode)
+{
     subSceneNodes.remove( sceneNode );
 }
 
@@ -107,8 +111,8 @@ void SceneNode::commitTransformation()
 }
 
 //--------------------------------------------------------------
-void SceneNode::calculateRotation(){
-
+void SceneNode::calculateRotation()
+{
     orientation.normalize();
 
     float convertion = 180.f/3.14159265359f;
@@ -141,9 +145,9 @@ Matrix4 SceneNode::getNormalMatrix()
 }
 
 //--------------------------------------------------------------
-std::shared_ptr<GraphicState> SceneNode::getGraphicState()
+GraphicState::Ptr SceneNode::getGraphicState()
 {
-	if(_state == nullptr)_state = std::shared_ptr<GraphicState>(new GraphicState());
+	if(_state == nullptr)_state = GraphicState::create();
 	return _state;
 }
 

@@ -11,19 +11,19 @@ GraphicState::GraphicState()
 {};
 
 //--------------------------------------------------------------
-void GraphicState::setTarget(const std::shared_ptr<imp::RenderTarget>& target)
+void GraphicState::setTarget(const imp::RenderTarget::Ptr& target)
 {
 	_target = target;
 }
 
 //--------------------------------------------------------------
-void GraphicState::setParameters(const std::shared_ptr<imp::RenderParameters>& params)
+void GraphicState::setParameters(const imp::RenderParameters::Ptr& params)
 {
 	_parameters = params;
 }
 
 //--------------------------------------------------------------
-void GraphicState::setShader(const std::shared_ptr<imp::Shader>& shader)
+void GraphicState::setShader(const imp::Shader::Ptr& shader)
 {
 	_shader = shader;
 }

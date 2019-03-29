@@ -24,12 +24,13 @@ public:
 	Matrix3 operator+(const Matrix3& other) const;
 	Matrix3 operator-(const Matrix3& other) const;
 
-	float getDet() const;
-	Matrix3 getInverse() const;
+	float det() const;
+	Matrix3 inverse() const;
 
-	static Matrix3 rotationX(float rad);
-	static Matrix3 rotationY(float rad);
-	static Matrix3 rotationZ(float rad);
+	static Matrix3 rotationX(float rx);
+	static Matrix3 rotationY(float ry);
+	static Matrix3 rotationZ(float rz);
+	static Matrix3 scale(float sx, float sy, float sz);
 };
 
 IMPGEARS_END

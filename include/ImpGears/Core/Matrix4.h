@@ -20,20 +20,19 @@ public:
 
 	const Matrix4& operator=(const Matrix& other){ Matrix::operator=(other); return *this; }
 	
-	float getDet() const;
+	float det() const;
 
-	Matrix4 getInverse() const;
+	Matrix4 inverse() const;
 
-	static Matrix4 getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue);
-	static Matrix4 getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue);
-	static Matrix4 getOrthographicProjectionMat(float width, float height, float nearValue, float farValue);
-	static Matrix4 getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up);
-	static Matrix4 getTranslationMat(float tx, float ty, float tz);
-	static Matrix4 getRotationMat(float rx, float ry, float rz);
-	static Matrix4 getRotationXAxisMat(float rx);
-	static Matrix4 getRotationYAxisMat(float ry);
-	static Matrix4 getRotationZAxisMat(float rz);
-	static Matrix4 getScaleMat(float sx, float sy, float sz);
+	static Matrix4 perspectiveProj(float fovx, float whRatio, float nearValue, float farValue);
+	static Matrix4 orthographicProj(float l, float r, float b, float t, float nearValue, float farValue);
+	static Matrix4 orthographicProj(float width, float height, float nearValue, float farValue);
+	static Matrix4 view(const Vec3& pos, const Vec3& target, const Vec3& up);
+	static Matrix4 translation(float tx, float ty, float tz);
+	static Matrix4 rotationX(float rx);
+	static Matrix4 rotationY(float ry);
+	static Matrix4 rotationZ(float rz);
+	static Matrix4 scale(float sx, float sy, float sz);
 };
 
 IMPGEARS_END

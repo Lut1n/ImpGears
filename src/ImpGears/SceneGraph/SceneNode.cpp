@@ -90,17 +90,17 @@ void SceneNode::commitTransformation()
     if(m_localMatrixHasChanged)
     {
         m_localModelMatrix =
-            Matrix4::getScaleMat(scale.x(), scale.y(), scale.z())
-            * Matrix4::getRotationMat(rx, 0.f, 0.f)
-            * Matrix4::getRotationMat(0.f, ry, 0.f)
-            * Matrix4::getRotationMat(0.f, 0.f, rz)
-            * Matrix4::getTranslationMat(position.x(), position.y(), position.z());
+            Matrix4::scale(scale.x(), scale.y(), scale.z())
+            * Matrix4::rotationX(rx)
+            * Matrix4::rotationY(ry)
+            * Matrix4::rotationZ(rz)
+            * Matrix4::translation(position.x(), position.y(), position.z());
 
         m_localNormalMatrix =
-            Matrix4::getRotationMat(rx, 0.f, 0.f)
-            * Matrix4::getRotationMat(0.f, ry, 0.f)
-            * Matrix4::getRotationMat(0.f, 0.f, rz)
-            * Matrix4::getScaleMat(scale.x(), scale.y(), scale.z()).getInverse();
+            Matrix4::rotationX(rx)
+            * Matrix4::rotationY(ry)
+            * Matrix4::rotationZ(rz)
+            * Matrix4::scale(scale.x(), scale.y(), scale.z()).inverse();
 
         m_localMatrixHasChanged = false;
     }

@@ -25,7 +25,7 @@ Matrix4::~Matrix4()
 }
 
 //--------------------------------------------------------------
-float Matrix4::getDet() const
+float Matrix4::det() const
 {
     float result = IDX(1,1)*IDX(2,2)*IDX(3,3)*IDX(4,4) + IDX(1,1)*IDX(2,3)*IDX(3,4)*IDX(4,2) + IDX(1,1)*IDX(2,4)*IDX(3,2)*IDX(4,3)
                  + IDX(1,2)*IDX(2,1)*IDX(3,4)*IDX(4,3) + IDX(1,2)*IDX(2,3)*IDX(3,1)*IDX(4,4) + IDX(1,2)*IDX(2,4)*IDX(3,3)*IDX(4,1)
@@ -40,7 +40,7 @@ float Matrix4::getDet() const
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getInverse() const
+Matrix4 Matrix4::inverse() const
 {
     float result[16];
 
@@ -81,13 +81,13 @@ Matrix4 Matrix4::getInverse() const
                - IDX(1,1)*IDX(2,3)*IDX(3,2) - IDX(1,2)*IDX(2,1)*IDX(3,3) - IDX(1,3)*IDX(2,2)*IDX(3,1);
 
     Matrix4 resultMat(result);
-    resultMat*=(1.f/getDet());
+    resultMat*=(1.f/det());
 
     return resultMat;
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getPerspectiveProjectionMat(float fovx, float whRatio, float nearValue, float farValue)
+Matrix4 Matrix4::perspectiveProj(float fovx, float whRatio, float nearValue, float farValue)
 {
     fovx *= 3.14159f/180.f;
     fovx /= 2.f;
@@ -108,7 +108,7 @@ Matrix4 Matrix4::getPerspectiveProjectionMat(float fovx, float whRatio, float ne
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getOrthographicProjectionMat(float l, float r, float b, float t, float nearValue, float farValue)
+Matrix4 Matrix4::orthographicProj(float l, float r, float b, float t, float nearValue, float farValue)
 {
     const float projX = 2.f/(r-l);
     const float projY = 2.f/(t-b);
@@ -128,7 +128,7 @@ Matrix4 Matrix4::getOrthographicProjectionMat(float l, float r, float b, float t
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getOrthographicProjectionMat(float width, float height, float nearValue, float farValue)
+Matrix4 Matrix4::orthographicProj(float width, float height, float nearValue, float farValue)
 {
     const float projX = 2.f/width;
     const float projY = 2.f/height;
@@ -146,7 +146,7 @@ Matrix4 Matrix4::getOrthographicProjectionMat(float width, float height, float n
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up)
+Matrix4 Matrix4::view(const Vec3& pos, const Vec3& target, const Vec3& up)
 {
     Vec3 zAxis = pos-target; zAxis.normalize();
     Vec3 xAxis = up.cross(zAxis); xAxis.normalize();
@@ -163,7 +163,7 @@ Matrix4 Matrix4::getViewMat(const Vec3& pos, const Vec3& target, const Vec3& up)
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getTranslationMat(float tx, float ty, float tz)
+Matrix4 Matrix4::translation(float tx, float ty, float tz)
 {
     const float data[16] = {
         1.f,    0.f,    0.f,    tx,
@@ -176,13 +176,7 @@ Matrix4 Matrix4::getTranslationMat(float tx, float ty, float tz)
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getRotationMat(float rx, float ry, float rz)
-{
-    return getRotationXAxisMat(rx) * getRotationYAxisMat(ry) * getRotationZAxisMat(rz);
-}
-
-//--------------------------------------------------------------
-Matrix4 Matrix4::getRotationXAxisMat(float rx)
+Matrix4 Matrix4::rotationX(float rx)
 {
     const float data[16] = {
         1.f,    0.f,        0.f,        0.f,
@@ -196,7 +190,7 @@ Matrix4 Matrix4::getRotationXAxisMat(float rx)
 
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getRotationYAxisMat(float ry)
+Matrix4 Matrix4::rotationY(float ry)
 {
     const float data[16] = {
         std::cos(ry),    0.f,        std::sin(ry),   0.f,
@@ -210,7 +204,7 @@ Matrix4 Matrix4::getRotationYAxisMat(float ry)
 
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getRotationZAxisMat(float rz)
+Matrix4 Matrix4::rotationZ(float rz)
 {
     const float data[16] = {
         std::cos(rz),    -std::sin(rz),   0.f,    0.f,
@@ -223,7 +217,7 @@ Matrix4 Matrix4::getRotationZAxisMat(float rz)
 }
 
 //--------------------------------------------------------------
-Matrix4 Matrix4::getScaleMat(float sx, float sy, float sz)
+Matrix4 Matrix4::scale(float sx, float sy, float sz)
 {
     const float data[16] = {
         sx,     0.f,    0.f,    0.f,

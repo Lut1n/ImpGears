@@ -49,7 +49,7 @@ Matrix3 Matrix3::operator-(const Matrix3& other) const
     return Matrix3(*this) -= other;
 }
 
-float Matrix3::getDet() const
+float Matrix3::det() const
 {
     /**
     A = | a b c |
@@ -70,7 +70,7 @@ float Matrix3::getDet() const
     return result;
 }
 
-Matrix3 Matrix3::getInverse() const
+Matrix3 Matrix3::inverse() const
 {
     /**
     A = | a b c |
@@ -96,7 +96,7 @@ Matrix3 Matrix3::getInverse() const
     result[8] = IDX(0,0)*IDX(1,1) - IDX(1,0)*IDX(0,1);
 
     Matrix3 mat(result);
-    float matDet = mat.getDet();
+    float matDet = mat.det();
     mat.transpose();
 
     return mat * (1.f/matDet);
@@ -145,6 +145,18 @@ Matrix3 Matrix3::rotationZ(float rad)
     };
 
     return Matrix3(values,true);
+}
+
+//--------------------------------------------------------------
+Matrix3 Matrix3::scale(float sx, float sy, float sz)
+{
+    const float data[9] = {
+        sx,     0.f,    0.f,
+        0.f,    sy,     0.f,
+        0.f,    0.f,    sz
+    };
+
+    return Matrix3(data);
 }
 
 IMPGEARS_END

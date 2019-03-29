@@ -22,12 +22,14 @@ Camera::~Camera()
 //--------------------------------------------------------------
 void Camera::lookAt()
 {
-	Matrix4 transform =
-		Matrix4::getScaleMat(scale.x(), scale.y(), scale.z())
-		* Matrix4::getRotationMat(getRx(), getRy(), getRz());
+	/*Matrix4 transform =
+		Matrix4::scale(scale.x(), scale.y(), scale.z())
+		* Matrix4::rotationX(getRx())
+		* Matrix4::rotationY(getRy())
+		* Matrix4::rotationZ(getRz());*/
 	Vec3 abs_pos = Vec4(getPosition()) * getModelMatrix();
 	Vec3 abs_tgt = Vec4(_target) * getModelMatrix();
-	_viewMatrix = Matrix4::getViewMat(abs_pos, abs_tgt, _upDir);
+	_viewMatrix = Matrix4::view(abs_pos, abs_tgt, _upDir);
 }
 
 //--------------------------------------------------------------

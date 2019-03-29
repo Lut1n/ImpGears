@@ -170,13 +170,13 @@ void RenderParameters::apply(bool clearBuffer) const
 //--------------------------------------------------------------
 void RenderParameters::setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue)
 {
-    m_projectionMatrix = Matrix4::getPerspectiveProjectionMat(fovx, ratio, nearValue, farValue);
+    m_projectionMatrix = Matrix4::perspectiveProj(fovx, ratio, nearValue, farValue);
 }
 
 //--------------------------------------------------------------
 void RenderParameters::setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue)
 {
-    m_projectionMatrix = Matrix4::getOrthographicProjectionMat(left, right, bottom, top, nearValue, farValue);
+    m_projectionMatrix = Matrix4::orthographicProj(left, right, bottom, top, nearValue, farValue);
 }
 		
 //--------------------------------------------------------------

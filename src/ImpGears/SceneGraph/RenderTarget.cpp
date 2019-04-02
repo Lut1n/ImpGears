@@ -1,9 +1,8 @@
 #include <SceneGraph/RenderTarget.h>
-
-#include <cstdio>
-
+#include <SceneGraph/OpenGL.h>
 #include <SceneGraph/Camera.h>
 
+#include <cstdio>
 #include <iostream>
 
 IMPGEARS_BEGIN

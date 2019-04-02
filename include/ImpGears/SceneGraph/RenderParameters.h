@@ -6,8 +6,6 @@
 #include <Core/Matrix4.h>
 #include <Core/Vec4.h>
 
-#include <SceneGraph/OpenGL.h>
-
 IMPGEARS_BEGIN
 
 /// \brief Defines the render parameters.

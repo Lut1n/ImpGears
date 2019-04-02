@@ -1,4 +1,5 @@
 #include <SceneGraph/RenderParameters.h>
+#include <SceneGraph/OpenGL.h>
 
 IMPGEARS_BEGIN
 

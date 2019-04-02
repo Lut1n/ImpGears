@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include <Core/ImpConfig.h>
+#include <Core/Config.h>
 
 #define Meta_Class(name) \
 	typedef std::shared_ptr<name> Ptr;\
@@ -21,7 +21,7 @@
 
 IMPGEARS_BEGIN
 	
-class Object
+class IMP_API Object
 {
 	public:
 	

@@ -2,7 +2,6 @@
 #define IMP_RENDERTARGET_H
 
 #include <Core/Object.h>
-#include <SceneGraph/OpenGL.h>
 #include <SceneGraph/Texture.h>
 
 IMPGEARS_BEGIN
@@ -42,7 +41,7 @@ class IMP_API RenderTarget : public Object
 
     Texture* m_colorTextures[5];
     Texture* m_depthTexture;
-    GLuint m_frameBufferID;
+    std::uint32_t m_frameBufferID;
 };
 
 IMPGEARS_END

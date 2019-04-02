@@ -1,4 +1,0 @@
-#!/bin/bash
-
-make all && 
-cp -v libimpgears.so /usr/lib

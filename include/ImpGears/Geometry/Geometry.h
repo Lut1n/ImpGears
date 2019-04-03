@@ -87,27 +87,25 @@ class IMP_API Geometry : public Object
 	
 	void reduceTriangles(float f);
 	
+	Geometry subdivise(int count);
+	
 	static void intoCCW( Geometry& buf );
 
 	static Geometry intoLineBuf(const Geometry& buf);
 	
 	static Geometry sphere(int sub, float size);
 
-	static Geometry extrude(const Path& base, float len, float ratioTop=1.0, int sub=0);
+	static Geometry extrude(const Path& base, float len, float ratioTop=1.0);
 
 	static Geometry cylinder(int sub, float len, float radius);
 	
 	static Geometry cone(int sub, float len, float radius1, float radius2=0.0);
 	
-	static Geometry createQuad(unsigned int subdivisionCount, const imp::Vec3& xvec, const imp::Vec3& yvec, const imp::Vec3& zvec, float size = 1.f);
+	static Geometry quad(const Vec3& p1, const Vec3& p2, const Vec3& p3, const Vec3& p4);
 	
-	static Geometry createCube(unsigned int subdivisionCount);
+	static Geometry cube();
 	
-	static Geometry generateTriangle(unsigned int subdivisionCount, const imp::Vec3& p1, const imp::Vec3& p2, const imp::Vec3& p3);
-	
-	static Geometry createTetrahedron(unsigned int subdivisionCount);
-	
-	static Geometry createPyramid(unsigned int baseDivision, unsigned int subdivisionCount);
+	static Geometry tetrahedron();
 };
 
 

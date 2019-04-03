@@ -13,7 +13,7 @@ inline double frac(double x)
 }
 
 /*
-inline imp::Vec3 mix(const imp::Vec3& v1, const imp::Vec3& v2, double f)
+inline Vec3 mix(const Vec3& v1, const Vec3& v2, double f)
 {
 	return (v2-v1)*f + v1;
 }
@@ -61,7 +61,7 @@ Geometry Geometry::operator+(const Geometry& other)
 	return geo;
 }
 
-void Geometry::origin(const imp::Vec3& origin)
+void Geometry::origin(const Vec3& origin)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
@@ -69,7 +69,7 @@ void Geometry::origin(const imp::Vec3& origin)
 	}
 }
 
-void Geometry::scale(const imp::Vec3& vec)
+void Geometry::scale(const Vec3& vec)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
@@ -83,7 +83,7 @@ void Geometry::sphericalNormalization(float factor)
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		imp::Vec3 vn = _vertices[i];
+		Vec3 vn = _vertices[i];
 		 vn.normalize();
 		 
 		 _vertices[i] = mix(_vertices[i], vn, factor);
@@ -133,10 +133,10 @@ void Geometry::noiseBump(unsigned int octaveCount, double persistence, double fr
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		// double noise = imp::simplexOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
-		 double noise = imp::perlinOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
-		//double noise = (frac( std::sin( _vertices[i].dot( imp::Vec3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
-		imp::Vec3 n(_vertices[i]);
+		// double noise = simplexOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
+		 double noise = perlinOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
+		//double noise = (frac( std::sin( _vertices[i].dot( Vec3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
+		Vec3 n(_vertices[i]);
 		n.normalize();
 		_vertices[i] += n * (noise * force);
 	}
@@ -147,84 +147,59 @@ void Geometry::bump(SignalFunctor* functor, float force)
        for(unsigned int i=0; i<_vertices.size();++i)
        {
         double noise = functor->apply(_vertices[i].x(), _vertices[i].y(), _vertices[i].z());
-               imp::Vec3 n(_vertices[i]);
+               Vec3 n(_vertices[i]);
                n.normalize();
                _vertices[i] += n * (noise * force);
     }
 }
 
-Geometry Geometry::createQuad(unsigned int subdivisionCount, const imp::Vec3& xvec, const imp::Vec3& yvec, const imp::Vec3& zvec, float size)
+Geometry Geometry::quad(const Vec3& p1, const Vec3& p2, const Vec3& p3, const Vec3& p4)
 {
-	const float center = (subdivisionCount+1.f)/2.f;
-	const float scaling = size/center;
-	
 	Geometry quad;
-	for(unsigned int u=0;u<subdivisionCount+1;++u)
-	{
-		for(unsigned int v=0;v<subdivisionCount+1;++v)
-		{
-			float u1 = (u-center)*scaling ;
-			float u2 = (u-center+1.0)*scaling;
-			float v1 = (v-center)*scaling;
-			float v2 = (v-center+1.0)*scaling;
-			quad._vertices.push_back( xvec*u1 + yvec*v1 );
-			quad._vertices.push_back( xvec*u2 + yvec*v1 );
-			quad._vertices.push_back( xvec*u2 + yvec*v2 );
-			quad._vertices.push_back( xvec*u1 + yvec*v2 );
-		}
-	}
-	
+	quad.add( {p1,p2,p3, p4,p3,p2} );
+	quad.setPrimitive(Primitive_Triangles);
 	return quad;
 }
 
-Geometry Geometry::createCube(unsigned int subdivisionCount)
+Geometry Geometry::cube()
 {
-	imp::Vec3 v_x(1.0,0.0,0.0);
-	imp::Vec3 v_y(0.0,1.0,0.0);
-	imp::Vec3 v_z(0.0,0.0,1.0);
-	imp::Vec3 v_ox(-1.0,0.0,0.0);
-	imp::Vec3 v_oy(0.0,-1.0,0.0);
-	imp::Vec3 v_oz(0.0,0.0,-1.0);
+	Vec3 p1(-1.0,-1.0,-1.0);
+	Vec3 p2(-1.0,-1.0,1.0);
+	Vec3 p3(-1.0,1.0,-1.0);
+	Vec3 p4(-1.0,1.0,1.0);
+	Vec3 p5(1.0,-1.0,-1.0);
+	Vec3 p6(1.0,-1.0,1.0);
+	Vec3 p7(1.0,1.0,-1.0);
+	Vec3 p8(1.0,1.0,1.0);
 	
-	Geometry up = createQuad(subdivisionCount, v_x, v_y, v_z);
-	up.origin( v_oz );
-	Geometry dw = createQuad(subdivisionCount, v_y, v_x, v_oz);
-	dw.origin(v_z );
-	Geometry lf = createQuad(subdivisionCount, v_z, v_y, v_ox);
-	lf.origin( v_x );
-	Geometry rg = createQuad(subdivisionCount, v_y, v_z, v_x);
-	rg.origin( v_ox );
-	Geometry bc = createQuad(subdivisionCount, v_x, v_z, v_oy);
-	bc.origin( v_y );
-	Geometry fc = createQuad(subdivisionCount, v_z, v_x, v_y);
-	fc.origin( v_oy );
-	
-	Geometry cube = up + dw + lf + rg + bc + fc;
-	
+	Geometry cube =
+		quad(p1,p2,p3,p4) + quad(p5,p6,p7,p8) + quad(p1,p2,p5,p6) +
+		quad(p3,p4,p7,p8) + quad(p1,p3,p5,p7) + quad(p2,p4,p6,p8);
 	return cube;
 }
 
-Geometry Geometry::generateTriangle(unsigned int subdivisionCount, const imp::Vec3& p1, const imp::Vec3& p2, const imp::Vec3& p3)
+Geometry subdivTriangle(const Geometry& buf, int count)
 {
 	Geometry tri;
+	int ite = count+1;
 	
-	imp::Vec3 u = (p2-p1) / (subdivisionCount+1);
-	imp::Vec3 v = (p3-p1) / (subdivisionCount+1);
-	
-	for(unsigned int j=0; j<(subdivisionCount+1); ++j)
+	for(int it = 0; it<buf.size(); it+=3)
 	{
-		unsigned int maxOnRaw = (subdivisionCount-j);
-		for(unsigned int i=0; i<maxOnRaw+1; ++i)
+		Vec3 u = (buf[it+1]-buf[it+0]) / ite;
+		Vec3 v = (buf[it+2]-buf[it+0]) / ite;
+		
+		for(int j=0; j<ite; ++j)
 		{
-			tri._vertices.push_back( p1 + u*(float)i 			+ v*(float)j );
-			tri._vertices.push_back( p1 + u*(float)i 			+ v*(float)(j+1) );
-			tri._vertices.push_back( p1 + u*(float)(i+1.0)	+ v*(float)j );
-			
-			if(i < maxOnRaw)
+			int maxOnRaw = (ite-j);
+			for(int i=0; i<maxOnRaw; ++i)
 			{
-				tri._vertices.push_back( p1 + u*(float)i 			+ v*(float)(j+1.0) );
-				tri._vertices.push_back( p1 + u*(float)(i+1.0) 	+ v*(float)(j+1.0) );
-				tri._vertices.push_back( p1 + u*(float)(i+1.0) 	+ v*(float)j  );
+				Vec3 t1 = buf[it+0] + u*Vec3(i+0) + v*Vec3(j+0);
+				Vec3 t2 = buf[it+0] + u*Vec3(i+0) + v*Vec3(j+1);
+				Vec3 t3 = buf[it+0] + u*Vec3(i+1) + v*Vec3(j+0);
+				Vec3 t4 = buf[it+0] + u*Vec3(i+1) + v*Vec3(j+1);
+				
+				tri.add({t1,t2,t3});
+				if(i < maxOnRaw-1) tri.add({t2,t4,t3});
 			}
 		}
 	}
@@ -232,59 +207,53 @@ Geometry Geometry::generateTriangle(unsigned int subdivisionCount, const imp::Ve
 	return tri;
 }
 
-Geometry Geometry::createTetrahedron(unsigned int subdivisionCount)
+Geometry subdivLine(const Geometry& buf, int count)
 {
-	const double PI = 3.141592;
-	const double rad120 = (120.0 * PI / 180.0);
+	Geometry segs;
+	int ite = count+1;
 	
-	imp::Vec3 p1(0.0,0.0,-1.0);
-	imp::Vec3 p2(0.0,0.0,-1.0);
-	imp::Vec3 p3(0.0,0.0,-1.0);
-	imp::Vec3 p4(0.0,0.0,-1.0);
-	
-	p1*=Matrix3::rotationY(rad120);
-	
-	p2*=Matrix3::rotationY(rad120);
-	p2*=Matrix3::rotationZ(-rad120);
-	
-	p3*=Matrix3::rotationY(rad120);
-	p3*=Matrix3::rotationZ(rad120);
-	
-	Geometry pir = generateTriangle(subdivisionCount, p1, p2, p3) + generateTriangle(subdivisionCount, p1, p4, p2) + generateTriangle(subdivisionCount, p2, p4, p3) + generateTriangle(subdivisionCount, p3, p4, p1);
-	
-	return pir;
-}
-
-Geometry Geometry::createPyramid(unsigned int baseDivision, unsigned int subdivisionCount)
-{
-	const double PI = 3.141592;
-	const double rad120 = (120.0 * PI / 180.0);
-	const double radStep = (2.0*PI)/baseDivision;
-	
-	Geometry pir;
-	
-	for(double step = 0; step < 2.0*PI; step+=radStep)
+	for(int it = 0; it<buf.size(); it+=2)
 	{
+		Vec3 u = (buf[it+1]-buf[it+0]) / ite;
 		
-		imp::Vec3 p1(0.0,0.0,-1.0);
-		
-		imp::Vec3 p2 = p1;
-		imp::Vec3 p3 = p1;
-		imp::Vec3 p4 = p1;
-		
-		p2*=Matrix3::rotationY(rad120);
-		p3*=Matrix3::rotationY(rad120);
-		p4*=Matrix3::rotationY(rad120);
-		p4.set( 0.0, 0.0, p4.z() );
-		
-		p2*=Matrix3::rotationZ(step);
-		p3*=Matrix3::rotationZ(step+radStep);
-		
-		pir += generateTriangle(subdivisionCount, p1, p2, p3);
-		pir += generateTriangle(subdivisionCount, p3, p2, p4);
+		for(int i=0; i<ite; ++i)
+		{
+			Vec3 l1 = buf[it+0] + u*Vec3(i+0);
+			Vec3 l2 = buf[it+0] + u*Vec3(i+1);
+			segs.add({l1,l2});
+		}
 	}
 	
-	return pir;
+	return segs;
+}
+
+Geometry Geometry::subdivise(int count)
+{
+	Geometry res;
+	if(_prim == Primitive_Lines)
+		res = subdivLine(*this, count);
+	else if(_prim == Primitive_Triangles)
+		res = subdivTriangle(*this, count);
+	
+	res.setPrimitive(getPrimitive());
+	return res;
+}
+
+Geometry Geometry::tetrahedron()
+{
+	const double PI = 3.141592;
+	const double rad120 = (120.0 * PI / 180.0);
+	
+	Vec3 p1(0.0,0.0,1.0);
+	Vec3 p2 = p1 * Matrix3::rotationY(rad120);
+	Vec3 p3 = p2 * Matrix3::rotationZ(rad120);
+	Vec3 p4 = p2 * Matrix3::rotationZ(-rad120);
+	
+	Geometry geo;
+	geo.add({p1,p2,p3, p1,p3,p4, p1,p4,p2, p2,p4,p3});
+	geo.setPrimitive(Primitive_Triangles);
+	
+	return geo;
 }
 
 void Geometry::setPrimitive(Primitive p) {_prim=p;}
@@ -341,14 +310,14 @@ Geometry Geometry::intoLineBuf(const Geometry& buf)
 
 Geometry Geometry::sphere(int sub, float size)
 {
-	Geometry geo = createTetrahedron(sub);
+	Geometry geo = tetrahedron();
+	geo = geo.subdivise(sub);
 	geo.sphericalNormalization(1.0);
 	geo*=size;
-	geo.setPrimitive(Primitive_Triangles);
 	return geo;
 }
 
-Geometry Geometry::extrude(const Path& base, float len, float ratioTop, int sub)
+Geometry Geometry::extrude(const Path& base, float len, float ratioTop)
 {
 	Geometry res;
 	
@@ -356,42 +325,24 @@ Geometry Geometry::extrude(const Path& base, float len, float ratioTop, int sub)
 	int i2 = size-1;
 	for(int i=0;i<size;++i)
 	{
-		for(int j=0;j<sub+1;++j)
-		{
-			float f1 = j/(float)(sub+1);
-			float f2 = (j+1)/(float)(sub+1);
-			
-			float h1 = f1*len;
-			float h2 = f2*len;
-			
-			float r1 = mix(1.0f,ratioTop,f1);
-			float r2 = mix(1.0f,ratioTop,f2);
-			
-			Vec3 bt1 = base[i]*r1 + Vec3(0.0,0.0,h1);
-			Vec3 bt2 = base[i2]*r1 + Vec3(0.0,0.0,h1);
-			Vec3 tp1 = base[i]*r2 + Vec3(0.0,0.0,h2);
-			Vec3 tp2 = base[i2]*r2 + Vec3(0.0,0.0,h2);
-			
-			res.add( {bt2,bt1,tp2} );
-			res.add( {tp1,tp2,bt1} );
-		}
+		// side
+		Vec3 bt1 = base[i2];
+		Vec3 bt2 = base[i];
+		Vec3 tp1 = base[i2]*ratioTop + Vec3(0.0,0.0,len);
+		Vec3 tp2 = base[i]*ratioTop + Vec3(0.0,0.0,len);
+		
+		res.add( {bt2,bt1,tp2} );
+		res.add( {tp1,tp2,bt1} );
 		
 		// bottom
-		res.add( {Vec3(0.0),base[i2],base[i]} );
-			
+		res.add( {Vec3(0.0),bt1,bt2} );
+
 		// top
-		if(ratioTop > 0.0)
-		{
-			res.add(Vec3(0.0,0.0,len));
-			res.add(base[i2]*ratioTop + Vec3(0.0,0.0,len));
-			res.add(base[i]*ratioTop + Vec3(0.0,0.0,len));
-		}
+		if(ratioTop > 0.0) res.add( {Vec3(0.0,0.0,len),tp1,tp2} );
 		
 		i2=i;
 	}
 	
-	// res+=base;
-	// res+=top;
 	res.setPrimitive(Primitive_Triangles);
 	return res;
 }
@@ -400,7 +351,7 @@ Geometry Geometry::cylinder(int sub, float len, float radius)
 {
 	
 	Path base = Path::circle(sub,radius);
-	Geometry res = extrude(base, len,1.0,0);
+	Geometry res = extrude(base, len,1.0);
 	return res;
 }
 
@@ -409,7 +360,7 @@ Geometry Geometry::cone(int sub, float len, float radius1, float radius2)
 {
 	
 	Path base = Path::circle(sub,radius1);
-	Geometry res = extrude(base, len,radius2/radius1,0);
+	Geometry res = extrude(base, len,radius2/radius1);
 	return res;
 }
 

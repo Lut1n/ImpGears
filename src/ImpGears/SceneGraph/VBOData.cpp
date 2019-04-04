@@ -11,10 +11,7 @@ VBOData::VBOData()
     vboID = 0;
     vboSize = 0;
 	_verticesCount = 0;
-	_primitive = Primitive_Quads;
-	#ifdef GRID_DEBUG
-		_primitive = Primitive_Lines;
-	#endif
+	_primitive = Primitive_Lines;
 }
 
 //--------------------------------------------------------------
@@ -37,7 +34,7 @@ void VBOData::drawVBO()
 	std::uint32_t texcoordOffset = _verticesCount * (3 * sizeof(float) );
     enableTexCoordArray(texcoordOffset);
 
-	unsigned int glPrimitive = GL_QUADS;
+	unsigned int glPrimitive = GL_LINES;
 	switch(_primitive)
 	{
 	case Primitive_Points:
@@ -53,7 +50,7 @@ void VBOData::drawVBO()
 		glPrimitive = GL_QUADS;
 		break;
 	default:
-		glPrimitive = GL_QUADS;
+		glPrimitive = GL_LINES;
 		break;
 	};
 

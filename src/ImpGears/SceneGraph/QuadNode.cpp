@@ -23,7 +23,7 @@ QuadNode::QuadNode()
 	int vertSize = vertex.size()*sizeof(float);
 	int texSize = texCoords.size()*sizeof(float);
 	_gData.requestVBO(vertSize+texSize);
-	_gData.setPrimitive(Primitive_Triangles);
+	_gData.setPrimitive(VBOData::Primitive_Triangles);
 	_gData.setVertices(vertex.data(), vertSize);
 	_gData.setData(texCoords.data(), texSize, vertSize);
 }

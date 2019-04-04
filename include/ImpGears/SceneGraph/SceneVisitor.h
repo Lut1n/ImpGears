@@ -3,6 +3,8 @@
 
 #include <SceneGraph/Visitor.h>
 #include <SceneGraph/SceneNode.h>
+#include <SceneGraph/GraphicState.h>
+#include <Core/Matrix4.h>
 
 #include <vector>
 
@@ -15,19 +17,16 @@ public:
 	Meta_Class(SceneVisitor)
 
 	SceneVisitor();
-	SceneVisitor(GraphicStatesManager* mngr);
 	virtual ~SceneVisitor();
-	
-	void setStateManager(GraphicStatesManager* mngr) { _stateMngr=mngr; }
 
 	virtual void apply( SceneNode* node );
-	
-	// temporary
-	void synchronizeStack();
+	virtual void push( SceneNode* node );
+	virtual void pop();
 
 protected:
 	
-	GraphicStatesManager* _stateMngr;
+	GraphicStatesManager::Ptr _gStates;
+	std::vector<Matrix4> _matrixStack;
 };
 
 IMPGEARS_END

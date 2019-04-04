@@ -24,7 +24,7 @@ public:
 	virtual ~SceneNode();
 
 	virtual void update() {}
-	virtual void render() = 0;
+	virtual void render() {};
 
 	void setPosition(const Vec3& position) { _position=position; }
 	void setRotation(const Vec3& rotation) { _rotation=rotation; }

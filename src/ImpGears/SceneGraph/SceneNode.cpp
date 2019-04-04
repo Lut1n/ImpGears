@@ -47,9 +47,8 @@ void SceneNode::accept( Visitor<SceneNode*>::Ptr& visitor )
 		* Matrix4::rotationZ(_rotation.z())
 		* Matrix4::scale(_scale.x(), _scale.y(), _scale.z()).inverse();
 	
-	visitor->apply(this);
-	
 	visitor->push(this);
+	visitor->apply(this);
     for(auto node:_children) node->accept(visitor);
 	visitor->pop();
 }

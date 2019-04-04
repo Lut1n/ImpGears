@@ -6,12 +6,7 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 SceneVisitor::SceneVisitor()
 {
-}
-
-//--------------------------------------------------------------
-SceneVisitor::SceneVisitor(GraphicStatesManager* mngr)
-{
-	setStateManager(mngr);
+	_gStates = GraphicStatesManager::create();
 }
 
 //--------------------------------------------------------------
@@ -22,41 +17,35 @@ SceneVisitor::~SceneVisitor()
 //--------------------------------------------------------------
 void SceneVisitor::apply( SceneNode* node )
 {
-	synchronizeStack();
-	
-	_stateMngr->pushState( node->getGraphicState().get() );
-	
 	Matrix4 model;
-	for(auto n : _stack) model *= n->getModelMatrix();
+	for(auto mat : _matrixStack) model *= mat;
 	
-	model *= node->getModelMatrix();
-	
-	if(_stateMngr->getShader())
+	if(_gStates->getShader())
 	{
-		_stateMngr->getShader()->setModel(model);
+		_gStates->getShader()->setModel(model);
 		if(imp::Camera::getActiveCamera())
 		{
 			imp::Camera::getActiveCamera()->lookAt();
-			_stateMngr->getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );
+			_gStates->getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );
 		}
-		if(_stateMngr->getParameters())
-			_stateMngr->getShader()->setProjection( _stateMngr->getParameters()->getProjectionMatrix() );
+		if(_gStates->getParameters())
+			_gStates->getShader()->setProjection( _gStates->getParameters()->getProjectionMatrix() );
 	}
-	
 	
 	node->render();
-	
-	_stateMngr->popState();
+}
+//--------------------------------------------------------------
+void SceneVisitor::push( SceneNode* node )
+{
+	_gStates->pushState(node->getGraphicState().get());
+	_matrixStack.push_back(node->getModelMatrix());
 }
 
-void SceneVisitor::synchronizeStack()
-{	
-	bool needSyncStacks = ( _stateMngr->size() != (int)_stack.size()+1 );
-	if(needSyncStacks)
-	{
-		if(_stateMngr->size() < (int)_stack.size()+1) _stateMngr->pushState(_stack.back()->getGraphicState().get());
-		while(_stateMngr->size() > (int)_stack.size()+1) _stateMngr->popState();
-	}
+//--------------------------------------------------------------
+void SceneVisitor::pop()
+{
+	_gStates->popState();
+	_matrixStack.pop_back();
 }
 
 IMPGEARS_END

@@ -18,12 +18,9 @@ public:
 	virtual ~Visitor() {}
 
 	virtual void apply( Ty node ) = 0;
-	virtual void push( Ty node ) { _stack.push_back(node); };
-	virtual void pop() { _stack.pop_back(); }
-
-protected:
 	
-	std::vector<Ty> _stack;
+	virtual void push( Ty node ) = 0;
+	virtual void pop() = 0;
 };
 
 IMPGEARS_END

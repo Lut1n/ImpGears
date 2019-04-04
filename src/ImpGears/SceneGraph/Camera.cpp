@@ -1,7 +1,5 @@
 #include <SceneGraph/Camera.h>
 
-#include <SceneGraph/GraphicRenderer.h>
-
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------

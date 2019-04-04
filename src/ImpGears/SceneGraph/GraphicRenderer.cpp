@@ -6,28 +6,24 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-GraphicRenderer* GraphicRenderer::instance = NULL;
+GraphicRenderer* GraphicRenderer::s_instance = nullptr;
 
 //--------------------------------------------------------------
 GraphicRenderer::GraphicRenderer()
 {
-    //ctor
-    setCenterCursor(false);
-
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+        std::cout << "Error: " << glewGetErrorString(err) << std::endl;
         exit(0);
     }
 
     int major, minor;
 	glGetIntegerv(GL_MAJOR_VERSION, &major);
 	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	fprintf(stdout, "OGL version %d.%d\n", major, minor);
-	fprintf(stdout, "OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+	std::cout << "OGL version " << major << "." << minor << std::endl;
+	std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
 
-    
     // default parameters values
     _parameters.reset(new RenderParameters());
     _parameters->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
@@ -41,8 +37,6 @@ GraphicRenderer::GraphicRenderer()
     
     _state.reset(new GraphicState());
     _state->setParameters(_parameters);
-    
-    setInstance(this);
 }
 
 //--------------------------------------------------------------
@@ -51,15 +45,13 @@ GraphicRenderer::~GraphicRenderer()
 }
 
 //--------------------------------------------------------------
-void GraphicRenderer::renderScene(){
-
+void GraphicRenderer::renderScene(SceneNode::Ptr& scene)
+{
+	setInstance(this);
 	GraphicStatesManager& states = getStateManager();
 	states.pushState( _state.get() );
 
-	if(_root != nullptr)
-	{
-		_root->renderAll();
-	}
+	scene->renderAll();
 	
 	states.popState();
 }

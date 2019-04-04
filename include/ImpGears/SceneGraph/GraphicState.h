@@ -15,9 +15,9 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 struct IMP_API GraphicState : public Object
 {
-	RenderTarget::Ptr			_target;
-	RenderParameters::Ptr 	_parameters;
-	Shader::Ptr 					_shader;
+	RenderTarget::Ptr _target;
+	RenderParameters::Ptr _parameters;
+	Shader::Ptr _shader;
 	
 	Meta_Class(GraphicState)
 	
@@ -26,6 +26,11 @@ struct IMP_API GraphicState : public Object
 	void setTarget(const RenderTarget::Ptr& target);
 	void setParameters(const RenderParameters::Ptr& params);
 	void setShader(const Shader::Ptr& shader);
+	
+	
+	// list of uniforms
+	
+	// list of parameters
 };
 
 

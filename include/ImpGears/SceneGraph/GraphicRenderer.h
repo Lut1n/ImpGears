@@ -25,17 +25,12 @@ public:
 	RenderParameters::Ptr getRenderParameters() const {return _parameters;}
 	
 	GraphicStatesManager& getStateManager() {return _stateMgr;}
-	
-	static GraphicRenderer* getInstance(){return s_instance;}
 
 protected:
 	
 	GraphicState::Ptr _state;
 	GraphicStatesManager _stateMgr;
 	RenderParameters::Ptr _parameters;
-
-	static void setInstance(GraphicRenderer* inst){s_instance = inst;}
-	static GraphicRenderer* s_instance;
 };
 
 IMPGEARS_END

@@ -59,6 +59,8 @@ class IMP_API GraphicStatesManager : public Object
 	
 	void revert(GraphicState* lastState);
 	
+	int size() const { return _stack.size(); }
+	
 	protected:
 
 	std::vector< GraphicState* > _stack;

@@ -1,12 +1,10 @@
 #include <SceneGraph/GraphicRenderer.h>
 #include <SceneGraph/OpenGL.h>
+#include <SceneGraph/SceneVisitor.h>
 
 #include <cstdlib>
 
 IMPGEARS_BEGIN
-
-//--------------------------------------------------------------
-GraphicRenderer* GraphicRenderer::s_instance = nullptr;
 
 //--------------------------------------------------------------
 GraphicRenderer::GraphicRenderer()
@@ -47,11 +45,13 @@ GraphicRenderer::~GraphicRenderer()
 //--------------------------------------------------------------
 void GraphicRenderer::renderScene(SceneNode::Ptr& scene)
 {
-	setInstance(this);
 	GraphicStatesManager& states = getStateManager();
 	states.pushState( _state.get() );
 
-	scene->renderAll();
+	SceneVisitor::Ptr sceneVis = SceneVisitor::create(&states);
+	Visitor<SceneNode*>::Ptr visitor = sceneVis;
+	scene->accept(visitor);
+	sceneVis->synchronizeStack();
 	
 	states.popState();
 }

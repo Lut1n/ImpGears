@@ -4,6 +4,7 @@
 #include <Core/Object.h>
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
+#include <SceneGraph/Visitor.h>
 #include <SceneGraph/GraphicState.h>
 
 #include <list>
@@ -13,92 +14,47 @@ IMPGEARS_BEGIN
 /// \brief Defines a scene node. Has to be added to a scene for rendering.
 class IMP_API SceneNode : public Object
 {
-    public:
+public:
+
+	Meta_Class(SceneNode)
+
+	using NodeList = std::list<SceneNode::Ptr>;
+
+	SceneNode();
+	virtual ~SceneNode();
+
+	virtual void update() {}
+	virtual void render() = 0;
+
+	void setPosition(const Vec3& position) { _position=position; }
+	void setRotation(const Vec3& rotation) { _rotation=rotation; }
+	void setScale(const Vec3& scale) { _scale=scale; }
+
+	const Vec3& getPosition() const {return _position;}
+	const Vec3& getRotation() const {return _rotation;}
+	const Vec3& getScale() const {return _scale;}
 	
-		Meta_Class(SceneNode)
+	void addNode(const SceneNode::Ptr& sceneNode);
+	void remNode(const SceneNode::Ptr& sceneNode);
 	
+	void accept( Visitor<SceneNode*>::Ptr& visitor );
 
-		using SceneNodeList = std::list<SceneNode::Ptr>;
-		using SceneNodeIt = SceneNodeList::iterator;
+	const Matrix4& getModelMatrix() const { return _modelMatrix; }
+	const Matrix4& getNormalMatrix() const { return _normalMatrix; }
+	
+	virtual GraphicState::Ptr getGraphicState() { return _state; }
 
-        SceneNode();
-        virtual ~SceneNode();
-
-        virtual void render() = 0;
-
-        void setRotation(float rx, float ry, float rz){
-            this->rx = rx;
-            this->ry = ry;
-            this->rz = rz;
-            m_localMatrixHasChanged = true;
-        }
-
-        void setPosition(imp::Vec3 position){
-            this->position = position;
-            m_localMatrixHasChanged = true;
-        }
-
-        void setOrientation(imp::Vec3 orientation){
-            this->orientation = orientation;
-        }
-		
-        void addSubNode(const SceneNode::Ptr& sceneNode);
-        void removeSubNode(const SceneNode::Ptr& sceneNode);
-
-        float getRx() const{return rx;}
-        float getRy() const{return ry;}
-        float getRz() const{return rz;}
-
-        void renderAll();
-
-        Vec3 getPosition() const{return position;}
-        Vec3 getOrientation() const{return orientation;}
-
-        bool renderIsActivated() const{return renderActivated;}
-        void setRenderActivated(bool activated){renderActivated = activated;}
-
-        Matrix4 getModelMatrix();
-        Matrix4 getNormalMatrix();
-        const void setParentModelMatrices(const Matrix4& pModelMat, const Matrix4& pNormalMat)
-        {
-            m_parentModelMatrix = pModelMat;
-            m_parentNormalMatrix = pNormalMat;
-        }
-
-        void setScale(const Vec3& _scale)
-        {
-            scale = _scale;
-            m_localMatrixHasChanged = true;
-        }
-		
-		virtual GraphicState::Ptr getGraphicState();
-
-        void commitTransformation();
-
-        static int nbDisplayed;
-
-    protected:
-		
-		GraphicState::Ptr _state;
-
-        Vec3 scale;
-
-    private:
-        SceneNodeList subSceneNodes;
-
-        float rx, ry, rz;
-
-        imp::Vec3 position;
-        imp::Vec3 orientation;
-
-        bool renderActivated;
-
-        Matrix4 m_parentModelMatrix;
-        Matrix4 m_parentNormalMatrix;
-
-        Matrix4 m_localModelMatrix;
-        Matrix4 m_localNormalMatrix;
-        bool m_localMatrixHasChanged;
+protected:
+	
+	GraphicState::Ptr _state;
+	Vec3 _position;
+	Vec3 _rotation;
+	Vec3 _scale;
+	
+	Matrix4 _modelMatrix;
+	Matrix4 _normalMatrix;
+	
+	NodeList _children;
 };
 
 IMPGEARS_END

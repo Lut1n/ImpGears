@@ -1,113 +1,73 @@
-#include <SceneGraph/BmpLoader.h>
+// #include <SceneGraph/BmpLoader.h>
 #include <SceneGraph/DefaultShader.h>
-#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/RenderTarget.h>
+#include <SceneGraph/Camera.h>
 
 #include <SFML/Graphics.hpp>
-#include <SceneGraph/ScreenVertex.h>
+#include <SceneGraph/QuadNode.h>
 
 #include <Utils/FileInfo.h>
-
+#include <fstream>
 
 std::string loadShader(const char* filename)
 {
-	std::string buffer;
-	std::ifstream is;
-	is.open(filename);
-	while( !is.eof() )
-	{
-		char c = is.get();
-		
-		if(c == '\n' || c == '\r')
-			c = '\n';
-		
-		if(!is.eof())		
-			buffer.push_back(c);
-	}
-	is.close();
-	
-	// std::cout << filename << " : \n " << buffer << std::endl;
-	
+	std::ifstream ifs(filename);
+	std::string buffer( (std::istreambuf_iterator<char>(ifs) ),
+						(std::istreambuf_iterator<char>()    ) );
 	return buffer;
 }
 
 int main(int argc, char* argv[])
 {
-	if(argc<2)
-		return 0;
+	if(argc<2) return 0;
 	
-	sf::RenderWindow window(sf::VideoMode(500, 500), "My window", sf::Style::Default, sf::ContextSettings(24));
+	sf::RenderWindow window(sf::VideoMode(500, 500), argv[1], sf::Style::Default, sf::ContextSettings(24));
 	window.setFramerateLimit(60);
 
-	imp::GraphicRenderer renderer;
-
-
-    imp::ImageData data;
-    data.create(500, 500, imp::PixelFormat_BGRA8);
-    
-	imp::Texture texture;
-    texture.loadFromImageData(&data);
-
-
-	time_t accessLast, modifLast, statusLast;
+    time_t accessLast, modifLast, statusLast;
 	imp::getTimeInfo(argv[1], accessLast, modifLast, statusLast);
 
-	window.setTitle(argv[1]);
-
-	// screen render parameters
-	std::shared_ptr<imp::RenderParameters> screenParameters;
-	screenParameters.reset(new imp::RenderParameters());
-	screenParameters->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-	screenParameters->setClearColor(imp::Vector3(0.f, 0.f, 1.f));
-
-	// screen render target
-	imp::RenderTarget screenTarget;
-	screenTarget.createScreenTarget(500,500);
-
-	imp::Matrix4 i4 = imp::Matrix4::getIdentityMat();
+	imp::GraphRenderer::Ptr renderer = imp::GraphRenderer::create();
+	imp::State::Ptr state = renderer->getInitState();
+	state->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+    state->setViewport(0.0, 0.0, 500.0, 500.0);
 
     std::cout << "defaultshader.vert + " << argv[1] << std::endl;
-    
-	imp::Shader* defaultShader = new imp::Shader(loadShader("defaultshader.vert").c_str(), loadShader(argv[1]).c_str());
-	imp::ScreenVertex screen;
+	std::string c_vert = loadShader("defaultshader.vert");
+	std::string c_frag = loadShader(argv[1]);
+	imp::Shader::Ptr shader = imp::Shader::create(c_vert.c_str(), c_frag.c_str());
+	
+    imp::Uniform::Ptr u_time = imp::Uniform::create("u_timer",imp::Uniform::Type_1f);
+	shader->addUniform(u_time);
+	u_time->set(0.f);
+	
+	imp::SceneNode::Ptr screen = imp::QuadNode::create();
+    screen->getState()->setShader(shader);
 
     sf::Clock timer;
     
 	while (window.isOpen())
 	{
         sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
-                window.close();
-        }
+        while (window.pollEvent(event)) if (event.type == sf::Event::Closed) window.close();
 
 		// reload if changed
 		time_t access, modif, status;
 		imp::getTimeInfo(argv[1], access, modif, status);
-		// std::cout << "MODIF time " << modif << "; " << modifLast << "\n";
 		if(modif != modifLast)
-		{
-            if(defaultShader == IMP_NULL)
-                delete defaultShader;
-            
+		{   
             std::cout << "[reload shaders] defaultshader.vert + " << argv[1] << std::endl;
 			modifLast = modif;
-			defaultShader = new imp::Shader(loadShader("defaultshader.vert").c_str(), loadShader(argv[1]).c_str());
+			c_frag = loadShader(argv[1]);
+			shader = imp::Shader::create(c_vert.c_str(), c_frag.c_str());
+			shader->addUniform(u_time);
+            screen->getState()->setShader(shader);
 		}
-
-		renderer.setRenderParameters(screenParameters);
-		screenTarget.bind();
-		defaultShader->enable();
-		defaultShader->setMatrix4Parameter("u_projection", renderer.getProjectionMatrix());
-		defaultShader->setMatrix4Parameter("u_view", i4);
-		defaultShader->setMatrix4Parameter("u_model", i4);
-		defaultShader->setTextureParameter("u_colorTexture", &texture, 0);
-        defaultShader->setFloatParameter("u_timer", timer.getElapsedTime().asMilliseconds());
-		renderer.renderScene();
-		screen.render();
-		defaultShader->disable();
-		screenTarget.unbind();
+		
+		float sec = timer.getElapsedTime().asMilliseconds() / 1000.0;
+        u_time->set(sec);
+        renderer->renderScene( screen );
 
 		window.display();
 	}

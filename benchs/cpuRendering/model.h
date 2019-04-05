@@ -6,39 +6,48 @@
 // -----------------------------------------------------------------------------------------------------------------------  
 std::vector<Vec3> generateTorch(const Vec3& center, float radius, int sub)
 {
-    imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
+    imp::Geometry geometry = imp::Geometry::tetrahedron();
+	geometry = geometry.subdivise(sub);
     geometry.sphericalNormalization(1.0);
     geometry.scale(Vec3(radius));
-       
+	Geometry::intoCCW( geometry );
+	
     return geometry._vertices;
 }     
+
 // -----------------------------------------------------------------------------------------------------------------------  
-std::vector<Vec3> generateRock(const Vec3& center, float radius, int sub)
+std::vector<Vec3> generateRockHat(const Vec3& center, float radius, int sub)
 {
-    imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
+    imp::Geometry geometry = imp::Geometry::cube();
+	geometry *= 0.5;
+	geometry = geometry.subdivise(sub);
     geometry.sphericalNormalization(0.5);
     geometry.scale(Vec3(radius * 0.7,radius * 0.7,radius * 1.5));
-    // geometry.noiseBump(6, 0.7, 1.0, 0.2);
+	
+	
+    imp::Geometry geo2 = imp::Geometry::cube();
+	geo2 *= 0.5; // side size = one
+	geo2 *= Vec3(1.0,1.0,0.5); /* h = 0.25*/ geo2 += Vec3(0.0,0.0,0.25); // demi-cube
+	geo2 = geo2.subdivise(sub);
+    geo2.sphericalNormalization(0.7);
+    geo2.scale(Vec3(radius*2.0,radius*2.0,radius*2.0));
+	geo2 += Vec3(0.0,0.0,1.0);
+	
+	geometry += geo2;
+	Geometry::intoCCW( geometry );
        
     return geometry._vertices;
-}   
-// -----------------------------------------------------------------------------------------------------------------------  
-std::vector<Vec3> generateHat(const Vec3& center, float radius, int sub)
-{
-    imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
-    geometry.sphericalNormalization(0.7);
-    geometry.scale(Vec3(radius,radius,radius*0.3));
-    // geometry.noiseBump(6, 0.7, 1.0, 0.2);
-       
-    return geometry._vertices;
-}
+}  
 // -----------------------------------------------------------------------------------------------------------------------  
 std::vector<Vec3> generatePlane(const Vec3& center, float radius, int sub)
 {
-    imp::Geometry geometry = imp::Geometry::createTetrahedron(sub);
+    imp::Geometry geometry = imp::Geometry::cube();
+	geometry *= 0.5;
+	geometry = geometry.subdivise(sub);
     geometry.sphericalNormalization(1.0);
     geometry.scale(Vec3(radius,radius,radius*0.25));
     // geometry.noiseBump(6, 0.7, 1.0, 0.3);
+	Geometry::intoCCW( geometry );
        
     return geometry._vertices;
 }
@@ -112,35 +121,6 @@ std::vector<Vec3> generateColors3(std::vector<Vec3>& buf)
     for(unsigned int i=0; i<buf.size(); ++i)
     {
         colorBuffer[i] = color;
-          
-        std::cout << "\rgenerate color buffer : " << std::floor(i*100/buf.size()) << "% ";
-    }
-    std::cout << "done" << std::endl;
-      
-    return colorBuffer;
-}
-// -----------------------------------------------------------------------------------------------------------------------  
-std::vector<Vec3> generateColors4(std::vector<Vec3>& buf)
-{
-    std::vector<Vec3> colorBuffer;
-    colorBuffer.resize(buf.size());
-      
-    std::cout << "generate color buffer : 0%";
-      
-    for(unsigned int i=0; i<buf.size(); ++i)
-    {
-        float disturb = imp::perlinOctave(buf[i].x(), buf[i].y(), buf[i].z(), 8, 0.7, 1.0/32.0) * 2.0 - 1.0;
-         
-        float a = std::atan2(buf[i].x(),buf[i].y());
-         
-        float signal = (1.0+std::sin((a + disturb*4.0) * 16.0))*0.5;
-         
-        Vec3 colorA(0.3,0.7,0.7);
-        Vec3 colorB(0.7,0.2,0.3);
-         
-        Vec3 finalColor = mix(colorA,colorB,signal);
-         
-        colorBuffer[i] = finalColor;
           
         std::cout << "\rgenerate color buffer : " << std::floor(i*100/buf.size()) << "% ";
     }

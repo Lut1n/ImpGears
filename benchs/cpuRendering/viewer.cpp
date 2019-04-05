@@ -1,9 +1,8 @@
 #include <Geometry/Geometry.h>
-// #include <SceneGraph/BmpLoader.h>
 #include <SceneGraph/DefaultShader.h>
-#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/RenderTarget.h>
-#include <SceneGraph/ScreenVertex.h>
+#include <SceneGraph/QuadNode.h>
 #include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
 #include <Graphics/Rasterizer.h>
@@ -95,10 +94,11 @@ void renderVertex(std::vector<Vec3>& buf, std::vector<Vec3>& col, Image::Ptr* ta
 		Vec3 p1p3 = mvpVertex[2] - mvpVertex[0];
 		Vec3 dir = p1p2.cross(p1p3);
 		
-		if(dir[2] < 0.0)
+		if(dir[2] > 0.0)
 		{
             global_rast.setUniforms3(uniforms[0],uniforms[1],uniforms[2]);
-            global_rast.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
+			global_rast.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
+            // global_rast.wireTriangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
 		}
 	}
 }
@@ -109,12 +109,11 @@ void renderVertex(std::vector<Vec3>& buf, std::vector<Vec3>& col, Image::Ptr* ta
 struct Screen
 {
 	sf::RenderWindow* window;
-	imp::GraphicRenderer::Ptr renderer;
+	imp::GraphRenderer::Ptr renderer;
 	imp::Texture::Ptr texture;
-	imp::RenderParameters::Ptr screenParameters;
+	imp::State::Ptr state;
 	imp::Shader::Ptr defaultShader;
-	imp::ScreenVertex::Ptr screen;
-	imp::Camera::Ptr camera;
+	imp::QuadNode::Ptr screen;
 	imp::Uniform::Ptr u_tex;
     
 	Screen()
@@ -123,24 +122,23 @@ struct Screen
 		window->setFramerateLimit(60);
 		window->setTitle("Cpu Renderer");
 
-		renderer = imp::GraphicRenderer::create();
+		renderer = imp::GraphRenderer::create();
 
 		texture = imp::Texture::create();
 		texture->setSmooth(true);
 		
-		// screen render parameters
-		screenParameters = imp::RenderParameters::create();
-		screenParameters->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-		screenParameters->setClearColor(imp::Vec3(0.f, 0.f, 1.f));
-		screenParameters->setViewport(0.0, 0.0, 500.0, 500.0);
-		renderer->setRenderParameters(screenParameters);
 		
 		std::string c_vert = loadShader("defaultshader.vert");
 		std::string c_frag = loadShader("defaultshader.frag");
 		defaultShader = imp::Shader::create(c_vert.c_str(),c_frag.c_str());
-		screen = imp::ScreenVertex::create();
-		screen->getGraphicState()->setShader(defaultShader);
-		renderer->setSceneRoot(screen);
+		
+		screen = imp::QuadNode::create();
+		
+		// screen render parameters
+		state = screen->getState();
+		state->setShader(defaultShader);
+		state->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+		state->setViewport(0.0, 0.0, 500.0, 500.0);
 		
 		u_tex = imp::Uniform::create("u_colorTexture", imp::Uniform::Type_1i);
 		u_tex->set(0);
@@ -204,11 +202,8 @@ int main(int argc, char* argv[])
 	std::vector<Vec3> vertexPlane = generatePlane(rock_center, 4.0, 2*GEO_SUBDIV);
 	std::vector<Vec3> colorPlane = generateColors2(vertexPlane);
 	
-	std::vector<Vec3> vertexRock = generateRock(rock_center, 1.0, 2*GEO_SUBDIV);
+	std::vector<Vec3> vertexRock = generateRockHat(rock_center, 1.0, 2*GEO_SUBDIV);
 	std::vector<Vec3> colorRock = generateColors(vertexRock);
-	
-	std::vector<Vec3> vertexHat = generateHat(rock_center, 2.0, 2*GEO_SUBDIV);
-	std::vector<Vec3> colorHat = generateColors4(vertexHat);
 	
 	std::vector<Vec3> vertexBall = generateTorch(rock_center, 0.2, std::min(10,1*GEO_SUBDIV));
 	std::vector<Vec3> colorBall = generateColors3(vertexBall);
@@ -228,7 +223,8 @@ int main(int argc, char* argv[])
 		}
 		
 		screen->texture->bind();
-		screen->renderer->renderScene();
+		SceneNode::Ptr toRender = screen->screen;
+		screen->renderer->renderScene( toRender );
 
 		screen->window->display();
 		a += 0.02;
@@ -245,8 +241,8 @@ int main(int argc, char* argv[])
 		renderVertex(vertexPlane, colorPlane, targets,defaultVert, terrFrag);
 		state.model = imp::Matrix4::translation(0.0, 0.0, 0.0);
 		renderVertex(vertexRock, colorRock, targets,defaultVert, defaultFrag);
-		state.model = imp::Matrix4::translation(0.0, 0.0, 1.0);
-		renderVertex(vertexHat, colorHat, targets,defaultVert, defaultFrag);
+		// state.model = imp::Matrix4::translation(0.0, 0.0, 1.0);
+		// renderVertex(vertexHat, colorHat, targets,defaultVert, defaultFrag);
 		state.model = imp::Matrix4::translation(1.0, 1.0, 0.0);
 		renderVertex(vertexBall, colorBall, targets,defaultVert, lightFrag);
 		

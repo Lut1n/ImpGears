@@ -12,20 +12,20 @@ IMPGEARS_BEGIN
 class IMP_API GraphRenderer : public Object
 {
 public:
-	
+
 	Meta_Class(GraphRenderer)
-	
-	using GraphicState = RenderParameters;
 	
 	GraphRenderer();
 	virtual ~GraphRenderer();
 
 	void renderScene(SceneNode::Ptr& scene);
+	
+	State::Ptr getInitState() { return _initState; }
 
 protected:
 	
 	ClearNode::Ptr _initNode;
-	GraphicState::Ptr _state;
+	State::Ptr _initState;
 	SceneVisitor::Ptr _visitor;
 };
 

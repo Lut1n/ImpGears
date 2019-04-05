@@ -1,5 +1,5 @@
-#ifndef IMP_RENDERPARAMETERS_H
-#define IMP_RENDERPARAMETERS_H
+#ifndef IMP_STATE_H
+#define IMP_STATE_H
 
 #include <Core/Object.h>
 #include <Core/Vec3.h>
@@ -12,7 +12,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API RenderParameters : public Object
+class IMP_API State : public Object
 {
 public:
 	
@@ -36,15 +36,15 @@ public:
 		BlendMode_SrcAlphaBased
 	};
 	
-	Meta_Class(RenderParameters)
+	Meta_Class(State)
 
-	RenderParameters();
-	RenderParameters(const RenderParameters& other);
-	virtual ~RenderParameters();
+	State();
+	State(const State& other);
+	virtual ~State();
 
-	const RenderParameters& operator=(const RenderParameters& other);
+	const State& operator=(const State& other);
 	
-	void clone(const RenderParameters::Ptr& other, CloneOpt opt = CloneOpt_All);
+	void clone(const State::Ptr& other, CloneOpt opt = CloneOpt_All);
 
 	void setFaceCullingMode(FaceCullingMode faceCullingMode){_faceCullingMode = faceCullingMode;_faceCullingChanged=true;}
 	FaceCullingMode getFaceCullingMode() const{return _faceCullingMode;}
@@ -101,4 +101,4 @@ private:
 
 IMPGEARS_END
 
-#endif // IMP_RENDERPARAMETERS_H
+#endif // IMP_STATE_H

@@ -4,7 +4,7 @@
 #include <SceneGraph/Visitor.h>
 #include <SceneGraph/SceneNode.h>
 #include <SceneGraph/Camera.h>
-#include <SceneGraph/GraphicState.h>
+#include <SceneGraph/State.h>
 #include <Core/Matrix4.h>
 
 #include <vector>
@@ -16,6 +16,9 @@ class IMP_API SceneVisitor : public Visitor<SceneNode*>
 public:
 
 	Meta_Class(SceneVisitor)
+	
+	using MatrixStack = std::vector<Matrix4>;
+	using StateStack = std::vector<State::Ptr>;
 
 	SceneVisitor();
 	virtual ~SceneVisitor();
@@ -27,9 +30,9 @@ public:
 	virtual void pop();
 
 protected:
-	
-	GraphicStatesManager::Ptr _gStates;
-	std::vector<Matrix4> _matrixStack;
+
+	MatrixStack _matrices;
+	StateStack _states;
 };
 
 IMPGEARS_END

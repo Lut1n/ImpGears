@@ -1,10 +1,10 @@
-#include <SceneGraph/RenderParameters.h>
+#include <SceneGraph/State.h>
 #include <SceneGraph/OpenGL.h>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-RenderParameters::RenderParameters()
+State::State()
 	: _projection()
 	, _viewport(0.0,0.0,1.0,1.0)
 	, _faceCullingMode(FaceCullingMode_None)
@@ -26,7 +26,7 @@ RenderParameters::RenderParameters()
 }
 
 //--------------------------------------------------------------
-RenderParameters::RenderParameters(const RenderParameters& other)
+State::State(const State& other)
 	: _projection(other._projection)
 	, _viewport(other._viewport)
 	, _faceCullingMode(other._faceCullingMode)
@@ -49,12 +49,12 @@ RenderParameters::RenderParameters(const RenderParameters& other)
 }
 
 //--------------------------------------------------------------
-RenderParameters::~RenderParameters()
+State::~State()
 {
 }
 
 //--------------------------------------------------------------
-void RenderParameters::clone(const RenderParameters::Ptr& other, CloneOpt opt)
+void State::clone(const State::Ptr& other, CloneOpt opt)
 {
 	if(opt == CloneOpt_All)
 	{
@@ -83,7 +83,7 @@ void RenderParameters::clone(const RenderParameters::Ptr& other, CloneOpt opt)
 }
 
 //--------------------------------------------------------------
-const RenderParameters& RenderParameters::operator=(const RenderParameters& other)
+const State& State::operator=(const State& other)
 {
 	_projection = other._projection;
 	_viewport = other._viewport;
@@ -106,7 +106,7 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
 }
 
 //--------------------------------------------------------------
-void RenderParameters::apply() const
+void State::apply() const
 {
 
 	if(_faceCullingChanged)
@@ -177,63 +177,63 @@ void RenderParameters::apply() const
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue)
+void State::setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue)
 {
 	_projection = Matrix4::perspectiveProj(fovx, ratio, nearValue, farValue);
 	_projectionChanged=true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue)
+void State::setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue)
 {
 	_projection = Matrix4::orthographicProj(left, right, bottom, top, nearValue, farValue);
 	_projectionChanged=true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setDepthTest(bool test)
+void State::setDepthTest(bool test)
 {
 	_depthTest = test;
 	_depthTestChanged = true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setViewport(float x, float y, float width, float height)
+void State::setViewport(float x, float y, float width, float height)
 {
 	_viewport = Vec4(x,y,width,height);
 	_viewportChanged = true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setViewport(const Vec4& viewport)
+void State::setViewport(const Vec4& viewport)
 {
 	_viewport = viewport;
 	_viewportChanged = true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setLineWidth(float lw)
+void State::setLineWidth(float lw)
 {
     _lineWidth = lw;
     _lineWidthChanged = true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setTarget(RenderTarget::Ptr target)
+void State::setTarget(RenderTarget::Ptr target)
 {
 	_target = target;
 	_targetChanged = true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setShader(Shader::Ptr shader)
+void State::setShader(Shader::Ptr shader)
 {
 	_shader = shader;
 	_shaderChanged = true;
 }
 
 //--------------------------------------------------------------
-void RenderParameters::setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms)
+void State::setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms)
 {
 	for(auto kv : uniforms) _uniforms[kv.first] = kv.second;
 	_uniformsChanged = true;

@@ -17,7 +17,7 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(&_color);
 	_shader->addUniform(u_color);
-	getGraphicState()->setShader(_shader);
+	getState()->setShader(_shader);
 }
 
 //--------------------------------------------------------------
@@ -32,7 +32,7 @@ GeoNode::GeoNode(const Geometry& geo, bool wireframe)
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(&_color);
 	_shader->addUniform(u_color);
-	getGraphicState()->setShader(_shader);
+	getState()->setShader(_shader);
 }
 
 //--------------------------------------------------------------
@@ -47,7 +47,7 @@ void GeoNode::setShader(Shader::Ptr shader)
 {
 	_shader = shader;
 	_shader->addUniform(u_color);
-	getGraphicState()->setShader(_shader);
+	getState()->setShader(_shader);
 }
 
 //--------------------------------------------------------------

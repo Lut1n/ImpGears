@@ -6,7 +6,6 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 SceneVisitor::SceneVisitor()
 {
-	_gStates = GraphicStatesManager::create();
 }
 
 //--------------------------------------------------------------
@@ -25,20 +24,16 @@ void SceneVisitor::apply( SceneNode* node )
 //--------------------------------------------------------------
 void SceneVisitor::applyDefault( SceneNode* node )
 {
-	if(_gStates->getParameters()) _gStates->getParameters()->apply();
+	State::Ptr topState = _states.back();
+	topState->apply();
 	
-	if(_gStates->getShader())
+	Shader::Ptr shader = topState->getShader();
+	if(shader)
 	{
-		_gStates->getShader()->setModel(_matrixStack.back());
-		if(imp::Camera::getActiveCamera())
-		{
-			_gStates->getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );
-		}
-		if(_gStates->getParameters())
-		{
-			Matrix4 proj = _gStates->getParameters()->getProjectionMatrix();
-			_gStates->getShader()->setProjection( proj );
-		}
+		shader->setModel(_matrices.back());
+		Camera* camera = Camera::getActiveCamera();
+		if(camera) shader->setView( camera->getViewMatrix() );
+		shader->setProjection( topState->getProjectionMatrix() );
 	}
 	node->render();
 }
@@ -46,7 +41,7 @@ void SceneVisitor::applyDefault( SceneNode* node )
 //--------------------------------------------------------------
 void SceneVisitor::applyCamera( Camera* node )
 {
-	Matrix4 m = _matrixStack.back();
+	Matrix4 m = _matrices.back();
 	Vec3 translation = Vec3(m(3,0),m(3,1),m(3,2));
 	node->setAbsolutePosition( translation );
 	node->lookAt();
@@ -55,17 +50,20 @@ void SceneVisitor::applyCamera( Camera* node )
 //--------------------------------------------------------------
 void SceneVisitor::push( SceneNode* node )
 {
-	_gStates->pushState(node->getGraphicState());
+	State::Ptr state = State::create();
+	if(_states.size() > 0) state->clone(_states.back(),State::CloneOpt_All);
+	state->clone(node->getState(),State::CloneOpt_IfChanged);
+	_states.push_back(state);
 	
-	Matrix4 model; if(_matrixStack.size() > 0) model = _matrixStack.back();
-	_matrixStack.push_back(model * node->getModelMatrix());
+	Matrix4 model; if(_matrices.size() > 0) model = _matrices.back();
+	_matrices.push_back(model * node->getModelMatrix());
 }
 
 //--------------------------------------------------------------
 void SceneVisitor::pop()
 {
-	_gStates->popState();
-	_matrixStack.pop_back();
+	_states.pop_back();
+	_matrices.pop_back();
 }
 
 IMPGEARS_END

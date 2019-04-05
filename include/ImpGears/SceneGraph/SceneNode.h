@@ -5,7 +5,7 @@
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 #include <SceneGraph/Visitor.h>
-#include <SceneGraph/GraphicState.h>
+#include <SceneGraph/State.h>
 
 #include <list>
 
@@ -19,7 +19,6 @@ public:
 	Meta_Class(SceneNode)
 
 	using NodeList = std::list<SceneNode::Ptr>;
-	using GraphicState = RenderParameters;
 
 	SceneNode();
 	virtual ~SceneNode();
@@ -43,11 +42,11 @@ public:
 	const Matrix4& getModelMatrix() const { return _modelMatrix; }
 	const Matrix4& getNormalMatrix() const { return _normalMatrix; }
 	
-	virtual GraphicState::Ptr getGraphicState() { return _state; }
+	virtual State::Ptr getState() { return _state; }
 
 protected:
 	
-	GraphicState::Ptr _state;
+	State::Ptr _state;
 	Vec3 _position;
 	Vec3 _rotation;
 	Vec3 _scale;

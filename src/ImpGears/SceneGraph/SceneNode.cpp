@@ -9,7 +9,7 @@ SceneNode::SceneNode()
     , _rotation(0.0)
 	, _scale(1.0)
 {
-	_state = GraphicState::create();
+	_state = State::create();
 }
 
 //--------------------------------------------------------------

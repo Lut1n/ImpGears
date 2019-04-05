@@ -115,7 +115,7 @@ void Mesh::setVertexMode(VertexMode vertexMode)
 
 void Mesh::updateVBO(bool clearLocalData)
 {
-    std::uint32_t vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
+    int vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
 
     if(getVBOID() == 0)
     {

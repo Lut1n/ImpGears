@@ -23,7 +23,9 @@ class IMP_API Geometry : public Object
 {
 	public:
 	
+	using TexCoord = Vec<2,float>;
 	using BufType = std::vector<Vec3>;
+	using TexCoordBuf = std::vector<TexCoord>;
 	
 	enum Primitive
 	{
@@ -33,6 +35,10 @@ class IMP_API Geometry : public Object
 	
 	Primitive _prim;
 	BufType _vertices;
+	TexCoordBuf _texCoords;
+	
+	bool _hasTexCoords;
+	
 	// std::vector<Vec3> _normals;
 	//std::vector<unsigned int> _indices;
 	
@@ -62,7 +68,7 @@ class IMP_API Geometry : public Object
 	
 	void optimize();
 	
-	void fillBuffer(std::vector<float>& buffer);
+	void fillBuffer(std::vector<float>& buffer) const;
 	
 	void noiseBump(unsigned int octaveCount, double persistence, double freq, float force = 1.0);
 	
@@ -88,6 +94,8 @@ class IMP_API Geometry : public Object
 	void reduceTriangles(float f);
 	
 	Geometry subdivise(int count);
+	
+	void setTexCoords(const TexCoordBuf& coords);
 	
 	static void intoCCW( Geometry& buf );
 

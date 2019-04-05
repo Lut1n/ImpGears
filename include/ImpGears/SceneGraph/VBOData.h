@@ -7,7 +7,8 @@ Define an interface for ustd::sing VBO. VBOData keeps memory size used after req
 #ifndef VBODATA_H
 #define VBODATA_H
 
-#include "VBOManager.h"
+#include <SceneGraph/VBOManager.h>
+#include <Geometry/Geometry.h>
 
 IMPGEARS_BEGIN
 
@@ -17,58 +18,60 @@ class IMP_API VBOData : public Object
 
 public:
 
-	enum Primitive
-	{
-		Primitive_Points = 0,
-		Primitive_Lines,
-		Primitive_Triangles,
-		Primitive_Quads,
-	};
+enum Primitive
+{
+	Primitive_Points = 0,
+	Primitive_Lines,
+	Primitive_Triangles,
+	Primitive_Quads,
+};
 
 private:
 
-    std::uint32_t vboID;
-    std::uint32_t vboSize;
-    VBOManager::UsageMode usage;
-	Primitive _primitive;
-	std::uint32_t _verticesCount;
+int _id;
+int _size;
+VBOManager::UsageMode _usage;
+Primitive _primitive;
+int _verticesCount;
 
 public:
 
 	Meta_Class(VBOData)
 
-    VBOData();
+	VBOData();
 
-    ~VBOData();
+	~VBOData();
 
 	void drawVBO();
 
-    void requestVBO(std::uint32_t _size, VBOManager::UsageMode _usage = VBOManager::UsageMode_Static);
+	void requestVBO(int _size, VBOManager::UsageMode _usage = VBOManager::UsageMode_Static);
 
-    void releaseVBO();
+	void releaseVBO();
 
-    void resizeVBO(std::uint32_t _size);
+	void resizeVBO(int _size);
 
-	void setVertices(const float* buffer, std::uint32_t size);
+	void setVertices(const float* buffer, int size);
 
-    void setData(const void* _buffer, std::uint32_t _size, std::uint32_t _vboOffset);
+	void setData(const void* _buffer, int _size, int _vboOffset);
 
-    void setData(const void* _buffer, std::uint32_t _size);
+	void setData(const void* _buffer, int _size);
+	
+	void loadGeometry(const Geometry& geometry);
 
 	void setPrimitive(Primitive prim) {_primitive = prim;}
 	Primitive getPrimitive() const {return _primitive;}
 
-    void enableVertexArray(std::uint64_t _offset);
-    void enableNormalArray(std::uint64_t _offset);
-    void enableTexCoordArray(std::uint64_t _offset);
-    void enableColorArray(std::uint64_t _offset);
+	void enableVertexArray(int _offset);
+	void enableNormalArray(int _offset);
+	void enableTexCoordArray(int _offset);
+	void enableColorArray(int _offset);
 
-    std::uint32_t getVBOID() const;
-    std::uint32_t getVBOSize() const;
+	int getVBOID() const;
+	int getVBOSize() const;
 
-    static std::uint32_t getBoundVbo();
-    static void bindVBO(const VBOData& _vboData);
-    static void unbindVBO();
+	static int getBoundVbo();
+	static void bindVBO(const VBOData& _vboData);
+	static void unbindVBO();
 };
 
 IMPGEARS_END

@@ -21,12 +21,16 @@ inline Vec3 mix(const Vec3& v1, const Vec3& v2, double f)
 
 Geometry::Geometry()
 	: _prim(Primitive_Lines)
+	, _hasTexCoords(false)
 	{}
 
 Geometry::Geometry(const Geometry& other)
 	: _prim(other._prim)
+	, _hasTexCoords(other._hasTexCoords)
 {
 	_vertices = other._vertices;
+	_texCoords = other._texCoords;
+	
 	// _normals = other._normals;
 	//_indices = other._indices;
 }
@@ -34,7 +38,10 @@ Geometry::Geometry(const Geometry& other)
 void Geometry::operator=(const Geometry& other)
 {
 	_vertices = other._vertices;
+	_hasTexCoords = other._hasTexCoords;
 	_prim = other._prim;
+	_hasTexCoords = other._hasTexCoords;
+	
 	// _normals = other._normals;
 	//_indices = other._indices;
 }
@@ -42,16 +49,8 @@ void Geometry::operator=(const Geometry& other)
 void Geometry::operator+=(const Geometry& other)
 {
 	add(other._vertices);
-	//for(unsigned int i=0; i<other._vertices.size();++i)
-	{
-		// _vertices.push_back(other._vertices[i]);
-		// _normals.push_back(other._normals[i]);
-	}
-	/*int indiceCount = _indices.size();
-	for(int i=0; i<other._indices.size();++i)
-	{
-		_indices.push_back( other._indices[i] + indiceCount) );
-	}*/
+	
+	// TODO : same for tex coords
 }
 
 Geometry Geometry::operator+(const Geometry& other)
@@ -118,7 +117,7 @@ void Geometry::optimize()
 {
 }
 
-void Geometry::fillBuffer(std::vector<float>& buffer)
+void Geometry::fillBuffer(std::vector<float>& buffer) const
 {
 	buffer.resize(_vertices.size() * 3);
 	for(unsigned int i=0; i<_vertices.size();++i)
@@ -377,6 +376,12 @@ void Geometry::reduceTriangles(float f)
 			at(i+2) = ((at(i+2) - mid) * f) + mid;
 		}
 	}
+}
+
+void Geometry::setTexCoords(const TexCoordBuf& coords)
+{
+	_texCoords = coords;
+	_hasTexCoords = true;
 }
 
 

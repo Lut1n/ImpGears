@@ -8,8 +8,8 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 VBOData::VBOData()
 {
-    vboID = 0;
-    vboSize = 0;
+	_id = 0;
+	_size = 0;
 	_verticesCount = 0;
 	_primitive = Primitive_Lines;
 }
@@ -17,22 +17,21 @@ VBOData::VBOData()
 //--------------------------------------------------------------
 VBOData::~VBOData()
 {
-    if(vboID != 0)
-        releaseVBO();
+	if(_id != 0) releaseVBO();
 }
 
 //--------------------------------------------------------------
 void VBOData::drawVBO()
 {
-    bindVBO(*this);
+	bindVBO(*this);
 
-    ///vertex
-    enableVertexArray(0);
-    GL_CHECKERROR("[impErr] VBOData::drawVBO - vertex pointer");
+	///vertex
+	enableVertexArray(0);
+	GL_CHECKERROR("[impErr] VBOData::drawVBO - vertex pointer");
 
-    ///texture coord
-	std::uint32_t texcoordOffset = _verticesCount * (3 * sizeof(float) );
-    enableTexCoordArray(texcoordOffset);
+	///texture coord
+	int texcoordOffset = _verticesCount * (3 * sizeof(float) );
+	enableTexCoordArray(texcoordOffset);
 
 	unsigned int glPrimitive = GL_LINES;
 	switch(_primitive)
@@ -54,122 +53,150 @@ void VBOData::drawVBO()
 		break;
 	};
 
-    glDrawArrays(glPrimitive, 0, _verticesCount);
+	glDrawArrays(glPrimitive, 0, _verticesCount);
 
-    unbindVBO();
+	unbindVBO();
 }
 
 //--------------------------------------------------------------
-void VBOData::requestVBO(std::uint32_t _size, VBOManager::UsageMode _usage)
+void VBOData::requestVBO(int size, VBOManager::UsageMode usage)
 {
-    vboID = VBOManager::getInstance()->request(_size, _usage);
-    vboSize = _size;
-    usage = _usage;
+	_id = VBOManager::getInstance()->request(size, usage);
+	_size = size;
+	_usage = usage;
 }
 
 //--------------------------------------------------------------
 void VBOData::releaseVBO()
 {
-    if(vboID != 0)
-    {
-        VBOManager::getInstance()->release(vboID);
-        vboID = 0;
-        vboSize = 0;
-    }
+	if(_id != 0)
+	{
+		VBOManager::getInstance()->release(_id);
+		_id = 0;
+		_size = 0;
+	}
 }
 
 //--------------------------------------------------------------
-void VBOData::resizeVBO(std::uint32_t _size)
+void VBOData::resizeVBO(int size)
 {
-    VBOManager::getInstance()->resize(vboID, _size, usage);
+	VBOManager::getInstance()->resize(_id, size, _usage);
 }
 
 //--------------------------------------------------------------
-void VBOData::setVertices(const float* buffer, std::uint32_t size)
+void VBOData::setVertices(const float* buffer, int size)
 {
-	std::uint32_t vertexSize = (sizeof(float) * 3.0);
+	int vertexSize = (sizeof(float) * 3.0);
 	_verticesCount = size / vertexSize;
 
 	setData((const void*)buffer, size, 0);
 }
 
 //--------------------------------------------------------------
-void VBOData::setData(const void* _buffer, std::uint32_t _size, std::uint32_t _vboOffset)
+void VBOData::setData(const void* buffer, int size, int vboOffset)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, (GLuint)vboID);
-    glBufferSubData(GL_ARRAY_BUFFER, _vboOffset, _size, _buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_id);
+	glBufferSubData(GL_ARRAY_BUFFER, vboOffset, size, buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 //--------------------------------------------------------------
-void VBOData::setData(const void* _buffer, std::uint32_t _size)
+void VBOData::setData(const void* buffer, int size)
 {
-    setData(_buffer, _size, 0);
+	setData(buffer, size, 0);
 }
 
 //--------------------------------------------------------------
-void VBOData::enableVertexArray(std::uint64_t _offset)
+void VBOData::loadGeometry(const Geometry& geometry)
 {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_offset);
+	// primitive selection
+	if(geometry.getPrimitive()==Geometry::Primitive_Triangles)
+		setPrimitive(VBOData::Primitive_Triangles);
+	else
+		setPrimitive(VBOData::Primitive_Lines);
+	
+	// uniformize
+	std::vector<float> vertex;
+	geometry.fillBuffer( vertex );
+	
+	std::vector<float> texcoords;
+	for(auto v2 : geometry._texCoords) { texcoords.push_back(v2[0]); texcoords.push_back(v2[1]); }
+	
+	// gpu load
+	int vertSize = vertex.size()*sizeof(float);
+	int texSize = texcoords.size()*sizeof(float);
+	requestVBO(vertSize+texSize);
+	setVertices(vertex.data(), vertSize);
+	if(texSize > 0) setData(texcoords.data(), texSize, vertSize);
 }
 
 //--------------------------------------------------------------
-void VBOData::enableNormalArray(std::uint64_t _offset)
+void VBOData::enableVertexArray(int offset)
 {
-    glEnableClientState( GL_NORMAL_ARRAY );
-    glNormalPointer(GL_FLOAT, 0, (GLvoid*)(_offset));
+	std::uint64_t oft = offset;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)oft);
 }
 
 //--------------------------------------------------------------
-void VBOData::enableTexCoordArray(std::uint64_t _offset)
+void VBOData::enableNormalArray(int offset)
 {
-    glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-    glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)(_offset));
+	std::uint64_t oft = offset;
+	glEnableClientState( GL_NORMAL_ARRAY );
+	glNormalPointer(GL_FLOAT, 0, (GLvoid*)oft);
 }
 
 //--------------------------------------------------------------
-void VBOData::enableColorArray(std::uint64_t _offset)
+void VBOData::enableTexCoordArray(int offset)
 {
-    glEnableClientState( GL_COLOR_ARRAY );
-    glColorPointer(4, GL_FLOAT, 0, (GLvoid*)(_offset));
+	std::uint64_t oft = offset;
+	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)oft);
 }
 
 //--------------------------------------------------------------
-std::uint32_t VBOData::getVBOID() const
+void VBOData::enableColorArray(int offset)
 {
-    return vboID;
+	std::uint64_t oft = offset;
+	glEnableClientState( GL_COLOR_ARRAY );
+	glColorPointer(4, GL_FLOAT, 0, (GLvoid*)oft);
 }
 
 //--------------------------------------------------------------
-std::uint32_t VBOData::getVBOSize() const
+int VBOData::getVBOID() const
 {
-    return vboSize;
+	return _id;
 }
 
 //--------------------------------------------------------------
-std::uint32_t VBOData::getBoundVbo()
+int VBOData::getVBOSize() const
 {
-    GLint id;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &id);
+	return _size;
+}
 
-    return static_cast<std::uint32_t>(id);
+//--------------------------------------------------------------
+int VBOData::getBoundVbo()
+{
+	GLint id;
+	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &id);
+
+	return (int)id;
 }
 
 //--------------------------------------------------------------
 void VBOData::bindVBO(const VBOData& _vboData)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _vboData.getVBOID());
+	glBindBuffer(GL_ARRAY_BUFFER, _vboData.getVBOID());
 }
 
 //--------------------------------------------------------------
 void VBOData::unbindVBO()
 {
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 IMPGEARS_END

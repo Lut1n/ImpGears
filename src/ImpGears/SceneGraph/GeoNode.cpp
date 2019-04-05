@@ -71,17 +71,7 @@ void GeoNode::render()
 				Geometry::intoCCW(_geo);
 			}
 		}
-		
-		if(_geo.getPrimitive()==Geometry::Primitive_Triangles)
-			_gBuffer.setPrimitive(VBOData::Primitive_Triangles);
-		else
-			_gBuffer.setPrimitive(VBOData::Primitive_Lines);
-		
-		std::vector<float> floatBuffer;
-		_geo.fillBuffer( floatBuffer );
-		std::uint32_t size = floatBuffer.size()*sizeof(float);
-		_gBuffer.requestVBO(size);
-		_gBuffer.setVertices(floatBuffer.data(), size);
+		_gBuffer.loadGeometry(_geo);
 		_loaded = true;
 	}
 	

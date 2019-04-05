@@ -1,4 +1,4 @@
-#include <SceneGraph/GraphicRenderer.h>
+#include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/GeoNode.h>
 
@@ -8,6 +8,29 @@ using namespace imp;
 
 #include "shader.h"
 
+Geometry generateRockHat(const Vec3& center, float radius, int sub)
+{
+    imp::Geometry geometry = imp::Geometry::cube();
+	geometry *= 0.5;
+	geometry = geometry.subdivise(sub);
+    geometry.sphericalNormalization(0.5);
+    geometry.scale(Vec3(radius * 0.7,radius * 0.7,radius * 1.5));
+	
+	
+    imp::Geometry geo2 = imp::Geometry::cube();
+	geo2 *= 0.5; // side size = one
+	geo2 *= Vec3(1.0,1.0,0.5); /* h = 0.25*/ geo2 += Vec3(0.0,0.0,0.25); // demi-cube
+	geo2 = geo2.subdivise(sub*4);
+    geo2.sphericalNormalization(0.7);
+    geo2.scale(Vec3(radius*2.0,radius*2.0,radius*2.0));
+	geo2 += Vec3(0.0,0.0,radius * 1.5);
+	
+	geometry += geo2;
+	Geometry::intoCCW( geometry );
+       
+    return geometry;
+}  
+
 int main(int argc, char* argv[])
 {
 	sf::Clock clock;
@@ -16,14 +39,15 @@ int main(int argc, char* argv[])
 	window.setFramerateLimit(60);
 	
 	
-	GraphicRenderer::Ptr graph = GraphicRenderer::create();
+	GraphRenderer::Ptr graph = GraphRenderer::create();
 	SceneNode::Ptr root = GeoNode::create(Geometry(),false);
-	graph->setSceneRoot(root);
+
+	// root->getGraphicState()->setPerspectiveProjection(60.0, 1.0, 0.001, 100.0);
 	
 	Camera::Ptr camera = Camera::create();
 	camera->setPosition(Vec3(0.0f, 0.0f, 0.0f));
 	camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
-	root->addSubNode(camera);
+	root->addNode(camera);
 	
 	Geometry lineVol = Geometry::cylinder(10,1.0,0.02);
 	Geometry arrowVol = Geometry::cone(10,0.1,0.05,0.0);
@@ -38,32 +62,41 @@ int main(int argc, char* argv[])
 	Geometry point = Geometry::sphere(4, 0.1);
 	point.setPrimitive(Geometry::Primitive_Triangles);
 
-	GeoNode::Ptr node1 = GeoNode::create(coords, false);
+	GeoNode::Ptr node1 = GeoNode::create(coords, true);
 	node1->setColor(Vec3(1.0,1.0,0.0));
 	node1->setPosition(Vec3(0.3,0.0,-0.2));
 
 	GeoNode::Ptr node2 = GeoNode::create(coords, false);
 	node2->setColor(Vec3(1.0,0.0,0.0));
 	node2->setPosition(Vec3(0.0,0.0,0.0));
-	root->addSubNode(node2);
+	root->addNode(node2);
 	
 	GeoNode::Ptr node3 = GeoNode::create(coords, false);
 	node3->setColor(Vec3(0.0,1.0,0.0));
 	node3->setPosition(Vec3(0.0,0.0,0.3));
-	node3->setRotation(3.14 * 0.1, 0.0, 3.14 * 0.25);
-	node2->addSubNode(node3);
+	node3->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
+	node2->addNode(node3);
 	
 	GeoNode::Ptr node4 = GeoNode::create(coords, false);
 	node4->setColor(Vec3(0.0,0.0,1.0));
 	node4->setPosition(Vec3(0.0,0.0,0.3));
-	node4->setRotation(3.14 * 0.1, 0.0, 3.14 * 0.25);
-	node3->addSubNode(node4);
+	node4->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
+	node3->addNode(node4);
 	
-	camera->addSubNode(node1);
+	camera->addNode(node1);
+	
+	imp::Shader::Ptr s = imp::Shader::create(vertexSimple.c_str(),fragSimple.c_str());
+	Geometry mush = generateRockHat(Vec3(0.0,0.0,0.0), 0.3, 1.0);
+	GeoNode::Ptr geomush = GeoNode::create(mush, false);
+	geomush->setColor(Vec3(1.0,1.0,1.0));
+	geomush->setPosition(Vec3(0.0,1.0,0.0));
+	geomush->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
+	geomush->setShader(s);
+	node2->addNode(geomush);
 
 	/*GeoNode::Ptr node3 = GeoNode::create(point, false);
 	node3->setColor(Vec3(1.0,0.2,0.2));
-	root->addSubNode(node3);*/
+	root->addNode(node3);*/
 	
     while (window.isOpen())
     {
@@ -82,7 +115,7 @@ int main(int argc, char* argv[])
 		node1->setPosition(Vec3(cos(t)*0.3,sin(t)*0.3,0.0));
 		
 		// rendering
-		graph->renderScene();
+		graph->renderScene( root );
 		
 		window.display();
     }

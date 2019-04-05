@@ -34,7 +34,7 @@ uniform vec3 u_color;
 
 float hash(vec3 xyz, float seed)
 {
-    return  fract( sin( seed + dot(xyz, vec3(12.19823371,10.27653,35.746541)) )* 5.2653872 );
+    return  fract( sin( seed + dot(xyz, vec3(12.19823371,10.27653,35.746541)) )* 45758.2653872 );
 }
 
 float noise(vec3 xyz, float freq)

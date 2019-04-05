@@ -6,7 +6,7 @@ IMPGEARS_BEGIN
 Camera* Camera::s_activeCamera = nullptr;
 
 //--------------------------------------------------------------
-Camera::Camera(bool active,Vec3 up)
+Camera::Camera(Vec3 up,bool active)
 {
 	_upDir = up;
 	if(active) activate();
@@ -20,15 +20,17 @@ Camera::~Camera()
 //--------------------------------------------------------------
 void Camera::lookAt()
 {
-	Matrix4 modelMat = getModelMatrix();
-	Vec3 finalPos( modelMat(3,0),modelMat(3,1),modelMat(3,2) );
-	Vec3 finalTarget = finalPos + _target - getPosition();
-	
-	_viewMatrix = Matrix4::view(finalPos, finalTarget, _upDir);
+	Vec3 absoluteTarget = _absolutePosition + _target - getPosition();
+	_viewMatrix = Matrix4::view(_absolutePosition, absoluteTarget, _upDir);
 }
 
 //--------------------------------------------------------------
 void Camera::render()
+{
+}
+
+//--------------------------------------------------------------
+void Camera::update()
 {
 }
 

@@ -24,15 +24,18 @@ GraphRenderer::GraphRenderer()
     // default parameters values
     RenderParameters::Ptr params = RenderParameters::create();
     params->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
-    params->setClearColor(imp::Vec3(0.0, 0.0, 0.0));
-    params->setClearDepth( 1.0 );
     params->setBlendMode(imp::RenderParameters::BlendMode_SrcAlphaBased);
-    params->setFog(RenderParameters::ParamState_Disable);
     params->setFaceCullingMode(RenderParameters::FaceCullingMode_None);
     params->setViewport(0.0,0.0,500.0,500.0);
     params->setLineWidth(1.0);
+    params->setDepthTest( true );
     
-	_initNode = SceneNode::create();
+	_initNode = ClearNode::create();
+	_initNode->setDepth(1);
+	_initNode->setColor(Vec3(0.0));
+	_initNode->enableDepth(true);
+	_initNode->enableColor(true);
+	
     _state = _initNode->getGraphicState();
     _state->setParameters(params);
 	_visitor = SceneVisitor::create();
@@ -43,11 +46,12 @@ GraphRenderer::~GraphRenderer()
 {
 }
 
-//--------------------------------------------------------------
+//---------------------------------------------------------x-----
 void GraphRenderer::renderScene(SceneNode::Ptr& scene)
 {
 	_visitor->push(_initNode.get());
 	Visitor<SceneNode*>::Ptr visitor = _visitor;
+	_visitor->apply(_initNode.get());
 	scene->accept(visitor);
 	_visitor->pop();
 }

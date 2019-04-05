@@ -107,8 +107,7 @@ void GraphicStatesManager::applyCurrentState()
 	
 	if(resultParameters != nullptr)
 	{
-		// TODO : move clear into Camera node
-		resultParameters->apply(_stack.size() <= 1);
+		resultParameters->apply();
 	}
 	
 	if(resultShader != nullptr)
@@ -138,7 +137,7 @@ void GraphicStatesManager::revert(GraphicState* lastState)
 	
 	if(lastState->_parameters != nullptr && resultParameters != nullptr)
 	{
-		resultParameters->apply(false);
+		resultParameters->apply();
 	}
 	
 	if(lastState->_shader != nullptr && resultShader != nullptr)

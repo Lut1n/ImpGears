@@ -25,12 +25,6 @@ class IMP_API RenderParameters : public Object
             BlendMode_None = 0,
             BlendMode_SrcAlphaBased
         };
-
-        enum ParamState
-        {
-            ParamState_Disable = 0,
-            ParamState_Enable
-        };
 		
 		Meta_Class(RenderParameters)
 
@@ -40,25 +34,21 @@ class IMP_API RenderParameters : public Object
 
         const RenderParameters& operator=(const RenderParameters& other);
 
-        void setClearColor(const Vec3& clearColor);
-        const Vec3& getClearColor() const{return m_clearColor;}
+        void setFaceCullingMode(FaceCullingMode faceCullingMode){_faceCullingMode = faceCullingMode;_faceCullingChanged=true;}
+        FaceCullingMode getFaceCullingMode() const{return _faceCullingMode;}
 
-        void setFaceCullingMode(FaceCullingMode faceCullingMode){m_faceCullingMode = faceCullingMode;_faceCullingChanged=true;}
-        FaceCullingMode getFaceCullingMode() const{return m_faceCullingMode;}
-
-        void setBlendMode(BlendMode blendMode){m_blendMode = blendMode;_blendModeChanged=true;}
-        BlendMode getBlendMode() const{return m_blendMode;}
+        void setBlendMode(BlendMode blendMode){_blendMode = blendMode; _blendModeChanged=true;}
+        BlendMode getBlendMode() const{return _blendMode;}
 		
-		void apply(bool clearBuffer) const;
+		void apply() const;
 
         void setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue);
         void setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue);
 
-        void setProjectionMatrix(const Matrix4& projection){m_projectionMatrix = projection;}
-        const Matrix4& getProjectionMatrix() const {return m_projectionMatrix;}
+        void setProjectionMatrix(const Matrix4& projection){_projection = projection;}
+        const Matrix4& getProjectionMatrix() const {return _projection;}
 		
-		void setFog(ParamState state);
-		void setClearDepth(float depth);
+		void setDepthTest(bool depthTest);
 		
 		void setViewport(float x, float y, float width, float height);
         
@@ -67,23 +57,18 @@ class IMP_API RenderParameters : public Object
     protected:
     private:
 
-        Vec3 m_clearColor;
-		float _clearDepth;
-        Matrix4 m_projectionMatrix;
-        FaceCullingMode m_faceCullingMode;
-        BlendMode m_blendMode;
-		ParamState _fogState;
-        float _lineWidth;
-		
+		Matrix4 _projection;
 		Vec4 _viewport;
+		FaceCullingMode _faceCullingMode;
+		BlendMode _blendMode;
+		float _lineWidth;
+		bool _depthTest;
 		
-		bool _clearColorChanged;
-		bool _clearDepthChanged;
+		bool _viewportChanged;
 		bool _faceCullingChanged;
 		bool _blendModeChanged;
-		bool _fogChanged;
-		bool _viewportChanged;
         bool _lineWidthChanged;
+		bool _depthTestChanged;
 };
 
 IMPGEARS_END

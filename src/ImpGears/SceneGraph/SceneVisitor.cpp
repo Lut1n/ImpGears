@@ -17,12 +17,17 @@ SceneVisitor::~SceneVisitor()
 //--------------------------------------------------------------
 void SceneVisitor::apply( SceneNode* node )
 {
-	Matrix4 model;
-	for(auto mat : _matrixStack) model *= mat;
-	
+	Camera* asCamera = dynamic_cast<Camera*>( node );
+	if( asCamera ) applyCamera(asCamera);
+	else applyDefault(node);
+}
+
+//--------------------------------------------------------------
+void SceneVisitor::applyDefault( SceneNode* node )
+{
 	if(_gStates->getShader())
 	{
-		_gStates->getShader()->setModel(model);
+		_gStates->getShader()->setModel(_matrixStack.back());
 		if(imp::Camera::getActiveCamera())
 		{
 			imp::Camera::getActiveCamera()->lookAt();
@@ -34,11 +39,23 @@ void SceneVisitor::apply( SceneNode* node )
 	
 	node->render();
 }
+
+//--------------------------------------------------------------
+void SceneVisitor::applyCamera( Camera* node )
+{
+	Matrix4 m = _matrixStack.back();
+	Vec3 translation = Vec3(m(3,0),m(3,1),m(3,2));
+	node->setAbsolutePosition( translation );
+	node->lookAt();
+}
+
 //--------------------------------------------------------------
 void SceneVisitor::push( SceneNode* node )
 {
 	_gStates->pushState(node->getGraphicState().get());
-	_matrixStack.push_back(node->getModelMatrix());
+	
+	Matrix4 model; if(_matrixStack.size() > 0) model = _matrixStack.back();
+	_matrixStack.push_back(model * node->getModelMatrix());
 }
 
 //--------------------------------------------------------------

@@ -3,6 +3,7 @@
 
 #include <SceneGraph/Visitor.h>
 #include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Camera.h>
 #include <SceneGraph/GraphicState.h>
 #include <Core/Matrix4.h>
 
@@ -20,6 +21,8 @@ public:
 	virtual ~SceneVisitor();
 
 	virtual void apply( SceneNode* node );
+	virtual void applyDefault( SceneNode* node );
+	virtual void applyCamera( Camera* node );
 	virtual void push( SceneNode* node );
 	virtual void pop();
 

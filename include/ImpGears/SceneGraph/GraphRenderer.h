@@ -3,7 +3,7 @@
 
 #include <Core/Object.h>
 
-#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/ClearNode.h>
 #include <SceneGraph/SceneVisitor.h>
 
 IMPGEARS_BEGIN
@@ -22,7 +22,7 @@ public:
 
 protected:
 	
-	SceneNode::Ptr _initNode;
+	ClearNode::Ptr _initNode;
 	GraphicState::Ptr _state;
 	SceneVisitor::Ptr _visitor;
 };

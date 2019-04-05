@@ -2,37 +2,13 @@
 #define IMP_GRAPHICSTATE_H
 
 #include <Core/Object.h>
-#include <SceneGraph/RenderTarget.h>
 #include <SceneGraph/RenderParameters.h>
-#include <SceneGraph/Shader.h>
 
 #include <vector>
-#include <memory>
+// #include <memory>
 
 
 IMPGEARS_BEGIN
-
-//--------------------------------------------------------------
-struct IMP_API GraphicState : public Object
-{
-	RenderTarget::Ptr _target;
-	RenderParameters::Ptr _parameters;
-	Shader::Ptr _shader;
-	
-	Meta_Class(GraphicState)
-	
-	GraphicState();
-	
-	void setTarget(const RenderTarget::Ptr& target);
-	void setParameters(const RenderParameters::Ptr& params);
-	void setShader(const Shader::Ptr& shader);
-	
-	
-	// list of uniforms
-	
-	// list of parameters
-};
-
 
 //--------------------------------------------------------------
 class IMP_API GraphicStatesManager : public Object
@@ -45,25 +21,23 @@ class IMP_API GraphicStatesManager : public Object
 	
 	virtual ~GraphicStatesManager();
 
-	imp::RenderTarget* getTarget();
+	RenderTarget::Ptr getTarget();
 
-	imp::RenderParameters* getParameters();
+	RenderParameters::Ptr getParameters();
 
-	imp::Shader* getShader();
+	Shader::Ptr getShader();
 
-	void pushState( GraphicState* st);
+	void pushState( RenderParameters::Ptr st);
 
 	void popState();
 	
 	void applyCurrentState();
 	
-	void revert(GraphicState* lastState);
-	
 	int size() const { return _stack.size(); }
 	
 	protected:
 
-	std::vector< GraphicState* > _stack;
+	std::vector< RenderParameters::Ptr > _stack;
 };
 
 IMPGEARS_END

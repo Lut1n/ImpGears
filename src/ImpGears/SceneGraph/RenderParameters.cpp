@@ -11,11 +11,17 @@ RenderParameters::RenderParameters()
 	, _blendMode(BlendMode_SrcAlphaBased)
 	, _lineWidth(1.0)
 	, _depthTest(false)
+	, _target(nullptr)
+	, _shader(nullptr)
+	, _projectionChanged(false)
 	, _viewportChanged(false)
 	, _faceCullingChanged(false)
 	, _blendModeChanged(false)
 	, _lineWidthChanged(false)
 	, _depthTestChanged(false)
+	, _targetChanged(false)
+	, _shaderChanged(false)
+	, _uniformsChanged(false)
 {
 }
 
@@ -27,18 +33,53 @@ RenderParameters::RenderParameters(const RenderParameters& other)
 	, _blendMode(other._blendMode)
 	, _lineWidth(other._lineWidth)
 	, _depthTest(other._depthTest)
+	, _target(other._target)
+	, _shader(other._shader)
+	, _uniforms(other._uniforms)
+	, _projectionChanged(other._projectionChanged)
 	, _viewportChanged(other._viewportChanged)
 	, _faceCullingChanged(other._faceCullingChanged)
 	, _blendModeChanged(other._blendModeChanged)
 	, _lineWidthChanged(other._lineWidthChanged)
 	, _depthTestChanged(other._depthTestChanged)
-
+	, _targetChanged(other._targetChanged)
+	, _shaderChanged(other._shaderChanged)
+	, _uniformsChanged(other._uniformsChanged)
 {
 }
 
 //--------------------------------------------------------------
 RenderParameters::~RenderParameters()
 {
+}
+
+//--------------------------------------------------------------
+void RenderParameters::clone(const RenderParameters::Ptr& other, CloneOpt opt)
+{
+	if(opt == CloneOpt_All)
+	{
+		setProjectionMatrix(other->_projection);
+		setViewport(other->_viewport);
+		setFaceCullingMode(other->_faceCullingMode);
+		setBlendMode(other->_blendMode);
+		setLineWidth(other->_lineWidth);
+		setDepthTest(other->_depthTest);
+		setTarget(other->_target);
+		setShader(other->_shader);
+		setUniforms(other->_uniforms);
+	}
+	else if(opt == CloneOpt_IfChanged)
+	{
+		if(other->_projectionChanged) setProjectionMatrix(other->_projection);
+		if(other->_viewportChanged) setViewport(other->_viewport);
+		if(other->_faceCullingChanged) setFaceCullingMode(other->_faceCullingMode);
+		if(other->_blendModeChanged) setBlendMode(other->_blendMode);
+		if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
+		if(other->_depthTestChanged) setDepthTest(other->_depthTest);
+		if(other->_targetChanged) setTarget(other->_target);
+		if(other->_shaderChanged) setShader(other->_shader);
+		if(other->_uniformsChanged) setUniforms(other->_uniforms);
+	}
 }
 
 //--------------------------------------------------------------
@@ -50,11 +91,16 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
 	_blendMode = other._blendMode;
 	_lineWidth = other._lineWidth;
 	_depthTest = other._depthTest;
+	_target = other._target;
+	_shader = other._shader;
+	_projectionChanged = other._projectionChanged;
 	_viewportChanged = other._viewportChanged;
 	_faceCullingChanged = other._faceCullingChanged;
 	_blendModeChanged = other._blendModeChanged;
 	_lineWidthChanged = other._lineWidthChanged;
 	_depthTestChanged = other._depthTestChanged;
+	_targetChanged = other._targetChanged;
+	_shaderChanged = other._shaderChanged;
 
 	return *this;
 }
@@ -62,7 +108,7 @@ const RenderParameters& RenderParameters::operator=(const RenderParameters& othe
 //--------------------------------------------------------------
 void RenderParameters::apply() const
 {
-	
+
 	if(_faceCullingChanged)
 	{
 		if(_faceCullingMode == FaceCullingMode_None)
@@ -117,18 +163,31 @@ void RenderParameters::apply() const
 	{
 			glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
 	}
+	
+	if(_targetChanged && _target != nullptr)
+	{
+		_target->bind();
+	}
+	
+	if(_shaderChanged && _shader != nullptr)
+	{
+		_shader->enable();
+		_shader->updateAllUniforms();
+	}
 }
 
 //--------------------------------------------------------------
 void RenderParameters::setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue)
 {
 	_projection = Matrix4::perspectiveProj(fovx, ratio, nearValue, farValue);
+	_projectionChanged=true;
 }
 
 //--------------------------------------------------------------
 void RenderParameters::setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue)
 {
 	_projection = Matrix4::orthographicProj(left, right, bottom, top, nearValue, farValue);
+	_projectionChanged=true;
 }
 
 //--------------------------------------------------------------
@@ -145,11 +204,39 @@ void RenderParameters::setViewport(float x, float y, float width, float height)
 	_viewportChanged = true;
 }
 
+//--------------------------------------------------------------
+void RenderParameters::setViewport(const Vec4& viewport)
+{
+	_viewport = viewport;
+	_viewportChanged = true;
+}
 
+//--------------------------------------------------------------
 void RenderParameters::setLineWidth(float lw)
 {
     _lineWidth = lw;
     _lineWidthChanged = true;
+}
+
+//--------------------------------------------------------------
+void RenderParameters::setTarget(RenderTarget::Ptr target)
+{
+	_target = target;
+	_targetChanged = true;
+}
+
+//--------------------------------------------------------------
+void RenderParameters::setShader(Shader::Ptr shader)
+{
+	_shader = shader;
+	_shaderChanged = true;
+}
+
+//--------------------------------------------------------------
+void RenderParameters::setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms)
+{
+	for(auto kv : uniforms) _uniforms[kv.first] = kv.second;
+	_uniformsChanged = true;
 }
 
 IMPGEARS_END

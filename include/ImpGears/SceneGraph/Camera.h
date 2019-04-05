@@ -15,8 +15,6 @@ public:
 	Camera(Vec3 up=Vec3(0.0,0.0,1.0),bool active = true);
 	virtual ~Camera();
 
-	virtual void render();
-	virtual void update();
 	virtual void lookAt();
 
 	void activate() {s_activeCamera = this;}

@@ -24,14 +24,4 @@ void Camera::lookAt()
 	_viewMatrix = Matrix4::view(_absolutePosition, absoluteTarget, _upDir);
 }
 
-//--------------------------------------------------------------
-void Camera::render()
-{
-}
-
-//--------------------------------------------------------------
-void Camera::update()
-{
-}
-
 IMPGEARS_END

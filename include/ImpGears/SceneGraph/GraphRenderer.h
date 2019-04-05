@@ -12,8 +12,10 @@ IMPGEARS_BEGIN
 class IMP_API GraphRenderer : public Object
 {
 public:
-
+	
 	Meta_Class(GraphRenderer)
+	
+	using GraphicState = RenderParameters;
 	
 	GraphRenderer();
 	virtual ~GraphRenderer();

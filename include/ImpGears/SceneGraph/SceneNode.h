@@ -19,6 +19,7 @@ public:
 	Meta_Class(SceneNode)
 
 	using NodeList = std::list<SceneNode::Ptr>;
+	using GraphicState = RenderParameters;
 
 	SceneNode();
 	virtual ~SceneNode();

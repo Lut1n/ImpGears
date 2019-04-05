@@ -25,18 +25,21 @@ void SceneVisitor::apply( SceneNode* node )
 //--------------------------------------------------------------
 void SceneVisitor::applyDefault( SceneNode* node )
 {
+	if(_gStates->getParameters()) _gStates->getParameters()->apply();
+	
 	if(_gStates->getShader())
 	{
 		_gStates->getShader()->setModel(_matrixStack.back());
 		if(imp::Camera::getActiveCamera())
 		{
-			imp::Camera::getActiveCamera()->lookAt();
 			_gStates->getShader()->setView( imp::Camera::getActiveCamera()->getViewMatrix() );
 		}
 		if(_gStates->getParameters())
-			_gStates->getShader()->setProjection( _gStates->getParameters()->getProjectionMatrix() );
+		{
+			Matrix4 proj = _gStates->getParameters()->getProjectionMatrix();
+			_gStates->getShader()->setProjection( proj );
+		}
 	}
-	
 	node->render();
 }
 
@@ -52,7 +55,7 @@ void SceneVisitor::applyCamera( Camera* node )
 //--------------------------------------------------------------
 void SceneVisitor::push( SceneNode* node )
 {
-	_gStates->pushState(node->getGraphicState().get());
+	_gStates->pushState(node->getGraphicState());
 	
 	Matrix4 model; if(_matrixStack.size() > 0) model = _matrixStack.back();
 	_matrixStack.push_back(model * node->getModelMatrix());

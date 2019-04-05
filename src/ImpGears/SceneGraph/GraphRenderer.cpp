@@ -20,15 +20,6 @@ GraphRenderer::GraphRenderer()
 	glGetIntegerv(GL_MINOR_VERSION, &minor);
 	std::cout << "OGL version " << major << "." << minor << std::endl;
 	std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
-
-    // default parameters values
-    RenderParameters::Ptr params = RenderParameters::create();
-    params->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
-    params->setBlendMode(imp::RenderParameters::BlendMode_SrcAlphaBased);
-    params->setFaceCullingMode(RenderParameters::FaceCullingMode_None);
-    params->setViewport(0.0,0.0,500.0,500.0);
-    params->setLineWidth(1.0);
-    params->setDepthTest( true );
     
 	_initNode = ClearNode::create();
 	_initNode->setDepth(1);
@@ -36,8 +27,15 @@ GraphRenderer::GraphRenderer()
 	_initNode->enableDepth(true);
 	_initNode->enableColor(true);
 	
+    // default parameters values
     _state = _initNode->getGraphicState();
-    _state->setParameters(params);
+    _state->setPerspectiveProjection(60.0, 1.0, 0.1, 128.0);
+    _state->setBlendMode(imp::RenderParameters::BlendMode_SrcAlphaBased);
+    _state->setFaceCullingMode(RenderParameters::FaceCullingMode_None);
+    _state->setViewport(0.0,0.0,500.0,500.0);
+    _state->setLineWidth(1.0);
+    _state->setDepthTest( true );
+	
 	_visitor = SceneVisitor::create();
 }
 
@@ -49,8 +47,9 @@ GraphRenderer::~GraphRenderer()
 //---------------------------------------------------------x-----
 void GraphRenderer::renderScene(SceneNode::Ptr& scene)
 {
-	_visitor->push(_initNode.get());
 	Visitor<SceneNode*>::Ptr visitor = _visitor;
+	
+	_visitor->push(_initNode.get());
 	_visitor->apply(_initNode.get());
 	scene->accept(visitor);
 	_visitor->pop();

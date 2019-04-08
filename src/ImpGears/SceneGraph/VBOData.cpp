@@ -130,6 +130,37 @@ void VBOData::loadGeometry(const Geometry& geometry)
 	if(texSize > 0) setData(texcoords.data(), texSize, vertSize);
 }
 
+/*
+void Mesh::updateVBO(bool clearLocalData)
+{
+    int vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
+
+    if(getVBOID() == 0)
+    {
+        requestVBO( vboSize );
+    }
+    else if(getVBOSize() != vboSize)
+    {
+        resizeVBO(vboSize);
+    }
+
+    m_vertexOffset = 0;
+    m_texCoordOffset = m_vertexBufferSize*sizeof(float);
+    m_normalOffset = m_texCoordOffset + m_texCoordBufferSize*sizeof(float);
+
+    setData(m_vertexBuffer, m_vertexBufferSize*sizeof(float), m_vertexOffset);
+    setData(m_texCoordBuffer, m_texCoordBufferSize*sizeof(float), m_texCoordOffset);
+    setData(m_normalBuffer, m_normalBufferSize*sizeof(float), m_normalOffset);
+
+    if(clearLocalData)
+    {
+        clearVertexBuffer();
+        clearTexCoordBuffer();
+        clearNormalBuffer();
+    }
+}
+*/
+
 //--------------------------------------------------------------
 void VBOData::enableVertexArray(int offset)
 {

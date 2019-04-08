@@ -33,7 +33,17 @@ void SceneNode::remNode(const SceneNode::Ptr& node)
 void SceneNode::accept( Visitor<SceneNode*>::Ptr& visitor )
 {
     update();
+	computeMatrices();
 	
+	visitor->push(this);
+	visitor->apply(this);
+    for(auto node:_children) node->accept(visitor);
+	visitor->pop();
+}
+
+//--------------------------------------------------------------
+void SceneNode::computeMatrices()
+{
 	_modelMatrix =
 		Matrix4::scale(_scale.x(), _scale.y(), _scale.z())
 		* Matrix4::rotationX(_rotation.x())
@@ -46,11 +56,6 @@ void SceneNode::accept( Visitor<SceneNode*>::Ptr& visitor )
 		* Matrix4::rotationY(_rotation.y())
 		* Matrix4::rotationZ(_rotation.z())
 		* Matrix4::scale(_scale.x(), _scale.y(), _scale.z()).inverse();
-	
-	visitor->push(this);
-	visitor->apply(this);
-    for(auto node:_children) node->accept(visitor);
-	visitor->pop();
 }
 
 IMPGEARS_END

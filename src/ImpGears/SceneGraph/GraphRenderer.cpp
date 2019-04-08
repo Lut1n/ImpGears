@@ -23,7 +23,7 @@ GraphRenderer::GraphRenderer()
     
 	_initNode = ClearNode::create();
 	_initNode->setDepth(1);
-	_initNode->setColor(Vec3(0.0));
+	_initNode->setColor( Vec4(0.0) );
 	_initNode->enableDepth(true);
 	_initNode->enableColor(true);
 	
@@ -53,6 +53,18 @@ void GraphRenderer::renderScene(SceneNode::Ptr& scene)
 	_visitor->apply(_initNode.get());
 	scene->accept(visitor);
 	_visitor->pop();
+}
+
+//---------------------------------------------------------------
+void GraphRenderer::setClearColor(const Vec4& color)
+{
+	_initNode->setColor(color);
+}
+
+//---------------------------------------------------------------
+void GraphRenderer::setClearDepth(float depth)
+{
+	_initNode->setDepth(depth);
 }
 
 IMPGEARS_END

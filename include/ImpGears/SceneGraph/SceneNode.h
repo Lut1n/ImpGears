@@ -38,6 +38,8 @@ public:
 	void remNode(const SceneNode::Ptr& sceneNode);
 	
 	void accept( Visitor<SceneNode*>::Ptr& visitor );
+	
+	void computeMatrices();
 
 	const Matrix4& getModelMatrix() const { return _modelMatrix; }
 	const Matrix4& getNormalMatrix() const { return _normalMatrix; }

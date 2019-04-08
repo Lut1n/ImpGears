@@ -87,8 +87,15 @@ int Image::channels() const
 }
 
 //--------------------------------------------------------------
-const Grid<3,Image::b8>::Ptr Image::asGrid() const{
+const Grid<3,Image::b8>::Ptr Image::asGrid() const
+{
     return _grid;
+}
+
+//--------------------------------------------------------------
+const Image::b8* Image::data() const
+{
+	return _buffer;
 }
 
 IMPGEARS_END

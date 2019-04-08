@@ -21,6 +21,9 @@ public:
 	void renderScene(SceneNode::Ptr& scene);
 	
 	State::Ptr getInitState() { return _initState; }
+	
+	void setClearColor(const Vec4& color);
+	void setClearDepth(float depth);
 
 protected:
 	

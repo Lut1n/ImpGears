@@ -29,6 +29,7 @@ public:
     int channels() const;
     
     const Grid<3,b8>::Ptr asGrid() const;
+	const b8* data() const;
     
 private:
     

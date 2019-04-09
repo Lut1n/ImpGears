@@ -1,6 +1,8 @@
 #include <SceneGraph/QuadNode.h>
 #include <Geometry/Geometry.h>
 
+#include <SceneGraph/GraphRenderer.h>
+
 IMPGEARS_BEGIN
 
 QuadNode::QuadNode()
@@ -17,18 +19,20 @@ QuadNode::QuadNode()
 	for(auto v : geo._vertices) {texCoords.push_back(v);}
 	geo.setTexCoords(texCoords);
 
-	_gData.loadGeometry(geo);
+	_gData = GraphRenderer::s_interface->load(&geo);
+	// _gData.loadGeometry(geo);
 }
 
 QuadNode::~QuadNode()
 {
-	_gData.releaseVBO();
+	// _gData.releaseVBO();
 }
 
 
 void QuadNode::render()
 {
-	_gData.drawVBO();
+	GraphRenderer::s_interface->draw(_gData);
+	// _gData.drawVBO();
 }
 
 IMPGEARS_END

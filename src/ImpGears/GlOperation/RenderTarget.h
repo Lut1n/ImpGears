@@ -2,7 +2,8 @@
 #define IMP_RENDERTARGET_H
 
 #include <Core/Object.h>
-#include <SceneGraph/Texture.h>
+
+#include "Texture.h"
 
 IMPGEARS_BEGIN
 

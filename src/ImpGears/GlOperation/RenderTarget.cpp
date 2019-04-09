@@ -1,6 +1,8 @@
-#include <SceneGraph/RenderTarget.h>
-#include <SceneGraph/OpenGL.h>
+
 #include <SceneGraph/Camera.h>
+
+#include "RenderTarget.h"
+#include "GlError.h"
 
 #include <cstdio>
 #include <iostream>

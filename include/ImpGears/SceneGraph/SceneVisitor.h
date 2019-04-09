@@ -33,6 +33,9 @@ protected:
 
 	MatrixStack _matrices;
 	StateStack _states;
+	Uniform::Ptr u_proj;
+	Uniform::Ptr u_view;
+	Uniform::Ptr u_model;
 };
 
 IMPGEARS_END

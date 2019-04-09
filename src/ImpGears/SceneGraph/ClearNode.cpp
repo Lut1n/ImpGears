@@ -1,5 +1,5 @@
 #include <SceneGraph/ClearNode.h>
-#include <SceneGraph/OpenGL.h>
+#include <SceneGraph/GraphRenderer.h>
 
 IMPGEARS_BEGIN
 
@@ -18,21 +18,7 @@ ClearNode::~ClearNode()
 //--------------------------------------------------------------
 void ClearNode::render()
 {
-	GLbitfield bitfield = 0;
-	
-	if(_clearColor)
-	{
-		glClearColor(_color.x(), _color.y(), _color.z(), _color.w());
-		bitfield = bitfield | GL_COLOR_BUFFER_BIT;
-	}
-	
-	if(_clearDepth)
-	{
-		glClearDepth(_depth);
-		bitfield = bitfield | GL_DEPTH_BUFFER_BIT;
-	}
-	
-	glClear(bitfield);
+	GraphRenderer::s_interface->apply(this);
 }
 
 //--------------------------------------------------------------

@@ -5,6 +5,7 @@
 
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/SceneVisitor.h>
+#include <SceneGraph/RefactoInterface.h>
 
 IMPGEARS_BEGIN
 
@@ -24,6 +25,8 @@ public:
 	
 	void setClearColor(const Vec4& color);
 	void setClearDepth(float depth);
+	
+	static RefactoInterface* s_interface;
 
 protected:
 	

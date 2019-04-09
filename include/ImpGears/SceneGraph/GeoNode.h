@@ -5,8 +5,9 @@
 #include <Geometry/Polyhedron.h>
 #include <Geometry/Geometry.h>
 #include <SceneGraph/SceneNode.h>
-#include <SceneGraph/Shader.h>
-#include <SceneGraph/VBOData.h>
+#include <SceneGraph/Uniform.h>
+
+#include <SceneGraph/RefactoInterface.h>
 
 IMPGEARS_BEGIN
 
@@ -17,11 +18,11 @@ class IMP_API GeoNode : public SceneNode
 	Meta_Class(GeoNode)
 	
 	Geometry _geo;
-	VBOData _gBuffer;
+	RefactoInterface::Data* _gBuffer;
 	bool _wireframe;
 	bool _loaded;
 	Vec3 _color;
-	Shader::Ptr _shader;
+	ShaderDsc::Ptr _shader;
 	Uniform::Ptr u_color;
 	
 	GeoNode(const Polyhedron& buf, bool wireframe = false);
@@ -30,7 +31,7 @@ class IMP_API GeoNode : public SceneNode
 	
 	void setColor(const Vec3& color);
 	
-	void setShader(Shader::Ptr shader);
+	void setShader(ShaderDsc::Ptr shader);
 	
 	virtual ~GeoNode();
 	virtual void render();

@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+
 #define GL_CHECKERROR(msg) GLcheckError(msg, __FILE__, __LINE__);
 
 #define ENUM_TO_STR(enumVar, testVal, str) if(enumVar == testVal) str = #testVal ;

@@ -5,8 +5,8 @@
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 #include <Core/Vec4.h>
-#include <SceneGraph/Shader.h>
-#include <SceneGraph/RenderTarget.h>
+#include <SceneGraph/Uniform.h>
+// #include <SceneGraph/RenderTarget.h>
 
 #include <map>
 
@@ -26,8 +26,8 @@ public:
 	enum FaceCullingMode
 	{
 		FaceCullingMode_None = 0,
-		FaceCullingMode_Front,
-		FaceCullingMode_Back
+		FaceCullingMode_Back,
+		FaceCullingMode_Front
 	};
 
 	enum BlendMode
@@ -67,12 +67,14 @@ public:
 	
 	void setLineWidth(float lw);
 	
-	void setTarget(RenderTarget::Ptr target);
-	void setShader(Shader::Ptr shader);
+	// void setTarget(RenderTarget::Ptr target);
+	void setShader(ShaderDsc::Ptr shader);
 	void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
+	void clearUniforms();
+	void setUniform(const Uniform::Ptr& uniform);
 	
-	RenderTarget::Ptr getTarget() { return _target; }
-	Shader::Ptr getShader() { return _shader; }
+	// RenderTarget::Ptr getTarget() { return _target; }
+	ShaderDsc::Ptr getShader() { return _shader; }
 
 protected:
 private:
@@ -84,8 +86,8 @@ private:
 	float _lineWidth;
 	bool _depthTest;
 	
-	RenderTarget::Ptr _target;
-	Shader::Ptr _shader;
+	// RenderTarget::Ptr _target;
+	ShaderDsc::Ptr _shader;
 	std::map<std::string,Uniform::Ptr> _uniforms;
 	
 	bool _projectionChanged;

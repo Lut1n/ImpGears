@@ -6,6 +6,9 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 SceneVisitor::SceneVisitor()
 {
+	u_proj = Uniform::create("u_projection",Uniform::Type_Mat4v);
+	u_view = Uniform::create("u_view",Uniform::Type_Mat4v);
+	u_model = Uniform::create("u_model",Uniform::Type_Mat4v);
 }
 
 //--------------------------------------------------------------
@@ -25,16 +28,18 @@ void SceneVisitor::apply( SceneNode* node )
 void SceneVisitor::applyDefault( SceneNode* node )
 {
 	State::Ptr topState = _states.back();
+	
+	u_model->set( &_matrices.back() );
+	u_proj->set( &topState->getProjectionMatrix() );
+	Camera* camera = Camera::getActiveCamera();
+	if(camera)
+		u_view->set( &camera->getViewMatrix() );
+	
+	topState->setUniform(u_proj);
+	topState->setUniform(u_model);
+	topState->setUniform(u_view);
 	topState->apply();
 	
-	Shader::Ptr shader = topState->getShader();
-	if(shader)
-	{
-		shader->setModel(_matrices.back());
-		Camera* camera = Camera::getActiveCamera();
-		if(camera) shader->setView( camera->getViewMatrix() );
-		shader->setProjection( topState->getProjectionMatrix() );
-	}
 	node->render();
 }
 

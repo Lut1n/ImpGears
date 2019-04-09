@@ -1,5 +1,6 @@
 #include <SceneGraph/GeoNode.h>
-#include <SceneGraph/BasicShader.h>
+// #include <SceneGraph/BasicShader.h>
+#include <SceneGraph/GraphRenderer.h>
 
 
 IMPGEARS_BEGIN
@@ -12,11 +13,11 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 	buf.getTriangles(_geo._vertices);
 	_wireframe = wireframe;
 	
-	_shader = BasicShader::create();
+	_shader = ShaderDsc::create();
 	u_color = Uniform::create("u_color", Uniform::Type_3f);
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(&_color);
-	_shader->addUniform(u_color);
+	getState()->setUniform(u_color);
 	getState()->setShader(_shader);
 }
 
@@ -27,11 +28,11 @@ GeoNode::GeoNode(const Geometry& geo, bool wireframe)
 	_geo = geo;
 	_wireframe = wireframe;
 	
-	_shader = BasicShader::create();
+	_shader = ShaderDsc::create();
 	u_color = Uniform::create("u_color", Uniform::Type_3f);
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(&_color);
-	_shader->addUniform(u_color);
+	getState()->setUniform(u_color);
 	getState()->setShader(_shader);
 }
 
@@ -40,13 +41,14 @@ void GeoNode::setColor(const Vec3& color)
 {
 	_color = color;
 	u_color->set(&_color);
+	getState()->setUniform(u_color);
 }
 
 //--------------------------------------------------------------
-void GeoNode::setShader(Shader::Ptr shader)
+void GeoNode::setShader(ShaderDsc::Ptr shader)
 {
 	_shader = shader;
-	_shader->addUniform(u_color);
+	// _shader->addUniform(u_color);
 	getState()->setShader(_shader);
 }
 
@@ -71,11 +73,11 @@ void GeoNode::render()
 				Geometry::intoCCW(_geo);
 			}
 		}
-		_gBuffer.loadGeometry(_geo);
+		_gBuffer = GraphRenderer::s_interface->load(&_geo);
 		_loaded = true;
 	}
 	
-	_gBuffer.drawVBO();
+	GraphRenderer::s_interface->draw(_gBuffer);
 }
 
 IMPGEARS_END

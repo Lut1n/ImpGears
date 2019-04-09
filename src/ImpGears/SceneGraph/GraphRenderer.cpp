@@ -1,25 +1,18 @@
 #include <SceneGraph/GraphRenderer.h>
-#include <SceneGraph/OpenGL.h>
 
 #include <cstdlib>
 
+#include "../GlOperation/GLInterface.h"
+
 IMPGEARS_BEGIN
+
+RefactoInterface* GraphRenderer::s_interface = NULL;
 
 //--------------------------------------------------------------
 GraphRenderer::GraphRenderer()
 {
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-        std::cout << "Error: " << glewGetErrorString(err) << std::endl;
-        exit(0);
-    }
-
-    int major, minor;
-	glGetIntegerv(GL_MAJOR_VERSION, &major);
-	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	std::cout << "OGL version " << major << "." << minor << std::endl;
-	std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
+	s_interface = new GLInterface();
+	s_interface->init();
     
 	_initNode = ClearNode::create();
 	_initNode->setDepth(1);

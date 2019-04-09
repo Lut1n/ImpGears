@@ -1,5 +1,5 @@
 #include <SceneGraph/State.h>
-#include <SceneGraph/OpenGL.h>
+#include <SceneGraph/GraphRenderer.h>
 
 IMPGEARS_BEGIN
 
@@ -11,7 +11,7 @@ State::State()
 	, _blendMode(BlendMode_SrcAlphaBased)
 	, _lineWidth(1.0)
 	, _depthTest(false)
-	, _target(nullptr)
+	// , _target(nullptr)
 	, _shader(nullptr)
 	, _projectionChanged(false)
 	, _viewportChanged(false)
@@ -33,7 +33,7 @@ State::State(const State& other)
 	, _blendMode(other._blendMode)
 	, _lineWidth(other._lineWidth)
 	, _depthTest(other._depthTest)
-	, _target(other._target)
+	// , _target(other._target)
 	, _shader(other._shader)
 	, _uniforms(other._uniforms)
 	, _projectionChanged(other._projectionChanged)
@@ -64,7 +64,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		setBlendMode(other->_blendMode);
 		setLineWidth(other->_lineWidth);
 		setDepthTest(other->_depthTest);
-		setTarget(other->_target);
+		// setTarget(other->_target);
 		setShader(other->_shader);
 		setUniforms(other->_uniforms);
 	}
@@ -76,7 +76,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		if(other->_blendModeChanged) setBlendMode(other->_blendMode);
 		if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
 		if(other->_depthTestChanged) setDepthTest(other->_depthTest);
-		if(other->_targetChanged) setTarget(other->_target);
+		// if(other->_targetChanged) setTarget(other->_target);
 		if(other->_shaderChanged) setShader(other->_shader);
 		if(other->_uniformsChanged) setUniforms(other->_uniforms);
 	}
@@ -91,7 +91,7 @@ const State& State::operator=(const State& other)
 	_blendMode = other._blendMode;
 	_lineWidth = other._lineWidth;
 	_depthTest = other._depthTest;
-	_target = other._target;
+	// _target = other._target;
 	_shader = other._shader;
 	_projectionChanged = other._projectionChanged;
 	_viewportChanged = other._viewportChanged;
@@ -108,71 +108,34 @@ const State& State::operator=(const State& other)
 //--------------------------------------------------------------
 void State::apply() const
 {
-
 	if(_faceCullingChanged)
-	{
-		if(_faceCullingMode == FaceCullingMode_None)
-		{
-			glDisable(GL_CULL_FACE);
-		}
-		else
-		{
-			glEnable(GL_CULL_FACE);
-			glFrontFace(GL_CCW); // GL_CW or GL_CCW
-
-			if(_faceCullingMode == FaceCullingMode_Back)
-				glCullFace(GL_BACK); // GL_FRONT, GL_BACK or GL_FRONT_AND_BACK
-			else if(_faceCullingMode == FaceCullingMode_Front)
-				glCullFace(GL_FRONT);
-		}
-	}
+		GraphRenderer::s_interface->setCulling(_faceCullingMode);
 	
 	if(_blendModeChanged)
-	{
-		if(_blendMode == BlendMode_None)
-		{
-			glDisable(GL_BLEND);
-		}
-		else if(_blendMode == BlendMode_SrcAlphaBased)
-		{
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-	}
+		GraphRenderer::s_interface->setBlend(_blendMode);
 	
 	if(_lineWidthChanged)
-    {
-        glLineWidth(_lineWidth);
-    }
+		GraphRenderer::s_interface->setLineW(_lineWidth);
 	
 	if(_depthTestChanged)
-	{
-		if(_depthTest)
-		{
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LEQUAL);
-			glDepthMask(GL_TRUE);
-		}
-		else
-		{
-			glDisable(GL_DEPTH_TEST);
-		}
-	}
+		GraphRenderer::s_interface->setDepthTest(_depthTest);
 	
 	if(_viewportChanged)
-	{
-			glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
-	}
+		GraphRenderer::s_interface->setViewport(_viewport);
 	
-	if(_targetChanged && _target != nullptr)
+	if(_targetChanged ) // && _target != nullptr)
 	{
-		_target->bind();
+		// _target->bind();
 	}
 	
 	if(_shaderChanged && _shader != nullptr)
 	{
-		_shader->enable();
-		_shader->updateAllUniforms();
+		// _shader->enable();
+		if(_shader->_d == nullptr)
+			_shader->_d = GraphRenderer::s_interface->load(_shader->vertCode, _shader->fragCode);
+		GraphRenderer::s_interface->bind(_shader->_d);
+		for(auto u : _uniforms)
+			GraphRenderer::s_interface->update(_shader->_d, u.second.get());
 	}
 }
 
@@ -219,14 +182,14 @@ void State::setLineWidth(float lw)
 }
 
 //--------------------------------------------------------------
-void State::setTarget(RenderTarget::Ptr target)
+/*void State::setTarget(RenderTarget::Ptr target)
 {
 	_target = target;
 	_targetChanged = true;
-}
+}*/
 
 //--------------------------------------------------------------
-void State::setShader(Shader::Ptr shader)
+void State::setShader(ShaderDsc::Ptr shader)
 {
 	_shader = shader;
 	_shaderChanged = true;
@@ -236,6 +199,20 @@ void State::setShader(Shader::Ptr shader)
 void State::setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms)
 {
 	for(auto kv : uniforms) _uniforms[kv.first] = kv.second;
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::clearUniforms()
+{
+	_uniforms.clear();
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const Uniform::Ptr& uniform)
+{
+	_uniforms[ uniform->getID() ] = uniform;
 	_uniformsChanged = true;
 }
 

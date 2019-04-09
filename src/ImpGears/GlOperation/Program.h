@@ -7,15 +7,15 @@ IMPGEARS_BEGIN
 
 #define IMP_GLSL_SRC( src ) #src
 
-class IMP_API Shader : public Object
+class IMP_API Program : public Object
 {
 public:
 	
-	Meta_Class(Shader)
+	Meta_Class(Program)
 
-	Shader();
-	Shader(const std::string& vertCode, const std::string& fragCode);
-	virtual ~Shader();
+	Program();
+	Program(const std::string& vertCode, const std::string& fragCode);
+	virtual ~Program();
 	
 	void load(const std::string& vertCode, const std::string& fragCode);
 	void compile(std::uint32_t srcId);

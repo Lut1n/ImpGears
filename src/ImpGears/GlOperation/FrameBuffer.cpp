@@ -1,7 +1,7 @@
 
 #include <SceneGraph/Camera.h>
 
-#include "RenderTarget.h"
+#include "FrameBuffer.h"
 #include "GlError.h"
 
 #include <cstdio>
@@ -10,7 +10,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-RenderTarget::RenderTarget():
+FrameBuffer::FrameBuffer():
     m_textureCount(0),
     m_hasDepthBuffer(false),
     m_depthTexture(nullptr)
@@ -20,13 +20,13 @@ RenderTarget::RenderTarget():
 }
 
 //--------------------------------------------------------------
-RenderTarget::~RenderTarget()
+FrameBuffer::~FrameBuffer()
 {
     destroy();
 }
 
 //--------------------------------------------------------------
-void RenderTarget::createBufferTarget(std::uint32_t width, std::uint32_t height, std::uint32_t textureCount, bool depthBuffer)
+void FrameBuffer::createBufferTarget(std::uint32_t width, std::uint32_t height, std::uint32_t textureCount, bool depthBuffer)
 {
     destroy();
     m_hasDepthBuffer = depthBuffer;
@@ -71,7 +71,7 @@ void RenderTarget::createBufferTarget(std::uint32_t width, std::uint32_t height,
 }
 
 //--------------------------------------------------------------
-void RenderTarget::destroy()
+void FrameBuffer::destroy()
 {
 	glDeleteFramebuffers(1, &m_frameBufferID);
 
@@ -92,13 +92,13 @@ void RenderTarget::destroy()
 }
 
 //--------------------------------------------------------------
-Texture* RenderTarget::getTexture(std::uint32_t n)
+Texture* FrameBuffer::getTexture(std::uint32_t n)
 {
 	return m_colorTextures[n];
 }
 
 //--------------------------------------------------------------
-Texture* RenderTarget::getDepthTexture()
+Texture* FrameBuffer::getDepthTexture()
 {
     if(m_hasDepthBuffer == false)
     {
@@ -110,13 +110,13 @@ Texture* RenderTarget::getDepthTexture()
 }
 
 //--------------------------------------------------------------
-void RenderTarget::bind()
+void FrameBuffer::bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
 }
 
 //--------------------------------------------------------------
-void RenderTarget::unbind()
+void FrameBuffer::unbind()
 {
 	/*for(std::uint32_t i=0; i<m_textureCount; ++i)
 	{

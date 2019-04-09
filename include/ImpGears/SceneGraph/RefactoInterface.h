@@ -9,7 +9,7 @@ IMPGEARS_BEGIN
 class ClearNode;
 class State;
 class Geometry;
-class Image;
+class Sampler;
 class Uniform;
 
 struct RefactoInterface
@@ -23,11 +23,11 @@ struct RefactoInterface
 	
 	virtual Data* load(const Geometry* geo) = 0;
 	
-	virtual Data* load(const Image* img) = 0;
+	virtual Data* load(const Sampler* sampler) = 0;
 	
 	virtual Data* load(const std::string& vert, const std::string& frag) = 0;
 	
-	virtual void update(Data* data, const Image* img) = 0;
+	virtual void update(Data* data, const Sampler* sampler) = 0;
 	
 	virtual void bind(Data* data) = 0;
 	

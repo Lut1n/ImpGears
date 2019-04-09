@@ -1,4 +1,4 @@
-#include "Shader.h"
+#include "Program.h"
 #include "GlError.h"
 
 #include <cstdio>
@@ -7,21 +7,21 @@
 
 IMPGEARS_BEGIN
 
-std::string Shader::s_compilation_log;
+std::string Program::s_compilation_log;
 
 //--------------------------------------------------------------
-Shader::Shader()
+Program::Program()
 {
 }
 
 //--------------------------------------------------------------
-Shader::Shader(const std::string& vertCode, const std::string& fragCode)
+Program::Program(const std::string& vertCode, const std::string& fragCode)
 {
     load(vertCode,fragCode);
 }
 
 //--------------------------------------------------------------
-void Shader::load(const std::string& vertCode, const std::string& fragCode)
+void Program::load(const std::string& vertCode, const std::string& fragCode)
 {
 	_programID = glCreateProgram () ;
 	_vertID = glCreateShader (GL_VERTEX_SHADER);
@@ -44,7 +44,7 @@ void Shader::load(const std::string& vertCode, const std::string& fragCode)
 	GL_CHECKERROR("link shader program");
 }
 
-void Shader::compile(std::uint32_t srcId)
+void Program::compile(std::uint32_t srcId)
 {
     GLint result = GL_TRUE;
 	glCompileShader (srcId) ;
@@ -61,7 +61,7 @@ void Shader::compile(std::uint32_t srcId)
 }
 
 //--------------------------------------------------------------
-Shader::~Shader()
+Program::~Program()
 {
 	glDeleteShader (_vertID) ;
 	glDeleteShader (_fragID);
@@ -69,13 +69,13 @@ Shader::~Shader()
 }
 
 //--------------------------------------------------------------
-void Shader::use()
+void Program::use()
 {
 	glUseProgram (_programID) ;
 }
 
 //--------------------------------------------------------------
-std::int32_t Shader::locate(const std::string& id) const
+std::int32_t Program::locate(const std::string& id) const
 {
 	std::int32_t location = glGetUniformLocation(_programID, id.c_str());
 	GL_CHECKERROR("parameter location");

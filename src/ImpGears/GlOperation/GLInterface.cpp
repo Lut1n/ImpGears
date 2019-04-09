@@ -1,13 +1,13 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <Graphics/Image.h>
+#include <SceneGraph/Sampler.h>
 #include <Geometry/Geometry.h>
 
 #include "GlError.h"
 #include "Texture.h"
 #include "GLInterface.h"
 #include "BufferObject.h"
-#include "Shader.h"
+#include "Program.h"
 
 #include <iostream>
 
@@ -52,7 +52,7 @@ struct ShaData : public RefactoInterface::Data
 {
 	ShaData() { ty=RefactoInterface::Ty_Shader; }
 	
-	Shader sha;
+	Program sha;
 };
 
 //--------------------------------------------------------------
@@ -162,10 +162,16 @@ GLInterface::Data* GLInterface::load(const Geometry* geo)
 }
 
 //--------------------------------------------------------------
-GLInterface::Data* GLInterface::load(const Image* img)
+GLInterface::Data* GLInterface::load(const Sampler* sampler)
 {
+	Image::Ptr img = sampler->getSource();
 	TexData* d = new TexData();
 	d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
+	d->tex.setSmooth(sampler->hasSmoothEnable());
+	d->tex.setRepeated(sampler->hasRepeatedEnable());
+	d->tex.setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
+	// sampler->_d = d;
+	
 	return d;
 }
 
@@ -180,10 +186,11 @@ GLInterface::Data* GLInterface::load(const std::string& vert, const std::string&
 }
 
 //--------------------------------------------------------------
-void GLInterface::update(Data* data, const Image* img)
+void GLInterface::update(Data* data, const Sampler* sampler)
 {
 	if(data->ty == Ty_Tex)
 	{
+		Image::Ptr img = sampler->getSource();
 		TexData* d = static_cast<TexData*>(data);
 		d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 	}
@@ -267,13 +274,14 @@ void GLInterface::update(Data* data, const Uniform* uniform)
 	{
 		glUniformMatrix4fv(uniformLocation, 1, false, value.value_mat4v->data());
 	}
-	/*else if(type == Uniform::Type_Sampler)
+	else if(type == Uniform::Type_Sampler)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + value.value_1i);
-		glBindTexture(GL_TEXTURE_2D, uniform->getSampler()->getVideoID());
+		TexData* d = static_cast<TexData*>(uniform->getSampler()->_d);
+		glBindTexture(GL_TEXTURE_2D, d->tex.getVideoID());
 		glUniform1i(uniformLocation, value.value_1i);
-	}*/
+	}
 	else
 	{
 		// 

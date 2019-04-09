@@ -6,6 +6,7 @@
 
 #include <Core/Object.h>
 #include <Core/Matrix4.h>
+#include <SceneGraph/Sampler.h>
 
 #include <SceneGraph/RefactoInterface.h>
 
@@ -81,7 +82,7 @@ class IMP_API Uniform : public Object
 	
 	Value getValue() const { return value; }
 	Type getType() const { return type; }
-	// const Texture* getSampler() const {return sampler;}
+	const Sampler::Ptr getSampler() const {return _sampler;}
 	std::uint32_t getCount() const {return count;}
 	
 	Meta_Class(Uniform)
@@ -106,7 +107,7 @@ class IMP_API Uniform : public Object
 	
 	void set(const Matrix4* mat4Array, int count = 1);
 	
-	// void set(const Texture* texture, std::int32_t textureUnit = 0);
+	void set(const Sampler::Ptr& sampler, std::int32_t textureUnit = 0);
 	
 	const std::string& getID() const {return id;}
 	
@@ -118,7 +119,7 @@ class IMP_API Uniform : public Object
 	std::uint32_t count;
 	Type type;
 	Value value;
-	// const Texture* sampler;
+	Sampler::Ptr _sampler;
 	
 };
 

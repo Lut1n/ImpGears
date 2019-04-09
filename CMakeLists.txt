@@ -11,6 +11,7 @@ file(GLOB SRCS
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Utils/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/GlOperation/*.cpp
     )
 
 file(GLOB HEADERS 
@@ -19,6 +20,7 @@ file(GLOB HEADERS
     ${PROJECT_SOURCE_DIR}/include/ImpGears/Graphics/*.h
     ${PROJECT_SOURCE_DIR}/include/ImpGears/SceneGraph/*.h
     ${PROJECT_SOURCE_DIR}/include/ImpGears/Utils/*.h
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/GlOperation/*.h
     )
 
 add_library(impgears SHARED ${SRCS} ${HEADERS})

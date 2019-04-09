@@ -19,11 +19,11 @@ struct GLInterface : public RefactoInterface
 	
 	virtual Data* load(const Geometry* geo);
 	
-	virtual Data* load(const Image* img);
+	virtual Data* load(const Sampler* samper);
 	
 	virtual Data* load(const std::string& vert, const std::string& frag);
 	
-	virtual void update(Data* data, const Image* img);
+	virtual void update(Data* data, const Sampler* sampler);
 	
 	virtual void bind(Data* data);
 	

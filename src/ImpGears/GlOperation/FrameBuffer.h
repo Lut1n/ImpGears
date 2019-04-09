@@ -8,14 +8,14 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines a render target. A render target can be a texture or a window.
-class IMP_API RenderTarget : public Object
+class IMP_API FrameBuffer : public Object
 {
     public:
 	
-		Meta_Class(RenderTarget)
+		Meta_Class(FrameBuffer)
 
-        RenderTarget();
-        virtual ~RenderTarget();
+        FrameBuffer();
+        virtual ~FrameBuffer();
 
         /// \brief Creates a texture render target.
         /// \param width - The width of the internal texture.

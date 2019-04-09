@@ -12,7 +12,6 @@ Uniform::Uniform(const std::string& id, Type type)
 {
 	this->id = id;
 	this->type = type;
-	// this->sampler = nullptr;
 }
 
 //--------------------------------------------------------------
@@ -83,11 +82,11 @@ void Uniform::set(const Matrix4* mat4Array, int count)
 }
 
 //--------------------------------------------------------------
-/*void Uniform::set(const Texture* texture, std::int32_t textureUnit)
+void Uniform::set(const Sampler::Ptr& sampler, std::int32_t textureUnit)
 {
 	this->type = Type_Sampler;
 	value.value_1i = textureUnit;
-	sampler = texture;
-}*/
+	_sampler = sampler;
+}
 
 IMPGEARS_END

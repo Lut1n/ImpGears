@@ -7,8 +7,7 @@
 #include <Core/Object.h>
 #include <Core/Matrix4.h>
 #include <SceneGraph/Sampler.h>
-
-#include <SceneGraph/RefactoInterface.h>
+#include <SceneGraph/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
@@ -19,7 +18,7 @@ struct ShaderDsc : public Object
 	std::string vertCode;
 	std::string fragCode;
 	
-	RefactoInterface::Data* _d;
+	RenderPlugin::Data* _d;
 	
 	ShaderDsc() : _d(NULL) {}
 };

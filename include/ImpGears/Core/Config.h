@@ -37,18 +37,21 @@
     #define IMP_LOCAL
 #endif
 
-/// IMP_API_C_CODE_BEGIN/END - Block for C code
+/// IMP_EXTERN_* for C code, plugin, etc...
 #if defined(__cplusplus)
-    #define IMP_API_C_CODE_BEGIN extern "C" {
-    #define IMP_API_C_CODE_END }
+    #define IMP_EXTERN extern "C"
+    #define IMP_EXTERN_BEGIN IMP_EXTERN {
+    #define IMP_EXTERN_END };
 #else
-    #define IMP_API_C_CODE_BEGIN
-    #define IMP_API_C_CODE_END
+	#define IMP_EXTERN
+    #define IMP_EXTERN_BEGIN
+    #define IMP_EXTERN_END
 #endif
 
 
 // define namespace
-#define IMPGEARS_BEGIN namespace imp{
+#define IMPGEARS_NS imp
+#define IMPGEARS_BEGIN namespace IMPGEARS_NS {
 #define IMPGEARS_END };
 
 #endif // IMPCONFIG_H

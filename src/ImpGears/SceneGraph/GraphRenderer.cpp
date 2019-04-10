@@ -2,16 +2,14 @@
 
 #include <cstdlib>
 
-#include "../GlOperation/GLInterface.h"
-
 IMPGEARS_BEGIN
 
-RefactoInterface* GraphRenderer::s_interface = NULL;
+RenderPlugin::Ptr GraphRenderer::s_interface;
 
 //--------------------------------------------------------------
 GraphRenderer::GraphRenderer()
 {
-	s_interface = new GLInterface();
+	s_interface = PluginManager::open("libglPlugin");
 	s_interface->init();
     
 	_initNode = ClearNode::create();

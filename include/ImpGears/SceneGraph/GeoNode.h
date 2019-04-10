@@ -6,8 +6,7 @@
 #include <Geometry/Geometry.h>
 #include <SceneGraph/SceneNode.h>
 #include <SceneGraph/Uniform.h>
-
-#include <SceneGraph/RefactoInterface.h>
+#include <SceneGraph/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
@@ -18,7 +17,7 @@ class IMP_API GeoNode : public SceneNode
 	Meta_Class(GeoNode)
 	
 	Geometry _geo;
-	RefactoInterface::Data* _gBuffer;
+	RenderPlugin::Data* _gBuffer;
 	bool _wireframe;
 	bool _loaded;
 	Vec3 _color;

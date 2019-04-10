@@ -1,12 +1,16 @@
 #ifndef GLINTERFACE_H_INCLUDED
 #define GLINTERFACE_H_INCLUDED
 
-#include <SceneGraph/RefactoInterface.h>
+#include <SceneGraph/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
-struct GLInterface : public RefactoInterface
+class IMP_API GlPlugin : public RenderPlugin
 {
+public:
+	
+	Meta_Class(GlPlugin);
+	
 	virtual void init();
 	
 	virtual void apply(const ClearNode* clear);

@@ -13,6 +13,14 @@
 
 #include <iostream>
 
+IMP_EXTERN IMP_API imp::RenderPlugin::Ptr loadRenderPlugin()
+{
+	static imp::GlPlugin::Ptr singleton = NULL;
+	if(singleton == NULL) singleton = imp::GlPlugin::create();
+	return singleton;
+}
+
+
 IMPGEARS_BEGIN
 
 /// =========== VERTEX SHADER SOURCE =====================
@@ -34,39 +42,39 @@ void main() { gl_FragData[0] = vec4(u_color, 1.0); }
 );
 
 //--------------------------------------------------------------
-struct GeoData : public RefactoInterface::Data
+struct GeoData : public RenderPlugin::Data
 {
-	GeoData() { ty=RefactoInterface::Ty_Vbo; }
+	GeoData() { ty=RenderPlugin::Ty_Vbo; }
 	
 	BufferObject vbo;
 };
 
 //--------------------------------------------------------------
-struct TexData : public RefactoInterface::Data
+struct TexData : public RenderPlugin::Data
 {
-	TexData() { ty=RefactoInterface::Ty_Tex; }
+	TexData() { ty=RenderPlugin::Ty_Tex; }
 	
 	Texture tex;
 };
 
 //--------------------------------------------------------------
-struct ShaData : public RefactoInterface::Data
+struct ShaData : public RenderPlugin::Data
 {
-	ShaData() { ty=RefactoInterface::Ty_Shader; }
+	ShaData() { ty=RenderPlugin::Ty_Shader; }
 	
 	Program sha;
 };
 
 //--------------------------------------------------------------
-struct TgtData : public RefactoInterface::Data
+struct TgtData : public RenderPlugin::Data
 {
-	TgtData() { ty=RefactoInterface::Ty_Tgt; }
+	TgtData() { ty=RenderPlugin::Ty_Tgt; }
 	
 	FrameBuffer frames;
 };
 
 //--------------------------------------------------------------
-void GLInterface::init()
+void GlPlugin::init()
 {
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -83,7 +91,7 @@ void GLInterface::init()
 }
 
 //--------------------------------------------------------------
-void GLInterface::apply(const ClearNode* clear)
+void GlPlugin::apply(const ClearNode* clear)
 {
 	GLbitfield bitfield = 0;
 	
@@ -104,7 +112,7 @@ void GLInterface::apply(const ClearNode* clear)
 }
 
 //--------------------------------------------------------------
-void GLInterface::setCulling(int mode)
+void GlPlugin::setCulling(int mode)
 {
 	if(mode == 0)
 	{
@@ -123,7 +131,7 @@ void GLInterface::setCulling(int mode)
 }
 
 //--------------------------------------------------------------
-void GLInterface::setBlend(int mode)
+void GlPlugin::setBlend(int mode)
 {
 	if(mode == 0)
 	{
@@ -137,19 +145,19 @@ void GLInterface::setBlend(int mode)
 }
 
 //--------------------------------------------------------------
-void GLInterface::setLineW(float lw)
+void GlPlugin::setLineW(float lw)
 {
 	glLineWidth(lw);
 }
 
 //--------------------------------------------------------------
-void GLInterface::setViewport(Vec4 vp)
+void GlPlugin::setViewport(Vec4 vp)
 {
 	glViewport(vp[0], vp[1], vp[2], vp[3]);
 }
 
 //--------------------------------------------------------------
-void GLInterface::setDepthTest(int mode)
+void GlPlugin::setDepthTest(int mode)
 {
 	if(mode == 1)
 	{
@@ -164,7 +172,7 @@ void GLInterface::setDepthTest(int mode)
 }
 
 //--------------------------------------------------------------
-GLInterface::Data* GLInterface::load(const Geometry* geo)
+GlPlugin::Data* GlPlugin::load(const Geometry* geo)
 {
 	GeoData* d = new GeoData();
 	d->vbo.load(*geo);
@@ -172,7 +180,7 @@ GLInterface::Data* GLInterface::load(const Geometry* geo)
 }
 
 //--------------------------------------------------------------
-GLInterface::Data* GLInterface::load(const Sampler* sampler)
+GlPlugin::Data* GlPlugin::load(const Sampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
 	TexData* d = new TexData();
@@ -186,7 +194,7 @@ GLInterface::Data* GLInterface::load(const Sampler* sampler)
 }
 
 //--------------------------------------------------------------
-GLInterface::Data* GLInterface::load(const std::string& vert, const std::string& frag)
+GlPlugin::Data* GlPlugin::load(const std::string& vert, const std::string& frag)
 {
 	bool alt = vert.empty();
 	ShaData* d = new ShaData();
@@ -196,7 +204,7 @@ GLInterface::Data* GLInterface::load(const std::string& vert, const std::string&
 }
 
 //--------------------------------------------------------------
-void GLInterface::update(Data* data, const Sampler* sampler)
+void GlPlugin::update(Data* data, const Sampler* sampler)
 {
 	if(data->ty == Ty_Tex)
 	{
@@ -207,7 +215,7 @@ void GLInterface::update(Data* data, const Sampler* sampler)
 }
 
 //--------------------------------------------------------------
-void GLInterface::bind(Data* data)
+void GlPlugin::bind(Data* data)
 {
 	if(data->ty == Ty_Tgt)
 	{
@@ -233,7 +241,7 @@ void GLInterface::bind(Data* data)
 }
 
 //--------------------------------------------------------------
-void GLInterface::init(Target* target)
+void GlPlugin::init(Target* target)
 {
 	TgtData* d = new TgtData();
 	d->frames.create(target->width(), target->height(), target->count(), target->hasDepth());
@@ -241,7 +249,7 @@ void GLInterface::init(Target* target)
 }
 
 //--------------------------------------------------------------
-void GLInterface::bringBack(Image::Ptr img, Data* data, int n)
+void GlPlugin::bringBack(Image::Ptr img, Data* data, int n)
 {
 	if(data->ty == Ty_Tex)
 	{
@@ -259,7 +267,7 @@ void GLInterface::bringBack(Image::Ptr img, Data* data, int n)
 }
 
 //--------------------------------------------------------------
-void GLInterface::draw(Data* data)
+void GlPlugin::draw(Data* data)
 {
 	if(data->ty == Ty_Vbo)
 	{
@@ -269,7 +277,7 @@ void GLInterface::draw(Data* data)
 }
 
 //--------------------------------------------------------------
-void GLInterface::update(Data* data, const Uniform* uniform)
+void GlPlugin::update(Data* data, const Uniform* uniform)
 {
 	std::string uId = uniform->getID();
 	Uniform::Type type = uniform->getType();

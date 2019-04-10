@@ -1,7 +1,7 @@
 #ifndef IMP_QUADNODE_H
 #define IMP_QUADNODE_H
 
-#include <SceneGraph/RefactoInterface.h>
+#include <SceneGraph/RenderPlugin.h>
 #include <SceneGraph/SceneNode.h>
 
 IMPGEARS_BEGIN
@@ -19,7 +19,7 @@ public:
 	
 protected:
 	
-	RefactoInterface::Data* _gData;
+	RenderPlugin::Data* _gData;
 };
 
 IMPGEARS_END

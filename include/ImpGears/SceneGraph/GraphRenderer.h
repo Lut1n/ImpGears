@@ -5,11 +5,10 @@
 
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/SceneVisitor.h>
-#include <SceneGraph/RefactoInterface.h>
+#include <SceneGraph/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
-/// \brief Defines The graphic renderer.
 class IMP_API GraphRenderer : public Object
 {
 public:
@@ -26,7 +25,7 @@ public:
 	void setClearColor(const Vec4& color);
 	void setClearDepth(float depth);
 	
-	static RefactoInterface* s_interface;
+	static RenderPlugin::Ptr s_interface;
 
 protected:
 	

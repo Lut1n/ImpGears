@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 #include <Graphics/Image.h>
 
-#include <SceneGraph/RefactoInterface.h>
+#include <SceneGraph/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
@@ -32,7 +32,7 @@ public:
 	void change();
 	void update();
 	
-	RefactoInterface::Data* _d;
+	RenderPlugin::Data* _d;
 	
 protected:
 	

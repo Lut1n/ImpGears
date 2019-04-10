@@ -27,6 +27,9 @@ struct GLInterface : public RefactoInterface
 	
 	virtual void bind(Data* data);
 	
+	virtual void init(Target* target);
+	virtual void bringBack(Image::Ptr img, Data* data, int n = 0);
+	
 	virtual void draw(Data* data);
 	
 	virtual void update(Data* d, const Uniform* uniform);

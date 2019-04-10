@@ -10,121 +10,105 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-FrameBuffer::FrameBuffer():
-    m_textureCount(0),
-    m_hasDepthBuffer(false),
-    m_depthTexture(nullptr)
+FrameBuffer::FrameBuffer()
+	: _id(0)
+	, _textureCount(0)
+	, _hasDepthBuffer(false)
 {
-    for(std::uint32_t i=0; i<5; ++i)
-        m_colorTextures[i] = nullptr;
 }
 
 //--------------------------------------------------------------
 FrameBuffer::~FrameBuffer()
 {
-    destroy();
+	destroy();
 }
 
 //--------------------------------------------------------------
-void FrameBuffer::createBufferTarget(std::uint32_t width, std::uint32_t height, std::uint32_t textureCount, bool depthBuffer)
+void FrameBuffer::create(int width, int height, int textureCount, bool depthBuffer)
 {
-    destroy();
-    m_hasDepthBuffer = depthBuffer;
-    m_textureCount = textureCount;
+	destroy();
+	_hasDepthBuffer = depthBuffer;
+	
+	// TODO : tets  GL_MAX_COLOR_ATTACHMENTS & GL_MAX_DRAW_BUFFERS
+	_textureCount = textureCount;
 
-    glGenFramebuffers(1, &m_frameBufferID);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
-    GL_CHECKERROR("bind FBO");
+	GLuint id;
+	glGenFramebuffers(1, &id);
+	_id = (int)id;
+	glBindFramebuffer(GL_FRAMEBUFFER, _id);
+	GL_CHECKERROR("bind FBO");
 
 	GLenum drawBuffers[textureCount];
-    for(std::uint32_t i=0; i<textureCount; ++i)
-    {
-        m_colorTextures[i] = new Texture();
-        // m_colorTextures[i]->build(width, height, PixelFormat_RGBA8);
-        m_colorTextures[i]->setSmooth(false);
-        m_colorTextures[i]->setRepeated(false);
-        m_colorTextures[i]->update();
-        m_colorTextures[i]->bind();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, m_colorTextures[i]->getVideoID(), 0);
+	_colorTextures.resize(textureCount);
+	for(int i=0; i<textureCount; ++i)
+	{
+		_colorTextures[i] = Texture::create();
+		_colorTextures[i]->loadFromMemory(NULL, width, height, 4);
+		_colorTextures[i]->update();
+		_colorTextures[i]->bind();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, _colorTextures[i]->getVideoID(), 0);
 		drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
-        GL_CHECKERROR("set color buffer");
-    }
-    glDrawBuffers(textureCount, drawBuffers);
-    GL_CHECKERROR("set draw buffers");
+		GL_CHECKERROR("set color buffer");
+	}
+	glDrawBuffers(textureCount, drawBuffers);
+	GL_CHECKERROR("set draw buffers");
 
-    if(m_hasDepthBuffer)
-    {
-        m_depthTexture = new Texture();
-        // m_depthTexture->build(width, height, PixelFormat_R16);
-        m_depthTexture->setSmooth(false);
-        m_depthTexture->setRepeated(false);
-        m_depthTexture->update();
-        m_depthTexture->bind();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->getVideoID(), 0);
-        GL_CHECKERROR("set depth buffer");
-    }
+	if(_hasDepthBuffer)
+	{
+		// render buffer
+		GLuint rbo = _rbo;
+		glGenRenderbuffers(1, &rbo); _rbo = rbo;
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbo);
+		GL_CHECKERROR("set depth buffer");
+	}
 
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        fprintf(stderr, "[impError] FrameBuffer creation failed.\n");
+	GLenum error = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(error != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::string string;
+		ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT, string)
+		ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT, string)
+		ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT, string)
+		ENUM_TO_STR(error, GL_FRAMEBUFFER_UNSUPPORTED, string)
+		std::cout << "[impError] FrameBuffer creation failed : " << string << std::endl;
+	}
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //--------------------------------------------------------------
 void FrameBuffer::destroy()
 {
-	glDeleteFramebuffers(1, &m_frameBufferID);
+	GLuint id = _id;
+	glDeleteFramebuffers(1, &id);
 
-	for(std::uint32_t i=0; i<m_textureCount; ++i)
-	{
-		delete m_colorTextures[i];
-		m_colorTextures[i] = nullptr;
-	}
+	for(int i=0; i<_textureCount; ++i) _colorTextures[i] = nullptr;
+	if(_hasDepthBuffer) {GLuint rbo=_rbo; glDeleteRenderbuffers(1,&rbo);_rbo=rbo;}
 
-	if(m_hasDepthBuffer)
-	{
-		delete m_depthTexture;
-		m_depthTexture = nullptr;
-	}
-
-    m_textureCount = 0;
-    m_hasDepthBuffer = false;
+    _textureCount = 0;
+    _hasDepthBuffer = false;
 }
 
 //--------------------------------------------------------------
-Texture* FrameBuffer::getTexture(std::uint32_t n)
+Texture::Ptr FrameBuffer::getTexture(int n)
 {
-	return m_colorTextures[n];
-}
-
-//--------------------------------------------------------------
-Texture* FrameBuffer::getDepthTexture()
-{
-    if(m_hasDepthBuffer == false)
-    {
-        fprintf(stderr, "[impError] Render target has not depth texture.\n");
-        return nullptr;
-    }
-
-    return m_depthTexture;
+	return _colorTextures[n];
 }
 
 //--------------------------------------------------------------
 void FrameBuffer::bind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferID);
+	glBindFramebuffer(GL_FRAMEBUFFER, _id);
 }
 
 //--------------------------------------------------------------
 void FrameBuffer::unbind()
 {
-	/*for(std::uint32_t i=0; i<m_textureCount; ++i)
-	{
-		m_colorTextures[i]->notifyTextureRendering();
-		m_colorTextures[i]->synchronize();
-	}*/
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 IMPGEARS_END

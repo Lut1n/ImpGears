@@ -1,12 +1,14 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
 #include <SceneGraph/Sampler.h>
+#include <SceneGraph/Target.h>
 #include <Geometry/Geometry.h>
 
 #include "GlError.h"
 #include "Texture.h"
 #include "GLInterface.h"
 #include "BufferObject.h"
+#include "FrameBuffer.h"
 #include "Program.h"
 
 #include <iostream>
@@ -53,6 +55,14 @@ struct ShaData : public RefactoInterface::Data
 	ShaData() { ty=RefactoInterface::Ty_Shader; }
 	
 	Program sha;
+};
+
+//--------------------------------------------------------------
+struct TgtData : public RefactoInterface::Data
+{
+	TgtData() { ty=RefactoInterface::Ty_Tgt; }
+	
+	FrameBuffer frames;
 };
 
 //--------------------------------------------------------------
@@ -202,6 +212,8 @@ void GLInterface::bind(Data* data)
 	if(data->ty == Ty_Tgt)
 	{
 		// _target->bind();
+		TgtData* d = static_cast<TgtData*>( data );
+		d->frames.bind();
 	}
 	else if(data->ty == Ty_Shader)
 	{
@@ -218,6 +230,32 @@ void GLInterface::bind(Data* data)
 		TexData* d = static_cast<TexData*>( data );
 		d->tex.bind();
 	}
+}
+
+//--------------------------------------------------------------
+void GLInterface::init(Target* target)
+{
+	TgtData* d = new TgtData();
+	d->frames.create(target->width(), target->height(), target->count(), target->hasDepth());
+	target->_d = d;
+}
+
+//--------------------------------------------------------------
+void GLInterface::bringBack(Image::Ptr img, Data* data, int n)
+{
+	if(data->ty == Ty_Tex)
+	{
+		TexData* d = static_cast<TexData*>( data );
+		d->tex.saveToImage(img);
+	}
+	
+	if(data->ty == Ty_Tgt && n>=0)
+	{
+		TgtData* d = static_cast<TgtData*>( data );
+		Texture::Ptr tex = d->frames.getTexture(n);
+		tex->saveToImage(img);
+	}
+	
 }
 
 //--------------------------------------------------------------

@@ -9,12 +9,19 @@ Sampler::Sampler()
 	, _hasMipmap(false)
 	, _maxMipmapLvl(1000)
 {
+	setInternalSrc(128,128,4);
 	_d = NULL;
 }
 
 //--------------------------------------------------------------
 Sampler::~Sampler()
 {
+}
+
+//--------------------------------------------------------------
+void Sampler::setInternalSrc(int w, int h, int chnl)
+{
+	_srcImage = Image::create(w,h,chnl);
 }
 
 //--------------------------------------------------------------

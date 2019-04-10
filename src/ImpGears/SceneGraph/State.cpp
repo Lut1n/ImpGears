@@ -11,7 +11,7 @@ State::State()
 	, _blendMode(BlendMode_SrcAlphaBased)
 	, _lineWidth(1.0)
 	, _depthTest(false)
-	// , _target(nullptr)
+	, _target(nullptr)
 	, _shader(nullptr)
 	, _projectionChanged(false)
 	, _viewportChanged(false)
@@ -33,7 +33,7 @@ State::State(const State& other)
 	, _blendMode(other._blendMode)
 	, _lineWidth(other._lineWidth)
 	, _depthTest(other._depthTest)
-	// , _target(other._target)
+	, _target(other._target)
 	, _shader(other._shader)
 	, _uniforms(other._uniforms)
 	, _projectionChanged(other._projectionChanged)
@@ -64,7 +64,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		setBlendMode(other->_blendMode);
 		setLineWidth(other->_lineWidth);
 		setDepthTest(other->_depthTest);
-		// setTarget(other->_target);
+		setTarget(other->_target);
 		setShader(other->_shader);
 		setUniforms(other->_uniforms);
 	}
@@ -76,7 +76,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		if(other->_blendModeChanged) setBlendMode(other->_blendMode);
 		if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
 		if(other->_depthTestChanged) setDepthTest(other->_depthTest);
-		// if(other->_targetChanged) setTarget(other->_target);
+		if(other->_targetChanged) setTarget(other->_target);
 		if(other->_shaderChanged) setShader(other->_shader);
 		if(other->_uniformsChanged) setUniforms(other->_uniforms);
 	}
@@ -91,7 +91,7 @@ const State& State::operator=(const State& other)
 	_blendMode = other._blendMode;
 	_lineWidth = other._lineWidth;
 	_depthTest = other._depthTest;
-	// _target = other._target;
+	_target = other._target;
 	_shader = other._shader;
 	_projectionChanged = other._projectionChanged;
 	_viewportChanged = other._viewportChanged;
@@ -123,14 +123,16 @@ void State::apply() const
 	if(_viewportChanged)
 		GraphRenderer::s_interface->setViewport(_viewport);
 	
-	if(_targetChanged ) // && _target != nullptr)
+	if(_targetChanged && _target != nullptr)
 	{
-		// _target->bind();
+		if(_target->_d == nullptr)
+			GraphRenderer::s_interface->init(_target.get());
+		GraphRenderer::s_interface->bind(_target->_d);
+		_target->change();
 	}
 	
 	if(_shaderChanged && _shader != nullptr)
 	{
-		// _shader->enable();
 		if(_shader->_d == nullptr)
 			_shader->_d = GraphRenderer::s_interface->load(_shader->vertCode, _shader->fragCode);
 		GraphRenderer::s_interface->bind(_shader->_d);
@@ -182,11 +184,11 @@ void State::setLineWidth(float lw)
 }
 
 //--------------------------------------------------------------
-/*void State::setTarget(RenderTarget::Ptr target)
+void State::setTarget(Target::Ptr target)
 {
 	_target = target;
 	_targetChanged = true;
-}*/
+}
 
 //--------------------------------------------------------------
 void State::setShader(ShaderDsc::Ptr shader)

@@ -30,6 +30,8 @@ class IMP_API Texture : public Object
         void loadFromMemory(std::uint8_t* data, std::uint32_t width, std::uint32_t height, int chnls = 3);
         
         void loadFromImage(const Image::Ptr data);
+		
+		void saveToImage(Image::Ptr& data);
 
         void bind() const;
         void unbind() const;

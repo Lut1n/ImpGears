@@ -98,4 +98,10 @@ const Image::b8* Image::data() const
 	return _buffer;
 }
 
+//--------------------------------------------------------------
+Image::b8* Image::data()
+{
+	return _buffer;
+}
+
 IMPGEARS_END

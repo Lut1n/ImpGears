@@ -35,7 +35,13 @@ void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
     std::int32_t glDataFormat = 0;
     std::int32_t glDataType = GL_UNSIGNED_BYTE;
 	
-	if(chnls == 3)
+	if(chnls == 1)
+	{
+        // case PixelFormat_R16 :
+		glDataFormat = GL_RED;
+        glInternalFormat = GL_DEPTH_COMPONENT16;
+	}
+	else if(chnls == 3)
 	{
 		glDataFormat = GL_RGB;
 		glInternalFormat = GL_RGB8;
@@ -65,7 +71,38 @@ void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
 //--------------------------------------------------------------
 void Texture::loadFromImage(const Image::Ptr img)
 {
-    loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
+    loadFromMemory(img->data(), img->width(),img->height(),img->channels());
+}
+
+//--------------------------------------------------------------
+void Texture::saveToImage(Image::Ptr& img)
+{
+	int chnls = img->channels();
+    // std::int32_t glInternalFormat = 0;
+    std::int32_t glDataFormat = 0;
+    std::int32_t glDataType = GL_UNSIGNED_BYTE;
+	
+	if(chnls == 1)
+	{
+		glDataFormat = GL_RED;
+		// glInternalFormat = GL_DEPTH_COMPONENT16;
+	}
+	else if(chnls == 3)
+	{
+		glDataFormat = GL_RGB;
+		// glInternalFormat = GL_RGB8;
+	}
+	else if(chnls == 4)
+	{
+		glDataFormat = GL_RGBA;
+		// glInternalFormat = GL_RGBA8;
+	}
+	
+	// void glGetTexImage(GLenum target,GLint level,GLenum format,GLenum type,GLvoid * pixels);
+	GLvoid* pixels = (GLvoid*)img->data();
+	glGetTexImage(GL_TEXTURE_2D, 0, glDataFormat, glDataType, pixels);
+	
+    GL_CHECKERROR("Texture::saveToImage");
 }
 
 //--------------------------------------------------------------
@@ -106,6 +143,7 @@ void Texture::bind() const
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_videoID));
+    GL_CHECKERROR("bind texture");
 }
 
 //--------------------------------------------------------------

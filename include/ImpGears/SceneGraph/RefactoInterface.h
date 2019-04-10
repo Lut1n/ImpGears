@@ -3,6 +3,7 @@
 
 #include <Core/Object.h>
 #include <Core/Vec4.h>
+#include <Graphics/Image.h>
 
 IMPGEARS_BEGIN
 
@@ -11,6 +12,7 @@ class State;
 class Geometry;
 class Sampler;
 class Uniform;
+class Target;
 
 struct RefactoInterface
 {
@@ -30,6 +32,9 @@ struct RefactoInterface
 	virtual void update(Data* data, const Sampler* sampler) = 0;
 	
 	virtual void bind(Data* data) = 0;
+	
+	virtual void init(Target* target) = 0;
+	virtual void bringBack(Image::Ptr img, Data* data, int n = 0) = 0;
 	
 	virtual void draw(Data* data) = 0;
 	

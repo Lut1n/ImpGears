@@ -17,6 +17,7 @@ public:
 	Sampler();
 	virtual ~Sampler();
 	
+	void setInternalSrc(int w, int h, int chnl);
 	void setSource(const Image::Ptr& src);
 	Image::Ptr getSource() const;
 	

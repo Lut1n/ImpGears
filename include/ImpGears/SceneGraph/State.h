@@ -6,7 +6,7 @@
 #include <Core/Matrix4.h>
 #include <Core/Vec4.h>
 #include <SceneGraph/Uniform.h>
-// #include <SceneGraph/RenderTarget.h>
+#include <SceneGraph/Target.h>
 
 #include <map>
 
@@ -67,13 +67,13 @@ public:
 	
 	void setLineWidth(float lw);
 	
-	// void setTarget(RenderTarget::Ptr target);
+	void setTarget(Target::Ptr target);
 	void setShader(ShaderDsc::Ptr shader);
 	void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
 	void clearUniforms();
 	void setUniform(const Uniform::Ptr& uniform);
 	
-	// RenderTarget::Ptr getTarget() { return _target; }
+	Target::Ptr getTarget() { return _target; }
 	ShaderDsc::Ptr getShader() { return _shader; }
 
 protected:
@@ -86,7 +86,7 @@ private:
 	float _lineWidth;
 	bool _depthTest;
 	
-	// RenderTarget::Ptr _target;
+	Target::Ptr _target;
 	ShaderDsc::Ptr _shader;
 	std::map<std::string,Uniform::Ptr> _uniforms;
 	

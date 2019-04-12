@@ -1,5 +1,7 @@
 #include <SceneGraph/GraphRenderer.h>
 
+#include <SceneGraph/CpuRenderPlugin.h>
+
 #include <cstdlib>
 
 IMPGEARS_BEGIN
@@ -10,7 +12,9 @@ RenderPlugin::Ptr GraphRenderer::s_interface;
 GraphRenderer::GraphRenderer()
 {
 	s_interface = PluginManager::open("libglPlugin");
-	s_interface->init();
+	if(s_interface == nullptr) { s_interface = CpuRenderPlugin::create(); std::cout << "fallback to CPU rendering" << std::endl; }
+	if(s_interface == nullptr) { std::cout << "fallback failed..." << std::endl; }
+	if(s_interface != nullptr) s_interface->init();
     
 	_initNode = ClearNode::create();
 	_initNode->setDepth(1);

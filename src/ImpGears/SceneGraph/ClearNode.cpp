@@ -18,7 +18,8 @@ ClearNode::~ClearNode()
 //--------------------------------------------------------------
 void ClearNode::render()
 {
-	GraphRenderer::s_interface->apply(this);
+	if(GraphRenderer::s_interface != nullptr)
+		GraphRenderer::s_interface->apply(this);
 }
 
 //--------------------------------------------------------------

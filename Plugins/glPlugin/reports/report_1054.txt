@@ -1,0 +1,30 @@
+Starting program: /home/mathieu/git/ImpGears/benchs/polyhedron/viewer 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/usr/lib/libthread_db.so.1".
+[New Thread 0x7ffff4e34700 (LWP 4902)]
+OGL version 3.0
+OpenGL version supported by this platform (3.0 Mesa 18.3.2)
+malloc(): memory corruption
+
+Thread 1 "viewer" received signal SIGABRT, Aborted.
+0x00007ffff790bd7f in raise () from /usr/lib/libc.so.6
+(gdb) bt
+#0  0x00007ffff790bd7f in raise () from /usr/lib/libc.so.6
+#1  0x00007ffff78f6672 in abort () from /usr/lib/libc.so.6
+#2  0x00007ffff794e878 in __libc_message () from /usr/lib/libc.so.6
+#3  0x00007ffff795518a in malloc_printerr () from /usr/lib/libc.so.6
+#4  0x00007ffff7958164 in _int_malloc () from /usr/lib/libc.so.6
+#5  0x00007ffff7959ada in malloc () from /usr/lib/libc.so.6
+#6  0x00007ffff7cc95fd in operator new (sz=80) at /build/gcc/src/gcc/libstdc++-v3/libsupc++/new_op.cc:50
+#7  0x00007ffff7eae642 in __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > > >::allocate (this=0x5555555a5548, __n=1) at /usr/include/c++/8.2.1/ext/new_allocator.h:111
+#8  0x00007ffff7eae49c in std::allocator_traits<std::allocator<std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > > > >::allocate (__a=..., __n=1) at /usr/include/c++/8.2.1/bits/alloc_traits.h:436
+#9  0x00007ffff7eadf8d in std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > > >::_M_get_node (
+    this=0x5555555a5548) at /usr/include/c++/8.2.1/bits/stl_tree.h:599
+#10 0x00007ffff7ead6a5 in std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > > >::_M_create_node<std::piecewise_construct_t const&, std::tuple<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>, std::tuple<> >(std::piecewise_construct_t const&, std::tuple<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>&&, std::tuple<>&&) (this=0x5555555a5548, __args#0=..., 
+    __args#1=..., __args#2=...) at /usr/include/c++/8.2.1/bits/stl_tree.h:653
+#11 0x00007ffff7ead2d3 in std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > > >::_M_emplace_hint_unique<std::piecewise_construct_t const&, std::tuple<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>, std::tuple<> >(std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > >, std::piecewise_construct_t const&, std::tuple<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>&&, std::tuple<>&&) (this=0x5555555a5548, __pos=
+    {first = <error: Cannot access memory at address 0x1>, second = std::shared_ptr<imp::Uniform> (expired, weak count 0) = {get() = 0x0}}, __args#0=..., 
+    __args#1=..., __args#2=...) at /usr/include/c++/8.2.1/bits/stl_tree.h:2414
+#12 0x00007ffff7eace86 in std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::shared_ptr<imp::Uniform>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::shared_ptr<imp::Uniform> > > >::operator[] (this=0x5555555a5548, __k="u_model") at /usr/include/c++/8.2.1/bits/stl_map.h:499
+#13 0x00007ffff7eac4ef in imp::State::setUniforms (this=0x5555555a54b0, uniforms=std::map with 4 elements = {...})
+    at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/State.cpp:206

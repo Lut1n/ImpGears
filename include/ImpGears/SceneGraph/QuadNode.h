@@ -3,6 +3,7 @@
 
 #include <SceneGraph/RenderPlugin.h>
 #include <SceneGraph/SceneNode.h>
+#include <Geometry/Geometry.h>
 
 IMPGEARS_BEGIN
 
@@ -19,7 +20,8 @@ public:
 	
 protected:
 	
-	RenderPlugin::Data* _gData;
+	Geometry _geo;
+	RenderPlugin::Data::Ptr _gData;
 };
 
 IMPGEARS_END

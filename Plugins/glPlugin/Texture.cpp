@@ -108,7 +108,7 @@ void Texture::saveToImage(Image::Ptr& img)
 //--------------------------------------------------------------
 void Texture::update()
 {
-    std::int32_t glFilterMagValue = _isSmooth? GL_NEAREST : GL_LINEAR;
+    std::int32_t glFilterMagValue = _isSmooth? GL_LINEAR : GL_NEAREST;
     std::int32_t glWrapMode = _isRepeated? GL_REPEAT : GL_CLAMP_TO_EDGE;
 
     GLint glFilterMinValue = glFilterMagValue;

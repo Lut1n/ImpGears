@@ -57,7 +57,7 @@ GeoNode::~GeoNode()
 {}
 
 //--------------------------------------------------------------
-void GeoNode::render()
+void GeoNode::update()
 { 
 	if(!_loaded)
 	{
@@ -73,11 +73,20 @@ void GeoNode::render()
 				Geometry::intoCCW(_geo);
 			}
 		}
-		_gBuffer = GraphRenderer::s_interface->load(&_geo);
 		_loaded = true;
 	}
-	
-	GraphRenderer::s_interface->draw(_gBuffer);
+}
+
+//--------------------------------------------------------------
+void GeoNode::render()
+{ 
+	if(GraphRenderer::s_interface != nullptr )
+	{
+		if(_gBuffer == nullptr)
+			_gBuffer = GraphRenderer::s_interface->load(&_geo);
+		if(_gBuffer != nullptr)
+		GraphRenderer::s_interface->draw(_gBuffer);
+	}
 }
 
 IMPGEARS_END

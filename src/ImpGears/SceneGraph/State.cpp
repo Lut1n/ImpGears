@@ -13,6 +13,7 @@ State::State()
 	, _depthTest(false)
 	, _target(nullptr)
 	, _shader(nullptr)
+	, _uniforms()
 	, _projectionChanged(false)
 	, _viewportChanged(false)
 	, _faceCullingChanged(false)
@@ -93,6 +94,7 @@ const State& State::operator=(const State& other)
 	_depthTest = other._depthTest;
 	_target = other._target;
 	_shader = other._shader;
+	_uniforms = other._uniforms;
 	_projectionChanged = other._projectionChanged;
 	_viewportChanged = other._viewportChanged;
 	_faceCullingChanged = other._faceCullingChanged;
@@ -108,6 +110,9 @@ const State& State::operator=(const State& other)
 //--------------------------------------------------------------
 void State::apply() const
 {
+	if(GraphRenderer::s_interface == nullptr) return;
+		
+		
 	if(_faceCullingChanged)
 		GraphRenderer::s_interface->setCulling(_faceCullingMode);
 	
@@ -131,13 +136,19 @@ void State::apply() const
 		_target->change();
 	}
 	
-	if(_shaderChanged && _shader != nullptr)
+	if(_shader != nullptr)
 	{
-		if(_shader->_d == nullptr)
-			_shader->_d = GraphRenderer::s_interface->load(_shader->vertCode, _shader->fragCode);
-		GraphRenderer::s_interface->bind(_shader->_d);
-		for(auto u : _uniforms)
-			GraphRenderer::s_interface->update(_shader->_d, u.second.get());
+		if(_shaderChanged)
+		{
+			if(_shader->_d == nullptr)
+				_shader->_d = GraphRenderer::s_interface->load(_shader->vertCode, _shader->fragCode);
+			GraphRenderer::s_interface->bind(_shader->_d);
+		}
+		if(_shader->_d != nullptr && _uniformsChanged)
+		{
+			for(auto u : _uniforms)
+				GraphRenderer::s_interface->update(_shader->_d, u.second.get());
+		}
 	}
 }
 

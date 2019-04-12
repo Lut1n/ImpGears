@@ -32,7 +32,7 @@ public:
 	void change();
 	void update();
 	
-	RenderPlugin::Data* _d;
+	RenderPlugin::Data::Ptr _d;
 	
 protected:
 	

@@ -9,7 +9,6 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 Target::Target()
 {
-	_d = NULL;
 	_hasChanged = false;
 	_hasDepthBuffer = false;
 }
@@ -80,16 +79,17 @@ void Target::change()
 //--------------------------------------------------------------
 void Target::update()
 {
-	if(_hasChanged)
+	if(GraphRenderer::s_interface != nullptr
+		&& _hasChanged)
 	{
 		for(int i=0;i<(int)_targets.size();++i)
 		{
 			Image::Ptr& img = _targets[i];
-			imp::GraphRenderer::s_interface->bringBack(img,_d,i);
+			GraphRenderer::s_interface->bringBack(img,_d,i);
 		}
+		_hasChanged = false;
 	}
 	
-	_hasChanged = false;
 }
 
 

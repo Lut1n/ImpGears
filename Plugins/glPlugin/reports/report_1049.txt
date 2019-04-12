@@ -1,0 +1,39 @@
+Starting program: /home/mathieu/git/ImpGears/benchs/polyhedron/viewer 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/usr/lib/libthread_db.so.1".
+[New Thread 0x7ffff4e34700 (LWP 3073)]
+OGL version 3.0
+OpenGL version supported by this platform (3.0 Mesa 18.3.2)
+corrupted double-linked list
+
+Thread 1 "viewer" received signal SIGABRT, Aborted.
+0x00007ffff790bd7f in raise () from /usr/lib/libc.so.6
+(gdb) bt
+#0  0x00007ffff790bd7f in raise () from /usr/lib/libc.so.6
+#1  0x00007ffff78f6672 in abort () from /usr/lib/libc.so.6
+#2  0x00007ffff794e878 in __libc_message () from /usr/lib/libc.so.6
+#3  0x00007ffff795518a in malloc_printerr () from /usr/lib/libc.so.6
+#4  0x00007ffff79586b5 in _int_malloc () from /usr/lib/libc.so.6
+#5  0x00007ffff7959ada in malloc () from /usr/lib/libc.so.6
+#6  0x00007ffff5421ffe in ?? () from /usr/lib/dri/i965_dri.so
+#7  0x00007ffff5422346 in ?? () from /usr/lib/dri/i965_dri.so
+#8  0x00007ffff569e977 in ?? () from /usr/lib/dri/i965_dri.so
+#9  0x00007ffff569fcd0 in ?? () from /usr/lib/dri/i965_dri.so
+#10 0x00007ffff565c56b in ?? () from /usr/lib/dri/i965_dri.so
+#11 0x00007ffff55a2ebc in ?? () from /usr/lib/dri/i965_dri.so
+#12 0x00007ffff54ad0aa in ?? () from /usr/lib/dri/i965_dri.so
+#13 0x00007ffff433a65f in imp::Program::load (this=0x555555ad5060, 
+    vertCode="uniform mat4 u_projection; uniform mat4 u_view; uniform mat4 u_model; void main() { gl_Position = u_projection * u_view * u_model * gl_Vertex; }", 
+    fragCode="uniform vec3 u_color; void main() { gl_FragData[0] = vec4(u_color, 1.0); }") at /home/mathieu/git/ImpGears/Plugins/glPlugin/Program.cpp:43
+#14 0x00007ffff4333d24 in imp::GlPlugin::load (this=0x555555a86f30, vert="", frag="") at /home/mathieu/git/ImpGears/Plugins/glPlugin/GLInterface.cpp:205
+#15 0x00007ffff7eabf22 in imp::State::apply (this=0x555555a93b10) at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/State.cpp:140
+#16 0x00007ffff7ea7f39 in imp::SceneVisitor::applyDefault (this=0x555555aac940, node=0x555555ab0460)
+    at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/SceneVisitor.cpp:41
+#17 0x00007ffff7ea7dd0 in imp::SceneVisitor::apply (this=0x555555aac940, node=0x555555ab0460) at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/SceneVisitor.cpp:24
+#18 0x00007ffff7ea5acd in imp::SceneNode::accept (this=0x555555ab0460, visitor=std::shared_ptr<imp::Visitor<imp::SceneNode*>> (use count 2, weak count 0) = {...})
+    at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/SceneNode.cpp:39
+#19 0x00007ffff7ea5b4e in imp::SceneNode::accept (this=0x555555a92fd0, visitor=std::shared_ptr<imp::Visitor<imp::SceneNode*>> (use count 2, weak count 0) = {...})
+    at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/SceneNode.cpp:40
+#20 0x00007ffff7e9f3a3 in imp::GraphRenderer::renderScene (this=0x555555a957b0, scene=std::shared_ptr<imp::SceneNode> (use count 1, weak count 0) = {...})
+    at /home/mathieu/git/ImpGears/src/ImpGears/SceneGraph/GraphRenderer.cpp:55
+#21 0x000055555555c89a in main (argc=1, argv=0x7fffffffe568) at viewer.cpp:129

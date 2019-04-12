@@ -17,7 +17,7 @@ class IMP_API GeoNode : public SceneNode
 	Meta_Class(GeoNode)
 	
 	Geometry _geo;
-	RenderPlugin::Data* _gBuffer;
+	RenderPlugin::Data::Ptr _gBuffer;
 	bool _wireframe;
 	bool _loaded;
 	Vec3 _color;
@@ -33,6 +33,8 @@ class IMP_API GeoNode : public SceneNode
 	void setShader(ShaderDsc::Ptr shader);
 	
 	virtual ~GeoNode();
+	
+	virtual void update();
 	virtual void render();
 };
 

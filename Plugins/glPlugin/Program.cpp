@@ -24,8 +24,11 @@ Program::Program(const std::string& vertCode, const std::string& fragCode)
 void Program::load(const std::string& vertCode, const std::string& fragCode)
 {
 	_programID = glCreateProgram () ;
+	GL_CHECKERROR("create program");
 	_vertID = glCreateShader (GL_VERTEX_SHADER);
+	GL_CHECKERROR("create vert shader");
 	_fragID = glCreateShader (GL_FRAGMENT_SHADER);
+	GL_CHECKERROR("create frag shader");
 
 	const char* src = vertCode.c_str();
 	glShaderSource (_vertID, 1, &src, NULL) ;

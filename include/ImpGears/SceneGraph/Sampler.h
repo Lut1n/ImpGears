@@ -32,7 +32,7 @@ public:
 	void setMaxMipmapLvl(int maxLvl);
 	int getMaxMipmapLvl() const;
 	
-	RenderPlugin::Data* _d;
+	RenderPlugin::Data::Ptr _d;
 	
 protected:
 	Image::Ptr _srcImage;

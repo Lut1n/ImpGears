@@ -42,9 +42,10 @@ void main() { gl_FragData[0] = vec4(u_color, 1.0); }
 );
 
 //--------------------------------------------------------------
-struct GeoData : public RenderPlugin::Data
+struct VboData : public RenderPlugin::Data
 {
-	GeoData() { ty=RenderPlugin::Ty_Vbo; }
+	Meta_Class(VboData)
+	VboData() { ty=RenderPlugin::Ty_Vbo; }
 	
 	BufferObject vbo;
 };
@@ -52,23 +53,26 @@ struct GeoData : public RenderPlugin::Data
 //--------------------------------------------------------------
 struct TexData : public RenderPlugin::Data
 {
+	Meta_Class(TexData)
 	TexData() { ty=RenderPlugin::Ty_Tex; }
 	
 	Texture tex;
 };
 
 //--------------------------------------------------------------
-struct ShaData : public RenderPlugin::Data
+struct ProgData : public RenderPlugin::Data
 {
-	ShaData() { ty=RenderPlugin::Ty_Shader; }
+	Meta_Class(ProgData)
+	ProgData() { ty=RenderPlugin::Ty_Shader; }
 	
 	Program sha;
 };
 
 //--------------------------------------------------------------
-struct TgtData : public RenderPlugin::Data
+struct FboData : public RenderPlugin::Data
 {
-	TgtData() { ty=RenderPlugin::Ty_Tgt; }
+	Meta_Class(FboData)
+	FboData() { ty=RenderPlugin::Ty_Tgt; }
 	
 	FrameBuffer frames;
 };
@@ -172,18 +176,18 @@ void GlPlugin::setDepthTest(int mode)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data* GlPlugin::load(const Geometry* geo)
+GlPlugin::Data::Ptr GlPlugin::load(const Geometry* geo)
 {
-	GeoData* d = new GeoData();
+	VboData::Ptr d = VboData::create();
 	d->vbo.load(*geo);
 	return d;
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data* GlPlugin::load(const Sampler* sampler)
+GlPlugin::Data::Ptr GlPlugin::load(const Sampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
-	TexData* d = new TexData();
+	TexData::Ptr d = TexData::create();
 	d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 	d->tex.setSmooth(sampler->hasSmoothEnable());
 	d->tex.setRepeated(sampler->hasRepeatedEnable());
@@ -194,38 +198,38 @@ GlPlugin::Data* GlPlugin::load(const Sampler* sampler)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data* GlPlugin::load(const std::string& vert, const std::string& frag)
+GlPlugin::Data::Ptr GlPlugin::load(const std::string& vert, const std::string& frag)
 {
 	bool alt = vert.empty();
-	ShaData* d = new ShaData();
+	ProgData::Ptr d = ProgData::create();
 	if(alt) d->sha.load(basicVert.c_str(),basicFrag.c_str());
 	else d->sha.load(vert.c_str(),frag.c_str());
 	return d;
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(Data* data, const Sampler* sampler)
+void GlPlugin::update(Data::Ptr data, const Sampler* sampler)
 {
 	if(data->ty == Ty_Tex)
 	{
 		Image::Ptr img = sampler->getSource();
-		TexData* d = static_cast<TexData*>(data);
+		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(data);
 		d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 	}
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(Data* data)
+void GlPlugin::bind(Data::Ptr data)
 {
 	if(data->ty == Ty_Tgt)
 	{
 		// _target->bind();
-		TgtData* d = static_cast<TgtData*>( data );
+		FboData::Ptr d = std::dynamic_pointer_cast<FboData>( data );
 		d->frames.bind();
 	}
 	else if(data->ty == Ty_Shader)
 	{
-		ShaData* d = static_cast<ShaData*>( data );
+		ProgData::Ptr d = std::dynamic_pointer_cast<ProgData>( data );
 		d->sha.use();
 		// _shader->enable();
 		// _shader->updateAllUniforms();	
@@ -235,7 +239,7 @@ void GlPlugin::bind(Data* data)
 	}
 	else if(data->ty == Ty_Tex)
 	{
-		TexData* d = static_cast<TexData*>( data );
+		TexData::Ptr d = std::dynamic_pointer_cast<TexData>( data );
 		d->tex.bind();
 	}
 }
@@ -243,23 +247,23 @@ void GlPlugin::bind(Data* data)
 //--------------------------------------------------------------
 void GlPlugin::init(Target* target)
 {
-	TgtData* d = new TgtData();
+	FboData::Ptr d = FboData::create();
 	d->frames.create(target->width(), target->height(), target->count(), target->hasDepth());
 	target->_d = d;
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bringBack(Image::Ptr img, Data* data, int n)
+void GlPlugin::bringBack(Image::Ptr img, Data::Ptr data, int n)
 {
 	if(data->ty == Ty_Tex)
 	{
-		TexData* d = static_cast<TexData*>( data );
+		TexData::Ptr d = std::dynamic_pointer_cast<TexData>( data );
 		d->tex.saveToImage(img);
 	}
 	
 	if(data->ty == Ty_Tgt && n>=0)
 	{
-		TgtData* d = static_cast<TgtData*>( data );
+		FboData::Ptr d = std::dynamic_pointer_cast<FboData>( data );
 		Texture::Ptr tex = d->frames.getTexture(n);
 		tex->saveToImage(img);
 	}
@@ -267,22 +271,22 @@ void GlPlugin::bringBack(Image::Ptr img, Data* data, int n)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::draw(Data* data)
+void GlPlugin::draw(Data::Ptr data)
 {
 	if(data->ty == Ty_Vbo)
 	{
-		GeoData* d = static_cast<GeoData*>(data);
+		VboData::Ptr d = std::dynamic_pointer_cast<VboData>(data);
 		d->vbo.draw();
 	}
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(Data* data, const Uniform* uniform)
+void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 {
 	std::string uId = uniform->getID();
 	Uniform::Type type = uniform->getType();
 	Uniform::Value value = uniform->getValue();
-	ShaData* sha = static_cast<ShaData*>(data);
+	ProgData::Ptr sha = std::dynamic_pointer_cast<ProgData>(data);
 	std::int32_t uniformLocation = sha->sha.locate(uId);
     if(uniformLocation == -1)
         std::cout << "impError : location of uniform (" << uId << ") failed" << std::endl;
@@ -324,7 +328,7 @@ void GlPlugin::update(Data* data, const Uniform* uniform)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + value.value_1i);
-		TexData* d = static_cast<TexData*>(uniform->getSampler()->_d);
+		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(uniform->getSampler()->_d);
 		glBindTexture(GL_TEXTURE_2D, d->tex.getVideoID());
 		glUniform1i(uniformLocation, value.value_1i);
 	}

@@ -18,9 +18,7 @@ struct ShaderDsc : public Object
 	std::string vertCode;
 	std::string fragCode;
 	
-	RenderPlugin::Data* _d;
-	
-	ShaderDsc() : _d(NULL) {}
+	RenderPlugin::Data::Ptr _d;
 };
 
 /// \brief Defines a shader uniform.

@@ -98,27 +98,43 @@ void GeometryRenderer::render(const Geometry& geo)
 	Vec3 mvpVertex[3];
 	Vec3 col(1.0);
 
-	// int i = 0;
-	for(int i=0;i<(int)geo.size();i+=3)
+	if(geo.getPrimitive() == Geometry::Primitive_Triangles)
 	{
-		for(int k=0;k<3;++k)
+		for(int i=0;i<(int)geo.size();i+=3)
 		{
-			_vertCallback->exec(geo[i+k],col,uniforms[k],this);
-			mvpVertex[k] = uniforms[k].get("mvp_vert");
+			for(int k=0;k<3;++k)
+			{
+				_vertCallback->exec(geo[i+k],col,uniforms[k],this);
+				mvpVertex[k] = uniforms[k].get("mvp_vert");
+			}
+			
+			Vec3 p1p2 = mvpVertex[1] - mvpVertex[0];
+			Vec3 p1p3 = mvpVertex[2] - mvpVertex[0];
+			Vec3 dir = p1p2.cross(p1p3);
+			
+			bool cullTest = _cull==Cull_None;
+			if(!cullTest) cullTest = (dir[2]>0) && _cull==Cull_Back;
+			if(!cullTest) cullTest = (dir[2]<0) && _cull==Cull_Front;
+			
+			if(cullTest)
+			{
+				_rasterizer.setUniforms3(uniforms[0],uniforms[1],uniforms[2]);
+				_rasterizer.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
+			}
 		}
-		
-		Vec3 p1p2 = mvpVertex[1] - mvpVertex[0];
-		Vec3 p1p3 = mvpVertex[2] - mvpVertex[0];
-		Vec3 dir = p1p2.cross(p1p3);
-		
-		bool cullTest = _cull==Cull_None;
-		if(!cullTest) cullTest = (dir[2]>0) && _cull==Cull_Back;
-		if(!cullTest) cullTest = (dir[2]<0) && _cull==Cull_Front;
-		
-		if(cullTest)
+	}
+	else if(geo.getPrimitive() == Geometry::Primitive_Lines)
+	{
+		for(int i=0;i<(int)geo.size();i+=2)
 		{
-			_rasterizer.setUniforms3(uniforms[0],uniforms[1],uniforms[2]);
-			_rasterizer.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
+			for(int k=0;k<2;++k)
+			{
+				_vertCallback->exec(geo[i+k],col,uniforms[k],this);
+				mvpVertex[k] = uniforms[k].get("mvp_vert");
+			}
+			
+			_rasterizer.setUniforms2(uniforms[0],uniforms[1]);
+			_rasterizer.line(mvpVertex[0],mvpVertex[1]);
 		}
 	}
 }

@@ -253,6 +253,13 @@ void GlPlugin::init(Target* target)
 }
 
 //--------------------------------------------------------------
+void GlPlugin::unbind(Target* target)
+{
+	FboData::Ptr d = std::dynamic_pointer_cast<FboData>( target->_d );
+	d->frames.unbind();
+}
+
+//--------------------------------------------------------------
 void GlPlugin::bringBack(Image::Ptr img, Data::Ptr data, int n)
 {
 	if(data->ty == Ty_Tex)

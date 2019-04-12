@@ -116,6 +116,10 @@ void CpuRenderPlugin::apply(const ClearNode* clear)
 	
 	r.init();
 	
+	/*if(clear->isColorEnable()) r.setClearColor(0, clear->getColor() * 255.0);
+	if(clear->isDepthEnable()) r.setClearColor(1, clear->getDepth() * 255.0);
+	r.clearTargets();*/
+	
 	if(clear->isColorEnable()) r.getTarget(0)->fill(clear->getColor() * 255.0);
 	if(clear->isDepthEnable()) r.getTarget(1)->fill(clear->getDepth() * 255.0);
 }

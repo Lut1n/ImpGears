@@ -153,6 +153,15 @@ void GeometryRenderer::setTarget(int id, Image::Ptr& target, Vec4 clearValue)
 }
 
 //--------------------------------------------------------------
+void GeometryRenderer::setClearColor(int targetId, const Vec4& clearValue)
+{
+	if(targetId>0 && targetId < (int)_targets.size())
+	{
+		_clearColors[targetId] = clearValue;
+	}
+}
+
+//--------------------------------------------------------------
 Image::Ptr GeometryRenderer::getTarget(int id)
 {
 	return _targets[id];

@@ -32,6 +32,7 @@ public:
 	void render(const Geometry& geo);
 	
 	void setTarget(int id, Image::Ptr& target, Vec4 clearValue = Vec4(0.0));
+	void setClearColor(int targetId, const Vec4& clearValue);
 	
 	Image::Ptr getTarget(int id);
 	const Image::Ptr getTarget(int id) const;

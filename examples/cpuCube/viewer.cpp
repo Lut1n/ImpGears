@@ -1,37 +1,71 @@
 #include <Core/Matrix3.h>
-#include <Graphics/GeometryRenderer.h>
+#include <SceneGraph/GraphRenderer.h>
+#include <SceneGraph/GeoNode.h>
 
 #include <SFML/Graphics.hpp>
 
 #include <ctime>
 
+
+struct IGStuff
+{
+	imp::GraphRenderer::Ptr renderer;
+	imp::SceneNode::Ptr graphRoot;
+	imp::Camera::Ptr camera;
+	imp::Target::Ptr target;
+	
+	imp::Vec4 viewport;
+	imp::Vec3 initCamPos;
+	
+	IGStuff()
+	{
+		viewport.set(0.0,0.0,256.0,256.0);
+		
+		target = imp::Target::create();
+		target->create((int)viewport.z(),(int)viewport.w(),1,true);
+		
+		renderer = imp::GraphRenderer::create();
+		renderer->getInitState()->setTarget(target);
+		renderer->getInitState()->setViewport( viewport );
+	
+		imp::Geometry cubeGeo = imp::Geometry::cube();
+		imp::GeoNode::Ptr cubeNode = imp::GeoNode::create(cubeGeo);
+		
+		initCamPos.set(10,0,3);
+		camera = imp::Camera::create();
+		camera->setPosition( initCamPos );
+		
+		graphRoot = imp::SceneNode::create();
+		graphRoot->addNode(camera);
+		graphRoot->addNode(cubeNode);
+	};
+	
+	void updateCamera(float angle)
+	{
+		camera->setPosition( initCamPos * imp::Matrix3::rotationZ(angle) );
+	}
+	
+	void render()
+	{
+		renderer->renderScene( graphRoot );
+	}
+};
+
+
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-	imp::Vec3 initialPos(10,0,3);
-	
-	imp::GeometryRenderer renderer;
-	imp::Vec4 vp = renderer.getViewport();
-    
-	imp::Image::Ptr rgb = imp::Image::create(vp[2],vp[3],4);
-    imp::Image::Ptr depth = imp::Image::create(vp[2],vp[3],1);
-	
-	renderer.setTarget(0,rgb);
-	renderer.setTarget(1,depth,imp::Vec4(255.0));
-	
-    imp::Geometry geometry = imp::Geometry::cube(); imp::Geometry::intoCCW(geometry);
-	
 	sf::RenderWindow* window = new sf::RenderWindow(sf::VideoMode(500, 500), "Cpu Renderer");
-	sf::Texture texture; texture.create(rgb->width(), rgb->height());
+	sf::Texture texture; texture.create(256, 256);
 	sf::Sprite sprite(texture);
+	
+	IGStuff engine;
 	
 	float target_fps = 60.0, current_fps = 60.0, acc = 1.0;
     double a = 0.0;
 	
 	int frames = 0;
 	sf::Clock c;
-	
-	renderer.init();
 	
 	while (window->isOpen())
 	{
@@ -46,14 +80,13 @@ int main(int argc, char* argv[])
 		window->display();
 		
 		a += 0.02 * acc; if(a > 2.0*3.141592) a = 0.0;
-		imp::Vec3 curr_pos = initialPos * imp::Matrix3::rotationZ(a);
-		renderer.setView( imp::Matrix4::view(curr_pos, imp::Vec3(0.0), imp::Vec3(0,0,1)) );
+		engine.updateCamera(a);
 		
-        renderer.clearTargets();
-		renderer.render(geometry);
+		engine.render();
 		
-        texture.update(rgb->data(),rgb->width(),rgb->height(),0,0);
-		sprite.setScale( 500.0 / rgb->width(), 500.0 / rgb->height() );
+		imp::Image::Ptr res = engine.target->get(0);
+        texture.update(res->data(),res->width(),res->height(),0,0);
+		sprite.setScale( 500.0 / res->width(), 500.0 / res->height() );
 		frames++;
 		
 		if(c.getElapsedTime().asMilliseconds() > 1000.0)

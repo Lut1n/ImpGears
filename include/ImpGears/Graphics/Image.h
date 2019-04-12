@@ -23,6 +23,8 @@ public:
     void setPixel(int x, int y, const Vec4& col);
     Vec4 getPixel(int x, int y) const;
     void fill(const Vec4& col);
+	
+	void resize(int w, int h, int chnls);
     
     int height() const;
     int width() const;

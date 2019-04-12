@@ -29,9 +29,7 @@ void memset32(Image::b8* ptr,const Vec4& color, int n)
 //--------------------------------------------------------------
 Image::Image(int w, int h, int chnls)
 {
-    _grid = Grid<3,Image::b8>::create(Dimension<3>(h,w,chnls));
-    _dims = _grid->size();
-    _buffer = _grid->data();
+	resize(w,h,chnls);
 }
 
 //--------------------------------------------------------------
@@ -102,6 +100,14 @@ const Image::b8* Image::data() const
 Image::b8* Image::data()
 {
 	return _buffer;
+}
+
+//--------------------------------------------------------------
+void Image::resize(int w, int h, int chnls)
+{
+	_grid = Grid<3,Image::b8>::create(Dimension<3>(h,w,chnls));
+	_dims = _grid->size();
+	_buffer = _grid->data();
 }
 
 IMPGEARS_END

@@ -42,6 +42,8 @@ public:
 	
 	virtual void init(Target* target) = 0;
 	
+	virtual void unbind(Target* target) = 0;
+	
 	virtual void bringBack(Image::Ptr img, Data::Ptr data, int n = 0) = 0;
 	
 	virtual void draw(Data::Ptr data) = 0;

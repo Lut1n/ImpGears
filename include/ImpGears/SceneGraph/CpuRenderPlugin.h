@@ -28,6 +28,8 @@ public:
 	
 	virtual void init(Target* target);
 	
+	virtual void unbind(Target* target);
+	
 	virtual void bringBack(Image::Ptr img, Data::Ptr data, int n = 0);
 	
 	virtual void draw(Data::Ptr data);

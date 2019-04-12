@@ -94,8 +94,9 @@ void CpuRenderPlugin::init()
 	std::cout << "CPU Renderer init" << std::endl;
 	if(s_internalState == nullptr)
 	{
+		imp::Vec4 vp(0.0,0.0,512.0,512.0);
 		s_internalState = new CpuRenderPlugin::Priv();
-		imp::Vec4 vp = s_internalState->geoRenderer.getViewport();
+		s_internalState->geoRenderer.setViewport( vp );
 		
 		s_internalState->depth = Image::create( vp[2] , vp[3], 1 );
 		
@@ -115,8 +116,8 @@ void CpuRenderPlugin::apply(const ClearNode* clear)
 	
 	r.init();
 	
-	if(clear->isColorEnable()) r.getTarget(0)->fill(clear->getColor());
-	if(clear->isDepthEnable()) r.getTarget(1)->fill(clear->getDepth());
+	if(clear->isColorEnable()) r.getTarget(0)->fill(clear->getColor() * 255.0);
+	if(clear->isDepthEnable()) r.getTarget(1)->fill(clear->getDepth() * 255.0);
 }
 
 //--------------------------------------------------------------
@@ -153,6 +154,13 @@ void CpuRenderPlugin::setLineW(float lw)
 void CpuRenderPlugin::setViewport(Vec4 vp)
 {
 	s_internalState->geoRenderer.setViewport( vp );
+	
+	Image::Ptr depth = s_internalState->depth;
+	if( vp[2] != depth->width() || vp[3] != depth->height() )
+	{
+		depth->resize( vp[2] , vp[3], 1 );
+		s_internalState->geoRenderer.setTarget(1,s_internalState->depth, Vec4(255.0));
+	}
 }
 
 //--------------------------------------------------------------
@@ -245,6 +253,15 @@ void CpuRenderPlugin::init(Target* target)
 	TgtData::Ptr d = TgtData::create();
 	d->tgt = target;
 	target->_d = d;
+}
+
+//--------------------------------------------------------------
+void CpuRenderPlugin::unbind(Target* target)
+{
+	s_internalState->target = &s_internalState->defaultTarget;
+
+	Image::Ptr tgt = s_internalState->target->get(0);
+	s_internalState->geoRenderer.setTarget(0,tgt,Vec4(0.0));
 }
 
 //--------------------------------------------------------------

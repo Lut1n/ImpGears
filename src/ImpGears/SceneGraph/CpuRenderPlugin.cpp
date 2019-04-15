@@ -3,6 +3,7 @@
 #include <SceneGraph/Sampler.h>
 #include <SceneGraph/Target.h>
 #include <SceneGraph/CpuRenderPlugin.h>
+#include <SceneGraph/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include <Graphics/Rasterizer.h>
@@ -201,7 +202,7 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const Sampler* sampler)
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const std::string& vert, const std::string& frag)
+CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const ShaderDsc* program)
 {
 	ShaData::Ptr d = ShaData::create();
 	return d;

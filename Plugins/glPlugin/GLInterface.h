@@ -25,7 +25,7 @@ public:
 	
 	virtual Data::Ptr load(const Sampler* samper);
 	
-	virtual Data::Ptr load(const std::string& vert, const std::string& frag);
+	virtual Data::Ptr load(const ShaderDsc* program);
 	
 	virtual void update(Data::Ptr data, const Sampler* sampler);
 	

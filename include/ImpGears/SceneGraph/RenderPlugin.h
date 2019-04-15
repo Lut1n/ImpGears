@@ -15,6 +15,7 @@ class Geometry;
 class Sampler;
 class Uniform;
 class Target;
+class ShaderDsc;
 
 class IMP_API RenderPlugin : public Object
 {
@@ -34,7 +35,7 @@ public:
 	
 	virtual Data::Ptr load(const Sampler* sampler) = 0;
 	
-	virtual Data::Ptr load(const std::string& vert, const std::string& frag) = 0;
+	virtual Data::Ptr load(const ShaderDsc* program) = 0;
 	
 	virtual void update(Data::Ptr data, const Sampler* sampler) = 0;
 	

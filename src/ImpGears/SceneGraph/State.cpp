@@ -141,7 +141,7 @@ void State::apply() const
 		if(_shaderChanged)
 		{
 			if(_shader->_d == nullptr)
-				_shader->_d = GraphRenderer::s_interface->load(_shader->vertCode, _shader->fragCode);
+				_shader->_d = GraphRenderer::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
 			GraphRenderer::s_interface->bind(_shader->_d);
 		}
 		if(_shader->_d != nullptr && _uniformsChanged)

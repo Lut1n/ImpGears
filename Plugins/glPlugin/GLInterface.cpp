@@ -2,6 +2,7 @@
 #include <SceneGraph/State.h>
 #include <SceneGraph/Sampler.h>
 #include <SceneGraph/Target.h>
+#include <SceneGraph/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include "GlError.h"
@@ -198,12 +199,12 @@ GlPlugin::Data::Ptr GlPlugin::load(const Sampler* sampler)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const std::string& vert, const std::string& frag)
+GlPlugin::Data::Ptr GlPlugin::load(const ShaderDsc* program)
 {
-	bool alt = vert.empty();
+	bool alt = program->vertCode.empty();
 	ProgData::Ptr d = ProgData::create();
 	if(alt) d->sha.load(basicVert.c_str(),basicFrag.c_str());
-	else d->sha.load(vert.c_str(),frag.c_str());
+	else d->sha.load(program->vertCode.c_str(),program->fragCode.c_str());
 	return d;
 }
 

@@ -1,8 +1,4 @@
 #include <Geometry/Geometry.h>
-#include <SceneGraph/DefaultShader.h>
-#include <SceneGraph/GraphRenderer.h>
-#include <SceneGraph/RenderTarget.h>
-#include <SceneGraph/QuadNode.h>
 #include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
 #include <Graphics/Rasterizer.h>
@@ -15,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <Utils/FileInfo.h>
+#include <Utils/ImageIO.h>
 
 #include <ctime>
 #include <vector>
@@ -105,63 +102,6 @@ void renderVertex(std::vector<Vec3>& buf, std::vector<Vec3>& col, Image::Ptr* ta
 
 #include "model.h"
 
-
-struct Screen
-{
-	sf::RenderWindow* window;
-	imp::GraphRenderer::Ptr renderer;
-	imp::Texture::Ptr texture;
-	imp::State::Ptr state;
-	imp::Shader::Ptr defaultShader;
-	imp::QuadNode::Ptr screen;
-	imp::Uniform::Ptr u_tex;
-    
-	Screen()
-	{
-		window = new sf::RenderWindow(sf::VideoMode(500, 500), "My window", sf::Style::Default, sf::ContextSettings(24));
-		window->setFramerateLimit(60);
-		window->setTitle("Cpu Renderer");
-
-		renderer = imp::GraphRenderer::create();
-
-		texture = imp::Texture::create();
-		texture->setSmooth(true);
-		
-		
-		std::string c_vert = loadShader("defaultshader.vert");
-		std::string c_frag = loadShader("defaultshader.frag");
-		defaultShader = imp::Shader::create(c_vert.c_str(),c_frag.c_str());
-		
-		screen = imp::QuadNode::create();
-		
-		// screen render parameters
-		state = screen->getState();
-		state->setShader(defaultShader);
-		state->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
-		state->setViewport(0.0, 0.0, 500.0, 500.0);
-		
-		u_tex = imp::Uniform::create("u_colorTexture", imp::Uniform::Type_1i);
-		u_tex->set(0);
-		defaultShader->addUniform(u_tex);
-	}
-	
-	virtual ~Screen()
-	{
-		delete imp::VBOManager::getInstance();
-	}
-	
-	
-	std::string loadShader(const char* filename)
-	{
-        std::ifstream ifs(filename);
-        std::string buffer( (std::istreambuf_iterator<char>(ifs) ),
-                            (std::istreambuf_iterator<char>()    ) );
-		return buffer;
-	}
-
-
-};
-
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
@@ -190,8 +130,6 @@ int main(int argc, char* argv[])
 	
     double a = 0.0;
 	
-	Screen* screen = new Screen();
- 
     defaultFrag = DefaultRenderFrag::create();
     lightFrag = LightRenderFrag::create();
     terrFrag = TerrRenderFrag::create();
@@ -214,39 +152,48 @@ int main(int argc, char* argv[])
     Vec4 fillColor(100.0,100.0,255.0,255.0);
     Vec4 fillDepth(255.0,255.0,255.0,255.0);
 	
-	while (screen->window->isOpen())
+	
+	sf::RenderWindow* window = 
+		new sf::RenderWindow(sf::VideoMode(500, 500), "CPU rendering", sf::Style::Default, sf::ContextSettings(24));
+	window->setFramerateLimit(60);
+	window->setTitle("Cpu Renderer");
+	sf::Texture texture;
+	sf::Sprite sprite;
+	texture.create(CONFIG_WIDTH,CONFIG_HEIGHT);
+	sprite.setTexture(texture);
+	sprite.setPosition( 0, 500 );
+	sprite.scale( 500.0/CONFIG_WIDTH, -500.0/CONFIG_HEIGHT );
+	
+	while (window->isOpen())
 	{
 		sf::Event event;
-		while (screen->window->pollEvent(event))
+		while (window->pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed) screen->window->close();
+			if (event.type == sf::Event::Closed) window->close();
 		}
 		
-		screen->texture->bind();
-		SceneNode::Ptr toRender = screen->screen;
-		screen->renderer->renderScene( toRender );
-
-		screen->window->display();
 		a += 0.02;
 		if(a > 2.0*3.141592) a = 0.0;
 		
-		imp::Matrix4 rot = imp::Matrix4::rotationZ(a);
-		Vec3 cam  = Vec3(Vec4(cam_position) * rot);
+		Vec3 cam  = Vec3(Vec4(cam_position) * imp::Matrix4::rotationZ(a));
 		state.view = imp::Matrix4::view(cam, cam_target, cam_up);
 		
-        targets[0]->fill(fillColor);
-        targets[1]->fill(fillDepth);
+		targets[0]->fill(fillColor);
+		targets[1]->fill(fillDepth);
         
 		state.model = imp::Matrix4::translation(0.0, 0.0, -2.0);
 		renderVertex(vertexPlane, colorPlane, targets,defaultVert, terrFrag);
 		state.model = imp::Matrix4::translation(0.0, 0.0, 0.0);
 		renderVertex(vertexRock, colorRock, targets,defaultVert, defaultFrag);
-		// state.model = imp::Matrix4::translation(0.0, 0.0, 1.0);
-		// renderVertex(vertexHat, colorHat, targets,defaultVert, defaultFrag);
 		state.model = imp::Matrix4::translation(1.0, 1.0, 0.0);
 		renderVertex(vertexBall, colorBall, targets,defaultVert, lightFrag);
 		
-        screen->texture->loadFromImage(targets[0]);
+		texture.update(targets[0]->data());
+		// imp::ImageIO::save(targets[0],"output.tga"); // debug
+		
+		window->draw(sprite);
+		window->display();
+		
 		frames++;
 		
 		if(c.getElapsedTime().asMilliseconds() > 1000.0)

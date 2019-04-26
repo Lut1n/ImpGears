@@ -23,10 +23,26 @@ inline float applyMode(float& c, ImageSampler::Mode mode)
 
 //--------------------------------------------------------------
 ImageSampler::ImageSampler(Image::Ptr src, Mode mode)
-	: _src(src)
-	, _mode(mode)
+	: _mode(mode)
 {
-	_dims=Vec2((float)_src->width(),(float)_src->height());
+	setSource(src);
+}
+
+//--------------------------------------------------------------
+void ImageSampler::setSource(Image::Ptr src)
+{
+	_src = src;
+	
+	if(_src != nullptr)
+		_dims=Vec2((float)_src->width(),(float)_src->height());
+	else
+		_dims=Vec2(0.0);
+}
+
+//--------------------------------------------------------------
+Image::Ptr ImageSampler::getSource() const
+{
+	return _src;
 }
 
 //--------------------------------------------------------------
@@ -38,6 +54,8 @@ Vec4 ImageSampler::operator()(const Vec2& uv)
 //--------------------------------------------------------------
 Vec4 ImageSampler::get(const Vec2& uv_orig)
 {
+	if(_src == nullptr) return Vec4(0.0);
+	
 	Vec2 uv = uv_orig;
 	for(int i=0;i<2;++i)uv[i]=applyMode(uv[i],_mode);
 	Vec2 coords = uv * _dims;
@@ -68,6 +86,8 @@ Vec4 ImageSampler::get(const Vec2& uv_orig)
 //--------------------------------------------------------------
 void ImageSampler::set(const Vec2& uv_orig, const Vec4& color)
 {
+	if(_src == nullptr) return;
+	
 	Vec2 uv = uv_orig;
 	for(int i=0;i<2;++i)uv[i]=applyMode(uv[i],_mode);
 	Vec2 coords = uv * _dims;

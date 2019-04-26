@@ -44,7 +44,9 @@ public:
 		Mode_Repeat
 	};
 	
-	ImageSampler(Image::Ptr src, Mode mode = Mode_Clamp);
+	ImageSampler(Image::Ptr src = nullptr, Mode mode = Mode_Clamp);
+	void setSource(Image::Ptr src);
+	Image::Ptr getSource() const;
 	
 	virtual Vec4 operator()(const Vec2& uv);
 	

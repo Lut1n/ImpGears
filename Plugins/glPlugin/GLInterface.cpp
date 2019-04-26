@@ -1,6 +1,6 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <SceneGraph/Sampler.h>
+#include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/Target.h>
 #include <SceneGraph/Uniform.h>
 #include <Geometry/Geometry.h>
@@ -185,13 +185,13 @@ GlPlugin::Data::Ptr GlPlugin::load(const Geometry* geo)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const Sampler* sampler)
+GlPlugin::Data::Ptr GlPlugin::load(const TextureSampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
 	TexData::Ptr d = TexData::create();
 	d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
-	d->tex.setSmooth(sampler->hasSmoothEnable());
-	d->tex.setRepeated(sampler->hasRepeatedEnable());
+	d->tex.setSmooth( sampler->getInterpo() != ImageSampler::Interpo_Nearest );
+	d->tex.setRepeated( sampler->getMode() == ImageSampler::Mode_Repeat );
 	d->tex.setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
 	// sampler->_d = d;
 	
@@ -209,7 +209,7 @@ GlPlugin::Data::Ptr GlPlugin::load(const ShaderDsc* program)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(Data::Ptr data, const Sampler* sampler)
+void GlPlugin::update(Data::Ptr data, const TextureSampler* sampler)
 {
 	if(data->ty == Ty_Tex)
 	{

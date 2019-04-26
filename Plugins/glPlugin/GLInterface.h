@@ -23,11 +23,11 @@ public:
 	
 	virtual Data::Ptr load(const Geometry* geo);
 	
-	virtual Data::Ptr load(const Sampler* samper);
+	virtual Data::Ptr load(const TextureSampler* samper);
 	
 	virtual Data::Ptr load(const ShaderDsc* program);
 	
-	virtual void update(Data::Ptr data, const Sampler* sampler);
+	virtual void update(Data::Ptr data, const TextureSampler* sampler);
 	
 	virtual void bind(Data::Ptr data);
 	

@@ -1,6 +1,6 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <SceneGraph/Sampler.h>
+#include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/Target.h>
 #include <SceneGraph/CpuRenderPlugin.h>
 #include <SceneGraph/Uniform.h>
@@ -67,7 +67,7 @@ struct ImgData : public RenderPlugin::Data
 	Meta_Class(ImgData)
 	ImgData() { ty=RenderPlugin::Ty_Tex; }
 	
-	const Sampler* sampler;
+	const TextureSampler* sampler;
 };
 
 //--------------------------------------------------------------
@@ -192,7 +192,7 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const Geometry* geo)
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const Sampler* sampler)
+CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const TextureSampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
 	ImgData::Ptr d = ImgData::create();
@@ -209,7 +209,7 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const ShaderDsc* program)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::update(Data::Ptr data, const Sampler* sampler)
+void CpuRenderPlugin::update(Data::Ptr data, const TextureSampler* sampler)
 {
 	if(data->ty == Ty_Tex)
 	{

@@ -12,7 +12,7 @@ IMPGEARS_BEGIN
 class ClearNode;
 class State;
 class Geometry;
-class Sampler;
+class TextureSampler;
 class Uniform;
 class Target;
 class ShaderDsc;
@@ -33,11 +33,11 @@ public:
 	
 	virtual Data::Ptr load(const Geometry* geo) = 0;
 	
-	virtual Data::Ptr load(const Sampler* sampler) = 0;
+	virtual Data::Ptr load(const TextureSampler* sampler) = 0;
 	
 	virtual Data::Ptr load(const ShaderDsc* program) = 0;
 	
-	virtual void update(Data::Ptr data, const Sampler* sampler) = 0;
+	virtual void update(Data::Ptr data, const TextureSampler* sampler) = 0;
 	
 	virtual void bind(Data::Ptr data) = 0;
 	

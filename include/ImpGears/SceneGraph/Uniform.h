@@ -6,7 +6,7 @@
 
 #include <Core/Object.h>
 #include <Core/Matrix4.h>
-#include <SceneGraph/Sampler.h>
+#include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/RenderPlugin.h>
 
 IMPGEARS_BEGIN
@@ -79,7 +79,7 @@ class IMP_API Uniform : public Object
 	
 	Value getValue() const { return value; }
 	Type getType() const { return type; }
-	const Sampler::Ptr getSampler() const {return _sampler;}
+	const TextureSampler::Ptr getSampler() const {return _sampler;}
 	std::uint32_t getCount() const {return count;}
 	
 	Meta_Class(Uniform)
@@ -104,7 +104,7 @@ class IMP_API Uniform : public Object
 	
 	void set(const Matrix4* mat4Array, int count = 1);
 	
-	void set(const Sampler::Ptr& sampler, std::int32_t textureUnit = 0);
+	void set(const TextureSampler::Ptr& sampler, std::int32_t textureUnit = 0);
 	
 	const std::string& getID() const {return id;}
 	
@@ -116,7 +116,7 @@ class IMP_API Uniform : public Object
 	std::uint32_t count;
 	Type type;
 	Value value;
-	Sampler::Ptr _sampler;
+	TextureSampler::Ptr _sampler;
 	
 };
 

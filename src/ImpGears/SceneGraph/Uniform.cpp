@@ -82,7 +82,7 @@ void Uniform::set(const Matrix4* mat4Array, int count)
 }
 
 //--------------------------------------------------------------
-void Uniform::set(const Sampler::Ptr& sampler, std::int32_t textureUnit)
+void Uniform::set(const TextureSampler::Ptr& sampler, std::int32_t textureUnit)
 {
 	this->type = Type_Sampler;
 	value.value_1i = textureUnit;

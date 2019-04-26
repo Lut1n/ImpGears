@@ -1,0 +1,25 @@
+{
+	"properties":
+	{
+		"width":256,
+		"height":256,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01", "seed":189422.10932},
+		{"op":"save", "input_id":"hash_01", "filename":"./output/test_morpho_01_no.tga"},
+		{"op":"save", "input_id":"dila_01", "filename":"./output/test_morpho_01_dila.tga"},
+		{"op":"save", "input_id":"erosion_01", "filename":"./output/test_morpho_01_erosion.tga"},
+		{"op":"save", "input_id":"open_01", "filename":"./output/test_morpho_01_open.tga"},
+		{"op":"save", "input_id":"close_01", "filename":"./output/test_morpho_01_close.tga"},
+		{"op":"save", "input_id":"signal_01", "filename":"./output/test_morpho_01_distord.tga"},
+		
+		{"op":"dilatation", "input_id":"hash_01", "id":"dila_01"},
+		{"op":"erosion", "input_id":"hash_01", "id":"erosion_01"},
+		
+		{"op":"dilatation", "input_id":"erosion_01", "id":"open_01"},
+		{"op":"erosion", "input_id":"dila_01", "id":"close_01"},
+		
+		{"op":"signal", "signal_type":"radial", "distorsion":"close_01", "freq":8.0, "base":0.0, "ampl":1.0,"x":0.5, "y":0.75, "id":"signal_01"},
+	]
+}

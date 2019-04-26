@@ -1,0 +1,20 @@
+{
+	"properties":
+	{
+		"width":512,
+		"height":512,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01"},
+		{"op":"fbm", "noise_type":"perlin", "input_id":"hash_01", "freq":4.0, "octaves":8.0, "persist":0.6, "id":"noise_01"},
+		{"op":"signal", "signal_type":"directional", "freq":4.0, "ampl":1.0, "x":2.0, "y":3.0, "id":"signal_01"},
+		{"op":"bumpToNormal", "input_id":"noise_01", "id":"perturb_01"},
+		{"op":"blur", "input_id":"perturb_01", "id":"perturb_02"},
+		{"op":"perturbate", "input_id":"signal_01", "uvmap":"perturb_02", "intensity":0.01, "id":"marble_01"},
+		{"op":"save", "input_id":"marble_01", "filename":"./output/basic_marble.tga"},
+		{"op":"save", "input_id":"perturb_02", "filename":"./output/basic_flow_02.tga"},
+		{"op":"save", "input_id":"noise_01", "filename":"./output/basic_fbm_02.tga"},
+		{"op":"save", "input_id":"perturb_01", "filename":"./output/basic_flow_01.tga"},
+	]
+}

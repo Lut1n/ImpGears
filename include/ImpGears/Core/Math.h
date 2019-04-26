@@ -57,6 +57,7 @@ IMP_API Ty frac(Ty v)
 template<typename Ty>
 IMP_API Ty smoothstep(Ty edge0, Ty edge1, float delta)
 {
+	delta = (delta-edge0) / (edge1-edge0);
     Ty x = clamp<Ty>(delta, 0.0, 1.0); 
     return x*x*(3.0 - 2.0*x);
 }

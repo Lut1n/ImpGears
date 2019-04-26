@@ -1,1 +1,0 @@
-../textureGeneration/test.exe atlas-generation.json

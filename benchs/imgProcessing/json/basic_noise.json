@@ -1,0 +1,24 @@
+{
+	"properties":
+	{
+		"width":512,
+		"height":512,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01"},
+		{"op":"noise", "input_id":"hash_01", "freq":32.0, "id":"noise_01"},
+		{"op":"voronoi", "input_id":"hash_01", "freq":12.0, "id":"cell_01"},
+		{"op":"fbm", "input_id":"hash_01", "freq":12.0, "octaves":3.0, "persist":0.7, "noise_type":"perlin", "id":"fbm_01"},
+		{"op":"fbm", "input_id":"hash_01", "freq":12.0, "octaves":3.0, "persist":0.7, "noise_type":"voronoi", "id":"fbm_02"},
+		{"op":"signal", "signal_type":"directional", "freq":4.0, "ampl":1.0, "x":2.0, "y":3.0, "id":"signal_01"},
+		{"op":"signal", "signal_type":"radial", "freq":8.0, "base":3.0, "ampl":2.7,"x":0.5, "y":0.75, "id":"signal_02"},
+		{"op":"save", "input_id":"noise_01", "filename":"./output/basic_noise.tga"},
+		{"op":"save", "input_id":"cell_01", "filename":"./output/basic_cell.tga"},
+		{"op":"save", "input_id":"hash_01", "filename":"./output/basic_hash.tga"},
+		{"op":"save", "input_id":"fbm_01", "filename":"./output/basic_fbm_perlin.tga"},
+		{"op":"save", "input_id":"fbm_02", "filename":"./output/basic_fbm_voronoi.tga"},
+		{"op":"save", "input_id":"signal_01", "filename":"./output/basic_directional.tga"},
+		{"op":"save", "input_id":"signal_02", "filename":"./output/basic_radial.tga"},
+	]
+}

@@ -1,0 +1,12 @@
+{
+	"properties":
+	{
+		"width":512,
+		"height":512,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01", "seed":1245.71436},
+		{"op":"voronoi", "input_id":"hash_01", "freq":4.0, "id":"cell_01"},
+	]
+}

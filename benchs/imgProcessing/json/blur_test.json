@@ -1,0 +1,22 @@
+{
+	"properties":
+	{
+		"width":32,
+		"height":32,
+	},
+	"operations":
+	[
+		{"op":"save", "input_id":"hash_01", "filename":"./output/test_blur_01_no.tga"},
+		{"op":"save", "input_id":"blur_01", "filename":"./output/test_blur_01_yes.tga"},
+		{"op":"save", "input_id":"hash_02", "filename":"./output/test_blur_02_no.tga"},
+		{"op":"save", "input_id":"blur_02", "filename":"./output/test_blur_02_yes.tga"},
+		{"op":"save", "input_id":"hash_03", "filename":"./output/test_blur_03_no.tga"},
+		{"op":"save", "input_id":"blur_03", "filename":"./output/test_blur_03_yes.tga"},
+		{"op":"blur", "input_id":"hash_01", "id":"blur_01"},
+		{"op":"blur", "input_id":"hash_02", "id":"blur_02"},
+		{"op":"blur", "input_id":"hash_03", "id":"blur_03"},
+		{"op":"hash", "id":"hash_01"},
+		{"op":"hash", "id":"hash_02", "seed":21482.764},
+		{"op":"hash", "id":"hash_03", "seed":189422.10932},
+	]
+}

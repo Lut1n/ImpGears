@@ -8,7 +8,7 @@ struct DefaultFragCallback : public FragCallback
 {
 	Meta_Class(DefaultFragCallback)
 
-	virtual void exec(ImageBuf& targets, const Vec3& pt, Uniforms* uniforms = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
 	{
 		int rgb_target = 0, depth_target = 1;
 		// depth test
@@ -32,13 +32,13 @@ struct DefaultFragCallback : public FragCallback
  {
 	Meta_Class(DefaultVertCallback)
 
-	virtual void exec(const Vec3& vert_in, const Vec3& vert_in2, Uniforms& out_uniforms, const GeometryRenderer* rder)
+	virtual void exec(const Vec3& vert, const Vec3& col, const Vec3& normal, const Vec3& tex, const CnstUniforms& cu, Uniforms& out_uniforms, const GeometryRenderer* rder)
 	{
 		Vec4 vp = rder->getViewport();
 		Vec4 win1(vp[2]*0.5, vp[3]*0.5, 1.0, 1.0);
 		Vec4 win2(vp[2]*0.5, vp[3]*0.5, 0.0, 0.0);
 		
-		Vec4 vertex = vert_in;
+		Vec4 vertex = vert;
 		Vec4 mvertex = vertex * rder->getModel();
 		Vec4 mvvertex = mvertex * rder->getView();
 		Vec4 mvpvertex = mvvertex * rder->getProj();
@@ -49,11 +49,13 @@ struct DefaultFragCallback : public FragCallback
 		
 		mvpvertex *= win1; mvpvertex += win2;
 		
-		out_uniforms.set("v_vert",vert_in);
+		out_uniforms.set("v_vert",vertex);
 		out_uniforms.set("m_vert",mvertex);
 		out_uniforms.set("mv_vert",mvvertex);
 		out_uniforms.set("mvp_vert",mvpvertex);
-		out_uniforms.set("col_vert",vert_in2);
+		out_uniforms.set("col_vert",col);
+		out_uniforms.set("normal_vert",normal);
+		out_uniforms.set("tex_vert",tex);
     }
  };
 
@@ -65,8 +67,8 @@ GeometryRenderer::GeometryRenderer()
 	_model = Matrix4::translation(0.0, 0.0, 0.0);
 	_viewport = Vec4(0,0,512,512);
 	
-	_vertCallback = DefaultVertCallback::create();
-	_fragCallback = DefaultFragCallback::create();
+	setDefaultVertCallback();
+	setDefaultFragCallback();
 	_cull = Cull_Back;
 }
 
@@ -93,10 +95,13 @@ void GeometryRenderer::clearTargets()
 void GeometryRenderer::render(const Geometry& geo)
 {
 	init();
+	_rasterizer.setCnstUniforms(_uniforms);
 	
 	Uniforms uniforms[3];
 	Vec3 mvpVertex[3];
 	Vec3 col(1.0);
+	Vec3 normal(0.0,0.0,1.0);
+	Vec3 tex(0.0);
 
 	if(geo.getPrimitive() == Geometry::Primitive_Triangles)
 	{
@@ -104,7 +109,11 @@ void GeometryRenderer::render(const Geometry& geo)
 		{
 			for(int k=0;k<3;++k)
 			{
-				_vertCallback->exec(geo[i+k],col,uniforms[k],this);
+				if(geo._hasColors) col = geo._colors[i+k];
+				if(geo._hasNormals) normal = geo._normals[i+k];
+				if(geo._hasTexCoords) tex = geo._texCoords[i+k];
+				
+				_vertCallback->exec(geo[i+k],col,normal,tex,_uniforms,uniforms[k],this);
 				mvpVertex[k] = uniforms[k].get("mvp_vert");
 			}
 			
@@ -129,7 +138,11 @@ void GeometryRenderer::render(const Geometry& geo)
 		{
 			for(int k=0;k<2;++k)
 			{
-				_vertCallback->exec(geo[i+k],col,uniforms[k],this);
+				if(geo._hasColors) col = geo._colors[i+k];
+				if(geo._hasNormals) normal = geo._normals[i+k];
+				if(geo._hasTexCoords) tex = geo._texCoords[i+k];
+				
+				_vertCallback->exec(geo[i+k],col,normal,tex,_uniforms,uniforms[k],this);
 				mvpVertex[k] = uniforms[k].get("mvp_vert");
 			}
 			
@@ -207,6 +220,36 @@ void GeometryRenderer::setViewport(const Vec4& viewport)
 void GeometryRenderer::setCullMode(Cull mode)
 {
 	_cull = mode;
+}
+
+//--------------------------------------------------------------
+void GeometryRenderer::setUniforms(const CnstUniforms& cu)
+{
+	_uniforms = cu;
+}
+
+//--------------------------------------------------------------
+void GeometryRenderer::setDefaultVertCallback()
+{
+	_vertCallback = DefaultVertCallback::create();
+}
+
+//--------------------------------------------------------------
+void GeometryRenderer::setDefaultFragCallback()
+{
+	_fragCallback = DefaultFragCallback::create();
+}
+
+//--------------------------------------------------------------
+void GeometryRenderer::setVertCallback(const VertCallback::Ptr& callback)
+{
+	_vertCallback = callback;
+}
+
+//--------------------------------------------------------------
+void GeometryRenderer::setFragCallback(const FragCallback::Ptr& callback)
+{
+	_fragCallback = callback;
 }
 
 //--------------------------------------------------------------

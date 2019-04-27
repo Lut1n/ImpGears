@@ -2,7 +2,7 @@
 #include <SceneGraph/State.h>
 #include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/Target.h>
-#include <SceneGraph/Uniform.h>
+#include <Graphics/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include "GlError.h"

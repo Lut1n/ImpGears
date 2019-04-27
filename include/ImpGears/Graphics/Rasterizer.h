@@ -4,12 +4,15 @@
 #include <Core/Math.h>
 #include <Core/Vec3.h>
 #include <Graphics/Image.h>
+#include <Graphics/Uniform.h>
 
 #include <map>
 #include <vector>
 
 IMPGEARS_BEGIN
-    
+
+using CnstUniforms = std::map<std::string,Uniform::Ptr>;
+
 struct IMP_API Uniforms
 {
     std::map<std::string, int> _adr;
@@ -48,7 +51,7 @@ using UniformBuf = std::vector<Uniforms>;
 struct IMP_API FragCallback : public imp::Object
 {
     Meta_Class(FragCallback)
-    virtual void exec(ImageBuf& targets, const Vec3& pt, Uniforms* uniforms = nullptr) = 0;
+    virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr) = 0;
 };
 
 class IMP_API Rasterizer : public imp::Object
@@ -57,6 +60,7 @@ public:
     
     ImageBuf _targets;
     UniformBuf _uniforms;
+	CnstUniforms _cnstUniforms;
     imp::Vec4 _defaultColor;
     FragCallback::Ptr _fragCallback;
     
@@ -71,6 +75,8 @@ public:
     void setTarget(imp::Image::Ptr target);
     void setColor(const imp::Vec4& col);
     void clearUniforms();
+	void setCnstUniforms(const CnstUniforms& cu);
+	void clearCnstUniforms();
     void setUniforms2(const Uniforms& u1, const Uniforms& u2);
     void setUniforms3(const Uniforms& u1, const Uniforms& u2, const Uniforms& u3);
     void setFragCallback(FragCallback::Ptr cb);

@@ -35,12 +35,13 @@ class IMP_API Geometry : public Object
 	
 	Primitive _prim;
 	BufType _vertices;
+	BufType _colors;
+	BufType _normals;
 	TexCoordBuf _texCoords;
 	
 	bool _hasTexCoords;
-	
-	// std::vector<Vec3> _normals;
-	//std::vector<unsigned int> _indices;
+	bool _hasColors;
+	bool _hasNormals;
 	
 	Meta_Class(Geometry)
 	
@@ -96,6 +97,9 @@ class IMP_API Geometry : public Object
 	Geometry subdivise(int count);
 	
 	void setTexCoords(const TexCoordBuf& coords);
+	void setVertices(const BufType& vertices);
+	void setColors(const BufType& colors);
+	void setNormals(const BufType& normals);
 	
 	static void intoCCW( Geometry& buf );
 

@@ -3,7 +3,7 @@
 #include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/Target.h>
 #include <SceneGraph/CpuRenderPlugin.h>
-#include <SceneGraph/Uniform.h>
+#include <Graphics/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include <Graphics/Rasterizer.h>

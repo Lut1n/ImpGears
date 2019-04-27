@@ -22,27 +22,37 @@ inline Vec3 mix(const Vec3& v1, const Vec3& v2, double f)
 Geometry::Geometry()
 	: _prim(Primitive_Lines)
 	, _hasTexCoords(false)
+	, _hasColors(false)
+	, _hasNormals(false)
 	{}
 
 Geometry::Geometry(const Geometry& other)
 	: _prim(other._prim)
 	, _hasTexCoords(other._hasTexCoords)
+	, _hasColors(other._hasColors)
+	, _hasNormals(other._hasNormals)
 {
 	_vertices = other._vertices;
 	_texCoords = other._texCoords;
+	_normals = other._normals;
+	_colors = other._colors;
 	
-	// _normals = other._normals;
 	//_indices = other._indices;
 }
 
 void Geometry::operator=(const Geometry& other)
 {
-	_vertices = other._vertices;
-	_hasTexCoords = other._hasTexCoords;
 	_prim = other._prim;
-	_hasTexCoords = other._hasTexCoords;
+	_vertices = other._vertices;
 	
-	// _normals = other._normals;
+	_hasTexCoords = other._hasTexCoords;
+	_hasColors = other._hasColors;
+	_hasNormals = other._hasNormals;
+	
+	_normals = other._normals;
+	_colors = other._colors;
+	_texCoords = other._texCoords;
+	
 	//_indices = other._indices;
 }
 
@@ -236,6 +246,23 @@ Geometry Geometry::subdivise(int count)
 	
 	res.setPrimitive(getPrimitive());
 	return res;
+}
+
+void Geometry::setVertices(const BufType& vertices)
+{
+	_vertices = vertices;
+}
+
+void Geometry::setColors(const BufType& colors)
+{
+	_colors = colors;
+	_hasColors = true;
+}
+
+void Geometry::setNormals(const BufType& normals)
+{
+	_normals = normals;
+	_hasNormals = true;
 }
 
 Geometry Geometry::tetrahedron()

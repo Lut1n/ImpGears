@@ -14,7 +14,7 @@ public:
 	struct VertCallback : public Object
 	{
 		Meta_Class(VertCallback)
-		virtual void exec(const Vec3& vert, const Vec3& col, Uniforms& uniforms, const GeometryRenderer* renderer) = 0;
+		virtual void exec(const Vec3& vert, const Vec3& col, const Vec3& normal, const Vec3& tex, const CnstUniforms& cu, Uniforms& uniforms, const GeometryRenderer* renderer) = 0;
 	};
 	
 	enum Cull
@@ -43,6 +43,11 @@ public:
 	void setModel(const Matrix4& model);
 	void setViewport(const Vec4& viewport);
 	void setCullMode(Cull mode);
+	void setUniforms(const CnstUniforms& cu);
+	void setDefaultVertCallback();
+	void setDefaultFragCallback();
+	void setVertCallback(const VertCallback::Ptr& callback);
+	void setFragCallback(const FragCallback::Ptr& callback);
 	
 	const Matrix4& getProj() const;
 	const Matrix4& getView() const;
@@ -53,6 +58,7 @@ protected:
 
 	std::vector<Image::Ptr> _targets;
 	std::vector<Vec4> _clearColors;
+	CnstUniforms _uniforms;
 	
 	VertCallback::Ptr _vertCallback;
 	FragCallback::Ptr _fragCallback;

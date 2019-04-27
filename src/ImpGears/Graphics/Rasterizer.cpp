@@ -16,7 +16,7 @@ struct DefaultPlainColor : public FragCallback
         : _rast(rast)
     {}
         
-    virtual void exec(ImageBuf& targets, const Vec3& pt, Uniforms* uniforms = nullptr)
+    virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
     {
         for(auto img:targets)img->setPixel(pt[0],pt[1],_rast->_defaultColor);
     }
@@ -64,6 +64,18 @@ void Rasterizer::clearUniforms()
 }
 
 //--------------------------------------------------------------
+void Rasterizer::setCnstUniforms(const CnstUniforms& cu)
+{
+	_cnstUniforms = cu;
+}
+
+//--------------------------------------------------------------
+void Rasterizer::clearCnstUniforms()
+{
+	_cnstUniforms.clear();
+}
+
+//--------------------------------------------------------------
 void Rasterizer::setUniforms2(const Uniforms& u1, const Uniforms& u2)
 {
     clearUniforms();
@@ -99,7 +111,7 @@ void Rasterizer::rectangle(const Vec3& p1, const Vec3& p2)
     {
         for(int j=p1[1];j<=p2[1];++j)
         {
-            _fragCallback->exec(_targets,Vec3(i,j,0));
+            _fragCallback->exec(_targets,Vec3(i,j,0),_cnstUniforms);
         }
     }
 }
@@ -122,7 +134,7 @@ void Rasterizer::grid(const Vec3& p1, const Vec3& p2, int gridOffset)
     {
         for(int j=p1[1];j<=p2[1];++j)
         {
-            if((i+j+gridOffset)%2 == 0)_fragCallback->exec(_targets,Vec3(i,j,0));
+            if((i+j+gridOffset)%2 == 0)_fragCallback->exec(_targets,Vec3(i,j,0),_cnstUniforms);
         }
     }
 }
@@ -130,7 +142,7 @@ void Rasterizer::grid(const Vec3& p1, const Vec3& p2, int gridOffset)
 //--------------------------------------------------------------
 void Rasterizer::dot(const Vec3& p1)
 {
-    _fragCallback->exec(_targets,p1);
+    _fragCallback->exec(_targets,p1,_cnstUniforms);
 }
 
 //--------------------------------------------------------------
@@ -152,11 +164,11 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2)
         if(_uniforms.size() >= 2)
         {
             uniforms.mix(_uniforms[0], _uniforms[1], rel);
-            _fragCallback->exec(_targets,position,&uniforms);
+            _fragCallback->exec(_targets,position,_cnstUniforms,&uniforms);
         }
         else
         {
-            _fragCallback->exec(_targets,position);
+            _fragCallback->exec(_targets,position,_cnstUniforms);
         }
     }
 }
@@ -175,11 +187,11 @@ void Rasterizer::hLine(const Vec3& p1, const Vec3& p2)
 		if(_uniforms.size() >= 2)
 		{
 			uniforms.mix(_uniforms[l], _uniforms[r], rel);
-			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),&uniforms);
+			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms,&uniforms);
 		}
 		else
 		{
-			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()));
+			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms);
 		}
     }
 }

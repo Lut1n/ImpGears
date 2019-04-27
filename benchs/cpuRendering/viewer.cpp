@@ -1,9 +1,10 @@
 #include <Geometry/Geometry.h>
 #include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
-#include <Graphics/Rasterizer.h>
+#include <Graphics/GeometryRenderer.h>
 
 #include <Core/Vec4.h>
+#include <Core/Matrix3.h>
 #include <Core/Matrix4.h>
 #include <Core/Perlin.h>
 #include <fstream>
@@ -17,31 +18,11 @@
 #include <vector>
 #include <map>
 
-
 using namespace imp;
 
-
-#define CONFIG_NEAR 0.1
-#define CONFIG_FAR 100.0
-#define CONFIG_FOV 60.0
-
-#define SQ_RESOLUTION 128
-#define GEO_SUBDIV 1
+#define INTERN_RES 256
+#define GEO_SUBDIV 3
 #define USE_BMPFORMAT false
-
-
-#define CONFIG_WIDTH SQ_RESOLUTION
-#define CONFIG_HEIGHT SQ_RESOLUTION
-
-struct RenderState
-{
-    imp::Matrix4 projection;
-    imp::Matrix4 view;
-    imp::Matrix4 model;
-    Vec4 viewport;
-};
-  
-RenderState state;
  
 struct Light
 {
@@ -52,147 +33,249 @@ struct Light
 
 Light light_1;
 
-std::string Varying_Color("Color");
-std::string Varying_Vert( "Vert");
-std::string Varying_MVert( "MVert");
-std::string Varying_MVVert( "MVVert");
-std::string Varying_MVPVert( "MVPVert");
-#define Varying_Count 5
+// -----------------------------------------------------------------------------------------------------------------------  
+Geometry ball(const Vec3& center, float radius)
+{
+    Geometry geo = Geometry::sphere(GEO_SUBDIV,radius);
+	Geometry::intoCCW( geo );
+	geo.setColors( std::vector<Vec3>(geo.size(),Vec3(1.0)) );
+    return geo;
+}     
 
-imp::Rasterizer global_rast;
-
-// -----------------------------------------------------------------------------------------------------------------------
- struct VertCallback
- {
-    virtual void operator()(Vec3& vert, Vec3& col, Uniforms& uniforms) = 0;
- };
+// -----------------------------------------------------------------------------------------------------------------------  
+Geometry mushroom(const Vec3& center, float radius, int sub)
+{
+	Geometry geo = Geometry::cylinder(sub, 1.5, radius*0.7);
+	Geometry geo2 = Geometry::cone(sub, 1.5, radius*2.0, radius*0.3);
+	geo2 += Vec3(0.0,0.0,1.5);
+	
+	geo += geo2;
+	Geometry::intoCCW( geo );
+	
+    geo.setColors( std::vector<Vec3>(geo.size(),Vec3(0.0,1.0,0.0)) );
+       
+    return geo;
+}  
+// -----------------------------------------------------------------------------------------------------------------------  
+Geometry ground(const Vec3& center, float radius, int sub)
+{
+    Geometry geo = Geometry::cylinder(sub*2.0, 1.0, radius*0.7);
+	Geometry::intoCCW( geo );
+	geo.setColors( std::vector<Vec3>(geo.size(),Vec3(1.0)) );
+    return geo;
+}
  
 // -----------------------------------------------------------------------------------------------------------------------
-void renderVertex(std::vector<Vec3>& buf, std::vector<Vec3>& col, Image::Ptr* targets, VertCallback& vertexOp, FragCallback::Ptr fragCallback)
-{    
-    global_rast.clearTarget();
-    global_rast.addTarget(targets[0]);
-    global_rast.addTarget(targets[1]);
-    global_rast.setFragCallback(fragCallback);
+struct DepthTestFrag : public FragCallback
+{
+    Meta_Class(DepthTestFrag)
+	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets) = 0;
 	
-	Uniforms uniforms[3];	
-	Vec3 mvpVertex[3];
-    
-	// int i = 0;
-	for(int i=0;i<(int)buf.size();i+=3)
+	void phong(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets, const Vec3& normal)
 	{
-        for(int k=0;k<3;++k)
-        {
-            vertexOp(buf[i+k],col[i+k],uniforms[k]);
-            mvpVertex[k] = uniforms[k].get(Varying_MVPVert);
-        }
+		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
 		
-		Vec3 p1p2 = mvpVertex[1] - mvpVertex[0];
-		Vec3 p1p3 = mvpVertex[2] - mvpVertex[0];
-		Vec3 dir = p1p2.cross(p1p3);
+		Vec3 light_pos = light_1.position;
+		Vec3 frag_pos = uniforms.get("m_vert");
+		const float* md = view.data();
+		Vec3 cam_pos(md[12],md[13],md[14]);
 		
-		if(dir[2] > 0.0)
+		Vec3 light_dir = light_pos - frag_pos;
+		Vec3 cam_dir = cam_pos - frag_pos;
+		light_dir.normalize();
+		cam_dir.normalize();
+		 
+		float a = clamp( light_dir.dot(normal) );
+		Vec3 reflection = (normal * 2.0 * a) - light_dir;
+		float s = clamp( reflection.dot(cam_dir) );
+		
+		float light_lvl = clamp( 0.2 + 0.6*a + pow(s, 8) );
+		Vec4 base_color = Vec4(dotClamp( Vec3(light_lvl) * uniforms.get("col_vert") ));
+        base_color *= 255.f;
+		targets[0]->setPixel(x,y,base_color);
+	}
+	
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+    {
+        depthTest(pt[0],pt[1],cu, *uniforms,targets.data());
+    }
+	
+	virtual void depthTest(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
+	{
+		// depth test
+		float depth = -uniforms.get("mv_vert").z();
+		
+		float depthPx = clamp( linearstep(0.1f, 20.f, depth )  )* 255.0;
+        Vec4 depthV = targets[1]->getPixel(x, y);
+		float curr_depth = depthV[0];
+		if( depthPx < curr_depth)
 		{
-            global_rast.setUniforms3(uniforms[0],uniforms[1],uniforms[2]);
-			global_rast.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
-            // global_rast.wireTriangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
+			apply(x, y, cu, uniforms, targets);
+			
+			Vec4 depth(depthPx);
+			targets[1]->setPixel(x,y,depth);
 		}
 	}
-}
+};
+ 
+// -----------------------------------------------------------------------------------------------------------------------
+struct MyFragCallback : public DepthTestFrag
+{
+    Meta_Class(MyFragCallback)
+	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
+	{
+		Vec3 normal = uniforms.get("v_vert"); normal.normalize();
+		phong(x,y,cu,uniforms, targets, normal);
+	}
+};
 
-#include "model.h"
+// -----------------------------------------------------------------------------------------------------------------------
+struct LightFrag : public DepthTestFrag
+{
+    Meta_Class(LightFrag)
+	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
+	{
+		targets[0]->setPixel(x,y,Vec4(255.0));
+	}
+};
+
+// -----------------------------------------------------------------------------------------------------------------------
+ struct MyVertCallback : public GeometryRenderer::VertCallback
+ {
+	Meta_Class(MyVertCallback)
+	
+    virtual void exec(const Vec3& vert, const Vec3& col, const Vec3& normal, const Vec3& tex, const CnstUniforms& cu, Uniforms& uniforms, const GeometryRenderer* rder)
+    {
+		const Matrix4& model = *(cu.at("u_model")->getValue().value_mat4v);
+		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
+		const Matrix4& proj = *(cu.at("u_proj")->getValue().value_mat4v);
+		const Vec4& vp = *(cu.at("u_vp")->getValue().value_4f);
+		Vec4 win1(vp[2]*0.5, vp[3]*0.5, 1.0, 1.0);
+		Vec4 win2(vp[2]*0.5, vp[3]*0.5, 0.0, 0.0);
+		
+		Vec4 vertex = vert;
+		Vec4 mvertex = vertex * model;
+		Vec4 mvvertex = mvertex * view;
+		Vec4 mvpvertex = mvvertex * proj;
+		
+		mvertex /= mvertex.w();
+		mvvertex /= mvvertex.w();
+		mvpvertex /= mvpvertex.w();
+		
+		mvpvertex *= win1; mvpvertex += win2;
+		
+		uniforms.set("v_vert",vert);
+		uniforms.set("m_vert",mvertex);
+		uniforms.set("mv_vert",mvvertex);
+		uniforms.set("mvp_vert",mvpvertex);
+		uniforms.set("col_vert",col);
+		uniforms.set("normal_vert",normal);
+		uniforms.set("tex_vert",tex);
+    }
+ };
 
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-    Vec3 cam_position(10.0, 0.0, 3.0);
-    Vec3 cam_target(0.0, 0.0, 0.0);
-    Vec3 cam_up(0.0, 0.0, 1.0);
-    Vec3 rock_center(0.0,0.0,0.0);
-      
-    state.viewport = Vec4(0.0,0.0,CONFIG_WIDTH,CONFIG_HEIGHT);
-    state.projection = imp::Matrix4::perspectiveProj(CONFIG_FOV, CONFIG_WIDTH/CONFIG_HEIGHT, CONFIG_NEAR, CONFIG_FAR);
-    state.view = imp::Matrix4::view(cam_position, cam_target, cam_up);
+	Vec3 observer(10.0, 0.0, 3.0);
      
-    light_1.position = Vec3(2.0,2.0,-1.0);
+    light_1.position = Vec3(2.0,1.0,1.0);
     light_1.color = Vec3(1.0,1.0,1.0);
     light_1.attn = 0.7;
-    
-	std::vector<Vec3> vertexQuad;
-	std::vector<Vec3> colorQuad;
-    for(int i=-1;i<2;i+=2) for(int j=-1;j<2;j+=2){ vertexQuad.push_back(Vec3(i,j,0)); }
-    colorQuad.resize(6,Vec3(0.5));
+	
 	
 	Image::Ptr targets[2];
-    targets[0] = Image::create(CONFIG_WIDTH,CONFIG_HEIGHT,4);
-    targets[1] = Image::create(CONFIG_WIDTH,CONFIG_HEIGHT,1);
+    targets[0] = Image::create(INTERN_RES,INTERN_RES,4);
+    targets[1] = Image::create(INTERN_RES,INTERN_RES,1);
+
+	double a = 0.0;
+	
+	MyVertCallback::Ptr defaultVert = MyVertCallback::create();
+	MyFragCallback::Ptr defaultFrag = MyFragCallback::create();
+	LightFrag::Ptr lightFrag = LightFrag::create();
     
-	
-    double a = 0.0;
-	
-    defaultFrag = DefaultRenderFrag::create();
-    lightFrag = LightRenderFrag::create();
-    terrFrag = TerrRenderFrag::create();
-    clearFrag = ClearFragCallback::create();
-    depthFrag = DepthFrag::create(&global_rast);
-    
-    
-	std::vector<Vec3> vertexPlane = generatePlane(rock_center, 4.0, 2*GEO_SUBDIV);
-	std::vector<Vec3> colorPlane = generateColors2(vertexPlane);
-	
-	std::vector<Vec3> vertexRock = generateRockHat(rock_center, 1.0, 2*GEO_SUBDIV);
-	std::vector<Vec3> colorRock = generateColors(vertexRock);
-	
-	std::vector<Vec3> vertexBall = generateTorch(rock_center, 0.2, std::min(10,1*GEO_SUBDIV));
-	std::vector<Vec3> colorBall = generateColors3(vertexBall);
+	Geometry mushr = mushroom(Vec3(0.0), 1.0, 2*GEO_SUBDIV);
+	Geometry torch = ball(Vec3(0.0), 0.2);
+	Geometry plane = ground(Vec3(0.0), 4.0, 2*GEO_SUBDIV);
 	
 	int frames = 0;
 	sf::Clock c;
-    
-    Vec4 fillColor(100.0,100.0,255.0,255.0);
-    Vec4 fillDepth(255.0,255.0,255.0,255.0);
 	
-	
-	sf::RenderWindow* window = 
-		new sf::RenderWindow(sf::VideoMode(500, 500), "CPU rendering", sf::Style::Default, sf::ContextSettings(24));
-	window->setFramerateLimit(60);
-	window->setTitle("Cpu Renderer");
+	sf::RenderWindow win(sf::VideoMode(500, 500), "CPU rendering");
+	win.setFramerateLimit(60);
+	win.setTitle("Cpu Renderer");
 	sf::Texture texture;
 	sf::Sprite sprite;
-	texture.create(CONFIG_WIDTH,CONFIG_HEIGHT);
+	texture.create(INTERN_RES,INTERN_RES);
 	sprite.setTexture(texture);
 	sprite.setPosition( 0, 500 );
-	sprite.scale( 500.0/CONFIG_WIDTH, -500.0/CONFIG_HEIGHT );
+	sprite.scale( 500.0/INTERN_RES, -500.0/INTERN_RES );
 	
-	while (window->isOpen())
+	Matrix4 model, view;
+	Matrix4 proj = Matrix4::perspectiveProj(60.0, 1.0, 0.1, 10.0);
+	Vec4 vp(0.0,0.0,INTERN_RES,INTERN_RES);
+	
+	GeometryRenderer georender;
+	georender.setTarget(0, targets[0], Vec4(100.0,100.0,255.0,255.0) );
+	georender.setTarget(1, targets[1], Vec4(255.0,255.0,255.0,255.0) );
+	georender.setProj( model );
+	georender.setViewport( vp );
+	
+	Uniform::Ptr u_proj = Uniform::create("u_proj",Uniform::Type_Mat4v);
+	Uniform::Ptr u_view = Uniform::create("u_view",Uniform::Type_Mat4v);
+	Uniform::Ptr u_model = Uniform::create("u_model",Uniform::Type_Mat4v);
+	Uniform::Ptr u_vp = Uniform::create("u_vp",Uniform::Type_4f);
+	CnstUniforms uniforms;
+	uniforms["u_proj"] = u_proj;
+	uniforms["u_view"] = u_view;
+	uniforms["u_model"] = u_model;
+	uniforms["u_vp"] = u_vp;
+	georender.setUniforms(uniforms);
+	
+	u_proj->set( &proj );
+	u_vp->set( &vp );
+	
+	while (win.isOpen())
 	{
-		sf::Event event;
-		while (window->pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed) window->close();
-		}
+		sf::Event ev;
+		while (win.pollEvent(ev)) if (ev.type == sf::Event::Closed) win.close();
 		
-		a += 0.02;
-		if(a > 2.0*3.141592) a = 0.0;
+		a += 0.05; if(a > 6.28) a = 0.0;
+		view = Matrix4::view(observer * Matrix3::rotationZ(a), Vec3(0.0), Vec3::Z);
+		u_view->set( &view );
+        georender.setView( view );
 		
-		Vec3 cam  = Vec3(Vec4(cam_position) * imp::Matrix4::rotationZ(a));
-		state.view = imp::Matrix4::view(cam, cam_target, cam_up);
+		georender.clearTargets();
 		
-		targets[0]->fill(fillColor);
-		targets[1]->fill(fillDepth);
-        
-		state.model = imp::Matrix4::translation(0.0, 0.0, -2.0);
-		renderVertex(vertexPlane, colorPlane, targets,defaultVert, terrFrag);
-		state.model = imp::Matrix4::translation(0.0, 0.0, 0.0);
-		renderVertex(vertexRock, colorRock, targets,defaultVert, defaultFrag);
-		state.model = imp::Matrix4::translation(1.0, 1.0, 0.0);
-		renderVertex(vertexBall, colorBall, targets,defaultVert, lightFrag);
+		georender.setVertCallback( defaultVert );
+		georender.setFragCallback( defaultFrag );
+		
+		model = Matrix4::translation(0.0, 0.0, -1.0);
+		u_model->set( &model );
+        georender.setModel( model );
+		georender.render( plane );
+		
+		georender.setVertCallback( defaultVert );
+		georender.setFragCallback( lightFrag );
+		
+		model = Matrix4::translation(light_1.position);
+		u_model->set( &model );
+		georender.setModel( model );
+		georender.render( torch );
+		
+		georender.setVertCallback( defaultVert );
+		georender.setFragCallback( defaultFrag );
+		
+		model = Matrix4();
+		u_model->set( &model );
+        georender.setModel( model );
+		georender.render( mushr );
 		
 		texture.update(targets[0]->data());
-		// imp::ImageIO::save(targets[0],"output.tga"); // debug
+		// ImageIO::save(targets[0],"output.tga"); // debug
 		
-		window->draw(sprite);
-		window->display();
+		win.draw(sprite);
+		win.display();
 		
 		frames++;
 		

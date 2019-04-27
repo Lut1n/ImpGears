@@ -2,6 +2,8 @@
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/GeoNode.h>
 
+#include <Utils/ImageIO.h>
+
 using namespace imp;
 
 #include <SFML/Graphics.hpp>
@@ -35,14 +37,21 @@ int main(int argc, char* argv[])
 {
 	sf::Clock clock;
 	
-	sf::RenderWindow window(sf::VideoMode(500, 500), "My window", sf::Style::Default, sf::ContextSettings(24));
+	sf::RenderWindow window(sf::VideoMode(512, 512), "My window", sf::Style::Default, sf::ContextSettings(24));
 	window.setFramerateLimit(60);
+	sf::Texture texture; texture.create(512, 512);
+	sf::Sprite sprite(texture);
+	sprite.setTextureRect( sf::IntRect(0,512,512,-512) );
 	
 	
 	GraphRenderer::Ptr graph = GraphRenderer::create();
 	SceneNode::Ptr root = GeoNode::create(Geometry(),false);
 
-	// root->getGraphicState()->setPerspectiveProjection(60.0, 1.0, 0.001, 100.0);
+	imp::Target::Ptr tgt = imp::Target::create();
+	tgt->create(512,512,1,true);
+	// graph->getInitState()->setTarget(tgt);
+	// graph->setClearColor( imp::Vec4(1.0,0.0,0.0,1.0) );
+	// graph->setClearDepth( 1.0 );
 	
 	Camera::Ptr camera = Camera::create();
 	camera->setPosition(Vec3(0.0f, 0.0f, 0.0f));
@@ -83,9 +92,11 @@ int main(int argc, char* argv[])
 	node4->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
 	node3->addNode(node4);
 	
-	camera->addNode(node1);
+	// camera->addNode(node1);
 	
-	imp::Shader::Ptr s = imp::Shader::create(vertexSimple.c_str(),fragSimple.c_str());
+	imp::ShaderDsc::Ptr s = imp::ShaderDsc::create();
+	s->vertCode = vertexSimple;
+	s->fragCode = fragSimple;
 	Geometry mush = generateRockHat(Vec3(0.0,0.0,0.0), 0.3, 1.0);
 	GeoNode::Ptr geomush = GeoNode::create(mush, false);
 	geomush->setColor(Vec3(1.0,1.0,1.0));
@@ -93,19 +104,19 @@ int main(int argc, char* argv[])
 	geomush->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
 	geomush->setShader(s);
 	node2->addNode(geomush);
-
-	/*GeoNode::Ptr node3 = GeoNode::create(point, false);
-	node3->setColor(Vec3(1.0,0.2,0.2));
-	root->addNode(node3);*/
 	
+	
+	bool stopLoop = false;
     while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
-                window.close();
+                stopLoop=true;// window.close();
         }
+		
+		if(stopLoop)break;
 		
         if(clock.getElapsedTime().asSeconds() > 2.0*3.14) clock.restart();
 		double t = clock.getElapsedTime().asMilliseconds() / 1000.0;
@@ -116,11 +127,16 @@ int main(int argc, char* argv[])
 		
 		// rendering
 		graph->renderScene( root );
+		// imp::GraphRenderer::s_interface->unbind(tgt.get());
+		// imp::Image::Ptr res = tgt->get(0);
+        // texture.update(res->data(),res->width(),res->height(),0,0);
 		
+		// window.clear();
+		// window.draw(sprite);
 		window.display();
+		
+		// std::cout << "ite" << std::endl;
     }
-
-	delete VBOManager::getInstance();
 
 	exit(EXIT_SUCCESS);
 }

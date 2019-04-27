@@ -7,7 +7,7 @@ else
 	CXXFLAGS=-Wall -std=c++11
 endif
 
-LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system ../../libimpgears.so
+LDFLAGS=-lsfml-graphics -lsfml-window -lsfml-system ../../build/libimpgears.so
 
 all: viewer
 

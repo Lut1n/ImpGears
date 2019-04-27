@@ -23,3 +23,7 @@ file(GLOB HEADERS
 
 add_library(impgears SHARED ${SRCS} ${HEADERS})
 target_include_directories(impgears PUBLIC ${PROJECT_SOURCE_DIR}/include/ImpGears)
+
+
+# link to DL
+target_link_libraries( impgears ${CMAKE_DL_LIBS} )

@@ -1,4 +1,4 @@
-#include <SceneGraph/Uniform.h>
+#include <Graphics/Uniform.h>
 
 #include <cstdio>
 #include <iostream>
@@ -32,6 +32,13 @@ void Uniform::set(const Vec3* vec3)
 {
 	this->type = Type_3f;
 	value.value_3f = vec3;
+}
+
+//--------------------------------------------------------------
+void Uniform::set(const Vec4* vec4)
+{
+	this->type = Type_4f;
+	value.value_4f = vec4;
 }
 
 //--------------------------------------------------------------

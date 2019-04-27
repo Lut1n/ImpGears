@@ -21,7 +21,6 @@ struct ShaderDsc : public Object
 	RenderPlugin::Data::Ptr _d;
 };
 
-/// \brief Defines a shader uniform.
 class IMP_API Uniform : public Object
 {
 	public:
@@ -32,7 +31,7 @@ class IMP_API Uniform : public Object
 		Type_1f,
 		//Type_2f,
 		Type_3f,
-		//Type_4f,
+		Type_4f,
 		
 		Type_1i,
 		//Type_2i,
@@ -47,7 +46,7 @@ class IMP_API Uniform : public Object
 		Type_1fv,
 		//Type_2fv,
 		Type_3fv,
-		//Type_4fv,
+		Type_4fv,
 		
 		Type_1iv,
 		//Type_2iv,
@@ -69,9 +68,11 @@ class IMP_API Uniform : public Object
 	{
 		float	 value_1f;
 		const Vec3* value_3f;
+		const Vec4* value_4f;
 		int		 value_1i;
 		const float*	 value_1fv;
 		const Vec3* value_3fv;
+		const Vec4* value_4fv;
 		const int*	 value_1iv;
 		// const Matrix3* value_mat3v;
 		const Matrix4* value_mat4v;
@@ -91,6 +92,8 @@ class IMP_API Uniform : public Object
 	void set(float float1);
 	
 	void set(const Vec3* vec3);
+	
+	void set(const Vec4* vec4);
 	
 	void set(int int1);
 	

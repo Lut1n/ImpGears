@@ -2,6 +2,7 @@
 #define IMP_MATRIX3_H
 
 #include <Core/Matrix.h>
+#include <Core/Vec3.h>
 
 IMPGEARS_BEGIN
 
@@ -30,7 +31,9 @@ public:
 	static Matrix3 rotationX(float rx);
 	static Matrix3 rotationY(float ry);
 	static Matrix3 rotationZ(float rz);
+	static Matrix3 rotationXYZ(const Vec3& rotation);
 	static Matrix3 scale(float sx, float sy, float sz);
+	static Matrix3 scale(const Vec3& scale);
 };
 
 IMPGEARS_END

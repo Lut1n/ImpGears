@@ -229,4 +229,22 @@ Matrix4 Matrix4::scale(float sx, float sy, float sz)
     return Matrix4(data);
 }
 
+//--------------------------------------------------------------
+Matrix4 Matrix4::translation(const Vec3& t)
+{
+	return translation(t[0],t[1],t[2]);
+}
+
+//--------------------------------------------------------------
+Matrix4 Matrix4::rotationXYZ(const Vec3& r)
+{
+	return rotationX(r[0]) * rotationY(r[1]) * rotationZ(r[2]);
+}
+
+//--------------------------------------------------------------
+Matrix4 Matrix4::scale(const Vec3& s)
+{
+	return scale(s[0],s[1],s[2]);
+}
+
 IMPGEARS_END

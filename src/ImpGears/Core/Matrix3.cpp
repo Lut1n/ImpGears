@@ -148,6 +148,12 @@ Matrix3 Matrix3::rotationZ(float rad)
 }
 
 //--------------------------------------------------------------
+Matrix3 Matrix3::rotationXYZ(const Vec3& r)
+{
+	return rotationX(r[0]) * rotationY(r[1]) * rotationZ(r[2]);
+}
+
+//--------------------------------------------------------------
 Matrix3 Matrix3::scale(float sx, float sy, float sz)
 {
     const float data[9] = {
@@ -157,6 +163,12 @@ Matrix3 Matrix3::scale(float sx, float sy, float sz)
     };
 
     return Matrix3(data);
+}
+
+//--------------------------------------------------------------
+Matrix3 Matrix3::scale(const Vec3& s)
+{
+	return scale(s[0],s[1],s[2]);
 }
 
 IMPGEARS_END

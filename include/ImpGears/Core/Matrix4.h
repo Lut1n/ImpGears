@@ -29,10 +29,13 @@ public:
 	static Matrix4 orthographicProj(float width, float height, float nearValue, float farValue);
 	static Matrix4 view(const Vec3& pos, const Vec3& target, const Vec3& up);
 	static Matrix4 translation(float tx, float ty, float tz);
+	static Matrix4 translation(const Vec3& translation);
 	static Matrix4 rotationX(float rx);
 	static Matrix4 rotationY(float ry);
 	static Matrix4 rotationZ(float rz);
+	static Matrix4 rotationXYZ(const Vec3& rotation);
 	static Matrix4 scale(float sx, float sy, float sz);
+	static Matrix4 scale(const Vec3& scale);
 };
 
 IMPGEARS_END

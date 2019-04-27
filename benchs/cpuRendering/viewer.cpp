@@ -1,6 +1,7 @@
 #include <Geometry/Geometry.h>
 #include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
+#include <Graphics/ImageOperation.h>
 #include <Graphics/GeometryRenderer.h>
 
 #include <Core/Vec4.h>
@@ -20,7 +21,7 @@
 
 using namespace imp;
 
-#define INTERN_RES 256
+#define INTERN_RES 128
 #define GEO_SUBDIV 3
 #define USE_BMPFORMAT false
  
@@ -34,13 +35,30 @@ struct Light
 Light light_1;
 
 // -----------------------------------------------------------------------------------------------------------------------  
+Geometry neocube(float radius)
+{
+    Geometry geo = Geometry::cylinder(10, 1.0, 1.0);
+	Geometry::intoCCW( geo );
+	std::vector<Geometry::TexCoord> tex(geo.size());
+	for(int i=0;i<geo.size();++i)
+	{
+		float u = std::atan2(geo[i].y(),geo[i].x()) / (3.141592) * 0.5 + 0.5;
+		float v = geo[i].z() * 0.5 + 0.5;
+		tex[i] = Geometry::TexCoord(u,v);
+	}
+	geo.scale(Vec3(radius));
+	geo.setTexCoords( tex );
+    return geo;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------  
 Geometry ball(const Vec3& center, float radius)
 {
     Geometry geo = Geometry::sphere(GEO_SUBDIV,radius);
 	Geometry::intoCCW( geo );
 	geo.setColors( std::vector<Vec3>(geo.size(),Vec3(1.0)) );
     return geo;
-}     
+}
 
 // -----------------------------------------------------------------------------------------------------------------------  
 Geometry mushroom(const Vec3& center, float radius, int sub)
@@ -52,10 +70,20 @@ Geometry mushroom(const Vec3& center, float radius, int sub)
 	geo += geo2;
 	Geometry::intoCCW( geo );
 	
-    geo.setColors( std::vector<Vec3>(geo.size(),Vec3(0.0,1.0,0.0)) );
+    geo.setColors( std::vector<Vec3>(geo.size(),Vec3(0.0,1.0,0.0)) );;
+	
+	std::vector<Geometry::TexCoord> tex(geo.size());
+	for(int i=0;i<geo.size();++i)
+	{
+		float u = std::atan2(geo[i].y(),geo[i].x()) / (3.141592) * 0.5 + 0.5;
+		float v = geo[i].z() * 0.5 + 0.5;
+		tex[i] = Geometry::TexCoord(u,v);
+	}
+	geo.setTexCoords( tex );
        
     return geo;
-}  
+}
+
 // -----------------------------------------------------------------------------------------------------------------------  
 Geometry ground(const Vec3& center, float radius, int sub)
 {
@@ -130,6 +158,55 @@ struct MyFragCallback : public DepthTestFrag
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
+struct TexFragCallback : public DepthTestFrag
+{
+	Image::Ptr src;
+	
+	TexFragCallback()
+		: DepthTestFrag()
+	{
+		// {"op":"hash", "id":"hash_01", "seed":76482.264},
+		// {"op":"fbm", "noise_type":"voronoi", "input_id":"hash_01", "freq":4.0, "octaves":2.0, "persist":0.7, "id":"noise_01"},
+		// {"op":"colorMix", "input_id":"noise_01", "r1":0.8, "g1":0.8, "b1":0.8, "r2":0.2, "g2":0.2, "b2":1.0, "id":"color_01"},
+		
+		Image::Ptr hash = Image::create(128,128,3);
+		HashOperation hash_op;
+		hash_op.setSeed(76482.264);
+		hash_op.execute(hash);
+		
+		Image::Ptr fbm = Image::create(128,128,3);
+		FbmOperation fbm_op;
+		fbm_op.setType(1);
+		fbm_op.setHashmap(hash);
+		fbm_op.setFreq(4.0);
+		fbm_op.setOctaves(2);
+		fbm_op.setPersist(0.7);
+		fbm_op.execute(fbm);
+		
+		src = Image::create(128,128,3);
+		ColorMixOperation color_op;
+		color_op.setTarget(fbm);
+		color_op.setColor1( Vec4(0.8,0.8,0.8,1.0) );
+		color_op.setColor2( Vec4(0.2,0.2,1.0,1.0) );
+		color_op.execute(src);
+	}
+	
+    Meta_Class(TexFragCallback)
+	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
+	{
+		Vec3 tex = uniforms.get("tex_vert");
+		ImageSampler sampler(src, ImageSampler::Mode_Repeat);
+		sampler.setInterpo(ImageSampler::Interpo_Linear);
+		Vec4 color = sampler(tex);
+		
+		uniforms.set("col_vert",color);
+		
+		Vec3 normal = uniforms.get("v_vert"); normal.normalize();
+		phong(x,y,cu,uniforms, targets, normal);
+	}
+};
+
+// -----------------------------------------------------------------------------------------------------------------------
 struct LightFrag : public DepthTestFrag
 {
     Meta_Class(LightFrag)
@@ -193,9 +270,11 @@ int main(int argc, char* argv[])
 	MyVertCallback::Ptr defaultVert = MyVertCallback::create();
 	MyFragCallback::Ptr defaultFrag = MyFragCallback::create();
 	LightFrag::Ptr lightFrag = LightFrag::create();
+	TexFragCallback::Ptr texFrag = TexFragCallback::create();
     
 	Geometry mushr = mushroom(Vec3(0.0), 1.0, 2*GEO_SUBDIV);
 	Geometry torch = ball(Vec3(0.0), 0.2);
+	Geometry testcube = neocube(1.0);
 	Geometry plane = ground(Vec3(0.0), 4.0, 2*GEO_SUBDIV);
 	
 	int frames = 0;
@@ -264,12 +343,20 @@ int main(int argc, char* argv[])
 		georender.render( torch );
 		
 		georender.setVertCallback( defaultVert );
-		georender.setFragCallback( defaultFrag );
+		georender.setFragCallback( texFrag );
 		
 		model = Matrix4();
 		u_model->set( &model );
         georender.setModel( model );
 		georender.render( mushr );
+		
+		/*georender.setVertCallback( defaultVert );
+		georender.setFragCallback( texFrag );
+		
+		model = Matrix4::translation(Vec3(-2.0,-1.0,1.0));
+		u_model->set( &model );
+        georender.setModel( model );
+		georender.render( testcube );*/
 		
 		texture.update(targets[0]->data());
 		// ImageIO::save(targets[0],"output.tga"); // debug

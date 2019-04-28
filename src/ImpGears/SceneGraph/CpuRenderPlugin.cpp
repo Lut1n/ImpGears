@@ -308,7 +308,7 @@ void CpuRenderPlugin::update(Data::Ptr data, const Uniform* uniform)
 	
 	if(type == Uniform::Type_Mat4v)
 	{
-		if(name == "u_projection") r.setProj( *value.value_mat4v );
+		if(name == "u_proj") r.setProj( *value.value_mat4v );
 		else if(name == "u_view") r.setView( *value.value_mat4v );
 		else if(name == "u_model") r.setModel( *value.value_mat4v );
 		// todo

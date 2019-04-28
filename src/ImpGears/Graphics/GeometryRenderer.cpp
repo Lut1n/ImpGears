@@ -65,15 +65,21 @@ struct DefaultFragCallback : public FragCallback
 
 //--------------------------------------------------------------
 GeometryRenderer::GeometryRenderer()
-{
-	_proj = Matrix4::perspectiveProj(60.0, 1.0, 0.01, 100.0);
-	_view = Matrix4::view( Vec3(1,0,0), Vec3(0.0), Vec3(0,0,1) );
-	_model = Matrix4::translation(0.0, 0.0, 0.0);
-	_viewport = Vec4(0,0,512,512);
-	
+{	
 	setDefaultVertCallback();
 	setDefaultFragCallback();
 	_cull = Cull_Back;
+	
+	// default uniforms
+	_uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4v);
+	_uniforms["u_view"] = Uniform::create("u_view",Uniform::Type_Mat4v);
+	_uniforms["u_model"] = Uniform::create("u_model",Uniform::Type_Mat4v);
+	_uniforms["u_vp"] = Uniform::create("u_vp",Uniform::Type_4f);
+	
+	setProj( Matrix4::perspectiveProj(60.0, 1.0, 0.01, 100.0) );
+	setView( Matrix4::view( Vec3(1,0,0), Vec3(0.0), Vec3(0,0,1)) );
+	setModel( Matrix4::translation(0.0, 0.0, 0.0) );
+	setViewport( Vec4(0,0,512,512) );
 }
 
 //--------------------------------------------------------------
@@ -198,24 +204,28 @@ const Vec4& GeometryRenderer::getClearColor(int id)
 void GeometryRenderer::setProj(const Matrix4& proj)
 {
 	_proj = proj;
+	if(_uniforms.find("u_proj") != _uniforms.end()) _uniforms["u_proj"]->set(&_proj);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::setView(const Matrix4& view)
 {
 	_view = view;
+	if(_uniforms.find("u_view") != _uniforms.end()) _uniforms["u_view"]->set(&_view);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::setModel(const Matrix4& model)
 {
 	_model = model;
+	if(_uniforms.find("u_model") != _uniforms.end()) _uniforms["u_model"]->set(&_model);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::setViewport(const Vec4& viewport)
 {
 	_viewport = viewport;
+	if(_uniforms.find("u_vp") != _uniforms.end()) _uniforms["u_vp"]->set(&_viewport);
 }
 
 //--------------------------------------------------------------

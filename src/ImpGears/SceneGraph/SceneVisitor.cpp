@@ -6,7 +6,7 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 SceneVisitor::SceneVisitor()
 {
-	u_proj = Uniform::create("u_projection",Uniform::Type_Mat4v);
+	u_proj = Uniform::create("u_proj",Uniform::Type_Mat4v);
 	u_view = Uniform::create("u_view",Uniform::Type_Mat4v);
 	u_model = Uniform::create("u_model",Uniform::Type_Mat4v);
 }

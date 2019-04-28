@@ -54,7 +54,7 @@ Vec4 ImageSampler::operator()(const Vec2& uv)
 //--------------------------------------------------------------
 Vec4 ImageSampler::get(const Vec2& uv_orig)
 {
-	if(_src == nullptr) return Vec4(0.0);
+	if(_src == nullptr) return Vec4(1.0);
 	
 	Vec2 uv = uv_orig;
 	for(int i=0;i<2;++i)uv[i]=applyMode(uv[i],_mode);

@@ -11,10 +11,17 @@ public:
 	
 	Meta_Class(GeometryRenderer)
 	
+	struct Attributes
+	{
+		Vec3 color;
+		Vec3 texUV;
+		Vec3 normal;
+	};
+	
 	struct VertCallback : public Object
 	{
 		Meta_Class(VertCallback)
-		virtual void exec(const Vec3& vert, const Vec3& col, const Vec3& normal, const Vec3& tex, const CnstUniforms& cu, Uniforms& uniforms, const GeometryRenderer* renderer) = 0;
+		virtual void exec(const Vec3& vert, Attributes& att, const CnstUniforms& cu, Uniforms& uniforms) = 0;
 	};
 	
 	enum Cull

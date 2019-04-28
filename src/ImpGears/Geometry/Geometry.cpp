@@ -384,7 +384,6 @@ Geometry Geometry::cylinder(int sub, float len, float radius)
 
 Geometry Geometry::cone(int sub, float len, float radius1, float radius2)
 {
-	
 	Path base = Path::circle(sub,radius1);
 	Geometry res = extrude(base, len,radius2/radius1);
 	return res;

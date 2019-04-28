@@ -32,16 +32,20 @@ struct DefaultFragCallback : public FragCallback
  {
 	Meta_Class(DefaultVertCallback)
 
-	virtual void exec(const Vec3& vert, const Vec3& col, const Vec3& normal, const Vec3& tex, const CnstUniforms& cu, Uniforms& out_uniforms, const GeometryRenderer* rder)
+	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const CnstUniforms& cu, Uniforms& out_uniforms)
 	{
-		Vec4 vp = rder->getViewport();
+		const Matrix4& model = *(cu.at("u_model")->getValue().value_mat4v);
+		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
+		const Matrix4& proj = *(cu.at("u_proj")->getValue().value_mat4v);
+		const Vec4& vp = *(cu.at("u_vp")->getValue().value_4f);
+		
 		Vec4 win1(vp[2]*0.5, vp[3]*0.5, 1.0, 1.0);
 		Vec4 win2(vp[2]*0.5, vp[3]*0.5, 0.0, 0.0);
 		
 		Vec4 vertex = vert;
-		Vec4 mvertex = vertex * rder->getModel();
-		Vec4 mvvertex = mvertex * rder->getView();
-		Vec4 mvpvertex = mvvertex * rder->getProj();
+		Vec4 mvertex = vertex * model;
+		Vec4 mvvertex = mvertex * view;
+		Vec4 mvpvertex = mvvertex * proj;
 		
 		mvertex /= mvertex.w();
 		mvvertex /= mvvertex.w();
@@ -49,13 +53,13 @@ struct DefaultFragCallback : public FragCallback
 		
 		mvpvertex *= win1; mvpvertex += win2;
 		
-		out_uniforms.set("v_vert",vertex);
+		out_uniforms.set("vert",vertex);
 		out_uniforms.set("m_vert",mvertex);
 		out_uniforms.set("mv_vert",mvvertex);
 		out_uniforms.set("mvp_vert",mvpvertex);
-		out_uniforms.set("col_vert",col);
-		out_uniforms.set("normal_vert",normal);
-		out_uniforms.set("tex_vert",tex);
+		out_uniforms.set("color",att.color);
+		out_uniforms.set("normal",att.normal);
+		out_uniforms.set("texUV",att.texUV);
     }
  };
 
@@ -99,9 +103,7 @@ void GeometryRenderer::render(const Geometry& geo)
 	
 	Uniforms uniforms[3];
 	Vec3 mvpVertex[3];
-	Vec3 col(1.0);
-	Vec3 normal(0.0,0.0,1.0);
-	Vec3 tex(0.0);
+	Attributes attribs;
 
 	if(geo.getPrimitive() == Geometry::Primitive_Triangles)
 	{
@@ -109,11 +111,11 @@ void GeometryRenderer::render(const Geometry& geo)
 		{
 			for(int k=0;k<3;++k)
 			{
-				if(geo._hasColors) col = geo._colors[i+k];
-				if(geo._hasNormals) normal = geo._normals[i+k];
-				if(geo._hasTexCoords) tex = geo._texCoords[i+k];
+				if(geo._hasColors) attribs.color = geo._colors[i+k];
+				if(geo._hasNormals) attribs.normal = geo._normals[i+k];
+				if(geo._hasTexCoords) attribs.texUV = geo._texCoords[i+k];
 				
-				_vertCallback->exec(geo[i+k],col,normal,tex,_uniforms,uniforms[k],this);
+				_vertCallback->exec(geo[i+k],attribs,_uniforms,uniforms[k]);
 				mvpVertex[k] = uniforms[k].get("mvp_vert");
 			}
 			
@@ -138,11 +140,11 @@ void GeometryRenderer::render(const Geometry& geo)
 		{
 			for(int k=0;k<2;++k)
 			{
-				if(geo._hasColors) col = geo._colors[i+k];
-				if(geo._hasNormals) normal = geo._normals[i+k];
-				if(geo._hasTexCoords) tex = geo._texCoords[i+k];
+				if(geo._hasColors) attribs.color = geo._colors[i+k];
+				if(geo._hasNormals) attribs.normal = geo._normals[i+k];
+				if(geo._hasTexCoords) attribs.texUV = geo._texCoords[i+k];
 				
-				_vertCallback->exec(geo[i+k],col,normal,tex,_uniforms,uniforms[k],this);
+				_vertCallback->exec(geo[i+k],attribs,_uniforms,uniforms[k]);
 				mvpVertex[k] = uniforms[k].get("mvp_vert");
 			}
 			

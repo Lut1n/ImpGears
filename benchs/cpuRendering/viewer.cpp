@@ -84,44 +84,15 @@ Geometry ground(const Vec3& center, float radius, int sub)
 }
  
 // -----------------------------------------------------------------------------------------------------------------------
-struct DepthTestFrag : public FragCallback
-{
-    Meta_Class(DepthTestFrag)
-	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets) = 0;
-	
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
-    {
-        depthTest(pt[0],pt[1],cu, *uniforms,targets.data());
-    }
-	
-	virtual void depthTest(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
-	{
-		// depth test
-		float depth = -uniforms.get("mv_vert").z();
-		
-		float depthPx = clamp( linearstep(0.1f, 20.f, depth )  )* 255.0;
-        Vec4 depthV = targets[1]->getPixel(x, y);
-		float curr_depth = depthV[0];
-		if( depthPx < curr_depth)
-		{
-			apply(x, y, cu, uniforms, targets);
-			
-			Vec4 depth(depthPx);
-			targets[1]->setPixel(x,y,depth);
-		}
-	}
-};
- 
-// -----------------------------------------------------------------------------------------------------------------------
-struct PhongFragCallback : public DepthTestFrag
+struct PhongFragCallback : public FragCallback
 {
     Meta_Class(PhongFragCallback)
-	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
 	{
 		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
 		
 		Vec3 light_pos = light_1.position;
-		Vec3 frag_pos = uniforms.get("m_vert");
+		Vec3 frag_pos = uniforms->get("m_vert");
 		const float* md = view.data();
 		Vec3 cam_pos(md[12],md[13],md[14]);
 		
@@ -130,31 +101,31 @@ struct PhongFragCallback : public DepthTestFrag
 		light_dir.normalize();
 		cam_dir.normalize();
 		
-		Vec3 normal = uniforms.get("normal");
+		Vec3 normal = uniforms->get("normal");
 		 
 		float a = clamp( light_dir.dot(normal) );
 		Vec3 reflection = (normal * 2.0 * a) - light_dir;
 		float s = clamp( reflection.dot(cam_dir) );
 		
-		Vec4 color = uniforms.get("color");
-		Vec3 tex = uniforms.get("texUV");
+		Vec4 color = uniforms->get("color");
+		Vec3 tex = uniforms->get("texUV");
 		TextureSampler::Ptr sampler = cu.at("u_sampler")->getSampler();
 		if(sampler) color *= sampler->get(tex);
 		
 		float light_lvl = clamp( 0.2 + 0.6*a + pow(s, 8) );
 		Vec4 base_color = Vec4(dotClamp( Vec3(light_lvl) * color ));
         base_color *= 255.f;
-		targets[0]->setPixel(x,y,base_color);
+		targets[1]->setPixel(pt[0],pt[1],base_color);
 	}
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
-struct LightFrag : public DepthTestFrag
+struct LightFrag : public FragCallback
 {
     Meta_Class(LightFrag)
-	virtual void apply(int x, int y, const CnstUniforms& cu, Uniforms& uniforms, Image::Ptr* targets)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
 	{
-		targets[0]->setPixel(x,y,Vec4(255.0));
+		targets[1]->setPixel(pt[0],pt[1],Vec4(255.0));
 	}
 };
 
@@ -168,12 +139,12 @@ int main(int argc, char* argv[])
     light_1.attn = 0.7;
 	
 	// texture
-	Image::Ptr hash = Image::create(128,128,3);
+	Image::Ptr hash = Image::create(INTERN_RES,INTERN_RES,3);
 	HashOperation hash_op;
 	hash_op.setSeed(76482.264);
 	hash_op.execute(hash);
 	
-	Image::Ptr fbm = Image::create(128,128,3);
+	Image::Ptr fbm = Image::create(INTERN_RES,INTERN_RES,3);
 	FbmOperation fbm_op;
 	fbm_op.setType(1);
 	fbm_op.setHashmap(hash);
@@ -182,7 +153,7 @@ int main(int argc, char* argv[])
 	fbm_op.setPersist(0.7);
 	fbm_op.execute(fbm);
 	
-	Image::Ptr tex = Image::create(128,128,3);
+	Image::Ptr tex = Image::create(INTERN_RES,INTERN_RES,3);
 	ColorMixOperation color_op;
 	color_op.setTarget(fbm);
 	color_op.setColor1( Vec4(0.8,0.8,0.8,1.0) );
@@ -194,9 +165,7 @@ int main(int argc, char* argv[])
 	sampler->setMode(TextureSampler::Mode_Repeat);
 	sampler->setInterpo(TextureSampler::Interpo_Linear);
 	
-	Image::Ptr targets[2];
-    targets[0] = Image::create(INTERN_RES,INTERN_RES,4);
-    targets[1] = Image::create(INTERN_RES,INTERN_RES,1);
+	Image::Ptr rgbtarget = Image::create(INTERN_RES,INTERN_RES,4);
 
 	double a = 0.0;
 	
@@ -225,8 +194,7 @@ int main(int argc, char* argv[])
 	Vec4 vp(0.0,0.0,INTERN_RES,INTERN_RES);
 	
 	GeometryRenderer georender;
-	georender.setTarget(0, targets[0], Vec4(100.0,100.0,255.0,255.0) );
-	georender.setTarget(1, targets[1], Vec4(255.0,255.0,255.0,255.0) );
+	georender.setTarget(0, rgbtarget, Vec4(100.0,100.0,255.0,255.0) );
 	georender.setProj( model );
 	georender.setViewport( vp );
 	
@@ -258,7 +226,8 @@ int main(int argc, char* argv[])
 		
 		georender.clearTargets();
 		
-		georender.setFragCallback( phongFrag );
+		// georender.setFragCallback( phongFrag );
+		georender.setDefaultFragCallback();
 		
 		model = Matrix4::translation(0.0, 0.0, -1.0);
 		u_model->set( &model );
@@ -276,8 +245,9 @@ int main(int argc, char* argv[])
 		u_model->set( &model );
 		georender.render( mushr );
 		
-		texture.update(targets[0]->data());
-		// ImageIO::save(targets[0],"output.tga"); // debug
+		texture.update(rgbtarget->data());
+		// ImageIO::save(rgbtarget,"output.tga"); // debug
+		// break;
 		
 		win.draw(sprite);
 		win.display();

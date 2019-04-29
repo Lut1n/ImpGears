@@ -56,6 +56,8 @@ public:
 	void setVertCallback(const VertCallback::Ptr& callback);
 	void setFragCallback(const FragCallback::Ptr& callback);
 	
+	void enableDepthTest(bool b);
+	
 	const Matrix4& getProj() const;
 	const Matrix4& getView() const;
 	const Matrix4& getModel() const;
@@ -63,8 +65,8 @@ public:
 	
 protected:
 
-	std::vector<Image::Ptr> _targets;
-	std::vector<Vec4> _clearColors;
+	std::map<int,Image::Ptr> _targets;
+	std::map<int,Vec4> _clearColors;
 	CnstUniforms _uniforms;
 	
 	VertCallback::Ptr _vertCallback;
@@ -72,12 +74,12 @@ protected:
 	
 	Rasterizer _rasterizer;
 	
-	// TODO : put model, view, projection into uniforms
-	// Uniforms _uniforms;
-	
 	Matrix4 _proj, _view, _model;
 	Vec4 _viewport;
 	Cull _cull;
+
+	Image::Ptr _depthBuffer;
+	bool _depthTestEnabled;
 };
 
 IMPGEARS_END

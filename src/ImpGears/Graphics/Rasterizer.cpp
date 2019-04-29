@@ -18,7 +18,7 @@ struct DefaultPlainColor : public FragCallback
         
     virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
     {
-        for(auto img:targets)img->setPixel(pt[0],pt[1],_rast->_defaultColor);
+        for(auto img:targets)img.second->setPixel(pt[0],pt[1],_rast->_defaultColor);
     }
 };
    
@@ -33,9 +33,9 @@ Rasterizer::Rasterizer()
 Rasterizer::~Rasterizer(){}
 
 //--------------------------------------------------------------
-void Rasterizer::addTarget(imp::Image::Ptr target)
+void Rasterizer::setTarget(int index, imp::Image::Ptr target)
 {
-    _targets.push_back(target);
+    _targets[index] = target;
 }
 
 //--------------------------------------------------------------
@@ -48,7 +48,7 @@ void Rasterizer::clearTarget()
 void Rasterizer::setTarget(imp::Image::Ptr target)
 {
     clearTarget();
-    addTarget(target);
+    setTarget(0,target);
 }
 
 //--------------------------------------------------------------

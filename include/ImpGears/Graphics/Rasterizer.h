@@ -45,7 +45,7 @@ struct IMP_API Uniforms
     }
 };
 
-using ImageBuf = std::vector<imp::Image::Ptr>;
+using ImageBuf = std::map<int,imp::Image::Ptr>;
 using UniformBuf = std::vector<Uniforms>;
 
 struct IMP_API FragCallback : public imp::Object
@@ -70,7 +70,7 @@ public:
     
     ~Rasterizer();
     
-    void addTarget(imp::Image::Ptr target);
+    void setTarget(int index, imp::Image::Ptr target);
     void clearTarget();
     void setTarget(imp::Image::Ptr target);
     void setColor(const imp::Vec4& col);

@@ -2,29 +2,68 @@
 
 IMPGEARS_BEGIN
 
+//--------------------------------------------------------------
+struct DefaultDepth : public FragCallback
+{
+	Meta_Class(DefaultDepth)
+	
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+    {
+		const int RGB_INDEX = 1;
+		const int DEPTH_INDEX = 0;
+		float depth = targets[DEPTH_INDEX]->getPixel(pt[0], pt[1])[0] / 255.0;
+		float v = std::sin(depth*10.0) * 0.5 + 0.5;
+		targets[RGB_INDEX]->setPixel(pt[0],pt[1], v * 255.0 );
+    }
+};
 
 //--------------------------------------------------------------
-struct DefaultFragCallback : public FragCallback
+struct DepthTestFragCallback : public FragCallback
 {
-	Meta_Class(DefaultFragCallback)
-
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+	FragCallback::Ptr _subCallback;
+	bool _depthTestEnabled;
+	float _near;
+	float _far;
+	
+	Meta_Class(DepthTestFragCallback)
+	
+	DepthTestFragCallback()
+		: _depthTestEnabled(true)
+		, _near(0.1)
+		, _far(100.0)
 	{
-		int rgb_target = 0, depth_target = 1;
+		_subCallback = DefaultDepth::create();
+	}
+	
+	void setSubFragCallback(const FragCallback::Ptr& subcb)
+	{
+		_subCallback = subcb;
+	}
+	
+	void enableDepthTest(bool b) { _depthTestEnabled = b; }
+	
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+    {
+		if(_depthTestEnabled == false)
+		{
+			if(_subCallback) _subCallback->exec(targets, pt, cu, uniforms);
+			return;
+		}
+		const int DEPTH_INDEX = 0;
+		
 		// depth test
 		float depth = -uniforms->get("mv_vert").z();
 		
-		float depthPx = clamp( linearstep(0.1f, 20.f, depth )  )* 255.0;
-		Vec4 depthV = targets[depth_target]->getPixel(pt[0], pt[1]);
+		float depthPx = clamp( linearstep(_near, _far, depth )  )* 255.0;
+		Vec4 depthV = targets[DEPTH_INDEX]->getPixel(pt[0], pt[1]);
 		float curr_depth = depthV[0];
 		if( depthPx < curr_depth)
 		{
-			Vec4 color(depthPx); color[3] = 255;
 			Vec4 depth(depthPx);
-			targets[rgb_target]->setPixel(pt[0],pt[1],color);
-			targets[depth_target]->setPixel(pt[0],pt[1],depth);
+			targets[DEPTH_INDEX]->setPixel(pt[0],pt[1],depth);
+			if(_subCallback) _subCallback->exec(targets, pt, cu, uniforms);
 		}
-	}
+    }
 };
 
 //--------------------------------------------------------------
@@ -66,6 +105,7 @@ struct DefaultFragCallback : public FragCallback
 //--------------------------------------------------------------
 GeometryRenderer::GeometryRenderer()
 {	
+	_fragCallback = DepthTestFragCallback::create();
 	setDefaultVertCallback();
 	setDefaultFragCallback();
 	_cull = Cull_Back;
@@ -80,6 +120,7 @@ GeometryRenderer::GeometryRenderer()
 	setView( Matrix4::view( Vec3(1,0,0), Vec3(0.0), Vec3(0,0,1)) );
 	setModel( Matrix4::translation(0.0, 0.0, 0.0) );
 	setViewport( Vec4(0,0,512,512) );
+	enableDepthTest(true);
 }
 
 //--------------------------------------------------------------
@@ -91,14 +132,15 @@ GeometryRenderer::~GeometryRenderer()
 void GeometryRenderer::init()
 {
 	_rasterizer.clearTarget();
-	for(auto t : _targets) _rasterizer.addTarget(t);
+	for(auto t : _targets) _rasterizer.setTarget(t.first + 1, t.second);
 	_rasterizer.setFragCallback(_fragCallback);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::clearTargets()
 {
-	for(int i=0;i<(int)_targets.size();++i) _targets[i]->fill(_clearColors[i]);
+	for(int i=0;i<(int)_targets.size();++i)
+		if(_targets[i-1]) _targets[i-1]->fill(_clearColors[i-1]);
 }
 
 //--------------------------------------------------------------
@@ -163,12 +205,6 @@ void GeometryRenderer::render(const Geometry& geo)
 //--------------------------------------------------------------
 void GeometryRenderer::setTarget(int id, Image::Ptr& target, Vec4 clearValue)
 {
-	if(id >= (int)_targets.size())
-	{
-		_targets.resize(id+1);
-		_clearColors.resize(id+1);
-	}
-	
 	_targets[id] = target;
 	_clearColors[id] = clearValue;
 }
@@ -176,28 +212,25 @@ void GeometryRenderer::setTarget(int id, Image::Ptr& target, Vec4 clearValue)
 //--------------------------------------------------------------
 void GeometryRenderer::setClearColor(int targetId, const Vec4& clearValue)
 {
-	if(targetId>0 && targetId < (int)_targets.size())
-	{
-		_clearColors[targetId] = clearValue;
-	}
+	_clearColors[targetId] = clearValue;
 }
 
 //--------------------------------------------------------------
 Image::Ptr GeometryRenderer::getTarget(int id)
 {
-	return _targets[id];
+	return _targets.at(id);
 }
 
 //--------------------------------------------------------------
 const Image::Ptr GeometryRenderer::getTarget(int id) const
 {
-	return _targets[id];
+	return _targets.at(id);
 }
 
 //--------------------------------------------------------------
 const Vec4& GeometryRenderer::getClearColor(int id)
 {
-	return _clearColors[id];
+	return _clearColors.at(id);
 }
 
 //--------------------------------------------------------------
@@ -226,6 +259,14 @@ void GeometryRenderer::setViewport(const Vec4& viewport)
 {
 	_viewport = viewport;
 	if(_uniforms.find("u_vp") != _uniforms.end()) _uniforms["u_vp"]->set(&_viewport);
+	
+	if(_depthTestEnabled
+		&& _depthBuffer->width() != _viewport[2]
+		&& _depthBuffer->height() != _viewport[3])
+	{
+		enableDepthTest(false);
+		enableDepthTest(true);
+	}
 }
 
 //--------------------------------------------------------------
@@ -249,7 +290,9 @@ void GeometryRenderer::setDefaultVertCallback()
 //--------------------------------------------------------------
 void GeometryRenderer::setDefaultFragCallback()
 {
-	_fragCallback = DefaultFragCallback::create();
+	DepthTestFragCallback* ptr = dynamic_cast<DepthTestFragCallback*>(_fragCallback.get());
+	DefaultDepth::Ptr fcb = DefaultDepth::create();
+	ptr->setSubFragCallback( fcb );
 }
 
 //--------------------------------------------------------------
@@ -261,7 +304,23 @@ void GeometryRenderer::setVertCallback(const VertCallback::Ptr& callback)
 //--------------------------------------------------------------
 void GeometryRenderer::setFragCallback(const FragCallback::Ptr& callback)
 {
-	_fragCallback = callback;
+	DepthTestFragCallback* ptr = dynamic_cast<DepthTestFragCallback*>(_fragCallback.get());
+	ptr->setSubFragCallback( callback );
+}
+
+//--------------------------------------------------------------
+void GeometryRenderer::enableDepthTest(bool b)
+{
+	_depthTestEnabled = b;
+	
+	if(b && _depthBuffer == nullptr)
+		_depthBuffer = Image::create(_viewport[2],_viewport[3],1);
+	else if(!b && _depthBuffer != nullptr)
+		_depthBuffer = nullptr;
+	
+	const int DEPTHBUFFER_INDEX = -1;
+	_targets[DEPTHBUFFER_INDEX] = _depthBuffer;
+	_clearColors[DEPTHBUFFER_INDEX] = Vec4(255.0);
 }
 
 //--------------------------------------------------------------

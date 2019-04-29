@@ -96,7 +96,7 @@ void VoronoiOperation::apply(const Vec2& uv, Vec4& outColor)
 	}
 	
 	// opt
-	res = 1.0 - smoothstep(0.0, 0.05, res);
+	// res = 1.0 - smoothstep(0.0, 0.05, res);
 	outColor.set(res,res,res,1.0);
 }
 

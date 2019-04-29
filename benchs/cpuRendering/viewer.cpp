@@ -21,18 +21,9 @@
 
 using namespace imp;
 
-#define INTERN_RES 128
+#define INTERN_RES 256
+#define TEX_RES INTERN_RES*0.5
 #define GEO_SUBDIV 3
-#define USE_BMPFORMAT false
- 
-struct Light
-{
-    Vec3 position;
-    Vec3 color;
-    float attn;
-};
-
-Light light_1;
 
 // -----------------------------------------------------------------------------------------------------------------------  
 Geometry ball(const Vec3& center, float radius)
@@ -90,8 +81,11 @@ struct PhongFragCallback : public FragCallback
 	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
 	{
 		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
+		const Vec3& lightPos = *(cu.at("u_lightPos")->getValue().value_3f);
+		const Vec3& lightCol = *(cu.at("u_lightCol")->getValue().value_3f);
+		const Vec3& lightAtt = *(cu.at("u_lightAtt")->getValue().value_3f);
 		
-		Vec3 light_pos = light_1.position;
+		Vec3 light_pos = lightPos;
 		Vec3 frag_pos = uniforms->get("m_vert");
 		const float* md = view.data();
 		Vec3 cam_pos(md[12],md[13],md[14]);
@@ -107,15 +101,20 @@ struct PhongFragCallback : public FragCallback
 		Vec3 reflection = (normal * 2.0 * a) - light_dir;
 		float s = clamp( reflection.dot(cam_dir) );
 		
-		Vec4 color = uniforms->get("color");
+		float l_lvl = clamp( 0.2 + lightAtt[0]*a + pow(s, 8) );
+		
+		Vec4 dcolor = Vec4( uniforms->get("color"), 1.0 );
+		Vec4 texcolor(1.0);
+		Vec4 lcolor(lightCol,1.0);
+		Vec4 attn(l_lvl,l_lvl,l_lvl,1.0);
+		
 		Vec3 tex = uniforms->get("texUV");
 		TextureSampler::Ptr sampler = cu.at("u_sampler")->getSampler();
-		if(sampler) color *= sampler->get(tex);
+		if(sampler) { texcolor = sampler->get(tex); texcolor[3]=1.0; }
 		
-		float light_lvl = clamp( 0.2 + 0.6*a + pow(s, 8) );
-		Vec4 base_color = Vec4(dotClamp( Vec3(light_lvl) * color ));
-        base_color *= 255.f;
-		targets[1]->setPixel(pt[0],pt[1],base_color);
+		Vec4 color = dcolor * texcolor * lcolor * attn;
+		color = dotClamp( color );
+		targets[1]->setPixel(pt[0], pt[1], color * 255.0 );
 	}
 };
 
@@ -134,17 +133,17 @@ int main(int argc, char* argv[])
 {
 	Vec3 observer(10.0, 0.0, 3.0);
      
-    light_1.position = Vec3(2.0,1.0,1.0);
-    light_1.color = Vec3(1.0,1.0,1.0);
-    light_1.attn = 0.7;
+    Vec3 lightPosition(2.0,1.0,1.0);
+    Vec3 lightColor(1.0,1.0,1.0);
+    Vec3 lightAttn(0.7);
 	
 	// texture
-	Image::Ptr hash = Image::create(INTERN_RES,INTERN_RES,3);
+	Image::Ptr hash = Image::create(TEX_RES,TEX_RES,1);
 	HashOperation hash_op;
 	hash_op.setSeed(76482.264);
 	hash_op.execute(hash);
 	
-	Image::Ptr fbm = Image::create(INTERN_RES,INTERN_RES,3);
+	Image::Ptr fbm = Image::create(TEX_RES,TEX_RES,1);
 	FbmOperation fbm_op;
 	fbm_op.setType(1);
 	fbm_op.setHashmap(hash);
@@ -153,7 +152,7 @@ int main(int argc, char* argv[])
 	fbm_op.setPersist(0.7);
 	fbm_op.execute(fbm);
 	
-	Image::Ptr tex = Image::create(INTERN_RES,INTERN_RES,3);
+	Image::Ptr tex = Image::create(TEX_RES,TEX_RES,3);
 	ColorMixOperation color_op;
 	color_op.setTarget(fbm);
 	color_op.setColor1( Vec4(0.8,0.8,0.8,1.0) );
@@ -203,17 +202,26 @@ int main(int argc, char* argv[])
 	Uniform::Ptr u_model = Uniform::create("u_model",Uniform::Type_Mat4v);
 	Uniform::Ptr u_vp = Uniform::create("u_vp",Uniform::Type_4f);
 	Uniform::Ptr u_sampler = Uniform::create("u_sampler",Uniform::Type_Sampler);
+	Uniform::Ptr u_lightPos = Uniform::create("u_lightPos",Uniform::Type_3f);
+	Uniform::Ptr u_lightCol = Uniform::create("u_lightCol",Uniform::Type_3f);
+	Uniform::Ptr u_lightAtt = Uniform::create("u_lightAtt",Uniform::Type_3f);
 	CnstUniforms uniforms;
 	uniforms["u_proj"] = u_proj;
 	uniforms["u_view"] = u_view;
 	uniforms["u_model"] = u_model;
 	uniforms["u_vp"] = u_vp;
 	uniforms["u_sampler"] = u_sampler;
+	uniforms["u_lightPos"] = u_lightPos;
+	uniforms["u_lightCol"] = u_lightCol;
+	uniforms["u_lightAtt"] = u_lightAtt;
 	georender.setUniforms(uniforms);
 	
 	u_proj->set( &proj );
 	u_vp->set( &vp );
 	u_sampler->set(sampler);
+	u_lightPos->set(&lightPosition);
+	u_lightCol->set(&lightColor);
+	u_lightAtt->set(&lightAttn);
 	
 	while (win.isOpen())
 	{
@@ -226,8 +234,7 @@ int main(int argc, char* argv[])
 		
 		georender.clearTargets();
 		
-		// georender.setFragCallback( phongFrag );
-		georender.setDefaultFragCallback();
+		georender.setFragCallback( phongFrag );
 		
 		model = Matrix4::translation(0.0, 0.0, -1.0);
 		u_model->set( &model );
@@ -235,7 +242,7 @@ int main(int argc, char* argv[])
 		
 		georender.setFragCallback( lightFrag );
 		
-		model = Matrix4::translation(light_1.position);
+		model = Matrix4::translation(lightPosition);
 		u_model->set( &model );
 		georender.render( torch );
 		

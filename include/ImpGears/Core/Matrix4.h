@@ -3,6 +3,7 @@
 
 #include <Core/Matrix.h>
 #include <Core/Vec3.h>
+#include <Core/Vec4.h>
 
 IMPGEARS_BEGIN
 
@@ -16,6 +17,7 @@ public:
 	template<int Cn2, int Rn2>
 	Matrix4(const Matrix<Cn2,Rn2,float>& mat) : Matrix(mat) {}
 	Matrix4(const float* buf, bool transp = false);
+	Matrix4(const Vec4& c1,const Vec4& c2,const Vec4& c3,const Vec4& c4);
 	virtual ~Matrix4();
 
 	const Matrix4& operator=(const Matrix& other){ Matrix::operator=(other); return *this; }

@@ -19,6 +19,13 @@ Matrix3::Matrix3(const float* buf, bool transp)
 {
 }
 
+Matrix3::Matrix3(const Vec3& c1,const Vec3& c2,const Vec3& c3)
+{
+	at(0,0)=c1[0]; at(0,1)=c1[1]; at(0,2)=c1[2];
+	at(1,0)=c2[0]; at(1,1)=c2[1]; at(1,2)=c2[2];
+	at(2,0)=c3[0]; at(2,1)=c3[1]; at(2,2)=c3[2];
+}
+
 Matrix3::~Matrix3()
 {
 }

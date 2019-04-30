@@ -16,6 +16,7 @@ public:
 	template<int Cn2, int Rn2>
 	Matrix3(const Matrix<Cn2,Rn2,float>& mat) : Matrix(mat) {}
 	Matrix3(const float* buf, bool transp = false);
+	Matrix3(const Vec3& c1,const Vec3& c2,const Vec3& c3);
 	virtual ~Matrix3();
 	
 	const Matrix3& operator=(const Matrix& other){ Matrix::operator=(other); return *this; }

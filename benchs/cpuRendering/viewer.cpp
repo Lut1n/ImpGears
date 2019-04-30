@@ -1,7 +1,7 @@
 #include <Geometry/Geometry.h>
 #include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
-#include <Graphics/ImageOperation.h>
+#include <Utils/JsonImageOp.h>
 #include <Graphics/GeometryRenderer.h>
 #include <Graphics/CpuBlinnPhong.h>
 
@@ -74,6 +74,26 @@ struct LightFrag : public FragCallback
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
+void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& normalSampler)
+{
+	if( !fileExists("./cache/scene_color.tga") || !fileExists("./cache/scene_normals.tga") )
+	{
+		generateImageFromJson("textures.json");
+	}
+	
+	colorSampler =TextureSampler::create();
+	colorSampler->setSource( ImageIO::load("./cache/scene_color.tga") );
+	colorSampler->setMode(TextureSampler::Mode_Repeat);
+	colorSampler->setInterpo(TextureSampler::Interpo_Linear);
+	
+	normalSampler =TextureSampler::create();
+	normalSampler->setSource( ImageIO::load("./cache/scene_normals.tga") );
+	normalSampler->setMode(TextureSampler::Mode_Repeat);
+	normalSampler->setInterpo(TextureSampler::Interpo_Linear);
+	
+}
+
+// -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
 	Vec3 observer(10.0, 0.0, 3.0);
@@ -82,43 +102,8 @@ int main(int argc, char* argv[])
     Vec3 lightColor(1.0,0.7,0.7);
     Vec3 lightAttn(2.0,8.0,0.0);
 	
-	// texture
-	Image::Ptr hash = Image::create(TEX_RES,TEX_RES,1);
-	HashOperation hash_op;
-	hash_op.setSeed(76482.264);
-	hash_op.execute(hash);
-	
-	Image::Ptr fbm = Image::create(TEX_RES,TEX_RES,1);
-	FbmOperation fbm_op;
-	fbm_op.setType(1);
-	fbm_op.setHashmap(hash);
-	fbm_op.setFreq(4.0);
-	fbm_op.setOctaves(2);
-	fbm_op.setPersist(0.7);
-	fbm_op.execute(fbm);
-	
-	Image::Ptr tex = Image::create(TEX_RES,TEX_RES,3);
-	ColorMixOperation color_op;
-	color_op.setTarget(fbm);
-	color_op.setColor1( Vec4(0.8,0.8,0.8,1.0) );
-	color_op.setColor2( Vec4(0.2,0.2,1.0,1.0) );
-	color_op.execute(tex);
-	
-	Image::Ptr normals = Image::create(TEX_RES,TEX_RES,3);
-	BumpToNormalOperation b2n_op;
-	b2n_op.setTarget(fbm);
-	b2n_op.execute(normals);
-	
-	TextureSampler::Ptr sampler =TextureSampler::create();
-	sampler->setSource(tex);
-	sampler->setMode(TextureSampler::Mode_Repeat);
-	sampler->setInterpo(TextureSampler::Interpo_Linear);
-	
-	TextureSampler::Ptr nsampler =TextureSampler::create();
-	nsampler->setSource(normals);
-	nsampler->setMode(TextureSampler::Mode_Repeat);
-	nsampler->setInterpo(TextureSampler::Interpo_Linear);
-	
+	TextureSampler::Ptr sampler, nsampler;
+	loadSamplers(sampler,nsampler);
 	Image::Ptr rgbtarget = Image::create(INTERN_RES,INTERN_RES,4);
 
 	double a = 0.0;

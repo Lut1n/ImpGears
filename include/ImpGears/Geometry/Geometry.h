@@ -101,6 +101,10 @@ class IMP_API Geometry : public Object
 	void setColors(const BufType& colors);
 	void setNormals(const BufType& normals);
 	
+	void generateColors(const Vec3& color);
+	void generateNormals();
+	void generateTexCoords(float resFactor = 1.0);
+	
 	static void intoCCW( Geometry& buf );
 
 	static Geometry intoLineBuf(const Geometry& buf);

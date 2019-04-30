@@ -410,5 +410,74 @@ void Geometry::setTexCoords(const TexCoordBuf& coords)
 	_hasTexCoords = true;
 }
 
+void Geometry::generateNormals()
+{
+	_normals = BufType(size());
+	_hasNormals = true;
+	if(_prim != Primitive_Triangles) return;
+	
+	Vec3 grav_cent;
+	for(auto v : _vertices) grav_cent += v;
+	grav_cent /= size();
+	
+	for(int i=0;i<size();i+=3)
+	{
+		/*Vec3 dir = at(i) - grav_cent;
+		Vec3 dx = at(i+1) - at(i); dx.normalize();
+		Vec3 dy = at(i+2) - at(i); dy.normalize();
+		
+		Vec3 n = dx.cross(dy);
+		if( n.dot(dir) < 0.0 ) n *= -1.0;*/
+		
+		Vec3 n1 = at(i) - grav_cent; n1.normalize();
+		Vec3 n2 = at(i+1) - grav_cent; n2.normalize();
+		Vec3 n3 = at(i+2) - grav_cent; n3.normalize();
+		
+		_normals[i] = n1;
+		_normals[i+1] = n2;
+		_normals[i+2] = n3;
+	}
+}
+
+void Geometry::generateColors(const Vec3& color)
+{
+	_colors = BufType(size(), color);
+	_hasColors = true;
+}
+
+void Geometry::generateTexCoords(float resFactor)
+{	
+	_texCoords = TexCoordBuf(size());
+	_hasTexCoords = true;
+	
+	Vec3 grav_cent;
+	for(auto v : _vertices) grav_cent += v;
+	grav_cent /= size();
+	
+	const float c_pi = 3.141592;
+	
+	for(int i=0;i<size();++i)
+	{
+		Vec3 dir = at(i) - grav_cent; dir.normalize();
+		float u = std::atan2(dir.y(),dir.x()) / c_pi;// * 0.5 + 0.5; u *= 4.0;
+		float v = std::atan2(dir.z(),(dir.y()+dir.x())*0.5) / c_pi;// * 0.5 + 0.5; v *= 4.0;
+		
+		u = u * 0.5 + 0.5;
+		v = v * 0.5 + 0.5;
+		
+		_texCoords[i] = Geometry::TexCoord(u*resFactor,v*resFactor);
+	}
+	
+	/*for(int i=0;i<size();i+=3)
+	{
+		float dx = (at(i+1) - at(i)).length();
+		float dy = (at(i+2) - at(i)).length();
+		
+		_texCoords[i] = TexCoord(0.f,0.f);
+		_texCoords[i+1] = TexCoord(dx,0.f);
+		_texCoords[i+2] = TexCoord(0.f,dy);
+	}*/
+}
+
 
 IMPGEARS_END

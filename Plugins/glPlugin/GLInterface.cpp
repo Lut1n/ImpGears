@@ -293,7 +293,6 @@ void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 {
 	std::string uId = uniform->getID();
 	Uniform::Type type = uniform->getType();
-	Uniform::Value value = uniform->getValue();
 	ProgData::Ptr sha = std::dynamic_pointer_cast<ProgData>(data);
 	std::int32_t uniformLocation = sha->sha.locate(uId);
     if(uniformLocation == -1)
@@ -302,43 +301,42 @@ void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 	
 	if(type == Uniform::Type_1f)
 	{
-		glUniform1f(uniformLocation, value.value_1f);
+		glUniform1f(uniformLocation, uniform->getFloat1());
+	}
+	else if(type == Uniform::Type_2f)
+	{
+		const Vec2& f2 = uniform->getFloat2();
+		glUniform2f(uniformLocation, f2[0], f2[1]);
 	}
 	else if(type == Uniform::Type_3f)
 	{
-		glUniform3f(uniformLocation, value.value_3f->x(), value.value_3f->y(), value.value_3f->z());
+		const Vec3& f3 = uniform->getFloat3();
+		glUniform3f(uniformLocation, f3[0], f3[1], f3[2]);
+	}
+	else if(type == Uniform::Type_4f)
+	{
+		const Vec4& f4 = uniform->getFloat4();
+		glUniform4f(uniformLocation, f4[0], f4[1], f4[2], f4[3]);
 	}
 	else if(type == Uniform::Type_1i)
 	{
-		glUniform1i(uniformLocation, value.value_1i);
+		glUniform1i(uniformLocation, uniform->getInt1());
 	}
-	else if(type == Uniform::Type_1fv)
+	else if(type == Uniform::Type_Mat3)
 	{
-		glUniform1fv(uniformLocation, uniform->getCount(), value.value_1fv);
+		glUniformMatrix3fv(uniformLocation, 1, false, uniform->getMat3().data());
 	}
-	else if(type == Uniform::Type_3fv)
+	else if(type == Uniform::Type_Mat4)
 	{
-		// glUniform3f(uniformLocation, value.value_3f->x(), value.value_3f->y(), value.value_3f->z());
-	}
-	else if(type == Uniform::Type_1iv)
-	{
-		glUniform1iv(uniformLocation, uniform->getCount(), value.value_1iv);
-	}
-	/*else if(type == Uniform::Type_Mat3v)
-	{
-		// 
-	}*/
-	else if(type == Uniform::Type_Mat4v)
-	{
-		glUniformMatrix4fv(uniformLocation, 1, false, value.value_mat4v->data());
+		glUniformMatrix4fv(uniformLocation, 1, false, uniform->getMat4().data());
 	}
 	else if(type == Uniform::Type_Sampler)
 	{
 		glEnable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0 + value.value_1i);
+		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
 		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(uniform->getSampler()->_d);
 		glBindTexture(GL_TEXTURE_2D, d->tex.getVideoID());
-		glUniform1i(uniformLocation, value.value_1i);
+		glUniform1i(uniformLocation, uniform->getInt1());
 	}
 	else
 	{

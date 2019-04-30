@@ -72,7 +72,7 @@ void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& 
 	+ color*0.3 * specular * lightCol * lightPower / distance;
 	
 	Vec4 px(colModelRes,1.0); px = dotClamp( px );
-	targets[1]->setPixel(pt[0], pt[1], px * 255.0 );
+	targets[0]->setPixel(pt[0], pt[1], px * 255.0 );
 }
 
 IMPGEARS_END

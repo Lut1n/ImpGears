@@ -69,7 +69,7 @@ struct LightFrag : public FragCallback
     Meta_Class(LightFrag)
 	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
 	{
-		targets[1]->setPixel(pt[0],pt[1],Vec4(uniforms->get("color"),1.0) * 255.0);
+		targets[0]->setPixel(pt[0],pt[1],Vec4(uniforms->get("color"),1.0) * 255.0);
 	}
 };
 

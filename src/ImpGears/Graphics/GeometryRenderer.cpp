@@ -9,17 +9,15 @@ struct DefaultDepth : public FragCallback
 	
 	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
     {
-		const int RGB_INDEX = 1;
-		const int DEPTH_INDEX = 0;
-		float depth = targets[DEPTH_INDEX]->getPixel(pt[0], pt[1])[0] / 255.0;
-		float v = std::sin(depth*10.0) * 0.5 + 0.5;
-		targets[RGB_INDEX]->setPixel(pt[0],pt[1], v * 255.0 );
+		float v = std::sin(pt.length()*10.0) * 0.5 + 0.5;
+		targets[0]->setPixel(pt[0],pt[1], v * 255.0 );
     }
 };
 
 //--------------------------------------------------------------
 struct DepthTestFragCallback : public FragCallback
 {
+	Image::Ptr _depthBuffer;
 	FragCallback::Ptr _subCallback;
 	bool _depthTestEnabled;
 	float _near;
@@ -33,6 +31,11 @@ struct DepthTestFragCallback : public FragCallback
 		, _far(100.0)
 	{
 		_subCallback = DefaultDepth::create();
+	}
+	
+	void setDepthBuffer(Image::Ptr depthBuffer)
+	{
+		_depthBuffer = depthBuffer;
 	}
 	
 	void setSubFragCallback(const FragCallback::Ptr& subcb)
@@ -49,18 +52,17 @@ struct DepthTestFragCallback : public FragCallback
 			if(_subCallback) _subCallback->exec(targets, pt, cu, uniforms);
 			return;
 		}
-		const int DEPTH_INDEX = 0;
 		
 		// depth test
 		float depth = -uniforms->get("mv_vert").z();
 		
 		float depthPx = clamp( linearstep(_near, _far, depth )  )* 255.0;
-		Vec4 depthV = targets[DEPTH_INDEX]->getPixel(pt[0], pt[1]);
+		Vec4 depthV = _depthBuffer->getPixel(pt[0], pt[1]);
 		float curr_depth = depthV[0];
 		if( depthPx < curr_depth)
 		{
 			Vec4 depth(depthPx);
-			targets[DEPTH_INDEX]->setPixel(pt[0],pt[1],depth);
+			_depthBuffer->setPixel(pt[0],pt[1],depth);
 			if(_subCallback) _subCallback->exec(targets, pt, cu, uniforms);
 		}
     }
@@ -104,7 +106,7 @@ struct DepthTestFragCallback : public FragCallback
 
 //--------------------------------------------------------------
 GeometryRenderer::GeometryRenderer()
-{	
+{
 	_fragCallback = DepthTestFragCallback::create();
 	setDefaultVertCallback();
 	setDefaultFragCallback();
@@ -132,15 +134,16 @@ GeometryRenderer::~GeometryRenderer()
 void GeometryRenderer::init()
 {
 	_rasterizer.clearTarget();
-	for(auto t : _targets) _rasterizer.setTarget(t.first + 1, t.second);
+	for(auto t : _targets) _rasterizer.setTarget(t.first, t.second);
 	_rasterizer.setFragCallback(_fragCallback);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::clearTargets()
 {
-	for(int i=0;i<(int)_targets.size();++i)
-		if(_targets[i-1]) _targets[i-1]->fill(_clearColors[i-1]);
+	if(_depthBuffer) _depthBuffer->fill(Vec4(255.0));
+	
+	for(int i=0;i<(int)_targets.size();++i) _targets[i]->fill(_clearColors[i]);
 }
 
 //--------------------------------------------------------------
@@ -264,8 +267,7 @@ void GeometryRenderer::setViewport(const Vec4& viewport)
 		&& _depthBuffer->width() != _viewport[2]
 		&& _depthBuffer->height() != _viewport[3])
 	{
-		enableDepthTest(false);
-		enableDepthTest(true);
+		_depthBuffer->resize(_viewport[2],_viewport[3],1);
 	}
 }
 
@@ -311,16 +313,16 @@ void GeometryRenderer::setFragCallback(const FragCallback::Ptr& callback)
 //--------------------------------------------------------------
 void GeometryRenderer::enableDepthTest(bool b)
 {
+	DepthTestFragCallback* ptr = dynamic_cast<DepthTestFragCallback*>(_fragCallback.get());
 	_depthTestEnabled = b;
 	
-	if(b && _depthBuffer == nullptr)
-		_depthBuffer = Image::create(_viewport[2],_viewport[3],1);
-	else if(!b && _depthBuffer != nullptr)
-		_depthBuffer = nullptr;
+	if(_depthTestEnabled)
+	{
+		 if(_depthBuffer == nullptr) _depthBuffer = Image::create(_viewport[2],_viewport[3],1);
+		 ptr->setDepthBuffer(_depthBuffer);
+	}
 	
-	const int DEPTHBUFFER_INDEX = -1;
-	_targets[DEPTHBUFFER_INDEX] = _depthBuffer;
-	_clearColors[DEPTHBUFFER_INDEX] = Vec4(255.0);
+	ptr->enableDepthTest(_depthTestEnabled);
 }
 
 //--------------------------------------------------------------

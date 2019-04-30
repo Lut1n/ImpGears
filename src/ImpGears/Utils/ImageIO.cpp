@@ -99,7 +99,7 @@ IMPGEARS_BEGIN
 void bmp_save(const std::string& filename, const Image::Ptr img);
 void tga_save(const std::string& filename, const Image::Ptr img);
 Image::Ptr bmp_load(std::string& filename);
-
+Image::Ptr tga_load(std::string& filename);
 
 //--------------------------------------------------------------
 ImageIO::ImageIO()
@@ -147,10 +147,49 @@ Image::Ptr ImageIO::load(std::string filename, const Options& opts)
     }
     else if(opts.fileType == FileType_TGA)
     {
-        // todo
-        // tga_load(filename, image);
+        res = tga_load(filename);
     }
 	return res;
+}
+
+Image::Ptr tga_load(std::string& filename)
+{
+	unsigned short w, h; unsigned char chnl;
+	
+    std::ifstream istrm(filename,std::ios::binary);
+    unsigned char v = 0;
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); //ID length (1o)
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Color map type (1o)
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Image type (1o)
+    
+    // if(v == 3) chnl = 1; // black and white
+    // if(v == 2) chnl = 3; // TrueColor
+    
+    v = 0;	// no color map
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
+    unsigned short d = 0;
+    istrm.read(reinterpret_cast<char*>(&d), sizeof d); // X-origin (2o)
+    istrm.read(reinterpret_cast<char*>(&d), sizeof d); // Y-origin (2o)
+    
+    istrm.read(reinterpret_cast<char*>(&w), sizeof w); // width (2o)
+    istrm.read(reinterpret_cast<char*>(&h), sizeof h); // height (2o)
+	
+    istrm.read(reinterpret_cast<char*>(&chnl), sizeof chnl); // px depth (1o)
+    
+    // chnl = 1;	// default for black and white
+    chnl /= 8;	// 24 for RGB; 32 for RGBA
+    
+    v = 0;
+    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // description (1o)
+    
+    Image::Ptr img = Image::create(w,h,chnl);
+	
+    istrm.read(reinterpret_cast<char*>(img->asGrid()->data()), (img->width()*img->height()*img->channels())); // image data
+	return img;
 }
 
 //--------------------------------------------------------------

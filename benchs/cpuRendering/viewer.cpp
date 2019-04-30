@@ -3,6 +3,7 @@
 #include <Graphics/Image.h>
 #include <Graphics/ImageOperation.h>
 #include <Graphics/GeometryRenderer.h>
+#include <Graphics/CpuBlinnPhong.h>
 
 #include <Core/Vec4.h>
 #include <Core/Matrix3.h>
@@ -21,8 +22,8 @@
 
 using namespace imp;
 
-#define INTERN_RES 256
-#define TEX_RES INTERN_RES*0.5
+#define INTERN_RES 128
+#define TEX_RES 64
 #define GEO_SUBDIV 3
 
 // -----------------------------------------------------------------------------------------------------------------------  
@@ -30,7 +31,7 @@ Geometry ball(const Vec3& center, float radius)
 {
     Geometry geo = Geometry::sphere(GEO_SUBDIV,radius);
 	Geometry::intoCCW( geo );
-	geo.setColors( std::vector<Vec3>(geo.size(),Vec3(1.0)) );
+	geo.generateColors( Vec3(1.0,0.7,0.7) );
     return geo;
 }
 
@@ -44,20 +45,9 @@ Geometry mushroom(const Vec3& center, float radius, int sub)
 	geo += geo2;
 	Geometry::intoCCW( geo );
 	
-    geo.setColors( std::vector<Vec3>(geo.size(),Vec3(0.0,1.0,0.0)) );
-	
-	std::vector<Geometry::TexCoord> tex(geo.size());
-	std::vector<Vec3> normals(geo.size());
-	for(int i=0;i<geo.size();++i)
-	{
-		float u = std::atan2(geo[i].y(),geo[i].x()) / (3.141592) * 0.5 + 0.5; u *= 4.0;
-		float v = geo[i].z();
-		
-		tex[i] = Geometry::TexCoord(u,v);
-		normals[i] = geo[i]; normals[i].normalize();
-	}
-	geo.setTexCoords( tex );
-	geo.setNormals( normals );
+    geo.generateColors( Vec3(0.0,0.5,1.0) );
+	geo.generateNormals();
+	geo.generateTexCoords(2.0);
        
     return geo;
 }
@@ -67,56 +57,11 @@ Geometry ground(const Vec3& center, float radius, int sub)
 {
     Geometry geo = Geometry::cylinder(sub*2.0, 1.0, radius*0.7);
 	Geometry::intoCCW( geo );
-	geo.setColors( std::vector<Vec3>(geo.size(),Vec3(1.0)) );
-	std::vector<Vec3> normals(geo.size());
-	for(int i=0;i<geo.size();++i) {normals[i]=geo[i]; normals[i].normalize(); }
-	geo.setNormals( normals );
+	geo.generateColors( Vec3(0.3,1.0,0.3) );
+	geo.generateNormals();
+	geo.generateTexCoords(2.0);
     return geo;
 }
- 
-// -----------------------------------------------------------------------------------------------------------------------
-struct PhongFragCallback : public FragCallback
-{
-    Meta_Class(PhongFragCallback)
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
-	{
-		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
-		const Vec3& lightPos = *(cu.at("u_lightPos")->getValue().value_3f);
-		const Vec3& lightCol = *(cu.at("u_lightCol")->getValue().value_3f);
-		const Vec3& lightAtt = *(cu.at("u_lightAtt")->getValue().value_3f);
-		
-		Vec3 light_pos = lightPos;
-		Vec3 frag_pos = uniforms->get("m_vert");
-		const float* md = view.data();
-		Vec3 cam_pos(md[12],md[13],md[14]);
-		
-		Vec3 light_dir = light_pos - frag_pos;
-		Vec3 cam_dir = cam_pos - frag_pos;
-		light_dir.normalize();
-		cam_dir.normalize();
-		
-		Vec3 normal = uniforms->get("normal");
-		 
-		float a = clamp( light_dir.dot(normal) );
-		Vec3 reflection = (normal * 2.0 * a) - light_dir;
-		float s = clamp( reflection.dot(cam_dir) );
-		
-		float l_lvl = clamp( 0.2 + lightAtt[0]*a + pow(s, 8) );
-		
-		Vec4 dcolor = Vec4( uniforms->get("color"), 1.0 );
-		Vec4 texcolor(1.0);
-		Vec4 lcolor(lightCol,1.0);
-		Vec4 attn(l_lvl,l_lvl,l_lvl,1.0);
-		
-		Vec3 tex = uniforms->get("texUV");
-		TextureSampler::Ptr sampler = cu.at("u_sampler")->getSampler();
-		if(sampler) { texcolor = sampler->get(tex); texcolor[3]=1.0; }
-		
-		Vec4 color = dcolor * texcolor * lcolor * attn;
-		color = dotClamp( color );
-		targets[1]->setPixel(pt[0], pt[1], color * 255.0 );
-	}
-};
 
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightFrag : public FragCallback
@@ -124,7 +69,7 @@ struct LightFrag : public FragCallback
     Meta_Class(LightFrag)
 	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
 	{
-		targets[1]->setPixel(pt[0],pt[1],Vec4(255.0));
+		targets[1]->setPixel(pt[0],pt[1],Vec4(uniforms->get("color"),1.0) * 255.0);
 	}
 };
 
@@ -134,8 +79,8 @@ int main(int argc, char* argv[])
 	Vec3 observer(10.0, 0.0, 3.0);
      
     Vec3 lightPosition(2.0,1.0,1.0);
-    Vec3 lightColor(1.0,1.0,1.0);
-    Vec3 lightAttn(0.7);
+    Vec3 lightColor(1.0,0.7,0.7);
+    Vec3 lightAttn(2.0,8.0,0.0);
 	
 	// texture
 	Image::Ptr hash = Image::create(TEX_RES,TEX_RES,1);
@@ -159,16 +104,26 @@ int main(int argc, char* argv[])
 	color_op.setColor2( Vec4(0.2,0.2,1.0,1.0) );
 	color_op.execute(tex);
 	
+	Image::Ptr normals = Image::create(TEX_RES,TEX_RES,3);
+	BumpToNormalOperation b2n_op;
+	b2n_op.setTarget(fbm);
+	b2n_op.execute(normals);
+	
 	TextureSampler::Ptr sampler =TextureSampler::create();
 	sampler->setSource(tex);
 	sampler->setMode(TextureSampler::Mode_Repeat);
 	sampler->setInterpo(TextureSampler::Interpo_Linear);
 	
+	TextureSampler::Ptr nsampler =TextureSampler::create();
+	nsampler->setSource(normals);
+	nsampler->setMode(TextureSampler::Mode_Repeat);
+	nsampler->setInterpo(TextureSampler::Interpo_Linear);
+	
 	Image::Ptr rgbtarget = Image::create(INTERN_RES,INTERN_RES,4);
 
 	double a = 0.0;
 	
-	PhongFragCallback::Ptr phongFrag = PhongFragCallback::create();
+	CpuBlinnPhong::Ptr phongFrag = CpuBlinnPhong::create();
 	LightFrag::Ptr lightFrag = LightFrag::create();
     
 	Geometry mushr = mushroom(Vec3(0.0), 1.0, 2*GEO_SUBDIV);
@@ -188,40 +143,35 @@ int main(int argc, char* argv[])
 	sprite.setPosition( 0, 500 );
 	sprite.scale( 500.0/INTERN_RES, -500.0/INTERN_RES );
 	
-	Matrix4 model, view;
+	Matrix4 model;
 	Matrix4 proj = Matrix4::perspectiveProj(60.0, 1.0, 0.1, 10.0);
 	Vec4 vp(0.0,0.0,INTERN_RES,INTERN_RES);
+	Matrix4 view = Matrix4::view(observer, Vec3(0.0), Vec3::Z);
 	
 	GeometryRenderer georender;
 	georender.setTarget(0, rgbtarget, Vec4(100.0,100.0,255.0,255.0) );
 	georender.setProj( model );
 	georender.setViewport( vp );
 	
-	Uniform::Ptr u_proj = Uniform::create("u_proj",Uniform::Type_Mat4v);
-	Uniform::Ptr u_view = Uniform::create("u_view",Uniform::Type_Mat4v);
-	Uniform::Ptr u_model = Uniform::create("u_model",Uniform::Type_Mat4v);
-	Uniform::Ptr u_vp = Uniform::create("u_vp",Uniform::Type_4f);
-	Uniform::Ptr u_sampler = Uniform::create("u_sampler",Uniform::Type_Sampler);
-	Uniform::Ptr u_lightPos = Uniform::create("u_lightPos",Uniform::Type_3f);
-	Uniform::Ptr u_lightCol = Uniform::create("u_lightCol",Uniform::Type_3f);
-	Uniform::Ptr u_lightAtt = Uniform::create("u_lightAtt",Uniform::Type_3f);
 	CnstUniforms uniforms;
-	uniforms["u_proj"] = u_proj;
-	uniforms["u_view"] = u_view;
-	uniforms["u_model"] = u_model;
-	uniforms["u_vp"] = u_vp;
-	uniforms["u_sampler"] = u_sampler;
-	uniforms["u_lightPos"] = u_lightPos;
-	uniforms["u_lightCol"] = u_lightCol;
-	uniforms["u_lightAtt"] = u_lightAtt;
+	uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4v);
+	uniforms["u_view"] = Uniform::create("u_view",Uniform::Type_Mat4v);
+	uniforms["u_model"] = Uniform::create("u_model",Uniform::Type_Mat4v);
+	uniforms["u_vp"] = Uniform::create("u_vp",Uniform::Type_4f);
+	uniforms["u_sampler"] = Uniform::create("u_sampler",Uniform::Type_Sampler);
+	uniforms["u_nsampler"] = Uniform::create("u_nsampler",Uniform::Type_Sampler);
+	uniforms["u_lightPos"] = Uniform::create("u_lightPos",Uniform::Type_3f);
+	uniforms["u_lightCol"] = Uniform::create("u_lightCol",Uniform::Type_3f);
+	uniforms["u_lightAtt"] = Uniform::create("u_lightAtt",Uniform::Type_3f);
 	georender.setUniforms(uniforms);
 	
-	u_proj->set( &proj );
-	u_vp->set( &vp );
-	u_sampler->set(sampler);
-	u_lightPos->set(&lightPosition);
-	u_lightCol->set(&lightColor);
-	u_lightAtt->set(&lightAttn);
+	uniforms["u_proj"]->set( &proj );
+	uniforms["u_vp"]->set( &vp );
+	uniforms["u_sampler"]->set(sampler);
+	uniforms["u_nsampler"]->set(nsampler);
+	uniforms["u_lightPos"]->set(&lightPosition);
+	uniforms["u_lightCol"]->set(&lightColor);
+	uniforms["u_lightAtt"]->set(&lightAttn);
 	
 	while (win.isOpen())
 	{
@@ -229,27 +179,28 @@ int main(int argc, char* argv[])
 		while (win.pollEvent(ev)) if (ev.type == sf::Event::Closed) win.close();
 		
 		a += 0.05; if(a > 6.28) a = 0.0;
-		view = Matrix4::view(observer * Matrix3::rotationZ(a), Vec3(0.0), Vec3::Z);
-		u_view->set( &view );
+		// view = Matrix4::view(observer +Vec3(0.0,0.0,std::sin(a)), Vec3(0.0), Vec3::Z);
+		lightPosition = Vec3(2.0,1.0,1.0) * Matrix3::rotationZ(a*2.0);
+		uniforms["u_view"]->set( &view );
 		
 		georender.clearTargets();
 		
 		georender.setFragCallback( phongFrag );
 		
 		model = Matrix4::translation(0.0, 0.0, -1.0);
-		u_model->set( &model );
+		uniforms["u_model"]->set( &model );
 		georender.render( plane );
 		
 		georender.setFragCallback( lightFrag );
 		
 		model = Matrix4::translation(lightPosition);
-		u_model->set( &model );
+		uniforms["u_model"]->set( &model );
 		georender.render( torch );
 		
 		georender.setFragCallback( phongFrag );
 		
 		model = Matrix4();
-		u_model->set( &model );
+		uniforms["u_model"]->set( &model );
 		georender.render( mushr );
 		
 		texture.update(rgbtarget->data());

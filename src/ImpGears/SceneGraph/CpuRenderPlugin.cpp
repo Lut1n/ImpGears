@@ -288,13 +288,12 @@ void CpuRenderPlugin::update(Data::Ptr data, const Uniform* uniform)
 	
 	std::string name = uniform->getID();
 	Uniform::Type type = uniform->getType();
-	Uniform::Value value = uniform->getValue();
 	
-	if(type == Uniform::Type_Mat4v)
+	if(type == Uniform::Type_Mat4)
 	{
-		if(name == "u_proj") r.setProj( *value.value_mat4v );
-		else if(name == "u_view") r.setView( *value.value_mat4v );
-		else if(name == "u_model") r.setModel( *value.value_mat4v );
+		if(name == "u_proj") r.setProj( uniform->getMat4() );
+		else if(name == "u_view") r.setView( uniform->getMat4() );
+		else if(name == "u_model") r.setModel( uniform->getMat4() );
 		// todo
 	}
 	else if(type == Uniform::Type_3f)
@@ -303,7 +302,7 @@ void CpuRenderPlugin::update(Data::Ptr data, const Uniform* uniform)
 	}
 	else if(type == Uniform::Type_4f)
 	{
-		if(name == "u_vp") r.setViewport( *value.value_4f );
+		if(name == "u_vp") r.setViewport( uniform->getFloat4() );
 	}
 }
 

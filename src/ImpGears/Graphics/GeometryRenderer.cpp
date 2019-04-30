@@ -73,10 +73,10 @@ struct DepthTestFragCallback : public FragCallback
 
 	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const CnstUniforms& cu, Uniforms& out_uniforms)
 	{
-		const Matrix4& model = *(cu.at("u_model")->getValue().value_mat4v);
-		const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
-		const Matrix4& proj = *(cu.at("u_proj")->getValue().value_mat4v);
-		const Vec4& vp = *(cu.at("u_vp")->getValue().value_4f);
+		const Matrix4& model = cu.at("u_model")->getMat4();
+		const Matrix4& view = cu.at("u_view")->getMat4();
+		const Matrix4& proj = cu.at("u_proj")->getMat4();
+		const Vec4& vp = cu.at("u_vp")->getFloat4();
 		
 		Vec4 win1(vp[2]*0.5, vp[3]*0.5, 1.0, 1.0);
 		Vec4 win2(vp[2]*0.5, vp[3]*0.5, 0.0, 0.0);
@@ -111,9 +111,9 @@ GeometryRenderer::GeometryRenderer()
 	_cull = Cull_Back;
 	
 	// default uniforms
-	_uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4v);
-	_uniforms["u_view"] = Uniform::create("u_view",Uniform::Type_Mat4v);
-	_uniforms["u_model"] = Uniform::create("u_model",Uniform::Type_Mat4v);
+	_uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4);
+	_uniforms["u_view"] = Uniform::create("u_view",Uniform::Type_Mat4);
+	_uniforms["u_model"] = Uniform::create("u_model",Uniform::Type_Mat4);
 	_uniforms["u_vp"] = Uniform::create("u_vp",Uniform::Type_4f);
 	
 	setProj( Matrix4::perspectiveProj(60.0, 1.0, 0.01, 100.0) );
@@ -237,28 +237,28 @@ const Vec4& GeometryRenderer::getClearColor(int id)
 void GeometryRenderer::setProj(const Matrix4& proj)
 {
 	_proj = proj;
-	if(_uniforms.find("u_proj") != _uniforms.end()) _uniforms["u_proj"]->set(&_proj);
+	if(_uniforms.find("u_proj") != _uniforms.end()) _uniforms["u_proj"]->set(_proj);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::setView(const Matrix4& view)
 {
 	_view = view;
-	if(_uniforms.find("u_view") != _uniforms.end()) _uniforms["u_view"]->set(&_view);
+	if(_uniforms.find("u_view") != _uniforms.end()) _uniforms["u_view"]->set(_view);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::setModel(const Matrix4& model)
 {
 	_model = model;
-	if(_uniforms.find("u_model") != _uniforms.end()) _uniforms["u_model"]->set(&_model);
+	if(_uniforms.find("u_model") != _uniforms.end()) _uniforms["u_model"]->set(_model);
 }
 
 //--------------------------------------------------------------
 void GeometryRenderer::setViewport(const Vec4& viewport)
 {
 	_viewport = viewport;
-	if(_uniforms.find("u_vp") != _uniforms.end()) _uniforms["u_vp"]->set(&_viewport);
+	if(_uniforms.find("u_vp") != _uniforms.end()) _uniforms["u_vp"]->set(_viewport);
 	
 	if(_depthTestEnabled
 		&& _depthBuffer->width() != _viewport[2]

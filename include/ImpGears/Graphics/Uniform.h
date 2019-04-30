@@ -4,8 +4,12 @@
 #include <vector>
 #include <memory>
 
-#include <Core/Object.h>
+#include <Core/Vec2.h>
+#include <Core/Vec3.h>
+#include <Core/Vec4.h>
+#include <Core/Matrix3.h>
 #include <Core/Matrix4.h>
+
 #include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/RenderPlugin.h>
 
@@ -29,59 +33,16 @@ class IMP_API Uniform : public Object
 	{
 		Type_Undefined,
 		Type_1f,
-		//Type_2f,
+		Type_2f,
 		Type_3f,
 		Type_4f,
 		
 		Type_1i,
-		//Type_2i,
-		//Type_3i,
-		//Type_4i,
 		
-		//Type_1ui,
-		//Type_2ui,
-		//Type_3ui,
-		//Type_4ui,
-		
-		Type_1fv,
-		//Type_2fv,
-		Type_3fv,
-		Type_4fv,
-		
-		Type_1iv,
-		//Type_2iv,
-		//Type_3iv,
-		//Type_4iv,
-		
-		//Type_1uiv,
-		//Type_2uiv,
-		//Type_3uiv,
-		//Type_4uiv,
-		
-		//Type_Mat2v,
-		// Type_Mat3v,
-		Type_Mat4v,
+		Type_Mat3,
+		Type_Mat4,
 		Type_Sampler
 	};
-	
-	union Value
-	{
-		float	 value_1f;
-		const Vec3* value_3f;
-		const Vec4* value_4f;
-		int		 value_1i;
-		const float*	 value_1fv;
-		const Vec3* value_3fv;
-		const Vec4* value_4fv;
-		const int*	 value_1iv;
-		// const Matrix3* value_mat3v;
-		const Matrix4* value_mat4v;
-	};
-	
-	Value getValue() const { return value; }
-	Type getType() const { return type; }
-	const TextureSampler::Ptr getSampler() const {return _sampler;}
-	std::uint32_t getCount() const {return count;}
 	
 	Meta_Class(Uniform)
 	
@@ -91,36 +52,45 @@ class IMP_API Uniform : public Object
 	
 	void set(float float1);
 	
-	void set(const Vec3* vec3);
+	void set(const Vec2& vec2);
 	
-	void set(const Vec4* vec4);
+	void set(const Vec3& vec3);
+	
+	void set(const Vec4& vec4);
 	
 	void set(int int1);
 	
-	void set(const float* float1Array, int count = 1);
+	void set(const Matrix3& mat3);
 	
-	void set(const Vec3* vec3Array, int count);
+	void set(const Matrix4& mat4);
 	
-	void set(const int* int1Array, int count = 1);
+	void set(const TextureSampler::Ptr& sampler, int textureUnit = 0);
 	
-	// void set(const Matrix3* mat3Array, int count);
+	const std::string& getID() const {return _id;}
 	
-	void set(const Matrix4* mat4Array, int count = 1);
+	int getInt1() const { return _value_1i; }
+	float getFloat1() const { return _value_1f; }
+	const Vec2& getFloat2() const { return _value_2f; }
+	const Vec3& getFloat3() const { return _value_3f; }
+	const Vec4& getFloat4() const { return _value_4f; }
+	const Matrix3& getMat3() const { return _value_mat3; }
+	const Matrix4& getMat4() const { return _value_mat4; }
 	
-	void set(const TextureSampler::Ptr& sampler, std::int32_t textureUnit = 0);
-	
-	const std::string& getID() const {return id;}
-	
-	// void updateUniform(const Shader& program) const;
+	Type getType() const { return _type; }
+	const TextureSampler::Ptr getSampler() const {return _sampler;}
 	
 	private:
 	
-	std::string id;
-	std::uint32_t count;
-	Type type;
-	Value value;
+	std::string _id;
+	Type _type;
+	int _value_1i;
+	float _value_1f;
+	Vec2 _value_2f;
+	Vec3 _value_3f;
+	Vec4 _value_4f;
+	Matrix3 _value_mat3;
+	Matrix4 _value_mat4;
 	TextureSampler::Ptr _sampler;
-	
 };
 
 IMPGEARS_END

@@ -150,13 +150,13 @@ int main(int argc, char* argv[])
 	
 	GeometryRenderer georender;
 	georender.setTarget(0, rgbtarget, Vec4(100.0,100.0,255.0,255.0) );
-	georender.setProj( model );
-	georender.setViewport( vp );
+	// georender.setProj( model );
+	// georender.setViewport( vp );
 	
 	CnstUniforms uniforms;
-	uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4v);
-	uniforms["u_view"] = Uniform::create("u_view",Uniform::Type_Mat4v);
-	uniforms["u_model"] = Uniform::create("u_model",Uniform::Type_Mat4v);
+	uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4);
+	uniforms["u_view"] = Uniform::create("u_view",Uniform::Type_Mat4);
+	uniforms["u_model"] = Uniform::create("u_model",Uniform::Type_Mat4);
 	uniforms["u_vp"] = Uniform::create("u_vp",Uniform::Type_4f);
 	uniforms["u_sampler"] = Uniform::create("u_sampler",Uniform::Type_Sampler);
 	uniforms["u_nsampler"] = Uniform::create("u_nsampler",Uniform::Type_Sampler);
@@ -165,13 +165,13 @@ int main(int argc, char* argv[])
 	uniforms["u_lightAtt"] = Uniform::create("u_lightAtt",Uniform::Type_3f);
 	georender.setUniforms(uniforms);
 	
-	uniforms["u_proj"]->set( &proj );
-	uniforms["u_vp"]->set( &vp );
+	uniforms["u_proj"]->set( proj );
+	uniforms["u_view"]->set( view );
+	uniforms["u_vp"]->set( vp );
 	uniforms["u_sampler"]->set(sampler);
 	uniforms["u_nsampler"]->set(nsampler);
-	uniforms["u_lightPos"]->set(&lightPosition);
-	uniforms["u_lightCol"]->set(&lightColor);
-	uniforms["u_lightAtt"]->set(&lightAttn);
+	uniforms["u_lightCol"]->set(lightColor);
+	uniforms["u_lightAtt"]->set(lightAttn);
 	
 	while (win.isOpen())
 	{
@@ -181,26 +181,23 @@ int main(int argc, char* argv[])
 		a += 0.05; if(a > 6.28) a = 0.0;
 		// view = Matrix4::view(observer +Vec3(0.0,0.0,std::sin(a)), Vec3(0.0), Vec3::Z);
 		lightPosition = Vec3(2.0,1.0,1.0) * Matrix3::rotationZ(a*2.0);
-		uniforms["u_view"]->set( &view );
+		uniforms["u_lightPos"]->set(lightPosition);
 		
 		georender.clearTargets();
 		
 		georender.setFragCallback( phongFrag );
 		
-		model = Matrix4::translation(0.0, 0.0, -1.0);
-		uniforms["u_model"]->set( &model );
+		uniforms["u_model"]->set( Matrix4::translation(0.0, 0.0, -1.0) );
 		georender.render( plane );
 		
 		georender.setFragCallback( lightFrag );
 		
-		model = Matrix4::translation(lightPosition);
-		uniforms["u_model"]->set( &model );
+		uniforms["u_model"]->set( Matrix4::translation(lightPosition) );
 		georender.render( torch );
 		
 		georender.setFragCallback( phongFrag );
 		
-		model = Matrix4();
-		uniforms["u_model"]->set( &model );
+		uniforms["u_model"]->set( Matrix4() );
 		georender.render( mushr );
 		
 		texture.update(rgbtarget->data());

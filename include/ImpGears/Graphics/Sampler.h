@@ -2,13 +2,11 @@
 #define IMP_SAMPLER_H
 
 #include <Core/Object.h>
+#include <Core/Vec2.h>
 #include <Core/Vec3.h>
 #include <Graphics/Image.h>
 
 IMPGEARS_BEGIN
-
-//--------------------------------------------------------------
-using Vec2 = Vec<2,float>;
 
 //--------------------------------------------------------------
 template<typename TyIn, typename TyOut>

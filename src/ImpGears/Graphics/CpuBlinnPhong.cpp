@@ -5,10 +5,10 @@ IMPGEARS_BEGIN
 
 void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms)
 {
-	const Matrix4& view = *(cu.at("u_view")->getValue().value_mat4v);
-	const Vec3& lightPos = *(cu.at("u_lightPos")->getValue().value_3f);
-	const Vec3& lightCol = *(cu.at("u_lightCol")->getValue().value_3f);
-	const Vec3& lightAtt = *(cu.at("u_lightAtt")->getValue().value_3f);
+	const Matrix4& view = cu.at("u_view")->getMat4();
+	const Vec3& lightPos = cu.at("u_lightPos")->getFloat3();
+	const Vec3& lightCol = cu.at("u_lightCol")->getFloat3();
+	const Vec3& lightAtt = cu.at("u_lightAtt")->getFloat3();
 	float lightPower = lightAtt[0];
 	float shininess = lightAtt[1];
 	

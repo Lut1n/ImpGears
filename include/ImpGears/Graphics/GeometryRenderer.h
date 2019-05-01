@@ -16,6 +16,8 @@ public:
 		Vec3 color;
 		Vec3 texUV;
 		Vec3 normal;
+		
+		Attributes() : color(1.0) {}
 	};
 	
 	struct VertCallback : public Object

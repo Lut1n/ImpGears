@@ -3,14 +3,14 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-struct DefaultDepth : public FragCallback
+struct DefaultPlain : public FragCallback
 {
-	Meta_Class(DefaultDepth)
+	Meta_Class(DefaultPlain)
 	
 	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
     {
-		float v = std::sin(pt.length()*10.0) * 0.5 + 0.5;
-		targets[0]->setPixel(pt[0],pt[1], v * 255.0 );
+		Vec3 color = uniforms->get("color");
+		targets[0]->setPixel(pt[0],pt[1], Vec4(color,1.0) * 255.0 );
     }
 };
 
@@ -30,7 +30,7 @@ struct DepthTestFragCallback : public FragCallback
 		, _near(0.1)
 		, _far(100.0)
 	{
-		_subCallback = DefaultDepth::create();
+		_subCallback = DefaultPlain::create();
 	}
 	
 	void setDepthBuffer(Image::Ptr depthBuffer)
@@ -108,6 +108,7 @@ struct DepthTestFragCallback : public FragCallback
 GeometryRenderer::GeometryRenderer()
 {
 	_fragCallback = DepthTestFragCallback::create();
+	_depthBuffer = Image::create(512,512,1);
 	setDefaultVertCallback();
 	setDefaultFragCallback();
 	_cull = Cull_Back;
@@ -293,7 +294,7 @@ void GeometryRenderer::setDefaultVertCallback()
 void GeometryRenderer::setDefaultFragCallback()
 {
 	DepthTestFragCallback* ptr = dynamic_cast<DepthTestFragCallback*>(_fragCallback.get());
-	DefaultDepth::Ptr fcb = DefaultDepth::create();
+	DefaultPlain::Ptr fcb = DefaultPlain::create();
 	ptr->setSubFragCallback( fcb );
 }
 
@@ -315,14 +316,8 @@ void GeometryRenderer::enableDepthTest(bool b)
 {
 	DepthTestFragCallback* ptr = dynamic_cast<DepthTestFragCallback*>(_fragCallback.get());
 	_depthTestEnabled = b;
-	
-	if(_depthTestEnabled)
-	{
-		 if(_depthBuffer == nullptr) _depthBuffer = Image::create(_viewport[2],_viewport[3],1);
-		 ptr->setDepthBuffer(_depthBuffer);
-	}
-	
 	ptr->enableDepthTest(_depthTestEnabled);
+	ptr->setDepthBuffer(_depthBuffer);
 }
 
 //--------------------------------------------------------------

@@ -27,7 +27,7 @@ IMPGEARS_BEGIN
 /// =========== VERTEX SHADER SOURCE =====================
 static std::string basicVert = IMP_GLSL_SRC(
 
-uniform mat4 u_projection;
+uniform mat4 u_proj;
 uniform mat4 u_view;
 uniform mat4 u_model;
 void main() { gl_Position = u_projection * u_view * u_model * gl_Vertex; }
@@ -232,8 +232,6 @@ void GlPlugin::bind(Data::Ptr data)
 	{
 		ProgData::Ptr d = std::dynamic_pointer_cast<ProgData>( data );
 		d->sha.use();
-		// _shader->enable();
-		// _shader->updateAllUniforms();	
 	}
 	else if(data->ty == Ty_Vbo)
 	{
@@ -275,7 +273,6 @@ void GlPlugin::bringBack(Image::Ptr img, Data::Ptr data, int n)
 		Texture::Ptr tex = d->frames.getTexture(n);
 		tex->saveToImage(img);
 	}
-	
 }
 
 //--------------------------------------------------------------

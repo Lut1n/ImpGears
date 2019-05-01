@@ -4,7 +4,7 @@
 std::string vertexSimple = GLSL_CODE
 (
 
-uniform mat4 u_projection;
+uniform mat4 u_proj;
 uniform mat4 u_view;
 uniform mat4 u_model;
 
@@ -17,7 +17,7 @@ void main()
 	// v_vertex = gl_Vertex.xyz;
 	vec4 mv_pos = u_view * u_model * gl_Vertex;
 	v_pos = gl_Vertex.xyz;
-	gl_Position = u_projection * mv_pos;
+	gl_Position = u_proj * mv_pos;
 	v_depth = length(mv_pos.xyz);
 }
 

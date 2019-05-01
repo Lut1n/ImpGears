@@ -13,14 +13,6 @@
 #include <Utils/FileInfo.h>
 #include <fstream>
 
-std::string loadShader(const std::string& filename)
-{
-	std::ifstream ifs(filename);
-	std::string buffer( (std::istreambuf_iterator<char>(ifs) ),
-						(std::istreambuf_iterator<char>()    ) );
-	return buffer;
-}
-
 std::vector<std::string> getarg(int argc, char* argv[])
 {
 	std::vector<std::string> result;
@@ -48,8 +40,8 @@ int main(int argc, char* argv[])
     state->setViewport(0.0, 0.0, 500.0, 500.0);
 
     std::cout << "defaultshader.vert + " << arg[1] << std::endl;
-	std::string c_vert = loadShader("defaultshader.vert");
-	std::string c_frag = loadShader(arg[1]);
+	std::string c_vert = imp::loadText("defaultshader.vert");
+	std::string c_frag = imp::loadText(arg[1]);
 	imp::ShaderDsc::Ptr shader = imp::ShaderDsc::create();
 	shader->vertCode = c_vert;
 	shader->fragCode = c_frag;
@@ -81,7 +73,7 @@ int main(int argc, char* argv[])
 		{   
             std::cout << "[reload shaders] defaultshader.vert + " << arg[1] << std::endl;
 			modifLast = modif;
-			c_frag = loadShader(arg[1]);
+			c_frag = imp::loadText(arg[1]);
 			shader->_d = NULL;
 			shader->vertCode = c_vert;
 			shader->fragCode = c_frag;

@@ -32,8 +32,10 @@ void Program::load(const std::string& vertCode, const std::string& fragCode)
 
 	const char* src = vertCode.c_str();
 	glShaderSource (_vertID, 1, &src, NULL) ;
+	GL_CHECKERROR("load vert source");
 	src = fragCode.c_str();
 	glShaderSource (_fragID, 1, &src, NULL) ;
+	GL_CHECKERROR("load frag source");
 
 	compile(_vertID);
 	compile(_fragID);
@@ -56,8 +58,10 @@ void Program::compile(std::uint32_t srcId)
 	{
 		GLint len;
 		glGetShaderiv(srcId, GL_INFO_LOG_LENGTH, &len);
+		GL_CHECKERROR("shader compilation");
 		s_compilation_log.resize(len);
 		glGetShaderInfoLog(srcId, len, &result, &s_compilation_log[0] );
+		GL_CHECKERROR("shader compilation info log");
 		std::cout << "[impError] shader compilation failed." << std::endl;
 		std::cout << s_compilation_log << std::endl;
 	}
@@ -75,6 +79,7 @@ Program::~Program()
 void Program::use()
 {
 	glUseProgram (_programID) ;
+	GL_CHECKERROR("use program");
 }
 
 //--------------------------------------------------------------

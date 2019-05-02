@@ -92,6 +92,10 @@ class IMP_API Geometry : public Object
 	void add(const Vec3& v);
 	void add(const BufType& buf);
 	
+	void addNormals(const BufType& buf);
+	void addColors(const BufType& buf);
+	void addTexCoords(const TexCoordBuf& buf);
+	
 	void reduceTriangles(float f);
 	
 	Geometry subdivise(int count);

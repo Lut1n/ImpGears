@@ -59,8 +59,9 @@ void Geometry::operator=(const Geometry& other)
 void Geometry::operator+=(const Geometry& other)
 {
 	add(other._vertices);
-	
-	// TODO : same for tex coords
+	addColors(other._colors);
+	addTexCoords(other._texCoords);
+	addNormals(other._normals);
 }
 
 Geometry Geometry::operator+(const Geometry& other)
@@ -299,6 +300,23 @@ const Vec3& Geometry::operator[](int i) const {return at(i);}
 void Geometry::add(const Vec3& v){_vertices.push_back(v);}
 void Geometry::add(const BufType& buf){for(auto v:buf)_vertices.push_back(v);}
 
+void Geometry::addNormals(const BufType& buf)
+{
+	if(buf.size() > 0)_hasNormals = true;
+	for(auto v:buf)_normals.push_back(v);
+}
+
+void Geometry::addColors(const BufType& buf)
+{
+	if(buf.size() > 0)_hasColors = true;
+	for(auto v:buf)_colors.push_back(v);
+}
+
+void Geometry::addTexCoords(const TexCoordBuf& buf)
+{
+	if(buf.size() > 0)_hasTexCoords = true;
+	for(auto v:buf)_texCoords.push_back(v);
+}
 
 void Geometry::intoCCW( Geometry& buf )
 {
@@ -314,6 +332,33 @@ void Geometry::intoCCW( Geometry& buf )
 		{
 			buf[i+1]=p3;
 			buf[i+2]=p2;
+			
+			if(buf._hasTexCoords)
+			{
+				TexCoord t1 = buf._texCoords[i+0];
+				TexCoord t2 = buf._texCoords[i+1];
+				TexCoord t3 = buf._texCoords[i+2];
+				buf._texCoords[i+1] = t3;
+				buf._texCoords[i+2] = t2;
+			}
+			
+			if(buf._hasNormals)
+			{
+				Vec3 n1 = buf._normals[i+0];
+				Vec3 n2 = buf._normals[i+1];
+				Vec3 n3 = buf._normals[i+2];
+				buf._normals[i+1] = n3;
+				buf._normals[i+2] = n2;
+			}
+			
+			if(buf._hasColors)
+			{
+				Vec3 c1 = buf._colors[i+0];
+				Vec3 c2 = buf._colors[i+1];
+				Vec3 c3 = buf._colors[i+2];
+				buf._colors[i+1] = c3;
+				buf._colors[i+2] = c2;
+			}
 		}
 	}
 }

@@ -170,6 +170,7 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2)
 	for(int i=0;i<=step;++i)
 	{
 		float rel = imp::clamp((float)i/(float)step);
+		uniforms.mix(_uniforms[0],_uniforms[1],rel);
 		
 		for(int w=-lineWidth;w<=lineWidth;++w)
 		{

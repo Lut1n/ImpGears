@@ -35,7 +35,7 @@ void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& 
 	if(normal_spl)
 	{
 		Vec4 frag_n = normal_spl->get(tex);
-		normal = Vec3(frag_n[0],frag_n[1],frag_n[2]) * 2.0 - 1.0; normal[2] = 2.0; normal.normalize();
+		normal = Vec3(frag_n[0],frag_n[1],frag_n[2]) * 2.0 - 1.0; /*normal[2] = 2.0;*/ // normal.normalize();
 	}
 	
 	float lambertian = std::max(light_dir.dot(normal),0.f);

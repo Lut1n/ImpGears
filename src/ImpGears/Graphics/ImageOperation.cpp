@@ -163,7 +163,7 @@ void BumpToNormalOperation::apply(const Vec2& uv, Vec4& outColor)
 	float dya = sampler.get( uv[0], uv[1]-yoff )[0];
 	float dyb = sampler.get( uv[0], uv[1]+yoff )[0];
 	
-	Vec3 normal(dxa-dxb,dya-dyb,xoff); normal.normalize();
+	Vec3 normal(dxa-dxb,dya-dyb,1.0); normal.normalize();
 	normal *= 0.5; normal += 0.5;
 	
 	outColor.set(normal[0],normal[1],normal[2],1.0);

@@ -1,0 +1,27 @@
+{
+	"properties":
+	{
+		"subdiv":3.0,
+		"normals":"auto",
+		"texcoords":"auto",
+		"color":"auto"
+	},
+	"operations":
+	[
+		{"op":"cylinder", "id":"feet_01", "subdiv":2, "length":2.0, "radius":1.0},
+		{"op":"cone", "id":"hat_01", "subdiv":2, "length":1.5, "radius1":2.0, "radius2":0.3},
+		{"op":"translate", "id":"hat_02", "input_id":"hat_01", "translation":[0.0,0.0,1.5]},
+		{"op":"add", "input_id":"feet_01", "input_id2":"hat_02", "id":"mush_01"},
+		{"op":"color", "id":"mush_02", "input_id":"mush_01", "color":[0.0,0.5,1.0]},
+		{"op":"texcoords", "id":"mush_03", "input_id":"mush_02", "factor":2.0},
+		{"op":"normals", "id":"mush_04", "input_id":"mush_03"},
+		
+		{"op":"cylinder", "id":"ground_01", "subdiv":4, "length":1.0, "radius":3.0},
+		{"op":"color", "id":"ground_02", "input_id":"ground_01", "color":[0.3,1.0,0.3]},
+		{"op":"texcoords", "id":"ground_03", "input_id":"ground_02", "factor":2.0},
+		{"op":"normals", "id":"ground_04", "input_id":"ground_03"},
+		
+		{"op":"sphere", "id":"lightball_01", "subdiv":1, "radius":0.2},
+		{"op":"color", "id":"lightball_02", "input_id":"lightball_01", "color":[0.3,1.0,0.3]},
+	]
+}

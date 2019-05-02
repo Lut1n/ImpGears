@@ -20,50 +20,11 @@
 #include <vector>
 #include <map>
 #include <filesystem>
+#include "JsonGeometryOp.h"
 
 using namespace imp;
 
 #define INTERN_RES 128
-#define TEX_RES 256
-#define GEO_SUBDIV 3
-
-// -----------------------------------------------------------------------------------------------------------------------  
-Geometry ball(const Vec3& center, float radius, const Vec3& color)
-{
-    Geometry geo = Geometry::sphere(GEO_SUBDIV,radius);
-	Geometry::intoCCW( geo );
-	geo.generateColors( color );
-    return geo;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------  
-Geometry mushroom(const Vec3& center, float radius, int sub)
-{
-	// Geometry geo = Geometry::cylinder(sub, 1.5, radius*0.7);
-	Geometry geo = Geometry::cylinder(sub, 2.0, radius*1.0);
-	Geometry geo2 = Geometry::cone(sub, 1.5, radius*2.0, radius*0.3);
-	geo2 += Vec3(0.0,0.0,1.5);
-	
-	geo += geo2;
-	Geometry::intoCCW( geo );
-	
-    geo.generateColors( Vec3(0.0,0.5,1.0) );
-	geo.generateNormals();
-	geo.generateTexCoords(4.0);
-       
-    return geo;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------  
-Geometry ground(const Vec3& center, float radius, int sub)
-{
-    Geometry geo = Geometry::cylinder(sub*2.0, 1.0, radius*0.7);
-	Geometry::intoCCW( geo );
-	geo.generateColors( Vec3(0.3,1.0,0.3) );
-	geo.generateNormals();
-	geo.generateTexCoords(4.0);
-    return geo;
-}
 
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightFrag : public FragCallback
@@ -99,7 +60,7 @@ void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& normal
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-	Vec3 observer(20.0, 0.0, 3.0);
+	Vec3 observer(10.0, 0.0, 3.0);
      
     Vec3 lightPosition(4.0,2.0,2.0);
     Vec3 lightColor(1.0,1.0,1.0);
@@ -114,9 +75,11 @@ int main(int argc, char* argv[])
 	CpuBlinnPhong::Ptr phongFrag = CpuBlinnPhong::create();
 	LightFrag::Ptr lightFrag = LightFrag::create();
     
-	Geometry mushr = mushroom(Vec3(0.0), 1.0, 2*GEO_SUBDIV);
-	Geometry torch = ball(Vec3(0.0), 0.2, lightColor);
-	Geometry plane = ground(Vec3(0.0), 4.0, 2*GEO_SUBDIV);
+	std::map<std::string,Geometry> geo_load;
+	imp::generateGeometryFromJson("geometries.json", geo_load);
+	Geometry mushr = geo_load["mush_04"]; Geometry::intoCCW(mushr);
+	Geometry torch = geo_load["lightball_02"]; Geometry::intoCCW(torch);
+	Geometry plane = geo_load["ground_04"]; Geometry::intoCCW(plane);
 	
 	int frames = 0;
 	sf::Clock c;

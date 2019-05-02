@@ -188,19 +188,27 @@ Image::Ptr tga_load(std::string& filename)
     
     Image::Ptr img = Image::create(w,h,chnl);
 	
-    istrm.read(reinterpret_cast<char*>(img->asGrid()->data()), (img->width()*img->height()*img->channels())); // image data
-	return img;
+	int totalSize = img->width() * img->height() * img->channels();
+    istrm.read(reinterpret_cast<char*>(img->data()),totalSize); // image data
+	
+	Image::Ptr res = Image::create(w,h,chnl);
+	if(chnl == 1) res->copy(img);
+	else if(chnl == 2) res->copy(img, {1,0});
+	else if(chnl == 3) res->copy(img, {2,1,0});
+	else if(chnl == 4) res->copy(img, {2,1,0,3});
+	return res;
 }
 
 //--------------------------------------------------------------
 void tga_save(const std::string& filename, const Image::Ptr img)
 {
     std::ofstream ostrm(filename,std::ios::binary);
+	unsigned char chnl = img->channels();
     unsigned char v = 0;
     ostrm.write(reinterpret_cast<char*>(&v), sizeof v); //ID length (1o)
     ostrm.write(reinterpret_cast<char*>(&v), sizeof v); // Color map type (1o)
-    if(img->channels() == 1) v = 3; // black and white
-    if(img->channels() == 3 || img->channels() == 4) v = 2;	// TrueColor
+    if(chnl == 1) v = 3; // black and white
+    if(chnl == 3 || chnl == 4) v = 2;	// TrueColor
     ostrm.write(reinterpret_cast<char*>(&v), sizeof v); // Image type (1o)
     v = 0;	// no color map
     ostrm.write(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
@@ -216,11 +224,19 @@ void tga_save(const std::string& filename, const Image::Ptr img)
     d = img->height();
     ostrm.write(reinterpret_cast<char*>(&d), sizeof d); // height (2o)
     // v = 8;	// default for black and white
-    v = img->channels() * 8;	// 24 for RGB; 32 for RGBA
+    v = chnl * 8;	// 24 for RGB; 32 for RGBA
     ostrm.write(reinterpret_cast<char*>(&v), sizeof v); // px depth (1o)
     v = 0;
     ostrm.write(reinterpret_cast<char*>(&v), sizeof v); // description (1o)
-    ostrm.write(reinterpret_cast<char*>(img->asGrid()->data()), (img->width()*img->height()*img->channels())); // image data
+    
+    int totalSize = img->width() * img->height() * chnl;
+	
+	Image::Ptr tosave = Image::create(img->width(),img->height(),chnl);
+	if(chnl == 1) tosave->copy(img);
+	else if(chnl == 2) tosave->copy(img, {1,0});
+	else if(chnl == 3) tosave->copy(img, {2,1,0});
+	else if(chnl == 4) tosave->copy(img, {2,1,0,3});
+    ostrm.write(reinterpret_cast<char*>(tosave->data()),totalSize); // image data
 }
 
 //--------------------------------------------------------------

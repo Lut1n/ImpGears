@@ -17,9 +17,11 @@ public:
     Meta_Class(Image);
     
     Image(int w, int h, int chnls);
-    
     ~Image();
     
+	void copy(const Image::Ptr& other);
+	void copy(const Image::Ptr& other, const std::vector<int>& mask);
+	
     void setPixel(int x, int y, const Vec4& col);
     Vec4 getPixel(int x, int y) const;
     void fill(const Vec4& col);

@@ -36,6 +36,27 @@ Image::Image(int w, int h, int chnls)
 Image::~Image(){}
 
 //--------------------------------------------------------------
+void Image::copy(const Image::Ptr& other)
+{
+	std::vector<int> mask(channels());
+	for(int i=0;i<channels();++i) mask[i]=i;
+	copy(other,mask);
+}
+
+void Image::copy(const Image::Ptr& other, const std::vector<int>& mask)
+{
+	int c = mask.size();
+	resize(other->width(), other->height(), c);
+	for(int i=0;i<width();++i) for(int j=0;j<height();++j)
+	{
+		Vec4 res;
+		Vec4 pixel = other->getPixel(i,j);
+		for(int k=0;k<c;++k) res[k] = pixel[ mask[k] ];
+		setPixel(i,j,res);
+	}
+}
+
+//--------------------------------------------------------------
 void Image::setPixel(int x, int y, const Vec4& col)
 {
     y = std::min(std::max(y,0),_dims[0]-1);

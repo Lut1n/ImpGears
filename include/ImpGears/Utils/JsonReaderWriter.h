@@ -1,5 +1,5 @@
 #ifndef IMP_JSON_H
-#define IMp_JSON_H
+#define IMP_JSON_H
 
 #include <Core/Object.h>
 

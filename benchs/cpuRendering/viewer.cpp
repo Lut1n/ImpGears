@@ -19,26 +19,28 @@
 #include <ctime>
 #include <vector>
 #include <map>
+#include <filesystem>
 
 using namespace imp;
 
 #define INTERN_RES 128
-#define TEX_RES 64
+#define TEX_RES 256
 #define GEO_SUBDIV 3
 
 // -----------------------------------------------------------------------------------------------------------------------  
-Geometry ball(const Vec3& center, float radius)
+Geometry ball(const Vec3& center, float radius, const Vec3& color)
 {
     Geometry geo = Geometry::sphere(GEO_SUBDIV,radius);
 	Geometry::intoCCW( geo );
-	geo.generateColors( Vec3(1.0,0.7,0.7) );
+	geo.generateColors( color );
     return geo;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------  
 Geometry mushroom(const Vec3& center, float radius, int sub)
 {
-	Geometry geo = Geometry::cylinder(sub, 1.5, radius*0.7);
+	// Geometry geo = Geometry::cylinder(sub, 1.5, radius*0.7);
+	Geometry geo = Geometry::cylinder(sub, 2.0, radius*1.0);
 	Geometry geo2 = Geometry::cone(sub, 1.5, radius*2.0, radius*0.3);
 	geo2 += Vec3(0.0,0.0,1.5);
 	
@@ -47,7 +49,7 @@ Geometry mushroom(const Vec3& center, float radius, int sub)
 	
     geo.generateColors( Vec3(0.0,0.5,1.0) );
 	geo.generateNormals();
-	geo.generateTexCoords(2.0);
+	geo.generateTexCoords(4.0);
        
     return geo;
 }
@@ -59,7 +61,7 @@ Geometry ground(const Vec3& center, float radius, int sub)
 	Geometry::intoCCW( geo );
 	geo.generateColors( Vec3(0.3,1.0,0.3) );
 	geo.generateNormals();
-	geo.generateTexCoords(2.0);
+	geo.generateTexCoords(4.0);
     return geo;
 }
 
@@ -78,6 +80,7 @@ void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& normal
 {
 	if( !fileExists("./cache/scene_color.tga") || !fileExists("./cache/scene_normals.tga") )
 	{
+		std::filesystem::create_directories("cache");
 		generateImageFromJson("textures.json");
 	}
 	
@@ -96,11 +99,11 @@ void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& normal
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-	Vec3 observer(10.0, 0.0, 3.0);
+	Vec3 observer(20.0, 0.0, 3.0);
      
-    Vec3 lightPosition(2.0,1.0,1.0);
-    Vec3 lightColor(1.0,0.7,0.7);
-    Vec3 lightAttn(2.0,8.0,0.0);
+    Vec3 lightPosition(4.0,2.0,2.0);
+    Vec3 lightColor(1.0,1.0,1.0);
+    Vec3 lightAttn(30.0,4.0,0.0);
 	
 	TextureSampler::Ptr sampler, nsampler;
 	loadSamplers(sampler,nsampler);
@@ -112,7 +115,7 @@ int main(int argc, char* argv[])
 	LightFrag::Ptr lightFrag = LightFrag::create();
     
 	Geometry mushr = mushroom(Vec3(0.0), 1.0, 2*GEO_SUBDIV);
-	Geometry torch = ball(Vec3(0.0), 0.2);
+	Geometry torch = ball(Vec3(0.0), 0.2, lightColor);
 	Geometry plane = ground(Vec3(0.0), 4.0, 2*GEO_SUBDIV);
 	
 	int frames = 0;
@@ -136,7 +139,7 @@ int main(int argc, char* argv[])
 	GeometryRenderer georender;
 	georender.setTarget(0, rgbtarget, Vec4(100.0,100.0,255.0,255.0) );
 	// georender.setProj( model );
-	// georender.setViewport( vp );
+	georender.setViewport( vp );
 	
 	CnstUniforms uniforms;
 	uniforms["u_proj"] = Uniform::create("u_proj",Uniform::Type_Mat4);
@@ -164,9 +167,10 @@ int main(int argc, char* argv[])
 		while (win.pollEvent(ev)) if (ev.type == sf::Event::Closed) win.close();
 		
 		a += 0.05; if(a > 6.28) a = 0.0;
-		// view = Matrix4::view(observer +Vec3(0.0,0.0,std::sin(a)), Vec3(0.0), Vec3::Z);
-		lightPosition = Vec3(2.0,1.0,1.0) * Matrix3::rotationZ(a*2.0);
-		uniforms["u_lightPos"]->set(lightPosition);
+		view = Matrix4::view(observer * Matrix3::rotationZ(a*2.0), Vec3(0.0), Vec3::Z);
+		Vec3 lightPos = lightPosition;// * Matrix3::rotationZ(a*2.0);
+		uniforms["u_view"]->set( view );
+		uniforms["u_lightPos"]->set(lightPos);
 		
 		georender.clearTargets();
 		
@@ -177,7 +181,7 @@ int main(int argc, char* argv[])
 		
 		georender.setFragCallback( lightFrag );
 		
-		uniforms["u_model"]->set( Matrix4::translation(lightPosition) );
+		uniforms["u_model"]->set( Matrix4::translation(lightPos) );
 		georender.render( torch );
 		
 		georender.setFragCallback( phongFrag );

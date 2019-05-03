@@ -21,7 +21,91 @@ struct DefaultPlainColor : public FragCallback
 		for(auto img:targets)img.second->setPixel(pt[0],pt[1],_rast->_defaultColor);
 	}
 };
-   
+
+
+//-------------------------------------------------------------- 
+bool CnstUniforms::contains(const std::string& name) const
+{
+	return _values.find(name)!=_values.end();
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::clear()
+{
+	_values.clear();
+}
+
+//-------------------------------------------------------------- 
+const Matrix3& CnstUniforms::getMat3(const std::string& name) const
+{
+	if(contains(name)) return _values.at(name)->getMat3();
+	else return _defaultMat3;
+}
+
+//-------------------------------------------------------------- 
+const Matrix4& CnstUniforms::getMat4(const std::string& name) const
+{
+	if(contains(name)) return _values.at(name)->getMat4();
+	else return _defaultMat4;
+}
+
+//-------------------------------------------------------------- 
+const Vec3& CnstUniforms::getVec3(const std::string& name) const
+{
+	if(contains(name)) return _values.at(name)->getFloat3();
+	else return _defaultVec3;
+}
+
+//-------------------------------------------------------------- 
+const Vec4& CnstUniforms::getVec4(const std::string& name) const
+{
+	if(contains(name)) return _values.at(name)->getFloat4();
+	else return _defaultVec4;
+}
+
+//-------------------------------------------------------------- 
+const TextureSampler::Ptr CnstUniforms::getSampler(const std::string& name) const
+{
+	if(contains(name)) return _values.at(name)->getSampler();
+	else return _defaultSampler;
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::set(const std::string& name, const Matrix3& mat3)
+{
+	if(contains(name)) _values[name]->set(mat3);
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::set(const std::string& name, const Matrix4& mat4)
+{
+	if(contains(name)) _values[name]->set(mat4);
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::set(const std::string& name, const Vec3& v3)
+{
+	if(contains(name)) _values[name]->set(v3);
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::set(const std::string& name, const Vec4& v4)
+{
+	if(contains(name)) _values[name]->set(v4);
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::set(const std::string& name, const TextureSampler::Ptr& sampler)
+{
+	if(contains(name)) _values[name]->set(sampler);
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::set(const Uniform::Ptr& uniform)
+{
+	_values[uniform->getID()] = uniform;
+}
+
 //-------------------------------------------------------------- 
 Rasterizer::Rasterizer()
 	: _defaultColor(255.0,255.0,255.0,255.0)

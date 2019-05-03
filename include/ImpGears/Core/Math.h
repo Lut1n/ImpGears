@@ -70,6 +70,22 @@ IMP_API Vec<Dim,Ty> dotClamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 
 	return r;
 }
 
+template<int Dim,typename Ty>
+IMP_API Vec<Dim,Ty> dotMax(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
+{
+	Vec<Dim,Ty> r;
+	for(int i=0;i<Dim;++i)r[i]=std::max(x[i],y[i]);
+	return r;
+}
+
+template<int Dim,typename Ty>
+IMP_API Vec<Dim,Ty> dotMin(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
+{
+	Vec<Dim,Ty> r;
+	for(int i=0;i<Dim;++i)r[i]=std::min(x[i],y[i]);
+	return r;
+}
+
 template<typename Ty>
 IMP_API Ty step(Ty edge, Ty x)
 {

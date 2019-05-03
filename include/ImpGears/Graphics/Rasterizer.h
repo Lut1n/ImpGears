@@ -11,7 +11,33 @@
 
 IMPGEARS_BEGIN
 
-using CnstUniforms = std::map<std::string,Uniform::Ptr>;
+struct IMP_API CnstUniforms
+{
+	std::map<std::string,Uniform::Ptr> _values;
+	
+	bool contains(const std::string& name) const;
+	
+	void clear();
+	
+	const Matrix3& getMat3(const std::string& name) const;
+	const Matrix4& getMat4(const std::string& name) const;
+	const Vec3& getVec3(const std::string& name) const;
+	const Vec4& getVec4(const std::string& name) const;
+	const TextureSampler::Ptr getSampler(const std::string& name) const;
+	
+	void set(const Uniform::Ptr& uniform);
+	void set(const std::string& name, const Matrix3& mat3);
+	void set(const std::string& name, const Matrix4& mat4);
+	void set(const std::string& name, const Vec3& v3);
+	void set(const std::string& name, const Vec4& v4);
+	void set(const std::string& name, const TextureSampler::Ptr& sampler);
+	
+	Matrix3 _defaultMat3;
+	Matrix4 _defaultMat4;
+	Vec3 _defaultVec3;
+	Vec4 _defaultVec4;
+	TextureSampler::Ptr _defaultSampler;
+};
 
 struct IMP_API Uniforms
 {

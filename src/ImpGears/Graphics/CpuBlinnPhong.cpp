@@ -5,16 +5,17 @@ IMPGEARS_BEGIN
 
 void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms)
 {
-	const Matrix4& view = cu.at("u_view")->getMat4();
-	const Vec3& lightPos = cu.at("u_lightPos")->getFloat3();
-	const Vec3& lightCol = cu.at("u_lightCol")->getFloat3();
-	const Vec3& lightAtt = cu.at("u_lightAtt")->getFloat3();
+	const Matrix4& view = cu.getMat4("u_view");
+	const Vec3& lightPos = cu.getVec3("u_lightPos");
+	const Vec3& lightCol = cu.getVec3("u_lightCol");
+	const Vec3& lightAtt = cu.getVec3("u_lightAtt");
 	float lightPower = lightAtt[0];
 	float shininess = lightAtt[1];
 	
 	
-	TextureSampler::Ptr normal_spl = cu.at("u_nsampler")->getSampler();
-	TextureSampler::Ptr color_spl = cu.at("u_sampler")->getSampler();
+	TextureSampler::Ptr normal_spl = cu.getSampler("u_sampler_normal");
+	TextureSampler::Ptr color_spl = cu.getSampler("u_sampler_color");
+	TextureSampler::Ptr illu_spl = cu.getSampler("u_sampler_illu");
 	
 	Vec3 tex = uniforms->get("texUV");
 	Vec3 color = uniforms->get("color");
@@ -35,7 +36,7 @@ void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& 
 	if(normal_spl)
 	{
 		Vec4 frag_n = normal_spl->get(tex);
-		normal = Vec3(frag_n[0],frag_n[1],frag_n[2]) * 2.0 - 1.0; /*normal[2] = 2.0;*/ // normal.normalize();
+		normal = Vec3(frag_n[0],frag_n[1],frag_n[2]) * 2.0 - 1.0;
 	}
 	
 	float lambertian = std::max(light_dir.dot(normal),0.f);
@@ -70,6 +71,12 @@ void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& 
 	Vec3 colModelRes = color*0.01
 	+ color*0.7 * lambertian * lightCol * lightPower / distance
 	+ color*0.3 * specular * lightCol * lightPower / distance;
+
+	if(illu_spl)
+	{
+		Vec3 illu = illu_spl->get(tex);
+		colModelRes = dotMax(illu,colModelRes);
+	}
 	
 	Vec4 px(colModelRes,1.0); px = dotClamp( px );
 	targets[0]->setPixel(pt[0], pt[1], px * 255.0 );

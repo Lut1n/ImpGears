@@ -490,6 +490,21 @@ void Geometry::generateColors(const Vec3& color)
 	_hasColors = true;
 }
 
+void getUV(Vec3& d, float& u, float& v)
+{
+	Vec3 fs[6] = {-Vec3::X,-Vec3::Y,-Vec3::Z,Vec3::X,Vec3::Y,Vec3::Z};
+	float p[6]; int j=0;
+	for(int i=0;i<6;++i) { p[i] = fs[i].dot(d); if(p[j]>p[i])j=i; }
+	
+	Vec3 x, y;
+	if(j==0 || j==3) { x=Vec3::Y; y=Vec3::Z; }
+	if(j==1 || j==4) { x=Vec3::Z; y=Vec3::X; }
+	if(j==2 || j==5) { x=Vec3::X; y=Vec3::Y; }
+	
+	u = x.dot(d);
+	v = y.dot(d);
+}
+
 void Geometry::generateTexCoords(float resFactor)
 {	
 	_texCoords = TexCoordBuf(size());
@@ -499,29 +514,13 @@ void Geometry::generateTexCoords(float resFactor)
 	for(auto v : _vertices) grav_cent += v;
 	grav_cent /= size();
 	
-	const float c_pi = 3.141592;
-	
 	for(int i=0;i<size();++i)
 	{
 		Vec3 dir = at(i) - grav_cent; dir.normalize();
-		float u = std::atan2(dir.y(),dir.x()) / c_pi;// * 0.5 + 0.5; u *= 4.0;
-		float v = std::atan2(dir.z(),(dir.y()+dir.x())*0.5) / c_pi;// * 0.5 + 0.5; v *= 4.0;
-		
-		u = u * 0.5 + 0.5;
-		v = v * 0.5 + 0.5;
-		
+		float u,v;
+		getUV(dir, u, v);
 		_texCoords[i] = Geometry::TexCoord(u*resFactor,v*resFactor);
 	}
-	
-	/*for(int i=0;i<size();i+=3)
-	{
-		float dx = (at(i+1) - at(i)).length();
-		float dy = (at(i+2) - at(i)).length();
-		
-		_texCoords[i] = TexCoord(0.f,0.f);
-		_texCoords[i+1] = TexCoord(dx,0.f);
-		_texCoords[i+2] = TexCoord(0.f,dy);
-	}*/
 }
 
 

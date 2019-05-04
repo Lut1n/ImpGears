@@ -7,9 +7,9 @@ struct DefaultPlain : public FragCallback
 {
 	Meta_Class(DefaultPlain)
 	
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
     {
-		Vec3 color = uniforms->get("color");
+		Vec3 color = varyings->get("color");
 		targets[0]->setPixel(pt[0],pt[1], Vec4(color,1.0) * 255.0 );
     }
 };
@@ -45,16 +45,16 @@ struct DepthTestFragCallback : public FragCallback
 	
 	void enableDepthTest(bool b) { _depthTestEnabled = b; }
 	
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
     {
 		if(_depthTestEnabled == false)
 		{
-			if(_subCallback) _subCallback->exec(targets, pt, cu, uniforms);
+			if(_subCallback) _subCallback->exec(targets, pt, cu, varyings);
 			return;
 		}
 		
 		// depth test
-		float depth = -uniforms->get("mv_vert").z();
+		float depth = -varyings->get("mv_vert").z();
 		
 		float depthPx = clamp( linearstep(_near, _far, depth )  )* 255.0;
 		Vec4 depthV = _depthBuffer->getPixel(pt[0], pt[1]);
@@ -63,7 +63,7 @@ struct DepthTestFragCallback : public FragCallback
 		{
 			Vec4 depth(depthPx);
 			_depthBuffer->setPixel(pt[0],pt[1],depth);
-			if(_subCallback) _subCallback->exec(targets, pt, cu, uniforms);
+			if(_subCallback) _subCallback->exec(targets, pt, cu, varyings);
 		}
     }
 };
@@ -73,7 +73,7 @@ struct DepthTestFragCallback : public FragCallback
  {
 	Meta_Class(DefaultVertCallback)
 
-	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const CnstUniforms& cu, Uniforms& out_uniforms)
+	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const CnstUniforms& cu, Varyings& out_varyings)
 	{
 		const Matrix4& model = cu.getMat4("u_model");
 		const Matrix4& view = cu.getMat4("u_view");
@@ -94,13 +94,13 @@ struct DepthTestFragCallback : public FragCallback
 		
 		mvpvertex *= win1; mvpvertex += win2;
 		
-		out_uniforms.set("vert",vertex);
-		out_uniforms.set("m_vert",mvertex);
-		out_uniforms.set("mv_vert",mvvertex);
-		out_uniforms.set("mvp_vert",mvpvertex);
-		out_uniforms.set("color",att.color);
-		out_uniforms.set("normal",att.normal);
-		out_uniforms.set("texUV",att.texUV);
+		out_varyings.set("vert",vertex);
+		out_varyings.set("m_vert",mvertex);
+		out_varyings.set("mv_vert",mvvertex);
+		out_varyings.set("mvp_vert",mvpvertex);
+		out_varyings.set("color",att.color);
+		out_varyings.set("normal",att.normal);
+		out_varyings.set("texUV",att.texUV);
     }
  };
 
@@ -153,7 +153,7 @@ void GeometryRenderer::render(const Geometry& geo)
 	init();
 	_rasterizer.setCnstUniforms(_uniforms);
 	
-	Uniforms uniforms[3];
+	Varyings varyings[3];
 	Vec3 mvpVertex[3];
 	Attributes attribs;
 
@@ -167,8 +167,8 @@ void GeometryRenderer::render(const Geometry& geo)
 				if(geo._hasNormals) attribs.normal = geo._normals[i+k];
 				if(geo._hasTexCoords) attribs.texUV = geo._texCoords[i+k];
 				
-				_vertCallback->exec(geo[i+k],attribs,_uniforms,uniforms[k]);
-				mvpVertex[k] = uniforms[k].get("mvp_vert");
+				_vertCallback->exec(geo[i+k],attribs,_uniforms,varyings[k]);
+				mvpVertex[k] = varyings[k].get("mvp_vert");
 			}
 			
 			Vec3 p1p2 = mvpVertex[1] - mvpVertex[0];
@@ -181,7 +181,7 @@ void GeometryRenderer::render(const Geometry& geo)
 			
 			if(cullTest)
 			{
-				_rasterizer.setUniforms3(uniforms[0],uniforms[1],uniforms[2]);
+				_rasterizer.setVaryings3(varyings[0],varyings[1],varyings[2]);
 				_rasterizer.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
 			}
 		}
@@ -196,11 +196,11 @@ void GeometryRenderer::render(const Geometry& geo)
 				if(geo._hasNormals) attribs.normal = geo._normals[i+k];
 				if(geo._hasTexCoords) attribs.texUV = geo._texCoords[i+k];
 				
-				_vertCallback->exec(geo[i+k],attribs,_uniforms,uniforms[k]);
-				mvpVertex[k] = uniforms[k].get("mvp_vert");
+				_vertCallback->exec(geo[i+k],attribs,_uniforms,varyings[k]);
+				mvpVertex[k] = varyings[k].get("mvp_vert");
 			}
 			
-			_rasterizer.setUniforms2(uniforms[0],uniforms[1]);
+			_rasterizer.setVaryings2(varyings[0],varyings[1]);
 			_rasterizer.line(mvpVertex[0],mvpVertex[1]);
 		}
 	}

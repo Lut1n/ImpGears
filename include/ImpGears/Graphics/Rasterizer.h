@@ -44,7 +44,7 @@ struct IMP_API CnstUniforms
 	TextureSampler::Ptr _defaultSampler;
 };
 
-struct IMP_API Uniforms
+struct IMP_API Varyings
 {
     std::map<std::string, int> _adr;
     std::vector<float> _allocator;
@@ -68,7 +68,7 @@ struct IMP_API Uniforms
     
     imp::Vec3 get(const std::string& id) { return imp::Vec3(_buf+_adr[id]); }
     
-    void mix(const Uniforms& v1, const Uniforms& v2, float delta)
+    void mix(const Varyings& v1, const Varyings& v2, float delta)
     {
         _adr = v1._adr; _allocator.resize(v1._allocator.size());
         _buf = _allocator.data();
@@ -77,12 +77,12 @@ struct IMP_API Uniforms
 };
 
 using ImageBuf = std::map<int,imp::Image::Ptr>;
-using UniformBuf = std::vector<Uniforms>;
+using VaryingsBuf = std::vector<Varyings>;
 
 struct IMP_API FragCallback : public imp::Object
 {
     Meta_Class(FragCallback)
-    virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr) = 0;
+    virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr) = 0;
 };
 
 class IMP_API Rasterizer : public imp::Object
@@ -90,7 +90,7 @@ class IMP_API Rasterizer : public imp::Object
 public:
     
     ImageBuf _targets;
-    UniformBuf _uniforms;
+    VaryingsBuf _varyings;
 	CnstUniforms _cnstUniforms;
     imp::Vec4 _defaultColor;
     FragCallback::Ptr _fragCallback;
@@ -105,11 +105,11 @@ public:
     void clearTarget();
     void setTarget(imp::Image::Ptr target);
     void setColor(const imp::Vec4& col);
-    void clearUniforms();
+    void clearVaryings();
 	void setCnstUniforms(const CnstUniforms& cu);
 	void clearCnstUniforms();
-    void setUniforms2(const Uniforms& u1, const Uniforms& u2);
-    void setUniforms3(const Uniforms& u1, const Uniforms& u2, const Uniforms& u3);
+    void setVaryings2(const Varyings& v1, const Varyings& v2);
+    void setVaryings3(const Varyings& v1, const Varyings& v2, const Varyings& v3);
     void setFragCallback(FragCallback::Ptr cb);
     void useDefaultFragCallback();
     

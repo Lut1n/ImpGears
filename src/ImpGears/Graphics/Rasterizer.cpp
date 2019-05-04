@@ -16,7 +16,7 @@ struct DefaultPlainColor : public FragCallback
 		: _rast(rast)
 	{}
 		
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
 	{
 		for(auto img:targets)img.second->setPixel(pt[0],pt[1],_rast->_defaultColor);
 	}
@@ -171,9 +171,9 @@ void Rasterizer::setColor(const imp::Vec4& col)
 }
 
 //--------------------------------------------------------------
-void Rasterizer::clearUniforms()
+void Rasterizer::clearVaryings()
 {
-	_uniforms.clear();
+	_varyings.clear();
 }
 
 //--------------------------------------------------------------
@@ -189,20 +189,20 @@ void Rasterizer::clearCnstUniforms()
 }
 
 //--------------------------------------------------------------
-void Rasterizer::setUniforms2(const Uniforms& u1, const Uniforms& u2)
+void Rasterizer::setVaryings2(const Varyings& v1, const Varyings& v2)
 {
-	clearUniforms();
-	_uniforms.push_back(u1);
-	_uniforms.push_back(u2);
+	clearVaryings();
+	_varyings.push_back(v1);
+	_varyings.push_back(v2);
 }
 
 //--------------------------------------------------------------
-void Rasterizer::setUniforms3(const Uniforms& u1, const Uniforms& u2, const Uniforms& u3)
+void Rasterizer::setVaryings3(const Varyings& v1, const Varyings& v2, const Varyings& v3)
 {
-	clearUniforms();
-	_uniforms.push_back(u1);
-	_uniforms.push_back(u2);
-	_uniforms.push_back(u3);
+	clearVaryings();
+	_varyings.push_back(v1);
+	_varyings.push_back(v2);
+	_varyings.push_back(v3);
 }
 
 //--------------------------------------------------------------
@@ -264,7 +264,7 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2)
 	float lineWidth = 1.0;
 	lineWidth -= 1.0; // 0 is 1 pixel
 	
-	Uniforms uniforms;
+	Varyings varyings;
 	Vec3 dxy = p2 - p1;
 	
 	Vec3 wl(1,0,0);
@@ -276,19 +276,19 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2)
 	}
 	dxy /= step;
 
-	Uniforms* uptr = nullptr;
-	if(_uniforms.size() >= 2) uptr = &uniforms;
+	Varyings* varptr = nullptr;
+	if(_varyings.size() >= 2) varptr = &varyings;
 	
 	Vec3 position = p1;
 	for(int i=0;i<=step;++i)
 	{
 		float rel = imp::clamp((float)i/(float)step);
-		uniforms.mix(_uniforms[0],_uniforms[1],rel);
+		varyings.mix(_varyings[0],_varyings[1],rel);
 		
 		for(int w=-lineWidth;w<=lineWidth;++w)
 		{
 			Vec3 p = position + wl*w;
-			_fragCallback->exec(_targets,p,_cnstUniforms,uptr);
+			_fragCallback->exec(_targets,p,_cnstUniforms,varptr);
 		}
 		position += dxy;
 	}
@@ -301,14 +301,14 @@ void Rasterizer::hLine(const Vec3& p1, const Vec3& p2)
 	Vec3 pts[2] = {p1,p2};
 	if(pts[l].x() > pts[r].x()){l=1;r=0;}
 
-	Uniforms uniforms;
+	Varyings varyings;
 	for(int x=std::floor(pts[l].x());x<std::floor(pts[r].x())+1;++x)
 	{
 		float rel = imp::clamp(imp::linearstep(pts[l].x(),pts[r].x(), (float)x));
-		if(_uniforms.size() >= 2)
+		if(_varyings.size() >= 2)
 		{
-			uniforms.mix(_uniforms[l], _uniforms[r], rel);
-			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms,&uniforms);
+			varyings.mix(_varyings[l], _varyings[r], rel);
+			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms,&varyings);
 		}
 		else
 		{
@@ -322,8 +322,8 @@ void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 {
 	// Scan Line
 	
-	UniformBuf local = _uniforms;
-	UniformBuf uniforms; uniforms.resize(2);
+	VaryingsBuf local = _varyings;
+	VaryingsBuf varyings(2);
 	imp::Vec3 line[2];
 		
 	Vec3 vertices[3] = {p1,p2,p3};
@@ -346,9 +346,9 @@ void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 	
 		if(local.size() >= 3)
 		{
-			uniforms[0].mix(local[a],local[b],rel0);
-			uniforms[1].mix(local[bottom],local[top],rel1);
-			setUniforms2(uniforms[0],uniforms[1]);
+			varyings[0].mix(local[a],local[b],rel0);
+			varyings[1].mix(local[bottom],local[top],rel1);
+			setVaryings2(varyings[0],varyings[1]);
 		}
 		
 		hLine(line[0],line[1]);
@@ -358,15 +358,15 @@ void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 //--------------------------------------------------------------
 void Rasterizer::wireTriangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 {
-	UniformBuf local = _uniforms;
+	VaryingsBuf local = _varyings;
 
 	if(local.size() >= 3)
 	{
-		setUniforms2(local[0],local[1]);
+		setVaryings2(local[0],local[1]);
 		line(p1,p2);
-		setUniforms2(local[0],local[2]);
+		setVaryings2(local[0],local[2]);
 		line(p1,p3);
-		setUniforms2(local[1],local[2]);
+		setVaryings2(local[1],local[2]);
 		line(p2,p3);
 	}
 	else

@@ -30,9 +30,9 @@ using namespace imp;
 struct LightFrag : public FragCallback
 {
     Meta_Class(LightFrag)
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
 	{
-		targets[0]->setPixel(pt[0],pt[1],Vec4(uniforms->get("color"),1.0) * 255.0);
+		targets[0]->setPixel(pt[0],pt[1],Vec4(varyings->get("color"),1.0) * 255.0);
 	}
 };
 

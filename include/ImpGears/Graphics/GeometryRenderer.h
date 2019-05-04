@@ -23,7 +23,7 @@ public:
 	struct VertCallback : public Object
 	{
 		Meta_Class(VertCallback)
-		virtual void exec(const Vec3& vert, Attributes& att, const CnstUniforms& cu, Uniforms& uniforms) = 0;
+		virtual void exec(const Vec3& vert, Attributes& att, const CnstUniforms& cu, Varyings& varyings) = 0;
 	};
 	
 	enum Cull

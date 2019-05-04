@@ -3,7 +3,7 @@
 
 IMPGEARS_BEGIN
 
-void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Uniforms* uniforms)
+void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings)
 {
 	const Matrix4& view = cu.getMat4("u_view");
 	const Vec3& lightPos = cu.getVec3("u_lightPos");
@@ -17,10 +17,10 @@ void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& 
 	TextureSampler::Ptr color_spl = cu.getSampler("u_sampler_color");
 	TextureSampler::Ptr illu_spl = cu.getSampler("u_sampler_illu");
 	
-	Vec3 tex = uniforms->get("texUV");
-	Vec3 color = uniforms->get("color");
-	Vec3 frag_pos = uniforms->get("m_vert");
-	Vec3 normal = uniforms->get("normal");
+	Vec3 tex = varyings->get("texUV");
+	Vec3 color = varyings->get("color");
+	Vec3 frag_pos = varyings->get("m_vert");
+	Vec3 normal = varyings->get("normal");
 	Vec3 light_dir = lightPos - frag_pos;
 	float distance = light_dir.length();
 	distance = distance * distance;

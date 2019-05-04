@@ -44,9 +44,15 @@ class IMP_API Uniform : public Object
 		Type_Sampler
 	};
 	
+	enum Mode
+	{
+		Mode_Flat,
+		Mode_Varying
+	};
+	
 	Meta_Class(Uniform)
 	
-	Uniform(const std::string& id, Type type);
+	Uniform(const std::string& id, Type type, Mode mode = Mode_Flat);
 	
 	~Uniform();
 	
@@ -79,10 +85,16 @@ class IMP_API Uniform : public Object
 	Type getType() const { return _type; }
 	const TextureSampler::Ptr getSampler() const {return _sampler;}
 	
+	void setMode(Mode mode) { _mode = mode; }
+	Mode getMode() const { return _mode; }
+	
+	void mix(const Uniform::Ptr& u1, const Uniform::Ptr& u2, float delta);
+	
 	private:
 	
 	std::string _id;
 	Type _type;
+	Mode _mode;
 	int _value_1i;
 	float _value_1f;
 	Vec2 _value_2f;

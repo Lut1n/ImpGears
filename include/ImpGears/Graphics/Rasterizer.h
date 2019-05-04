@@ -19,6 +19,7 @@ struct IMP_API CnstUniforms
 	
 	void clear();
 	
+	const Uniform::Ptr get(const std::string& name) const;
 	const Matrix3& getMat3(const std::string& name) const;
 	const Matrix4& getMat4(const std::string& name) const;
 	const Vec3& getVec3(const std::string& name) const;
@@ -31,6 +32,10 @@ struct IMP_API CnstUniforms
 	void set(const std::string& name, const Vec3& v3);
 	void set(const std::string& name, const Vec4& v4);
 	void set(const std::string& name, const TextureSampler::Ptr& sampler);
+	
+	void reserve(const CnstUniforms& u);
+	void copy(const CnstUniforms& u);
+	void mix(const CnstUniforms& u1,const CnstUniforms& u2, float delta);
 	
 	Matrix3 _defaultMat3;
 	Matrix4 _defaultMat4;

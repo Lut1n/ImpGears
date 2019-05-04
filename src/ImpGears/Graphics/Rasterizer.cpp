@@ -36,6 +36,35 @@ void CnstUniforms::clear()
 }
 
 //-------------------------------------------------------------- 
+void CnstUniforms::reserve(const CnstUniforms& u)
+{
+	for(auto kv : u._values)
+		if( !contains(kv.first) )
+			_values[kv.first] = Uniform::create(kv.first, kv.second->getType());
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::copy(const CnstUniforms& u)
+{
+	mix(u,u,0.0);
+}
+
+//-------------------------------------------------------------- 
+void CnstUniforms::mix(const CnstUniforms& u1,const CnstUniforms& u2, float delta)
+{
+	reserve(u1);
+	for(auto kv : _values)
+		_values[kv.first]->mix(u1.get(kv.first),u2.get(kv.first),delta);
+}
+
+//-------------------------------------------------------------- 
+const Uniform::Ptr CnstUniforms::get(const std::string& name) const
+{
+	if(contains(name)) return _values.at(name);
+	else return nullptr;
+}
+
+//-------------------------------------------------------------- 
 const Matrix3& CnstUniforms::getMat3(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getMat3();

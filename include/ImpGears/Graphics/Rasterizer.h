@@ -50,30 +50,15 @@ struct IMP_API Varyings
     std::vector<float> _allocator;
     float*  _buf;
     
-    void set(const std::string& id, const imp::Vec3& v)
-    {
-		if(!contains(id)) alloc(id,3);
-        memcpy(_buf+_adr[id],v.data(),3*sizeof(float));
-    }
+    void set(const std::string& id, const imp::Vec3& v);
     
-    bool contains(const std::string& id) { return _adr.find(id) != _adr.end(); }
+    bool contains(const std::string& id) const;
     
-    void alloc(const std::string& id, int size)
-	{
-		int index = _allocator.size();
-		_allocator.resize(index+size);
-        _buf = _allocator.data();
-		_adr[id] = index;
-	}
+    void alloc(const std::string& id, int size);
     
-    imp::Vec3 get(const std::string& id) { return imp::Vec3(_buf+_adr[id]); }
+    imp::Vec3 get(const std::string& id) const;
     
-    void mix(const Varyings& v1, const Varyings& v2, float delta)
-    {
-        _adr = v1._adr; _allocator.resize(v1._allocator.size());
-        _buf = _allocator.data();
-        for(int i=0; i<(int)_allocator.size(); ++i) _buf[i] = imp::mix( v1._buf[i], v2._buf[i], delta );
-    }
+    void mix(const Varyings& v1, const Varyings& v2, float delta);
 };
 
 using ImageBuf = std::map<int,imp::Image::Ptr>;

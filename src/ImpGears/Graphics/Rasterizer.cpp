@@ -100,6 +100,44 @@ const TextureSampler::Ptr CnstUniforms::getSampler(const std::string& name) cons
 }
 
 //-------------------------------------------------------------- 
+void Varyings::set(const std::string& id, const imp::Vec3& v)
+{
+	if(!contains(id)) alloc(id,3);
+	memcpy(_buf+_adr[id],v.data(),3*sizeof(float));
+}
+
+//--------------------------------------------------------------     
+bool Varyings::contains(const std::string& id) const
+{
+	return _adr.find(id) != _adr.end();
+}
+
+//-------------------------------------------------------------- 
+void Varyings::alloc(const std::string& id, int size)
+{
+	int index = _allocator.size();
+	_allocator.resize(index+size);
+	_buf = _allocator.data();
+	_adr[id] = index;
+}
+
+//-------------------------------------------------------------- 
+imp::Vec3 Varyings::get(const std::string& id) const
+{
+	Vec3 res;
+	if(_adr.find(id)!=_adr.end()) res=Vec3(_buf+_adr.at(id));
+	return res;
+}
+
+//-------------------------------------------------------------- 
+void Varyings::mix(const Varyings& v1, const Varyings& v2, float delta)
+{
+	_adr = v1._adr; _allocator.resize(v1._allocator.size());
+	_buf = _allocator.data();
+	for(int i=0; i<(int)_allocator.size(); ++i) _buf[i] = imp::mix( v1._buf[i], v2._buf[i], delta );
+}
+
+//-------------------------------------------------------------- 
 void CnstUniforms::set(const std::string& name, const Matrix3& mat3)
 {
 	if(contains(name)) _values[name]->set(mat3);

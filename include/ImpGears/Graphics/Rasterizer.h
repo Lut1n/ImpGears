@@ -90,7 +90,8 @@ class IMP_API Rasterizer : public imp::Object
 public:
     
     ImageBuf _targets;
-    VaryingsBuf _varyings;
+    VaryingsBuf _inputVaryings;
+	VaryingsBuf _subVaryings;
 	CnstUniforms _cnstUniforms;
     imp::Vec4 _defaultColor;
     FragCallback::Ptr _fragCallback;
@@ -131,7 +132,10 @@ public:
 	
 	void wireTriangle(const Vec3& p1, const Vec3& p2, const Vec3& p3);
     
-private:
+protected:
+	
+	void line(const Vec3& p1, const Vec3& p2, const Varyings& v1, const Varyings& v2);
+	void hLine(const Vec3& p1, const Vec3& p2, const Varyings& v1, const Varyings& v2);
 };
 
 IMPGEARS_END

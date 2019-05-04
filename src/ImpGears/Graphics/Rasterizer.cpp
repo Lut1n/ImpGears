@@ -139,6 +139,8 @@ void CnstUniforms::set(const Uniform::Ptr& uniform)
 Rasterizer::Rasterizer()
 	: _defaultColor(255.0,255.0,255.0,255.0)
 {
+	_inputVaryings.resize(3);
+	_subVaryings.resize(3);
 	useDefaultFragCallback();
 }
 
@@ -173,7 +175,9 @@ void Rasterizer::setColor(const imp::Vec4& col)
 //--------------------------------------------------------------
 void Rasterizer::clearVaryings()
 {
-	_varyings.clear();
+	_inputVaryings[0] = Varyings();
+	_inputVaryings[1] = Varyings();
+	_inputVaryings[2] = Varyings();
 }
 
 //--------------------------------------------------------------
@@ -191,18 +195,16 @@ void Rasterizer::clearCnstUniforms()
 //--------------------------------------------------------------
 void Rasterizer::setVaryings2(const Varyings& v1, const Varyings& v2)
 {
-	clearVaryings();
-	_varyings.push_back(v1);
-	_varyings.push_back(v2);
+	_inputVaryings[0] = v1;
+	_inputVaryings[1] = v2;
 }
 
 //--------------------------------------------------------------
 void Rasterizer::setVaryings3(const Varyings& v1, const Varyings& v2, const Varyings& v3)
 {
-	clearVaryings();
-	_varyings.push_back(v1);
-	_varyings.push_back(v2);
-	_varyings.push_back(v3);
+	_inputVaryings[0] = v1;
+	_inputVaryings[1] = v2;
+	_inputVaryings[2] = v3;
 }
 
 //--------------------------------------------------------------
@@ -260,6 +262,12 @@ void Rasterizer::hSymmetry()
 //--------------------------------------------------------------
 void Rasterizer::line(const Vec3& p1, const Vec3& p2)
 {
+	line(p1,p2,_inputVaryings[0],_inputVaryings[1]);
+}
+
+//--------------------------------------------------------------
+void Rasterizer::line(const Vec3& p1, const Vec3& p2, const Varyings& v1, const Varyings& v2)
+{
 	// Digital differential analyzer (DDA)
 	float lineWidth = 1.0;
 	lineWidth -= 1.0; // 0 is 1 pixel
@@ -275,20 +283,17 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2)
 		wl = Vec3(0,1,0);
 	}
 	dxy /= step;
-
-	Varyings* varptr = nullptr;
-	if(_varyings.size() >= 2) varptr = &varyings;
 	
 	Vec3 position = p1;
 	for(int i=0;i<=step;++i)
 	{
 		float rel = imp::clamp((float)i/(float)step);
-		varyings.mix(_varyings[0],_varyings[1],rel);
+		varyings.mix(v1,v2,rel);
 		
 		for(int w=-lineWidth;w<=lineWidth;++w)
 		{
 			Vec3 p = position + wl*w;
-			_fragCallback->exec(_targets,p,_cnstUniforms,varptr);
+			_fragCallback->exec(_targets,p,_cnstUniforms,&varyings);
 		}
 		position += dxy;
 	}
@@ -297,23 +302,24 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2)
 //--------------------------------------------------------------
 void Rasterizer::hLine(const Vec3& p1, const Vec3& p2)
 {
+	hLine(p1,p2,_inputVaryings[0],_inputVaryings[1]);
+}
+
+//--------------------------------------------------------------
+void Rasterizer::hLine(const Vec3& p1, const Vec3& p2, const Varyings& v1, const Varyings& v2)
+{
+	const Varyings* vptr_l = &v1;
+	const Varyings* vptr_r = &v2;
 	int l=0,r=1;
 	Vec3 pts[2] = {p1,p2};
-	if(pts[l].x() > pts[r].x()){l=1;r=0;}
+	if(pts[l].x() > pts[r].x()){l=1;r=0; vptr_l=&v2; vptr_r=&v1; }
 
 	Varyings varyings;
 	for(int x=std::floor(pts[l].x());x<std::floor(pts[r].x())+1;++x)
 	{
 		float rel = imp::clamp(imp::linearstep(pts[l].x(),pts[r].x(), (float)x));
-		if(_varyings.size() >= 2)
-		{
-			varyings.mix(_varyings[l], _varyings[r], rel);
-			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms,&varyings);
-		}
-		else
-		{
-			_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms);
-		}
+		varyings.mix(*vptr_l, *vptr_r, rel);
+		_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms,&varyings);
 	}
 }
 
@@ -321,12 +327,8 @@ void Rasterizer::hLine(const Vec3& p1, const Vec3& p2)
 void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 {
 	// Scan Line
-	
-	VaryingsBuf local = _varyings;
-	VaryingsBuf varyings(2);
-	imp::Vec3 line[2];
-		
 	Vec3 vertices[3] = {p1,p2,p3};
+	Vec3 line[2];
 
 	int bottom=0,center=1,top=2;
 	if(vertices[bottom].y()>vertices[center].y()) std::swap(bottom,center);
@@ -344,37 +346,18 @@ void Rasterizer::triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 		line[0] = imp::mix(vertices[a],vertices[b],rel0);
 		line[1] = imp::mix(vertices[bottom],vertices[top],rel1);
 	
-		if(local.size() >= 3)
-		{
-			varyings[0].mix(local[a],local[b],rel0);
-			varyings[1].mix(local[bottom],local[top],rel1);
-			setVaryings2(varyings[0],varyings[1]);
-		}
-		
-		hLine(line[0],line[1]);
+		_subVaryings[0].mix(_inputVaryings[a],_inputVaryings[b],rel0);
+		_subVaryings[1].mix(_inputVaryings[bottom],_inputVaryings[top],rel1);
+		hLine(line[0],line[1],_subVaryings[0],_subVaryings[1]);
 	}
 }
 
 //--------------------------------------------------------------
 void Rasterizer::wireTriangle(const Vec3& p1, const Vec3& p2, const Vec3& p3)
 {
-	VaryingsBuf local = _varyings;
-
-	if(local.size() >= 3)
-	{
-		setVaryings2(local[0],local[1]);
-		line(p1,p2);
-		setVaryings2(local[0],local[2]);
-		line(p1,p3);
-		setVaryings2(local[1],local[2]);
-		line(p2,p3);
-	}
-	else
-	{
-		line(p1,p2);
-		line(p1,p3);
-		line(p2,p3);
-	}
+	line(p1,p2,_inputVaryings[0],_inputVaryings[1]);
+	line(p1,p3,_inputVaryings[0],_inputVaryings[2]);
+	line(p2,p3,_inputVaryings[1],_inputVaryings[2]);
 }
 
 IMPGEARS_END

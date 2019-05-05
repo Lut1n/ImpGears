@@ -30,9 +30,9 @@ using namespace imp;
 struct LightFrag : public FragCallback
 {
     Meta_Class(LightFrag)
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
 	{
-		targets[0]->setPixel(pt[0],pt[1],Vec4(varyings->get("color"),1.0) * 255.0);
+		targets[0]->setPixel(pt[0],pt[1],Vec4(varyings.get("color"),1.0) * 255.0);
 	}
 };
 
@@ -50,6 +50,18 @@ struct IlluOp : public ImageOperation
 		l *= 2.0;
 		l = imp::pow( 0.4+l, 16 );
 		outColor = Vec4(l,l,l,1.0);
+	};
+};
+
+struct CopyOp : public ImageOperation
+{
+	Image::Ptr src;
+	virtual void apply(const Vec2& uv, Vec4& outColor)
+	{
+		ImageSampler sampler(src);
+		Vec3 col = sampler.get(uv);
+		sampler.setInterpo(TextureSampler::Interpo_Linear);
+		outColor = Vec4(col,1.0);
 	};
 };
 
@@ -97,7 +109,10 @@ int main(int argc, char* argv[])
 	TextureSampler::Ptr sampler, nsampler, illusampler;
 	loadSamplers(sampler,illusampler, nsampler);
 	Image::Ptr rgbtarget = Image::create(INTERN_RES,INTERN_RES,4);
+	Image::Ptr rgbtarget2 = Image::create(INTERN_RES*0.5,INTERN_RES*0.5,4);
 
+	CopyOp copyOp;
+	
 	double a = 0.0;
 	
 	CpuBlinnPhong::Ptr phongFrag = CpuBlinnPhong::create();
@@ -132,7 +147,7 @@ int main(int argc, char* argv[])
 	// georender.setProj( model );
 	georender.setViewport( vp );
 	
-	CnstUniforms uniforms;
+	UniformMap uniforms;
 	uniforms.set( Uniform::create("u_proj",Uniform::Type_Mat4) );
 	uniforms.set( Uniform::create("u_view",Uniform::Type_Mat4) );
 	uniforms.set( Uniform::create("u_model",Uniform::Type_Mat4) );
@@ -181,6 +196,11 @@ int main(int argc, char* argv[])
 		
 		uniforms.set("u_model", Matrix4() );
 		georender.render( mushr );
+		
+		/*copyOp.src = rgbtarget;
+		copyOp.execute(rgbtarget2);
+		copyOp.src = rgbtarget2;
+		copyOp.execute(rgbtarget);*/
 		
 		texture.update(rgbtarget->data());
 		// ImageIO::save(rgbtarget,"output.tga"); // debug

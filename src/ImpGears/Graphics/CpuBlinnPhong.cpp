@@ -3,24 +3,24 @@
 
 IMPGEARS_BEGIN
 
-void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings)
+void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
 {
-	const Matrix4& view = cu.getMat4("u_view");
-	const Vec3& lightPos = cu.getVec3("u_lightPos");
-	const Vec3& lightCol = cu.getVec3("u_lightCol");
-	const Vec3& lightAtt = cu.getVec3("u_lightAtt");
+	const Matrix4& view = uniforms.getMat4("u_view");
+	const Vec3& lightPos = uniforms.getVec3("u_lightPos");
+	const Vec3& lightCol = uniforms.getVec3("u_lightCol");
+	const Vec3& lightAtt = uniforms.getVec3("u_lightAtt");
 	float lightPower = lightAtt[0];
 	float shininess = lightAtt[1];
 	
 	
-	TextureSampler::Ptr normal_spl = cu.getSampler("u_sampler_normal");
-	TextureSampler::Ptr color_spl = cu.getSampler("u_sampler_color");
-	TextureSampler::Ptr illu_spl = cu.getSampler("u_sampler_illu");
+	TextureSampler::Ptr normal_spl = uniforms.getSampler("u_sampler_normal");
+	TextureSampler::Ptr color_spl = uniforms.getSampler("u_sampler_color");
+	TextureSampler::Ptr illu_spl = uniforms.getSampler("u_sampler_illu");
 	
-	Vec3 tex = varyings->get("texUV");
-	Vec3 color = varyings->get("color");
-	Vec3 frag_pos = varyings->get("m_vert");
-	Vec3 normal = varyings->get("normal");
+	Vec3 tex = varyings.get("texUV");
+	Vec3 color = varyings.get("color");
+	Vec3 frag_pos = varyings.get("m_vert");
+	Vec3 normal = varyings.get("normal");
 	Vec3 light_dir = lightPos - frag_pos;
 	float distance = light_dir.length();
 	distance = distance * distance;

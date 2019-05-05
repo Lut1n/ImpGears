@@ -16,7 +16,7 @@ struct DefaultPlainColor : public FragCallback
 		: _rast(rast)
 	{}
 		
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
 	{
 		for(auto img:targets)img.second->setPixel(pt[0],pt[1],_rast->_defaultColor);
 	}
@@ -24,19 +24,19 @@ struct DefaultPlainColor : public FragCallback
 
 
 //-------------------------------------------------------------- 
-bool CnstUniforms::contains(const std::string& name) const
+bool UniformMap::contains(const std::string& name) const
 {
 	return _values.find(name)!=_values.end();
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::clear()
+void UniformMap::clear()
 {
 	_values.clear();
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::reserve(const CnstUniforms& u)
+void UniformMap::reserve(const UniformMap& u)
 {
 	for(auto kv : u._values)
 		if( !contains(kv.first) )
@@ -44,13 +44,13 @@ void CnstUniforms::reserve(const CnstUniforms& u)
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::copy(const CnstUniforms& u)
+void UniformMap::copy(const UniformMap& u)
 {
 	mix(u,u,0.0);
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::mix(const CnstUniforms& u1,const CnstUniforms& u2, float delta)
+void UniformMap::mix(const UniformMap& u1,const UniformMap& u2, float delta)
 {
 	reserve(u1);
 	for(auto kv : _values)
@@ -58,42 +58,42 @@ void CnstUniforms::mix(const CnstUniforms& u1,const CnstUniforms& u2, float delt
 }
 
 //-------------------------------------------------------------- 
-const Uniform::Ptr CnstUniforms::get(const std::string& name) const
+const Uniform::Ptr UniformMap::get(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name);
 	else return nullptr;
 }
 
 //-------------------------------------------------------------- 
-const Matrix3& CnstUniforms::getMat3(const std::string& name) const
+const Matrix3& UniformMap::getMat3(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getMat3();
 	else return _defaultMat3;
 }
 
 //-------------------------------------------------------------- 
-const Matrix4& CnstUniforms::getMat4(const std::string& name) const
+const Matrix4& UniformMap::getMat4(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getMat4();
 	else return _defaultMat4;
 }
 
 //-------------------------------------------------------------- 
-const Vec3& CnstUniforms::getVec3(const std::string& name) const
+const Vec3& UniformMap::getVec3(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getFloat3();
 	else return _defaultVec3;
 }
 
 //-------------------------------------------------------------- 
-const Vec4& CnstUniforms::getVec4(const std::string& name) const
+const Vec4& UniformMap::getVec4(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getFloat4();
 	else return _defaultVec4;
 }
 
 //-------------------------------------------------------------- 
-const TextureSampler::Ptr CnstUniforms::getSampler(const std::string& name) const
+const TextureSampler::Ptr UniformMap::getSampler(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getSampler();
 	else return _defaultSampler;
@@ -122,7 +122,7 @@ void Varyings::alloc(const std::string& id, int size)
 }
 
 //-------------------------------------------------------------- 
-imp::Vec3 Varyings::get(const std::string& id) const
+Vec3 Varyings::get(const std::string& id) const
 {
 	Vec3 res;
 	if(_adr.find(id)!=_adr.end()) res=Vec3(_buf+_adr.at(id));
@@ -138,37 +138,37 @@ void Varyings::mix(const Varyings& v1, const Varyings& v2, float delta)
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::set(const std::string& name, const Matrix3& mat3)
+void UniformMap::set(const std::string& name, const Matrix3& mat3)
 {
 	if(contains(name)) _values[name]->set(mat3);
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::set(const std::string& name, const Matrix4& mat4)
+void UniformMap::set(const std::string& name, const Matrix4& mat4)
 {
 	if(contains(name)) _values[name]->set(mat4);
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::set(const std::string& name, const Vec3& v3)
+void UniformMap::set(const std::string& name, const Vec3& v3)
 {
 	if(contains(name)) _values[name]->set(v3);
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::set(const std::string& name, const Vec4& v4)
+void UniformMap::set(const std::string& name, const Vec4& v4)
 {
 	if(contains(name)) _values[name]->set(v4);
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::set(const std::string& name, const TextureSampler::Ptr& sampler)
+void UniformMap::set(const std::string& name, const TextureSampler::Ptr& sampler)
 {
 	if(contains(name)) _values[name]->set(sampler);
 }
 
 //-------------------------------------------------------------- 
-void CnstUniforms::set(const Uniform::Ptr& uniform)
+void UniformMap::set(const Uniform::Ptr& uniform)
 {
 	_values[uniform->getID()] = uniform;
 }
@@ -219,15 +219,15 @@ void Rasterizer::clearVaryings()
 }
 
 //--------------------------------------------------------------
-void Rasterizer::setCnstUniforms(const CnstUniforms& cu)
+void Rasterizer::setUniformMap(const UniformMap& um)
 {
-	_cnstUniforms = cu;
+	_uniforms = um;
 }
 
 //--------------------------------------------------------------
-void Rasterizer::clearCnstUniforms()
+void Rasterizer::clearUniformMap()
 {
-	_cnstUniforms.clear();
+	_uniforms.clear();
 }
 
 //--------------------------------------------------------------
@@ -262,7 +262,7 @@ void Rasterizer::rectangle(const Vec3& p1, const Vec3& p2)
 {
 	for(int i=p1[0];i<=p2[0];++i) for(int j=p1[1];j<=p2[1];++j)
 	{
-		_fragCallback->exec(_targets,Vec3(i,j,0),_cnstUniforms);
+		_fragCallback->exec(_targets,Vec3(i,j,0),_uniforms,_inputVaryings[0]);
 	}
 }
 
@@ -282,14 +282,14 @@ void Rasterizer::grid(const Vec3& p1, const Vec3& p2, int gridOffset)
 {
 	for(int i=p1[0];i<=p2[0];++i) for(int j=p1[1];j<=p2[1];++j)
 	{
-		if((i+j+gridOffset)%2 == 0)_fragCallback->exec(_targets,Vec3(i,j,0),_cnstUniforms);
+		if((i+j+gridOffset)%2 == 0)_fragCallback->exec(_targets,Vec3(i,j,0),_uniforms,_inputVaryings[0]);
 	}
 }
 
 //--------------------------------------------------------------
 void Rasterizer::dot(const Vec3& p1)
 {
-	_fragCallback->exec(_targets,p1,_cnstUniforms);
+	_fragCallback->exec(_targets,p1,_uniforms,_inputVaryings[0]);
 }
 
 //--------------------------------------------------------------
@@ -331,7 +331,7 @@ void Rasterizer::line(const Vec3& p1, const Vec3& p2, const Varyings& v1, const 
 		for(int w=-lineWidth;w<=lineWidth;++w)
 		{
 			Vec3 p = position + wl*w;
-			_fragCallback->exec(_targets,p,_cnstUniforms,&varyings);
+			_fragCallback->exec(_targets,p,_uniforms,varyings);
 		}
 		position += dxy;
 	}
@@ -357,7 +357,7 @@ void Rasterizer::hLine(const Vec3& p1, const Vec3& p2, const Varyings& v1, const
 	{
 		float rel = imp::clamp(imp::linearstep(pts[l].x(),pts[r].x(), (float)x));
 		varyings.mix(*vptr_l, *vptr_r, rel);
-		_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_cnstUniforms,&varyings);
+		_fragCallback->exec(_targets,imp::Vec3(x,pts[l].y(),pts[l].z()),_uniforms,varyings);
 	}
 }
 

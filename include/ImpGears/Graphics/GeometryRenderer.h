@@ -23,7 +23,7 @@ public:
 	struct VertCallback : public Object
 	{
 		Meta_Class(VertCallback)
-		virtual void exec(const Vec3& vert, Attributes& att, const CnstUniforms& cu, Varyings& varyings) = 0;
+		virtual void exec(const Vec3& vert, Attributes& att, const UniformMap& uniforms, Varyings& varyings) = 0;
 	};
 	
 	enum Cull
@@ -52,7 +52,7 @@ public:
 	void setModel(const Matrix4& model);
 	void setViewport(const Vec4& viewport);
 	void setCullMode(Cull mode);
-	void setUniforms(const CnstUniforms& cu);
+	void setUniforms(const UniformMap& cu);
 	void setDefaultVertCallback();
 	void setDefaultFragCallback();
 	void setVertCallback(const VertCallback::Ptr& callback);
@@ -69,7 +69,7 @@ protected:
 
 	std::map<int,Image::Ptr> _targets;
 	std::map<int,Vec4> _clearColors;
-	CnstUniforms _uniforms;
+	UniformMap _uniforms;
 	
 	VertCallback::Ptr _vertCallback;
 	FragCallback::Ptr _fragCallback;

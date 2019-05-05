@@ -7,9 +7,9 @@ struct DefaultPlain : public FragCallback
 {
 	Meta_Class(DefaultPlain)
 	
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
     {
-		Vec3 color = varyings->get("color");
+		Vec3 color = varyings.get("color");
 		targets[0]->setPixel(pt[0],pt[1], Vec4(color,1.0) * 255.0 );
     }
 };
@@ -45,16 +45,16 @@ struct DepthTestFragCallback : public FragCallback
 	
 	void enableDepthTest(bool b) { _depthTestEnabled = b; }
 	
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr)
+	virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
     {
 		if(_depthTestEnabled == false)
 		{
-			if(_subCallback) _subCallback->exec(targets, pt, cu, varyings);
+			if(_subCallback) _subCallback->exec(targets, pt, uniforms, varyings);
 			return;
 		}
 		
 		// depth test
-		float depth = -varyings->get("mv_vert").z();
+		float depth = -varyings.get("mv_vert").z();
 		
 		float depthPx = clamp( linearstep(_near, _far, depth )  )* 255.0;
 		Vec4 depthV = _depthBuffer->getPixel(pt[0], pt[1]);
@@ -63,7 +63,7 @@ struct DepthTestFragCallback : public FragCallback
 		{
 			Vec4 depth(depthPx);
 			_depthBuffer->setPixel(pt[0],pt[1],depth);
-			if(_subCallback) _subCallback->exec(targets, pt, cu, varyings);
+			if(_subCallback) _subCallback->exec(targets, pt, uniforms, varyings);
 		}
     }
 };
@@ -73,12 +73,12 @@ struct DepthTestFragCallback : public FragCallback
  {
 	Meta_Class(DefaultVertCallback)
 
-	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const CnstUniforms& cu, Varyings& out_varyings)
+	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const UniformMap& uniforms, Varyings& out_varyings)
 	{
-		const Matrix4& model = cu.getMat4("u_model");
-		const Matrix4& view = cu.getMat4("u_view");
-		const Matrix4& proj = cu.getMat4("u_proj");
-		const Vec4& vp = cu.getVec4("u_vp");
+		const Matrix4& model = uniforms.getMat4("u_model");
+		const Matrix4& view = uniforms.getMat4("u_view");
+		const Matrix4& proj = uniforms.getMat4("u_proj");
+		const Vec4& vp = uniforms.getVec4("u_vp");
 		
 		Vec4 win1(vp[2]*0.5, vp[3]*0.5, 1.0, 1.0);
 		Vec4 win2(vp[2]*0.5, vp[3]*0.5, 0.0, 0.0);
@@ -151,7 +151,7 @@ void GeometryRenderer::clearTargets()
 void GeometryRenderer::render(const Geometry& geo)
 {
 	init();
-	_rasterizer.setCnstUniforms(_uniforms);
+	_rasterizer.setUniformMap(_uniforms);
 	
 	Varyings varyings[3];
 	Vec3 mvpVertex[3];
@@ -279,9 +279,9 @@ void GeometryRenderer::setCullMode(Cull mode)
 }
 
 //--------------------------------------------------------------
-void GeometryRenderer::setUniforms(const CnstUniforms& cu)
+void GeometryRenderer::setUniforms(const UniformMap& um)
 {
-	_uniforms = cu;
+	_uniforms = um;
 }
 
 //--------------------------------------------------------------

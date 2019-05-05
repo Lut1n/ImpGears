@@ -11,7 +11,7 @@
 
 IMPGEARS_BEGIN
 
-struct IMP_API CnstUniforms
+struct IMP_API UniformMap
 {
 	std::map<std::string,Uniform::Ptr> _values;
 	
@@ -33,9 +33,9 @@ struct IMP_API CnstUniforms
 	void set(const std::string& name, const Vec4& v4);
 	void set(const std::string& name, const TextureSampler::Ptr& sampler);
 	
-	void reserve(const CnstUniforms& u);
-	void copy(const CnstUniforms& u);
-	void mix(const CnstUniforms& u1,const CnstUniforms& u2, float delta);
+	void reserve(const UniformMap& u);
+	void copy(const UniformMap& u);
+	void mix(const UniformMap& u1,const UniformMap& u2, float delta);
 	
 	Matrix3 _defaultMat3;
 	Matrix4 _defaultMat4;
@@ -56,7 +56,7 @@ struct IMP_API Varyings
     
     void alloc(const std::string& id, int size);
     
-    imp::Vec3 get(const std::string& id) const;
+    Vec3 get(const std::string& id) const;
     
     void mix(const Varyings& v1, const Varyings& v2, float delta);
 };
@@ -67,7 +67,7 @@ using VaryingsBuf = std::vector<Varyings>;
 struct IMP_API FragCallback : public imp::Object
 {
     Meta_Class(FragCallback)
-    virtual void exec(ImageBuf& targets, const Vec3& pt, const CnstUniforms& cu, Varyings* varyings = nullptr) = 0;
+    virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings) = 0;
 };
 
 class IMP_API Rasterizer : public imp::Object
@@ -77,7 +77,7 @@ public:
     ImageBuf _targets;
     VaryingsBuf _inputVaryings;
 	VaryingsBuf _subVaryings;
-	CnstUniforms _cnstUniforms;
+	UniformMap _uniforms;
     imp::Vec4 _defaultColor;
     FragCallback::Ptr _fragCallback;
     
@@ -92,8 +92,8 @@ public:
     void setTarget(imp::Image::Ptr target);
     void setColor(const imp::Vec4& col);
     void clearVaryings();
-	void setCnstUniforms(const CnstUniforms& cu);
-	void clearCnstUniforms();
+	void setUniformMap(const UniformMap& um);
+	void clearUniformMap();
     void setVaryings2(const Varyings& v1, const Varyings& v2);
     void setVaryings3(const Varyings& v1, const Varyings& v2, const Varyings& v3);
     void setFragCallback(FragCallback::Ptr cb);

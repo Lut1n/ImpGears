@@ -59,15 +59,23 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 {
 	if(opt == CloneOpt_All)
 	{
-		setProjectionMatrix(other->_projection);
-		setViewport(other->_viewport);
-		setFaceCullingMode(other->_faceCullingMode);
-		setBlendMode(other->_blendMode);
-		setLineWidth(other->_lineWidth);
-		setDepthTest(other->_depthTest);
-		setTarget(other->_target);
-		setShader(other->_shader);
-		setUniforms(other->_uniforms);
+		_projection = other->_projection;
+		_viewport = other->_viewport;
+		_faceCullingMode = other->_faceCullingMode;
+		_blendMode = other->_blendMode;
+		_lineWidth = other->_lineWidth;
+		_depthTest = other->_depthTest;
+		_target = other->_target;
+		_shader = other->_shader;
+		_uniforms = other->_uniforms;
+		_projectionChanged = other->_projectionChanged;
+		_viewportChanged = other->_viewportChanged;
+		_faceCullingChanged = other->_faceCullingChanged;
+		_blendModeChanged = other->_blendModeChanged;
+		_lineWidthChanged = other->_lineWidthChanged;
+		_depthTestChanged = other->_depthTestChanged;
+		_targetChanged = other->_targetChanged;
+		_shaderChanged = other->_shaderChanged;
 	}
 	else if(opt == CloneOpt_IfChanged)
 	{
@@ -128,12 +136,19 @@ void State::apply() const
 	if(_viewportChanged)
 		GraphRenderer::s_interface->setViewport(_viewport);
 	
-	if(_targetChanged && _target != nullptr)
+	if(_targetChanged)
 	{
-		if(_target->_d == nullptr)
-			GraphRenderer::s_interface->init(_target.get());
-		GraphRenderer::s_interface->bind(_target->_d);
-		_target->change();
+		if(_target == nullptr)
+		{
+			GraphRenderer::s_interface->unbind(nullptr);
+		}
+		else 
+		{
+			if(_target->_d == nullptr)
+				GraphRenderer::s_interface->init(_target.get());
+			GraphRenderer::s_interface->bind(_target->_d);
+			_target->change();
+		}
 	}
 	
 	if(_shader != nullptr)

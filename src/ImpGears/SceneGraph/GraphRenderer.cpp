@@ -30,6 +30,7 @@ GraphRenderer::GraphRenderer()
     _initState->setViewport(0.0,0.0,500.0,500.0);
     _initState->setLineWidth(1.0);
     _initState->setDepthTest( true );
+	_initState->setTarget(nullptr);
 	
 	_visitor = SceneVisitor::create();
 }

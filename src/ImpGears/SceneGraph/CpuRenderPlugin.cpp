@@ -21,20 +21,6 @@
 
 IMPGEARS_BEGIN
 
-/// =========== VERTEX SHADER SOURCE =====================
-/*static std::string basicVert = IMP_GLSL_SRC(
-uniform mat4 u_projection;
-uniform mat4 u_view;
-uniform mat4 u_model;
-void main() { gl_Position = u_projection * u_view * u_model * gl_Vertex; }
-);
-
-/// =========== FRAGMENT SHADER SOURCE =====================
-static std::string basicFrag = IMP_GLSL_SRC(
-uniform vec3 u_color;
-void main() { gl_FragData[0] = vec4(u_color, 1.0); }
-);*/
-
 //--------------------------------------------------------------
 struct CpuRenderPlugin::Priv
 {
@@ -101,8 +87,9 @@ void CpuRenderPlugin::init()
 		s_internalState->defaultTarget.create( (int)vp[2] , (int)vp[3], 1, true);
 		s_internalState->target = &s_internalState->defaultTarget;
 		
-		Image::Ptr tgt = s_internalState->defaultTarget.get(0);
-		s_internalState->geoRenderer.setTarget(0,tgt, Vec4(0.0));
+		TextureSampler::Ptr tgt = s_internalState->defaultTarget.get(0);
+		Image::Ptr sourceTgt = tgt->getSource();
+		s_internalState->geoRenderer.setTarget(0,sourceTgt, Vec4(0.0));
 		// s_internalState->geoRenderer.setTarget(1,s_internalState->depth, Vec4(255.0));
 	}
 }
@@ -216,8 +203,9 @@ void CpuRenderPlugin::bind(Data::Ptr data)
 		else
 			s_internalState->target = &s_internalState->defaultTarget;
 		
-		Image::Ptr tgt = s_internalState->target->get(0);
-		s_internalState->geoRenderer.setTarget(0,tgt,Vec4(0.0));
+		TextureSampler::Ptr tgt = s_internalState->target->get(0);
+		Image::Ptr sourceTgt = tgt->getSource();
+		s_internalState->geoRenderer.setTarget(0,sourceTgt,Vec4(0.0));
 	}
 	else if(data->ty == Ty_Shader)
 	{
@@ -249,8 +237,9 @@ void CpuRenderPlugin::unbind(Target* target)
 {
 	s_internalState->target = &s_internalState->defaultTarget;
 
-	Image::Ptr tgt = s_internalState->target->get(0);
-	s_internalState->geoRenderer.setTarget(0,tgt,Vec4(0.0));
+	TextureSampler::Ptr tgt = s_internalState->target->get(0);
+	Image::Ptr sourceTgt = tgt->getSource();
+	s_internalState->geoRenderer.setTarget(0,sourceTgt,Vec4(0.0));
 }
 
 //--------------------------------------------------------------

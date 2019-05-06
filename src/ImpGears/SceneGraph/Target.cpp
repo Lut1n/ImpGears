@@ -23,8 +23,19 @@ Target::~Target()
 void Target::create(int w, int h, int count, bool hasDepth)
 {
 	_targets.resize(count);
-	for(int i=0;i<count;++i) _targets[i] = Image::create(w,h,4);
+	for(int i=0;i<count;++i)
+	{
+		_targets[i] = TextureSampler::create();
+		_targets[i]->setInternalSrc(w,h,4);
+	}
 	
+	_hasDepthBuffer = hasDepth;
+}
+
+//--------------------------------------------------------------
+void Target::create(const std::vector<TextureSampler::Ptr>& textures, bool hasDepth)
+{
+	_targets = textures;;
 	_hasDepthBuffer = hasDepth;
 }
 
@@ -36,7 +47,7 @@ void Target::destroy()
 }
 
 //--------------------------------------------------------------
-Image::Ptr Target::get(int n)
+TextureSampler::Ptr Target::get(int n)
 {
 	update();
 	return _targets[n];
@@ -46,7 +57,7 @@ Image::Ptr Target::get(int n)
 int Target::width() const
 {
 	int w = 0;
-	if(_targets.size() > 0) w = _targets[0]->width();
+	if(_targets.size() > 0) w = _targets[0]->getSource()->width();
 	return w;
 }
 
@@ -54,7 +65,7 @@ int Target::width() const
 int Target::height() const
 {
 	int h = 0;
-	if(_targets.size() > 0) h = _targets[0]->height();
+	if(_targets.size() > 0) h = _targets[0]->getSource()->height();
 	return h;
 }
 
@@ -84,8 +95,8 @@ void Target::update()
 	{
 		for(int i=0;i<(int)_targets.size();++i)
 		{
-			Image::Ptr& img = _targets[i];
-			GraphRenderer::s_interface->bringBack(img,_d,i);
+			TextureSampler::Ptr& img = _targets[i];
+			GraphRenderer::s_interface->bringBack(img->getSource(),img->_d,i);
 		}
 		_hasChanged = false;
 	}

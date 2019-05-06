@@ -48,11 +48,17 @@ class IMP_API Texture : public Object
         void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){_hasMipmap = mipmap; _mipmapMaxLevel = maxLevel; update();}
 
         void update();
+		
+		int width() const {return _width;}
+		int height() const {return _height;}
 
     protected:
     private:
 
         std::uint32_t _videoID;
+		
+		int _width;
+		int _height;
 
 		bool _isSmooth;
 		bool _isRepeated;

@@ -24,13 +24,15 @@ FrameBuffer::~FrameBuffer()
 }
 
 //--------------------------------------------------------------
-void FrameBuffer::create(int width, int height, int textureCount, bool depthBuffer)
+void FrameBuffer::build(const std::vector<Texture::Ptr>& textures, bool depthBuffer)
 {
 	destroy();
 	_hasDepthBuffer = depthBuffer;
+	// TODO : test  GL_MAX_COLOR_ATTACHMENTS & GL_MAX_DRAW_BUFFERS
+	_textureCount = textures.size();
+	_colorTextures = textures;
 	
-	// TODO : tets  GL_MAX_COLOR_ATTACHMENTS & GL_MAX_DRAW_BUFFERS
-	_textureCount = textureCount;
+	if(_textureCount==0) return;
 
 	GLuint id;
 	glGenFramebuffers(1, &id);
@@ -38,23 +40,22 @@ void FrameBuffer::create(int width, int height, int textureCount, bool depthBuff
 	glBindFramebuffer(GL_FRAMEBUFFER, _id);
 	GL_CHECKERROR("bind FBO");
 
-	GLenum drawBuffers[textureCount];
-	_colorTextures.resize(textureCount);
-	for(int i=0; i<textureCount; ++i)
+	GLenum drawBuffers[_textureCount];
+	for(int i=0; i<_textureCount; ++i)
 	{
-		_colorTextures[i] = Texture::create();
-		_colorTextures[i]->loadFromMemory(NULL, width, height, 4);
-		_colorTextures[i]->update();
 		_colorTextures[i]->bind();
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, _colorTextures[i]->getVideoID(), 0);
 		drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
 		GL_CHECKERROR("set color buffer");
 	}
-	glDrawBuffers(textureCount, drawBuffers);
+	glDrawBuffers(_textureCount, drawBuffers);
 	GL_CHECKERROR("set draw buffers");
 
 	if(_hasDepthBuffer)
 	{
+		int width = _colorTextures[0]->width();
+		int height = _colorTextures[0]->height();
+		
 		// render buffer
 		GLuint rbo = _rbo;
 		glGenRenderbuffers(1, &rbo); _rbo = rbo;
@@ -81,12 +82,29 @@ void FrameBuffer::create(int width, int height, int textureCount, bool depthBuff
 }
 
 //--------------------------------------------------------------
+void FrameBuffer::build(int width, int height, int textureCount, bool depthBuffer)
+{
+	std::vector<Texture::Ptr> textures;
+	textures.resize(textureCount);
+	
+	for(int i=0; i<textureCount; ++i)
+	{
+		textures[i] = Texture::create();
+		textures[i]->loadFromMemory(NULL, width, height, 4);
+		textures[i]->update();
+		textures[i]->bind();
+	}
+	
+	build(textures, depthBuffer);
+}
+
+//--------------------------------------------------------------
 void FrameBuffer::destroy()
 {
 	GLuint id = _id;
 	glDeleteFramebuffers(1, &id);
 
-	for(int i=0; i<_textureCount; ++i) _colorTextures[i] = nullptr;
+	_colorTextures.clear();
 	if(_hasDepthBuffer) {GLuint rbo=_rbo; glDeleteRenderbuffers(1,&rbo);_rbo=rbo;}
 
     _textureCount = 0;

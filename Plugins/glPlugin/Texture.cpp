@@ -6,12 +6,14 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-Texture::Texture(const std::string& name):
-    _videoID(0),
-    _isSmooth(false),
-    _isRepeated(false),
-    _hasMipmap(false),
-    _mipmapMaxLevel(1000)
+Texture::Texture(const std::string& name)
+	: _videoID(0)
+	, _width(0)
+	, _height(0)
+	, _isSmooth(false)
+	, _isRepeated(false)
+	, _hasMipmap(false)
+	, _mipmapMaxLevel(1000)
 	, _name(name)
 {
     glGenTextures(1, &_videoID);
@@ -63,6 +65,8 @@ void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
 	}
 
     bind();
+	_width = width;
+	_height = height;
     glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, width, height,0, glDataFormat, glDataType, buf);
     GL_CHECKERROR("texture update gpu Texture");
     unbind();

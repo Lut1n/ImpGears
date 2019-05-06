@@ -16,7 +16,8 @@ public:
 	FrameBuffer();
 	virtual ~FrameBuffer();
 
-	void create(int width, int height, int textureCount = 1, bool depthBuffer = false);
+	void build(int width, int height, int textureCount = 1, bool depthBuffer = false);
+	void build(const std::vector<Texture::Ptr>& textures, bool depthBuffer = false);
 
 	void destroy();
 

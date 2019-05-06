@@ -30,7 +30,7 @@ static std::string basicVert = IMP_GLSL_SRC(
 uniform mat4 u_proj;
 uniform mat4 u_view;
 uniform mat4 u_model;
-void main() { gl_Position = u_projection * u_view * u_model * gl_Vertex; }
+void main() { gl_Position = u_proj * u_view * u_model * gl_Vertex; }
 
 );
 
@@ -57,7 +57,7 @@ struct TexData : public RenderPlugin::Data
 	Meta_Class(TexData)
 	TexData() { ty=RenderPlugin::Ty_Tex; }
 	
-	Texture tex;
+	Texture::Ptr tex;
 };
 
 //--------------------------------------------------------------
@@ -188,14 +188,18 @@ GlPlugin::Data::Ptr GlPlugin::load(const Geometry* geo)
 GlPlugin::Data::Ptr GlPlugin::load(const TextureSampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
-	TexData::Ptr d = TexData::create();
-	d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
-	d->tex.setSmooth( sampler->getInterpo() != ImageSampler::Interpo_Nearest );
-	d->tex.setRepeated( sampler->getMode() == ImageSampler::Mode_Repeat );
-	d->tex.setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
+	if(sampler->_d == nullptr)
+	{
+		TexData::Ptr d = TexData::create();
+		d->tex = Texture::create();
+		d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
+		d->tex->setSmooth( sampler->getInterpo() != ImageSampler::Interpo_Nearest );
+		d->tex->setRepeated( sampler->getMode() == ImageSampler::Mode_Repeat );
+		d->tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
+		return d;
+	}
 	// sampler->_d = d;
-	
-	return d;
+	return sampler->_d;
 }
 
 //--------------------------------------------------------------
@@ -215,7 +219,7 @@ void GlPlugin::update(Data::Ptr data, const TextureSampler* sampler)
 	{
 		Image::Ptr img = sampler->getSource();
 		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(data);
-		d->tex.loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
+		d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 	}
 }
 
@@ -239,7 +243,7 @@ void GlPlugin::bind(Data::Ptr data)
 	else if(data->ty == Ty_Tex)
 	{
 		TexData::Ptr d = std::dynamic_pointer_cast<TexData>( data );
-		d->tex.bind();
+		d->tex->bind();
 	}
 }
 
@@ -247,15 +251,26 @@ void GlPlugin::bind(Data::Ptr data)
 void GlPlugin::init(Target* target)
 {
 	FboData::Ptr d = FboData::create();
-	d->frames.create(target->width(), target->height(), target->count(), target->hasDepth());
+	
+	std::vector<Texture::Ptr> textures;
+	for(int i=0;i<target->count();++i)
+	{
+		TextureSampler::Ptr s = target->get(i);
+		if(s->_d == nullptr) s->_d = load(s.get());
+		TexData::Ptr dtex = std::dynamic_pointer_cast<TexData>( s->_d );
+		Texture::Ptr t = dtex->tex;
+		textures.push_back(t);
+	}
+	
+	d->frames.build(textures, target->hasDepth());
+	// d->frames.build(target->width(), target->height(), target->count(), target->hasDepth());
 	target->_d = d;
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unbind(Target* target)
 {
-	FboData::Ptr d = std::dynamic_pointer_cast<FboData>( target->_d );
-	d->frames.unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //--------------------------------------------------------------
@@ -264,7 +279,7 @@ void GlPlugin::bringBack(Image::Ptr img, Data::Ptr data, int n)
 	if(data->ty == Ty_Tex)
 	{
 		TexData::Ptr d = std::dynamic_pointer_cast<TexData>( data );
-		d->tex.saveToImage(img);
+		d->tex->saveToImage(img);
 	}
 	
 	if(data->ty == Ty_Tgt && n>=0)
@@ -332,7 +347,7 @@ void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
 		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(uniform->getSampler()->_d);
-		glBindTexture(GL_TEXTURE_2D, d->tex.getVideoID());
+		glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
 		glUniform1i(uniformLocation, uniform->getInt1());
 	}
 	else

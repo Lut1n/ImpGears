@@ -17,6 +17,14 @@ SceneVisitor::~SceneVisitor()
 }
 
 //--------------------------------------------------------------
+void SceneVisitor::reset()
+{
+	u_model->set( Matrix4() );
+	u_proj->set( Matrix4() );
+	u_view->set( Matrix4() );
+}
+
+//--------------------------------------------------------------
 void SceneVisitor::apply( SceneNode* node )
 {
 	Camera* asCamera = dynamic_cast<Camera*>( node );
@@ -31,9 +39,6 @@ void SceneVisitor::applyDefault( SceneNode* node )
 	
 	u_model->set( _matrices.back() );
 	u_proj->set( topState->getProjectionMatrix() );
-	Camera* camera = Camera::getActiveCamera();
-	if(camera)
-		u_view->set( camera->getViewMatrix() );
 	
 	topState->setUniform(u_proj);
 	topState->setUniform(u_model);
@@ -50,6 +55,7 @@ void SceneVisitor::applyCamera( Camera* node )
 	Vec3 translation = Vec3(m(3,0),m(3,1),m(3,2));
 	node->setAbsolutePosition( translation );
 	node->lookAt();
+	u_view->set( node->getViewMatrix() );
 }
 
 //--------------------------------------------------------------

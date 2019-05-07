@@ -22,6 +22,8 @@ public:
 
 	SceneVisitor();
 	virtual ~SceneVisitor();
+	
+	virtual void reset();
 
 	virtual void apply( SceneNode* node );
 	virtual void applyDefault( SceneNode* node );

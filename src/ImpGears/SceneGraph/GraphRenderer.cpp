@@ -44,7 +44,8 @@ GraphRenderer::~GraphRenderer()
 void GraphRenderer::renderScene(SceneNode::Ptr& scene)
 {
 	Visitor<SceneNode*>::Ptr visitor = _visitor;
-	
+
+	_visitor->reset();
 	_visitor->push(_initNode.get());
 	_visitor->apply(_initNode.get());
 	scene->accept(visitor);

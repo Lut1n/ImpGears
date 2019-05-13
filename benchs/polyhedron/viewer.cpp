@@ -1,12 +1,11 @@
 #include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/GeoNode.h>
-
 #include <Utils/ImageIO.h>
 
-using namespace imp;
-
 #include <SFML/Graphics.hpp>
+
+using namespace imp;
 
 #include "shader.h"
 
@@ -39,24 +38,14 @@ int main(int argc, char* argv[])
 	
 	sf::RenderWindow window(sf::VideoMode(512, 512), "My window", sf::Style::Default, sf::ContextSettings(24));
 	window.setFramerateLimit(60);
-	sf::Texture texture; texture.create(512, 512);
-	sf::Sprite sprite(texture);
-	sprite.setTextureRect( sf::IntRect(0,512,512,-512) );
-	
 	
 	GraphRenderer::Ptr graph = GraphRenderer::create();
-	SceneNode::Ptr root = GeoNode::create(Geometry(),false);
-
-	imp::Target::Ptr tgt = imp::Target::create();
-	tgt->create(512,512,1,true);
-	// graph->getInitState()->setTarget(tgt);
-	// graph->setClearColor( imp::Vec4(1.0,0.0,0.0,1.0) );
-	// graph->setClearDepth( 1.0 );
 	
 	Camera::Ptr camera = Camera::create();
 	camera->setPosition(Vec3(0.0f, 0.0f, 0.0f));
 	camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
-	root->addNode(camera);
+	
+	SceneNode::Ptr root = camera;
 	
 	Geometry lineVol = Geometry::cylinder(10,1.0,0.02);
 	Geometry arrowVol = Geometry::cone(10,0.1,0.05,0.0);
@@ -92,7 +81,7 @@ int main(int argc, char* argv[])
 	node4->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
 	node3->addNode(node4);
 	
-	// camera->addNode(node1);
+	camera->addNode(node1);
 	
 	imp::ShaderDsc::Ptr s = imp::ShaderDsc::create();
 	s->vertCode = vertexSimple;
@@ -104,7 +93,6 @@ int main(int argc, char* argv[])
 	geomush->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
 	geomush->setShader(s);
 	node2->addNode(geomush);
-	
 	
 	bool stopLoop = false;
     while (window.isOpen())
@@ -127,16 +115,10 @@ int main(int argc, char* argv[])
 		
 		// rendering
 		graph->renderScene( root );
-		// imp::GraphRenderer::s_interface->unbind(tgt.get());
-		// imp::Image::Ptr res = tgt->get(0);
-        // texture.update(res->data(),res->width(),res->height(),0,0);
-		
-		// window.clear();
-		// window.draw(sprite);
 		window.display();
-		
-		// std::cout << "ite" << std::endl;
     }
+    
+    // ImageIO::save(tgt->get(0)->getSource(),"test.tga");
 
 	exit(EXIT_SUCCESS);
 }

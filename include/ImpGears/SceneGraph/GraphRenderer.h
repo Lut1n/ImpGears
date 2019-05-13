@@ -18,12 +18,14 @@ public:
 	GraphRenderer();
 	virtual ~GraphRenderer();
 
-	void renderScene(SceneNode::Ptr& scene);
+	void renderScene(const SceneNode::Ptr& scene);
 	
 	State::Ptr getInitState() { return _initState; }
 	
 	void setClearColor(const Vec4& color);
 	void setClearDepth(float depth);
+	void setTarget(const Target::Ptr& target);
+	void setDefaultTarget();
 	
 	static RenderPlugin::Ptr s_interface;
 

@@ -41,7 +41,7 @@ GraphRenderer::~GraphRenderer()
 }
 
 //---------------------------------------------------------------
-void GraphRenderer::renderScene(SceneNode::Ptr& scene)
+void GraphRenderer::renderScene(const SceneNode::Ptr& scene)
 {
 	Visitor<SceneNode*>::Ptr visitor = _visitor;
 
@@ -62,6 +62,18 @@ void GraphRenderer::setClearColor(const Vec4& color)
 void GraphRenderer::setClearDepth(float depth)
 {
 	_initNode->setDepth(depth);
+}
+
+//---------------------------------------------------------------
+void GraphRenderer::setTarget(const Target::Ptr& target)
+{
+	_initNode->setTarget(target);
+}
+
+//---------------------------------------------------------------
+void GraphRenderer::setDefaultTarget()
+{
+	_initNode->setTarget(nullptr);
 }
 
 IMPGEARS_END

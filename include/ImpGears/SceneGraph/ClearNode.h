@@ -27,6 +27,11 @@ public:
 	bool isColorEnable() const { return _clearColor; }
 	void enableDepth(bool enable) { _clearDepth=enable; }
 	bool isDepthEnable() const { return _clearDepth; }
+	
+	void setTarget(const Target::Ptr& targets);
+	void setDefaultTarget();
+	Target::Ptr getTarget() const;
+	
 
 private:
 

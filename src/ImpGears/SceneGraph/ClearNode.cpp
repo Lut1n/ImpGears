@@ -27,4 +27,22 @@ void ClearNode::update()
 {
 }
 
+//--------------------------------------------------------------
+void ClearNode::setTarget(const Target::Ptr& targets)
+{
+	_state->setTarget(targets);
+}
+
+//--------------------------------------------------------------
+void ClearNode::setDefaultTarget()
+{
+	_state->setTarget(nullptr);
+}
+
+//--------------------------------------------------------------
+Target::Ptr ClearNode::getTarget() const
+{
+	return _state->getTarget();
+}
+
 IMPGEARS_END

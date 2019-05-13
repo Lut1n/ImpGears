@@ -42,7 +42,6 @@ public:
 	void computeMatrices();
 
 	const Matrix4& getModelMatrix() const { return _modelMatrix; }
-	const Matrix4& getNormalMatrix() const { return _normalMatrix; }
 	
 	virtual State::Ptr getState() { return _state; }
 
@@ -54,7 +53,6 @@ protected:
 	Vec3 _scale;
 	
 	Matrix4 _modelMatrix;
-	Matrix4 _normalMatrix;
 	
 	NodeList _children;
 };

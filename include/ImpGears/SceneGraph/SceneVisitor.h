@@ -38,6 +38,7 @@ protected:
 	Uniform::Ptr u_proj;
 	Uniform::Ptr u_view;
 	Uniform::Ptr u_model;
+	Uniform::Ptr u_normal;
 };
 
 IMPGEARS_END

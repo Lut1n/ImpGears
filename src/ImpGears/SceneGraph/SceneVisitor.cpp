@@ -9,6 +9,7 @@ SceneVisitor::SceneVisitor()
 	u_proj = Uniform::create("u_proj",Uniform::Type_Mat4);
 	u_view = Uniform::create("u_view",Uniform::Type_Mat4);
 	u_model = Uniform::create("u_model",Uniform::Type_Mat4);
+	u_normal = Uniform::create("u_normal",Uniform::Type_Mat3);
 }
 
 //--------------------------------------------------------------
@@ -22,6 +23,7 @@ void SceneVisitor::reset()
 	u_model->set( Matrix4() );
 	u_proj->set( Matrix4() );
 	u_view->set( Matrix4() );
+	u_normal->set( Matrix3() );
 }
 
 //--------------------------------------------------------------
@@ -40,9 +42,14 @@ void SceneVisitor::applyDefault( SceneNode* node )
 	u_model->set( _matrices.back() );
 	u_proj->set( topState->getProjectionMatrix() );
 	
+	Matrix4 mv = _matrices.back() * u_view->getMat4();
+	Matrix3 normalMat = Matrix3(mv).inverse().transpose();
+	u_normal->set( normalMat );
+	
 	topState->setUniform(u_proj);
 	topState->setUniform(u_model);
 	topState->setUniform(u_view);
+	topState->setUniform(u_normal);
 	topState->apply();
 	
 	node->render();

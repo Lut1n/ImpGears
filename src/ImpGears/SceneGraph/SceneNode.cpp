@@ -50,12 +50,6 @@ void SceneNode::computeMatrices()
 		* Matrix4::rotationY(_rotation.y())
 		* Matrix4::rotationZ(_rotation.z())
 		* Matrix4::translation(_position.x(), _position.y(), _position.z());
-
-	_normalMatrix =
-		Matrix4::rotationX(_rotation.x())
-		* Matrix4::rotationY(_rotation.y())
-		* Matrix4::rotationZ(_rotation.z())
-		* Matrix4::scale(_scale.x(), _scale.y(), _scale.z()).inverse();
 }
 
 IMPGEARS_END

@@ -4,8 +4,6 @@
 #include <Geometry/Geometry.h>
 #include <Utils/JsonReaderWriter.h>
 
-// #include <ctime>
-// #include <iostream>
 #include <map>
 
 IMPGEARS_BEGIN

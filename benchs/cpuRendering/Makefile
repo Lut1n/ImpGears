@@ -11,16 +11,13 @@ LDFLAGS= -lstdc++fs -lsfml-graphics -lsfml-window -lsfml-system ../../build/libi
 
 all: viewer
 
-viewer: viewer.o geoOp.o
-	$(CXX) -o viewer viewer.o geoOp.o -L /usr/lib $(LDFLAGS)
+viewer: viewer.o
+	$(CXX) -o viewer viewer.o -L /usr/lib $(LDFLAGS)
 
-viewer.o: viewer.cpp JsonGeometryOp.h
+viewer.o: viewer.cpp
 	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c viewer.cpp -o viewer.o
-
-geoOp.o:  JsonGeometryOp.cpp JsonGeometryOp.h
-	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c  JsonGeometryOp.cpp -o geoOp.o
 
 .PHONY : clean
 
 clean:
-	rm -rf viewer.o geoOp.o viewer
+	rm -rf viewer.o viewer

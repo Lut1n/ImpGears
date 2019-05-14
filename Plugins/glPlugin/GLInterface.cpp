@@ -30,6 +30,7 @@ static std::string basicVert = IMP_GLSL_SRC(
 uniform mat4 u_proj;
 uniform mat4 u_view;
 uniform mat4 u_model;
+uniform mat3 u_normal;
 void main() { gl_Position = u_proj * u_view * u_model * gl_Vertex; }
 
 );
@@ -307,9 +308,7 @@ void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 	Uniform::Type type = uniform->getType();
 	ProgData::Ptr sha = std::dynamic_pointer_cast<ProgData>(data);
 	std::int32_t uniformLocation = sha->sha.locate(uId);
-    if(uniformLocation == -1)
-        std::cout << "impError : location of uniform (" << uId << ") failed" << std::endl;
-    GL_CHECKERROR("parameter location");
+    if(uniformLocation == -1) return;
 	
 	if(type == Uniform::Type_1f)
 	{

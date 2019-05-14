@@ -85,9 +85,21 @@ void Program::use()
 //--------------------------------------------------------------
 std::int32_t Program::locate(const std::string& id) const
 {
-	std::int32_t location = glGetUniformLocation(_programID, id.c_str());
-	GL_CHECKERROR("parameter location");
-	return location;
+	auto found = _locationCache.find(id);
+	if(found != _locationCache.end())
+	{
+		return found->second;
+	}
+	else
+	{
+		std::int32_t location = glGetUniformLocation(_programID, id.c_str());
+		GL_CHECKERROR("parameter location");
+		
+		if(location == -1)
+			std::cout << "impError : location of uniform (" << id << ") failed" << std::endl;
+		_locationCache[id] = location;
+		return location;
+	}
 }
 
 IMPGEARS_END

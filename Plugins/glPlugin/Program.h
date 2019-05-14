@@ -3,6 +3,8 @@
 
 #include <Core/Object.h>
 
+#include <map>
+
 IMPGEARS_BEGIN
 
 #define IMP_GLSL_SRC( src ) #src
@@ -31,6 +33,8 @@ protected:
 	std::uint32_t _programID;
 	
 	static std::string s_compilation_log;
+	
+	mutable std::map<std::string,int> _locationCache;
 };
 
 IMPGEARS_END

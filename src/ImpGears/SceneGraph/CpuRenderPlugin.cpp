@@ -289,10 +289,6 @@ void CpuRenderPlugin::update(Data::Ptr data, const Uniform* uniform)
 	{
 		// if(name == "u_color") // set color
 	}
-	else if(type == Uniform::Type_4f)
-	{
-		if(name == "u_vp") r.setViewport( uniform->getFloat4() );
-	}
 }
 
 IMPGEARS_END

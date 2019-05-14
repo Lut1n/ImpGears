@@ -78,10 +78,6 @@ struct DepthTestFragCallback : public FragCallback
 		const Matrix4& model = uniforms.getMat4("u_model");
 		const Matrix4& view = uniforms.getMat4("u_view");
 		const Matrix4& proj = uniforms.getMat4("u_proj");
-		const Vec4& vp = uniforms.getVec4("u_vp");
-		
-		Vec4 win1(vp[2]*0.5, vp[3]*0.5, 1.0, 1.0);
-		Vec4 win2(vp[2]*0.5, vp[3]*0.5, 0.0, 0.0);
 		
 		Vec4 vertex = vert;
 		Vec4 mvertex = vertex * model;
@@ -91,8 +87,6 @@ struct DepthTestFragCallback : public FragCallback
 		mvertex /= mvertex.w();
 		mvvertex /= mvvertex.w();
 		mvpvertex /= mvpvertex.w();
-		
-		mvpvertex *= win1; mvpvertex += win2;
 		
 		out_varyings.set("vert",vertex);
 		out_varyings.set("m_vert",mvertex);
@@ -108,7 +102,7 @@ struct DepthTestFragCallback : public FragCallback
 GeometryRenderer::GeometryRenderer()
 {
 	_fragCallback = DepthTestFragCallback::create();
-	_depthBuffer = Image::create(512,512,1);
+	_depthBuffer = Image::create(32,32,1);
 	setDefaultVertCallback();
 	setDefaultFragCallback();
 	_cull = Cull_Back;
@@ -117,7 +111,6 @@ GeometryRenderer::GeometryRenderer()
 	_uniforms.set( Uniform::create("u_proj",Uniform::Type_Mat4) );
 	_uniforms.set( Uniform::create("u_view",Uniform::Type_Mat4) );
 	_uniforms.set( Uniform::create("u_model",Uniform::Type_Mat4) );
-	_uniforms.set( Uniform::create("u_vp",Uniform::Type_4f) );
 	
 	setProj( Matrix4::perspectiveProj(60.0, 1.0, 0.01, 100.0) );
 	setView( Matrix4::view( Vec3(1,0,0), Vec3(0.0), Vec3(0,0,1)) );
@@ -142,7 +135,7 @@ void GeometryRenderer::init()
 //--------------------------------------------------------------
 void GeometryRenderer::clearTargets()
 {
-	if(_depthBuffer) _depthBuffer->fill(Vec4(255.0));
+	if(_depthTestEnabled) _depthBuffer->fill(Vec4(255.0));
 	
 	for(int i=0;i<(int)_targets.size();++i) _targets[i]->fill(_clearColors[i]);
 }
@@ -154,7 +147,7 @@ void GeometryRenderer::render(const Geometry& geo)
 	_rasterizer.setUniformMap(_uniforms);
 	
 	Varyings varyings[3];
-	Vec3 mvpVertex[3];
+	Vec3 coords[3];
 	Attributes attribs;
 
 	if(geo.getPrimitive() == Geometry::Primitive_Triangles)
@@ -168,11 +161,11 @@ void GeometryRenderer::render(const Geometry& geo)
 				if(geo._hasTexCoords) attribs.texUV = geo._texCoords[i+k];
 				
 				_vertCallback->exec(geo[i+k],attribs,_uniforms,varyings[k]);
-				mvpVertex[k] = varyings[k].get("mvp_vert");
+				coords[k] = varyings[k].get("mvp_vert");
 			}
 			
-			Vec3 p1p2 = mvpVertex[1] - mvpVertex[0];
-			Vec3 p1p3 = mvpVertex[2] - mvpVertex[0];
+			Vec3 p1p2 = coords[1] - coords[0];
+			Vec3 p1p3 = coords[2] - coords[0];
 			Vec3 dir = p1p2.cross(p1p3);
 			
 			bool cullTest = _cull==Cull_None;
@@ -181,8 +174,11 @@ void GeometryRenderer::render(const Geometry& geo)
 			
 			if(cullTest)
 			{
+				for(int k=0;k<3;++k)
+					coords[k] = (coords[k]+1.0) * Vec3(_viewport[2],_viewport[3],0.0)*0.5 + Vec3(_viewport[0],_viewport[1],0.0);
+				
 				_rasterizer.setVaryings3(varyings[0],varyings[1],varyings[2]);
-				_rasterizer.triangle(mvpVertex[0],mvpVertex[1],mvpVertex[2]);
+				_rasterizer.triangle(coords[0],coords[1],coords[2]);
 			}
 		}
 	}
@@ -197,11 +193,12 @@ void GeometryRenderer::render(const Geometry& geo)
 				if(geo._hasTexCoords) attribs.texUV = geo._texCoords[i+k];
 				
 				_vertCallback->exec(geo[i+k],attribs,_uniforms,varyings[k]);
-				mvpVertex[k] = varyings[k].get("mvp_vert");
+				coords[k] = varyings[k].get("mvp_vert");
+				coords[k] = (coords[k]+1.0) * Vec3(_viewport[2],_viewport[3],0.0)*0.5 + Vec3(_viewport[0],_viewport[1],0.0);
 			}
 			
 			_rasterizer.setVaryings2(varyings[0],varyings[1]);
-			_rasterizer.line(mvpVertex[0],mvpVertex[1]);
+			_rasterizer.line(coords[0],coords[1]);
 		}
 	}
 }
@@ -211,6 +208,10 @@ void GeometryRenderer::setTarget(int id, Image::Ptr& target, Vec4 clearValue)
 {
 	_targets[id] = target;
 	_clearColors[id] = clearValue;
+	
+	if(target->width() != _depthBuffer->width()
+		|| target->height() != _depthBuffer->height())
+		_depthBuffer->resize(target->width(),target->height(),1);
 }
 
 //--------------------------------------------------------------
@@ -262,14 +263,6 @@ void GeometryRenderer::setModel(const Matrix4& model)
 void GeometryRenderer::setViewport(const Vec4& viewport)
 {
 	_viewport = viewport;
-	_uniforms.set("u_vp",_viewport);
-	
-	if(_depthTestEnabled
-		&& _depthBuffer->width() != _viewport[2]
-		&& _depthBuffer->height() != _viewport[3])
-	{
-		_depthBuffer->resize(_viewport[2],_viewport[3],1);
-	}
 }
 
 //--------------------------------------------------------------

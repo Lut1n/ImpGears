@@ -25,7 +25,7 @@ struct IGStuff
 		target->create((int)viewport.z(),(int)viewport.w(),1,true);
 		
 		renderer = imp::GraphRenderer::create();
-		renderer->getInitState()->setTarget(target);
+		renderer->setTarget(target);
 		renderer->getInitState()->setViewport( viewport );
 	
 		imp::Geometry cubeGeo = imp::Geometry::cube();
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 		
 		engine.render();
 		
-		imp::Image::Ptr res = engine.target->get(0);
+		imp::Image::Ptr res = engine.target->get(0)->getSource();
         texture.update(res->data(),res->width(),res->height(),0,0);
 		sprite.setScale( 500.0 / res->width(), 500.0 / res->height() );
 		frames++;

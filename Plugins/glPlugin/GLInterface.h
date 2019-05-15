@@ -25,7 +25,7 @@ public:
 	
 	virtual Data::Ptr load(const TextureSampler* samper);
 	
-	virtual Data::Ptr load(const ShaderDsc* program);
+	virtual Data::Ptr load(const LightModel* program);
 	
 	virtual void update(Data::Ptr data, const TextureSampler* sampler);
 	
@@ -39,7 +39,7 @@ public:
 	
 	virtual void draw(Data::Ptr data);
 	
-	virtual void update(Data::Ptr d, const Uniform* uniform);
+	virtual void update(Data::Ptr d, const Uniform::Ptr& uniform);
 	
 };
 

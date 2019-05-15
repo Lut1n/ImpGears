@@ -4,6 +4,7 @@
 #include <Core/Object.h>
 #include <Core/Vec4.h>
 #include <Graphics/Image.h>
+#include <Graphics/Uniform.h>
 
 #include <map>
 
@@ -13,9 +14,8 @@ class ClearNode;
 class State;
 class Geometry;
 class TextureSampler;
-class Uniform;
 class Target;
-class ShaderDsc;
+class LightModel;
 
 class IMP_API RenderPlugin : public Object
 {
@@ -35,7 +35,7 @@ public:
 	
 	virtual Data::Ptr load(const TextureSampler* sampler) = 0;
 	
-	virtual Data::Ptr load(const ShaderDsc* program) = 0;
+	virtual Data::Ptr load(const LightModel* program) = 0;
 	
 	virtual void update(Data::Ptr data, const TextureSampler* sampler) = 0;
 	
@@ -49,7 +49,7 @@ public:
 	
 	virtual void draw(Data::Ptr data) = 0;
 	
-	virtual void update(Data::Ptr d, const Uniform* uniform) = 0;
+	virtual void update(Data::Ptr d, const Uniform::Ptr& uniform) = 0;
 	
 	virtual void setCulling(int mode) = 0;
 	

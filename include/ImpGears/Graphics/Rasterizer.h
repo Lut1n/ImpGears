@@ -24,14 +24,14 @@ struct IMP_API UniformMap
 	const Matrix4& getMat4(const std::string& name) const;
 	const Vec3& getVec3(const std::string& name) const;
 	const Vec4& getVec4(const std::string& name) const;
-	const TextureSampler::Ptr getSampler(const std::string& name) const;
+	const ImageSampler::Ptr getSampler(const std::string& name) const;
 	
 	void set(const Uniform::Ptr& uniform);
 	void set(const std::string& name, const Matrix3& mat3);
 	void set(const std::string& name, const Matrix4& mat4);
 	void set(const std::string& name, const Vec3& v3);
 	void set(const std::string& name, const Vec4& v4);
-	void set(const std::string& name, const TextureSampler::Ptr& sampler);
+	void set(const std::string& name, const ImageSampler::Ptr& sampler);
 	
 	void reserve(const UniformMap& u);
 	void copy(const UniformMap& u);
@@ -41,7 +41,7 @@ struct IMP_API UniformMap
 	Matrix4 _defaultMat4;
 	Vec3 _defaultVec3;
 	Vec4 _defaultVec4;
-	TextureSampler::Ptr _defaultSampler;
+	ImageSampler::Ptr _defaultSampler;
 };
 
 struct IMP_API Varyings

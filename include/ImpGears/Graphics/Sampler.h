@@ -14,6 +14,8 @@ class IMP_API Sampler
 {
 public:
 	
+	Meta_Class(Sampler)
+	
 	enum Interpo
 	{
 		Interpo_Nearest,
@@ -41,6 +43,8 @@ public:
 		Mode_Mirror,
 		Mode_Repeat
 	};
+	
+	Meta_Class(ImageSampler)
 	
 	ImageSampler(Image::Ptr src = nullptr, Mode mode = Mode_Clamp);
 	void setSource(Image::Ptr src);

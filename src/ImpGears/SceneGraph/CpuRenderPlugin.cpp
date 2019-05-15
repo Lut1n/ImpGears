@@ -8,6 +8,7 @@
 
 #include <Graphics/Rasterizer.h>
 #include <Graphics/GeometryRenderer.h>
+#include <Graphics/CpuBlinnPhong.h>
 
 #include <iostream>
 
@@ -61,8 +62,8 @@ struct ShaData : public RenderPlugin::Data
 	Meta_Class(ShaData)
 	ShaData() { ty=RenderPlugin::Ty_Shader; }
 	
-	GeometryRenderer::VertCallback::Ptr vert;
-	FragCallback::Ptr frag;
+	GeometryRenderer::VertCallback::Ptr vertCb;
+	FragCallback::Ptr fragCb;
 };
 
 //--------------------------------------------------------------
@@ -173,9 +174,29 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const TextureSampler* sampler)
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const ShaderDsc* program)
+CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const LightModel* program)
 {
 	ShaData::Ptr d = ShaData::create();
+	
+	LightModel::Model model = program->getModel();
+	if(model == LightModel::Model_PlainColor)
+	{
+		d->vertCb = nullptr;
+		d->fragCb = nullptr;
+	}
+	else if(model == LightModel::Model_Customized)
+	{
+		d->vertCb = program->vertCb;
+		d->fragCb = program->fragCb;
+	}
+	else if(model == LightModel::Model_Phong_NoTex
+		|| model == LightModel::Model_Phong
+		|| model == LightModel::Model_Phong_Emissive)
+	{
+		d->vertCb = nullptr;
+		d->fragCb = CpuBlinnPhong::create();
+	}
+	
 	return d;
 }
 
@@ -210,9 +231,14 @@ void CpuRenderPlugin::bind(Data::Ptr data)
 	else if(data->ty == Ty_Shader)
 	{
 		ShaData::Ptr d = std::dynamic_pointer_cast<ShaData>( data );
-		// d->sha.use();
-		// _shader->enable();
-		// _shader->updateAllUniforms();
+		if(d.get() != nullptr)
+		{
+			GeometryRenderer& georender = s_internalState->geoRenderer;
+			if(d->vertCb == nullptr) georender.setDefaultVertCallback();
+			else georender.setVertCallback(d->vertCb);
+			if(d->fragCb == nullptr) georender.setDefaultFragCallback();
+			else georender.setFragCallback(d->fragCb);
+		}
 	}
 	else if(data->ty == Ty_Vbo)
 	{
@@ -271,7 +297,7 @@ void CpuRenderPlugin::draw(Data::Ptr data)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::update(Data::Ptr data, const Uniform* uniform)
+void CpuRenderPlugin::update(Data::Ptr data, const Uniform::Ptr& uniform)
 {
 	GeometryRenderer& r = s_internalState->geoRenderer;
 	
@@ -285,9 +311,9 @@ void CpuRenderPlugin::update(Data::Ptr data, const Uniform* uniform)
 		else if(name == "u_model") r.setModel( uniform->getMat4() );
 		// todo
 	}
-	else if(type == Uniform::Type_3f)
+	else
 	{
-		// if(name == "u_color") // set color
+		r.setUniform( uniform );
 	}
 }
 

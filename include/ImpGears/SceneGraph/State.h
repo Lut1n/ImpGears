@@ -6,6 +6,7 @@
 #include <Core/Matrix4.h>
 #include <Core/Vec4.h>
 #include <Graphics/Uniform.h>
+#include <SceneGraph/LightModel.h>
 #include <SceneGraph/Target.h>
 
 #include <map>
@@ -68,13 +69,13 @@ public:
 	void setLineWidth(float lw);
 	
 	void setTarget(Target::Ptr target);
-	void setShader(ShaderDsc::Ptr shader);
+	void setShader(LightModel::Ptr shader);
 	void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
 	void clearUniforms();
 	void setUniform(const Uniform::Ptr& uniform);
 	
 	Target::Ptr getTarget() { return _target; }
-	ShaderDsc::Ptr getShader() { return _shader; }
+	LightModel::Ptr getShader() { return _shader; }
 
 protected:
 private:
@@ -87,7 +88,7 @@ private:
 	bool _depthTest;
 	
 	Target::Ptr _target;
-	ShaderDsc::Ptr _shader;
+	LightModel::Ptr _shader;
 	std::map<std::string,Uniform::Ptr> _uniforms;
 	
 	bool _projectionChanged;

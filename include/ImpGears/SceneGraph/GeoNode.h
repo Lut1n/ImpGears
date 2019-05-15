@@ -21,7 +21,7 @@ class IMP_API GeoNode : public SceneNode
 	bool _wireframe;
 	bool _loaded;
 	Vec3 _color;
-	ShaderDsc::Ptr _shader;
+	LightModel::Ptr _shader;
 	Uniform::Ptr u_color;
 	
 	GeoNode(const Polyhedron& buf, bool wireframe = false);
@@ -30,7 +30,7 @@ class IMP_API GeoNode : public SceneNode
 	
 	void setColor(const Vec3& color);
 	
-	void setShader(ShaderDsc::Ptr shader);
+	void setShader(LightModel::Ptr shader);
 	
 	virtual ~GeoNode();
 	

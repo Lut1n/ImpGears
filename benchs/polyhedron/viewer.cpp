@@ -120,9 +120,7 @@ int main(int argc, char* argv[])
 	node1->setColor(Vec3(1.0,1.0,0.0));
 	node1->setPosition(Vec3(0.3,0.0,-0.2));
 	
-	imp::ShaderDsc::Ptr s = imp::ShaderDsc::create();
-	s->vertCode = imp::loadText("phong.vert"); // vertexSimple;
-	s->fragCode = imp::loadText("phong.frag"); // fragSimple;
+	imp::LightModel::Ptr s = imp::LightModel::create(imp::LightModel::Model_Phong);
 	Geometry mush = generateRockHat(1.0, 4.0);
 	GeoNode::Ptr geomush = GeoNode::create(mush, false);
 	geomush->setColor(Vec3(1.0,1.0,1.0));

@@ -7,7 +7,6 @@
 
 IMPGEARS_BEGIN
 
-
 //--------------------------------------------------------------
 Uniform::Uniform(const std::string& id, Type type, Mode mode)
 	: _id(id)
@@ -71,7 +70,7 @@ void Uniform::set(const Matrix4& mat4)
 }
 
 //--------------------------------------------------------------
-void Uniform::set(const TextureSampler::Ptr& sampler, int textureUnit)
+void Uniform::set(const ImageSampler::Ptr& sampler, int textureUnit)
 {
 	_type = Type_Sampler;
 	_value_1i = textureUnit;

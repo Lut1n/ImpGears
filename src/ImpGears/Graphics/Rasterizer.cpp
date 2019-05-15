@@ -93,7 +93,7 @@ const Vec4& UniformMap::getVec4(const std::string& name) const
 }
 
 //-------------------------------------------------------------- 
-const TextureSampler::Ptr UniformMap::getSampler(const std::string& name) const
+const ImageSampler::Ptr UniformMap::getSampler(const std::string& name) const
 {
 	if(contains(name)) return _values.at(name)->getSampler();
 	else return _defaultSampler;
@@ -162,7 +162,7 @@ void UniformMap::set(const std::string& name, const Vec4& v4)
 }
 
 //-------------------------------------------------------------- 
-void UniformMap::set(const std::string& name, const TextureSampler::Ptr& sampler)
+void UniformMap::set(const std::string& name, const ImageSampler::Ptr& sampler)
 {
 	if(contains(name)) _values[name]->set(sampler);
 }

@@ -162,7 +162,7 @@ void State::apply() const
 		if(_shader->_d != nullptr && _uniformsChanged)
 		{
 			for(auto u : _uniforms)
-				GraphRenderer::s_interface->update(_shader->_d, u.second.get());
+				GraphRenderer::s_interface->update(_shader->_d, u.second);
 		}
 	}
 }
@@ -217,7 +217,7 @@ void State::setTarget(Target::Ptr target)
 }
 
 //--------------------------------------------------------------
-void State::setShader(ShaderDsc::Ptr shader)
+void State::setShader(LightModel::Ptr shader)
 {
 	_shader = shader;
 	_shaderChanged = true;

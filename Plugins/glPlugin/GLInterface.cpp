@@ -21,27 +21,9 @@ IMP_EXTERN IMP_API imp::RenderPlugin::Ptr loadRenderPlugin()
 	return singleton;
 }
 
+#include "GlslCode.h"
 
 IMPGEARS_BEGIN
-
-/// =========== VERTEX SHADER SOURCE =====================
-static std::string basicVert = IMP_GLSL_SRC(
-
-uniform mat4 u_proj;
-uniform mat4 u_view;
-uniform mat4 u_model;
-uniform mat3 u_normal;
-void main() { gl_Position = u_proj * u_view * u_model * gl_Vertex; }
-
-);
-
-/// =========== FRAGMENT SHADER SOURCE =====================
-static std::string basicFrag = IMP_GLSL_SRC(
-
-uniform vec3 u_color;
-void main() { gl_FragData[0] = vec4(u_color, 1.0); }
-
-);
 
 //--------------------------------------------------------------
 struct VboData : public RenderPlugin::Data
@@ -204,12 +186,33 @@ GlPlugin::Data::Ptr GlPlugin::load(const TextureSampler* sampler)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const ShaderDsc* program)
+GlPlugin::Data::Ptr GlPlugin::load(const LightModel* program)
 {
-	bool alt = program->vertCode.empty();
 	ProgData::Ptr d = ProgData::create();
-	if(alt) d->sha.load(basicVert.c_str(),basicFrag.c_str());
-	else d->sha.load(program->vertCode.c_str(),program->fragCode.c_str());
+	
+	LightModel::Model model = program->getModel();
+	if(model == LightModel::Model_PlainColor)
+	{
+		d->sha.load(basicVert.c_str(),basicFrag.c_str());
+	}
+	else if(model == LightModel::Model_Phong_NoTex)
+	{
+		d->sha.load(basicVert.c_str(),phongNoTexFrag.c_str());
+	}
+	else if(model == LightModel::Model_Phong)
+	{
+		d->sha.load(basicVert.c_str(),phongTexFrag.c_str());
+	}
+	else if(model == LightModel::Model_Phong_Emissive)
+	{
+		d->sha.load(basicVert.c_str(),phongEmiFrag.c_str());
+	}
+	else if(model == LightModel::Model_Customized)
+	{
+		bool alt = program->vertCode.empty() || program->fragCode.empty();
+		if(alt) d->sha.load(basicVert.c_str(),basicFrag.c_str());
+		else d->sha.load(program->vertCode.c_str(),program->fragCode.c_str());
+	}
 	return d;
 }
 
@@ -302,7 +305,7 @@ void GlPlugin::draw(Data::Ptr data)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
+void GlPlugin::update(Data::Ptr data, const Uniform::Ptr& uniform)
 {
 	std::string uId = uniform->getID();
 	Uniform::Type type = uniform->getType();
@@ -345,8 +348,9 @@ void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
-		if(uniform->getSampler()->_d == nullptr) uniform->getSampler()->_d = load(uniform->getSampler().get());
-		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(uniform->getSampler()->_d);
+		TextureSampler::Ptr sampler = std::dynamic_pointer_cast<TextureSampler>( uniform->getSampler() );
+		if(sampler->_d == nullptr) sampler->_d = load(sampler.get());
+		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(sampler->_d);
 		glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
 		glUniform1i(uniformLocation, uniform->getInt1());
 	}

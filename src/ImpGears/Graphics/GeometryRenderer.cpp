@@ -78,11 +78,13 @@ struct DepthTestFragCallback : public FragCallback
 		const Matrix4& model = uniforms.getMat4("u_model");
 		const Matrix4& view = uniforms.getMat4("u_view");
 		const Matrix4& proj = uniforms.getMat4("u_proj");
+		const Matrix3& normalMat = uniforms.getMat3("u_normal");
 		
 		Vec4 vertex = vert;
 		Vec4 mvertex = vertex * model;
 		Vec4 mvvertex = mvertex * view;
 		Vec4 mvpvertex = mvvertex * proj;
+		Vec3 normal = att.normal * normalMat;
 		
 		mvertex /= mvertex.w();
 		mvvertex /= mvvertex.w();
@@ -93,7 +95,7 @@ struct DepthTestFragCallback : public FragCallback
 		out_varyings.set("mv_vert",mvvertex);
 		out_varyings.set("mvp_vert",mvpvertex);
 		out_varyings.set("color",att.color);
-		out_varyings.set("normal",att.normal);
+		out_varyings.set("normal",normal);
 		out_varyings.set("texUV",att.texUV);
     }
  };
@@ -275,6 +277,11 @@ void GeometryRenderer::setCullMode(Cull mode)
 void GeometryRenderer::setUniforms(const UniformMap& um)
 {
 	_uniforms = um;
+}
+
+void GeometryRenderer::setUniform(const Uniform::Ptr& uniform)
+{
+	_uniforms.set(uniform);
 }
 
 //--------------------------------------------------------------

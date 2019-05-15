@@ -1,3 +1,7 @@
+#ifndef IMP_GEOMETRY_RENDERER_H
+#define IMP_GEOMETRY_RENDERER_H
+
+
 #include <Core/Matrix4.h>
 #include <Geometry/Geometry.h>
 #include <Graphics/Image.h>
@@ -53,6 +57,7 @@ public:
 	void setViewport(const Vec4& viewport);
 	void setCullMode(Cull mode);
 	void setUniforms(const UniformMap& cu);
+	void setUniform(const Uniform::Ptr& uniform);
 	void setDefaultVertCallback();
 	void setDefaultFragCallback();
 	void setVertCallback(const VertCallback::Ptr& callback);
@@ -85,3 +90,5 @@ protected:
 };
 
 IMPGEARS_END
+
+#endif // IMP_GEOMETRY_RENDERER_H

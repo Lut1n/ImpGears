@@ -10,20 +10,9 @@
 #include <Core/Matrix3.h>
 #include <Core/Matrix4.h>
 
-#include <SceneGraph/TextureSampler.h>
-#include <SceneGraph/RenderPlugin.h>
+#include <Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
-
-struct ShaderDsc : public Object
-{
-	Meta_Class(ShaderDsc);
-	
-	std::string vertCode;
-	std::string fragCode;
-	
-	RenderPlugin::Data::Ptr _d;
-};
 
 class IMP_API Uniform : public Object
 {
@@ -70,7 +59,7 @@ class IMP_API Uniform : public Object
 	
 	void set(const Matrix4& mat4);
 	
-	void set(const TextureSampler::Ptr& sampler, int textureUnit = 0);
+	void set(const ImageSampler::Ptr& sampler, int textureUnit = 0);
 	
 	const std::string& getID() const {return _id;}
 	
@@ -83,7 +72,7 @@ class IMP_API Uniform : public Object
 	const Matrix4& getMat4() const { return _value_mat4; }
 	
 	Type getType() const { return _type; }
-	const TextureSampler::Ptr getSampler() const {return _sampler;}
+	const ImageSampler::Ptr getSampler() const {return _sampler;}
 	
 	void setMode(Mode mode) { _mode = mode; }
 	Mode getMode() const { return _mode; }
@@ -102,7 +91,7 @@ class IMP_API Uniform : public Object
 	Vec4 _value_4f;
 	Matrix3 _value_mat3;
 	Matrix4 _value_mat4;
-	TextureSampler::Ptr _sampler;
+	ImageSampler::Ptr _sampler;
 };
 
 IMPGEARS_END

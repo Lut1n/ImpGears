@@ -13,7 +13,7 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 	buf.getTriangles(_geo._vertices);
 	_wireframe = wireframe;
 	
-	_shader = ShaderDsc::create();
+	_shader = LightModel::create();
 	u_color = Uniform::create("u_color", Uniform::Type_3f);
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(_color);
@@ -28,7 +28,7 @@ GeoNode::GeoNode(const Geometry& geo, bool wireframe)
 	_geo = geo;
 	_wireframe = wireframe;
 	
-	_shader = ShaderDsc::create();
+	_shader = LightModel::create();
 	u_color = Uniform::create("u_color", Uniform::Type_3f);
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(_color);
@@ -45,7 +45,7 @@ void GeoNode::setColor(const Vec3& color)
 }
 
 //--------------------------------------------------------------
-void GeoNode::setShader(ShaderDsc::Ptr shader)
+void GeoNode::setShader(LightModel::Ptr shader)
 {
 	_shader = shader;
 	// _shader->addUniform(u_color);

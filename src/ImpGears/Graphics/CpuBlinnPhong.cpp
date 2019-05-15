@@ -46,7 +46,7 @@ void CpuBlinnPhong::exec(ImageBuf& targets, const Vec3& pt, const UniformMap& un
 	{
 		
 		// view dir
-		Vec3 view_pos = Vec3(view(3,0),view(3,1),view(3,2)) * tbn;
+		Vec3 view_pos = Vec3(-view(3,0),-view(3,1),-view(3,2)) * tbn;
 		Vec3 view_dir = view_pos - frag_pos;
 		view_dir.normalize();
 		

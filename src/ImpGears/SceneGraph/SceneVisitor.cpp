@@ -42,8 +42,10 @@ void SceneVisitor::applyDefault( SceneNode* node )
 	u_model->set( _matrices.back() );
 	u_proj->set( topState->getProjectionMatrix() );
 	
-	Matrix4 mv = _matrices.back() * u_view->getMat4();
-	Matrix3 normalMat = Matrix3(mv).inverse().transpose();
+	/*Matrix4 mv = _matrices.back() * u_view->getMat4();
+	Matrix3 normalMat = Matrix3(mv).inverse().transpose();*/
+	
+	Matrix3 normalMat = Matrix3(_matrices.back()).inverse().transpose();
 	u_normal->set( normalMat );
 	
 	topState->setUniform(u_proj);

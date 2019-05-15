@@ -39,8 +39,6 @@ public:
 
 	void resize(int _size);
 
-	void setVertices(const float* buffer, int size);
-
 	void setData(const void* _buffer, int _size, int _vboOffset = 0);
 	
 	void load(const Geometry& geometry);
@@ -48,10 +46,10 @@ public:
 	void setPrimitive(Primitive prim) {_primitive = prim;}
 	Primitive getPrimitive() const {return _primitive;}
 
-	void enableVertexArray(int _offset);
-	void enableNormalArray(int _offset);
-	void enableTexCoordArray(int _offset);
-	void enableColorArray(int _offset);
+	void enableVertexArray();
+	void enableNormalArray();
+	void enableTexCoordArray();
+	void enableColorArray();
 
 	int id() const;
 	int size() const;
@@ -70,6 +68,11 @@ private:
 	
     static std::uint32_t s_memoryUsed;
     static std::uint32_t s_vboCount;
+	
+	int _vertIndex;
+	int _texIndex;
+	int _colIndex;
+	int _norIndex;
 
 };
 

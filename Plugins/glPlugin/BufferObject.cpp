@@ -17,6 +17,10 @@ BufferObject::BufferObject()
 	_size = 0;
 	_verticesCount = 0;
 	_primitive = Primitive_Lines;
+	_vertIndex = -1;
+	_texIndex = -1;
+	_colIndex = -1;
+	_norIndex = -1;
 }
 
 //--------------------------------------------------------------
@@ -31,12 +35,11 @@ void BufferObject::draw()
 	bind();
 
 	///vertex
-	enableVertexArray(0);
+	enableVertexArray();
+	enableTexCoordArray();
+	enableNormalArray();
+	enableColorArray();
 	GL_CHECKERROR("[impErr] BufferObject::draw - vertex pointer");
-
-	///texture coord
-	int texcoordOffset = _verticesCount * (3 * sizeof(float) );
-	enableTexCoordArray(texcoordOffset);
 
 	unsigned int glPrimitive = GL_LINES;
 	switch(_primitive)
@@ -110,15 +113,6 @@ void BufferObject::resize(int size)
 }
 
 //--------------------------------------------------------------
-void BufferObject::setVertices(const float* buffer, int size)
-{
-	int vertexSize = (sizeof(float) * 3.0);
-	_verticesCount = size / vertexSize;
-
-	setData((const void*)buffer, size, 0);
-}
-
-//--------------------------------------------------------------
 void BufferObject::setData(const void* buffer, int size, int vboOffset)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_id);
@@ -142,75 +136,79 @@ void BufferObject::load(const Geometry& geometry)
 	std::vector<float> texcoords;
 	for(auto v2 : geometry._texCoords) { texcoords.push_back(v2[0]); texcoords.push_back(v2[1]); }
 	
-	// gpu load
+	std::vector<float> normals;
+	for(auto v3 : geometry._normals) { normals.push_back(v3[0]); normals.push_back(v3[1]); normals.push_back(v3[2]); }
+	
+	std::vector<float> colors;
+	for(auto v4 : geometry._colors)
+	{
+		colors.push_back(v4[0]);
+		colors.push_back(v4[1]);
+		colors.push_back(v4[2]);
+		colors.push_back(v4[3]);
+	}
+	
 	int vertSize = vertex.size()*sizeof(float);
 	int texSize = texcoords.size()*sizeof(float);
-	request(vertSize+texSize);
-	setVertices(vertex.data(), vertSize);
-	if(texSize > 0) setData(texcoords.data(), texSize, vertSize);
-}
-
-/*
-void Mesh::updateVBO(bool clearLocalData)
-{
-    int vboSize = (m_vertexBufferSize+m_texCoordBufferSize+m_normalBufferSize)*sizeof(float);
-
-    if(getVBOID() == 0)
-    {
-        requestVBO( vboSize );
-    }
-    else if(getVBOSize() != vboSize)
-    {
-        resizeVBO(vboSize);
-    }
-
-    m_vertexOffset = 0;
-    m_texCoordOffset = m_vertexBufferSize*sizeof(float);
-    m_normalOffset = m_texCoordOffset + m_texCoordBufferSize*sizeof(float);
-
-    setData(m_vertexBuffer, m_vertexBufferSize*sizeof(float), m_vertexOffset);
-    setData(m_texCoordBuffer, m_texCoordBufferSize*sizeof(float), m_texCoordOffset);
-    setData(m_normalBuffer, m_normalBufferSize*sizeof(float), m_normalOffset);
-
-    if(clearLocalData)
-    {
-        clearVertexBuffer();
-        clearTexCoordBuffer();
-        clearNormalBuffer();
-    }
-}
-*/
-
-//--------------------------------------------------------------
-void BufferObject::enableVertexArray(int offset)
-{
-	std::uint64_t oft = offset;
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)oft);
+	int norSize = normals.size()*sizeof(float);
+	int colSize = colors.size()*sizeof(float);
+	
+	_vertIndex = 0;
+	_texIndex = _vertIndex+vertSize;
+	_norIndex = _texIndex+texSize;
+	_colIndex = _norIndex+norSize;
+	_verticesCount = geometry.size();
+	
+	// gpu load
+	request(vertSize+texSize+norSize+colSize);
+	if(vertSize > 0) setData(vertex.data(), vertSize, _vertIndex);
+	if(texSize > 0) setData(texcoords.data(), texSize, _texIndex);
+	if(norSize > 0) setData(normals.data(), norSize, _norIndex);
+	if(colSize > 0) setData(colors.data(), colSize, _colIndex);
 }
 
 //--------------------------------------------------------------
-void BufferObject::enableNormalArray(int offset)
+void BufferObject::enableVertexArray()
 {
-	std::uint64_t oft = offset;
-	glEnableClientState( GL_NORMAL_ARRAY );
-	glNormalPointer(GL_FLOAT, 0, (GLvoid*)oft);
+	if(_vertIndex > -1)
+	{
+		std::uint64_t oft = _vertIndex;
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)oft);
+	}
 }
 
 //--------------------------------------------------------------
-void BufferObject::enableTexCoordArray(int offset)
+void BufferObject::enableNormalArray()
 {
-	std::uint64_t oft = offset;
-	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)oft);
+	if(_norIndex > -1)
+	{
+		std::uint64_t oft = _norIndex;
+		glEnableClientState( GL_NORMAL_ARRAY );
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)oft);
+	}
 }
 
 //--------------------------------------------------------------
-void BufferObject::enableColorArray(int offset)
+void BufferObject::enableTexCoordArray()
 {
-	std::uint64_t oft = offset;
-	glEnableClientState( GL_COLOR_ARRAY );
-	glColorPointer(4, GL_FLOAT, 0, (GLvoid*)oft);
+	if(_texIndex > -1)
+	{
+		std::uint64_t oft = _texIndex;
+		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+		glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)oft);
+	}
+}
+
+//--------------------------------------------------------------
+void BufferObject::enableColorArray()
+{
+	if(_colIndex > -1)
+	{
+		std::uint64_t oft = _colIndex;
+		glEnableClientState( GL_COLOR_ARRAY );
+		glColorPointer(4, GL_FLOAT, 0, (GLvoid*)oft);
+	}
 }
 
 //--------------------------------------------------------------

@@ -472,7 +472,11 @@ void Geometry::generateNormals()
 		Vec3 dy = at(i+2) - at(i); dy.normalize();
 		
 		Vec3 n = dx.cross(dy);
-		if( n.dot(dir) < 0.0 ) n *= -1.0;*/
+		if( n.dot(dir) < 0.0 ) n *= -1.0;
+		
+		_normals[i] = n;
+		_normals[i+1] = n;
+		_normals[i+2] = n;*/
 		
 		Vec3 n1 = at(i) - grav_cent; n1.normalize();
 		Vec3 n2 = at(i+1) - grav_cent; n2.normalize();

@@ -345,6 +345,7 @@ void GlPlugin::update(Data::Ptr data, const Uniform* uniform)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
+		if(uniform->getSampler()->_d == nullptr) uniform->getSampler()->_d = load(uniform->getSampler().get());
 		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(uniform->getSampler()->_d);
 		glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
 		glUniform1i(uniformLocation, uniform->getInt1());

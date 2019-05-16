@@ -18,7 +18,7 @@ struct IGStuff
 	
 	IGStuff(const std::string& arg)
 	{
-		imp::LightModel::Ptr model = imp::LightModel::create(imp::LightModel::Model_Phong_NoTex);
+		imp::LightModel::Ptr model = imp::LightModel::create(imp::LightModel::Lighting_Phong,imp::LightModel::Texturing_PlainColor);
 		
 		viewport.set(0.0,0.0,512.0,512.0);
 		

@@ -190,29 +190,41 @@ GlPlugin::Data::Ptr GlPlugin::load(const LightModel* program)
 {
 	ProgData::Ptr d = ProgData::create();
 	
-	LightModel::Model model = program->getModel();
-	if(model == LightModel::Model_PlainColor)
+	std::string fullVertCode = basicVert;
+	std::string fullFragCode;
+	
+	LightModel::Texturing te = program->getTexturing();
+	
+	if(te == LightModel::Texturing_PlainColor)
 	{
-		d->sha.load(basicVert.c_str(),basicFrag.c_str());
+		fullFragCode = fullFragCode + glsl_samplerNone;
 	}
-	else if(model == LightModel::Model_Phong_NoTex)
+	else if(te == LightModel::Texturing_Samplers)
 	{
-		d->sha.load(basicVert.c_str(),phongNoTexFrag.c_str());
+		fullFragCode = fullFragCode + glsl_samplerCN;
 	}
-	else if(model == LightModel::Model_Phong)
+	else if(te == LightModel::Texturing_Customized)
 	{
-		d->sha.load(basicVert.c_str(),phongTexFrag.c_str());
+		fullFragCode = fullFragCode + program->_fragCode_texturing;
 	}
-	else if(model == LightModel::Model_Phong_Emissive)
+	
+	LightModel::Lighting li = program->getLighting();
+	if(li == LightModel::Lighting_None)
 	{
-		d->sha.load(basicVert.c_str(),phongEmiFrag.c_str());
+		fullFragCode = fullFragCode + basicFrag;
 	}
-	else if(model == LightModel::Model_Customized)
+	else if(li == LightModel::Lighting_Phong)
 	{
-		bool alt = program->vertCode.empty() || program->fragCode.empty();
-		if(alt) d->sha.load(basicVert.c_str(),basicFrag.c_str());
-		else d->sha.load(program->vertCode.c_str(),program->fragCode.c_str());
+		fullFragCode = fullFragCode + glsl_invMat3 + glsl_phong;
 	}
+	else if(li == LightModel::Lighting_Customized)
+	{
+		fullFragCode = fullFragCode + program->_fragCode_lighting;
+	}
+	
+	// LightModel::MRT mrt = program->getMRT();
+	
+	d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
 	return d;
 }
 

@@ -178,23 +178,24 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const LightModel* program)
 {
 	ShaData::Ptr d = ShaData::create();
 	
-	LightModel::Model model = program->getModel();
-	if(model == LightModel::Model_PlainColor)
+	LightModel::Lighting li = program->getLighting();
+	// LightModel::Texturing te = program->getTexturing();
+	// LightModel::MRT mrt = program->getMRT();
+	
+	if(li == LightModel::Lighting_None)
 	{
 		d->vertCb = nullptr;
 		d->fragCb = nullptr;
 	}
-	else if(model == LightModel::Model_Customized)
-	{
-		d->vertCb = program->vertCb;
-		d->fragCb = program->fragCb;
-	}
-	else if(model == LightModel::Model_Phong_NoTex
-		|| model == LightModel::Model_Phong
-		|| model == LightModel::Model_Phong_Emissive)
+	else if(li == LightModel::Lighting_Phong)
 	{
 		d->vertCb = nullptr;
 		d->fragCb = CpuBlinnPhong::create();
+	}
+	else
+	{
+		d->vertCb = program->_vertCb;
+		d->fragCb = program->_fragCb_lighting;
 	}
 	
 	return d;

@@ -1,36 +1,8 @@
 #define GLSL_CODE( code ) #code
 
 //--------------------------------------------------------------
-std::string vertexSimple = GLSL_CODE
-(
-
-uniform mat4 u_proj;
-uniform mat4 u_view;
-uniform mat4 u_model;
-
-// varying vec3 v_vertex;
-varying float v_depth;
-varying vec3 v_pos;
-
-void main()
-{
-	// v_vertex = gl_Vertex.xyz;
-	vec4 mv_pos = u_view * u_model * gl_Vertex;
-	v_pos = gl_Vertex.xyz;
-	gl_Position = u_proj * mv_pos;
-	v_depth = length(mv_pos.xyz);
-}
-
-);
-
-//--------------------------------------------------------------
 std::string fragSimple = GLSL_CODE
 (
-
-// varying vec3 v_vertex;
-varying float v_depth;
-varying vec3 v_pos;
-uniform vec3 u_color;
 
 float hash(vec3 xyz, float seed)
 {
@@ -81,16 +53,12 @@ float fractal(vec3 xyz, int octave, float freq, float persist, float force)
     return result/total;
 }
 
-void main()
+vec3 textureColor(vec2 uv)
 {
-	float fog_max = 5.0;
-	float fog = min(v_depth,fog_max) / fog_max;
-	
-	float c = fractal(v_pos,8,8.0,0.7,1.0);
-	c *= 1.0;
-	c = clamp(c,0.0,1.0);
-	
-	gl_FragData[0] = vec4(u_color*(1.0-fog)*c,1.0);
+	return vec3(fractal(vec3(uv,0.0),8,8.0,0.7,1.0));
 }
+
+vec3 textureNormal(vec2 uv){ return vec3(0.0,0.0,1.0); }
+vec3 textureEmissive(vec2 uv){ return vec3(0.0,0.0,0.0); }
 
 );

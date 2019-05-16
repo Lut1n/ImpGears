@@ -30,9 +30,17 @@ void main()
 static std::string basicFrag = GLSL_CODE(
 
 uniform vec3 u_color;
+
+varying vec2 v_texCoord;
+
 void main()
 {
-	gl_FragData[0] = vec4(u_color, 1.0);
+	vec3 color = u_color * gl_Color.xyz;
+	color *= textureColor(v_texCoord);
+	vec3 emi = textureEmissive(v_texCoord);
+	color = max(emi,color);
+	
+	gl_FragData[0] = vec4(color, 1.0);
 }
 
 );
@@ -177,18 +185,15 @@ vec3 phong()
 	+ color*0.7 * lambertian * u_lightCol * lightPower / dist
 	+ color*0.3 * specular * u_lightCol * lightPower / dist;
 	
+	vec3 emi = textureEmissive(v_texCoord);
+	colModelRes = max(emi,colModelRes);
+	
 	return clamp( colModelRes,0.0,1.0 );
 }
 
 void main()
 {
-	// gl_FragData[0] = vec4(phong(),1.0);
-	gl_FragColor = vec4(phong(),1.0);
+	gl_FragData[0] = vec4(phong(),1.0);
 }
 
 );
-
-
-static std::string phongEmiFrag = glsl_invMat3 + glsl_samplerCNE + glsl_phong;
-static std::string phongTexFrag = glsl_invMat3 + glsl_samplerCN + glsl_phong;
-static std::string phongNoTexFrag = glsl_invMat3 + glsl_samplerNone + glsl_phong;

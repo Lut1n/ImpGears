@@ -3,8 +3,10 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-LightModel::LightModel(Model model)
-	: _model(model)
+LightModel::LightModel(Lighting l, Texturing t, MRT mrt)
+	: _lighting(l)
+	, _texturing(t)
+	, _mrt(mrt)
 {
 }
 
@@ -14,15 +16,39 @@ LightModel::~LightModel()
 }
 
 //--------------------------------------------------------------
-void LightModel::setModel(Model model)
+void LightModel::setTexturing(Texturing t)
 {
-	_model = model;
+	_texturing = t;
 }
 
 //--------------------------------------------------------------
-LightModel::Model LightModel::getModel() const
+LightModel::Texturing LightModel::getTexturing() const
 {
-	return _model;
+	return _texturing;
+}
+
+//--------------------------------------------------------------
+void LightModel::setLighting(Lighting l)
+{
+	_lighting = l;
+}
+
+//--------------------------------------------------------------
+LightModel::Lighting LightModel::getLighting() const
+{
+	return _lighting;
+}
+
+//--------------------------------------------------------------
+void LightModel::setMRT(MRT mrt)
+{
+	_mrt = mrt;
+}
+
+//--------------------------------------------------------------
+LightModel::MRT LightModel::getMRT() const
+{
+	return _mrt;
 }
 
 IMPGEARS_END

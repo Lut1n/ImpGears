@@ -97,9 +97,11 @@ int main(int argc, char* argv[])
 	Geometry coords = xAxe + yAxe + zAxe;
 	coords.setPrimitive(Geometry::Primitive_Triangles);
 	coords *= 0.2;
+	coords.generateColors(Vec3(1.0));
 
 	Geometry point = Geometry::sphere(4, 0.1);
 	point.setPrimitive(Geometry::Primitive_Triangles);
+	point.generateColors(Vec3(1.0));
 
 	GeoNode::Ptr node2 = GeoNode::create(coords, false);
 	node2->setColor(Vec3(1.0,0.0,0.0));
@@ -116,11 +118,12 @@ int main(int argc, char* argv[])
 	node4->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
 	
 
-	GeoNode::Ptr node1 = GeoNode::create(coords, true);
+	GeoNode::Ptr node1 = GeoNode::create(coords, false);
 	node1->setColor(Vec3(1.0,1.0,0.0));
 	node1->setPosition(Vec3(0.3,0.0,-0.2));
 	
-	imp::LightModel::Ptr s = imp::LightModel::create(imp::LightModel::Model_Phong);
+	imp::LightModel::Ptr s = imp::LightModel::create(imp::LightModel::Lighting_Phong,imp::LightModel::Texturing_Customized);
+	s->_fragCode_texturing = fragSimple;
 	Geometry mush = generateRockHat(1.0, 4.0);
 	GeoNode::Ptr geomush = GeoNode::create(mush, false);
 	geomush->setColor(Vec3(1.0,1.0,1.0));
@@ -134,8 +137,8 @@ int main(int argc, char* argv[])
 	geomush->getState()->setUniform(u_lightAtt);
 	
 	root->addNode(camera);
-	root->addNode(node1);
 	root->addNode(geomush);
+	root->addNode(node1);
 	root->addNode(node2);
 	node2->addNode(node3);
 	node3->addNode(node4);

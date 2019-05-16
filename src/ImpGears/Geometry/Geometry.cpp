@@ -365,6 +365,9 @@ void Geometry::intoCCW( Geometry& buf )
 
 Geometry Geometry::intoLineBuf(const Geometry& buf)
 {
+	BufType colors;
+	BufType normals;
+	TexCoordBuf coords;
 	Geometry res;
 	for(int i=0;i<(int)buf.size();i+=3)
 	{
@@ -375,7 +378,45 @@ Geometry Geometry::intoLineBuf(const Geometry& buf)
 		res.add( {p1,p2} );
 		res.add( {p1,p3} );
 		res.add( {p2,p3} );
+		
+		if(buf._hasColors)
+		{
+			Vec3 c1 = buf._colors[i+0];
+			Vec3 c2 = buf._colors[i+1];
+			Vec3 c3 = buf._colors[i+2];
+			
+			colors.push_back(c1); colors.push_back(c2);
+			colors.push_back(c1); colors.push_back(c3);
+			colors.push_back(c2); colors.push_back(c3);
+		}
+		
+		if(buf._hasNormals)
+		{
+			Vec3 n1 = buf._normals[i+0];
+			Vec3 n2 = buf._normals[i+1];
+			Vec3 n3 = buf._normals[i+2];
+			
+			normals.push_back(n1); normals.push_back(n2);
+			normals.push_back(n1); normals.push_back(n3);
+			normals.push_back(n2); normals.push_back(n3);
+		}
+		
+		if(buf._hasTexCoords)
+		{
+			TexCoord t1 = buf._texCoords[i+0];
+			TexCoord t2 = buf._texCoords[i+1];
+			TexCoord t3 = buf._texCoords[i+2];
+			
+			coords.push_back(t1); coords.push_back(t2);
+			coords.push_back(t1); coords.push_back(t3);
+			coords.push_back(t2); coords.push_back(t3);
+		}
 	}
+	
+	if(buf._hasColors) res.setColors( colors );
+	if(buf._hasNormals) res.setNormals( normals );
+	if(buf._hasTexCoords) res.setTexCoords( coords );
+	
 	return res;
 }
 

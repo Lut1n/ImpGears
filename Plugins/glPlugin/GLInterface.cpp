@@ -199,9 +199,13 @@ GlPlugin::Data::Ptr GlPlugin::load(const LightModel* program)
 	{
 		fullFragCode = fullFragCode + glsl_samplerNone;
 	}
-	else if(te == LightModel::Texturing_Samplers)
+	else if(te == LightModel::Texturing_Samplers_CN)
 	{
 		fullFragCode = fullFragCode + glsl_samplerCN;
+	}
+	else if(te == LightModel::Texturing_Samplers_CNE)
+	{
+		fullFragCode = fullFragCode + glsl_samplerCNE;
 	}
 	else if(te == LightModel::Texturing_Customized)
 	{
@@ -222,7 +226,19 @@ GlPlugin::Data::Ptr GlPlugin::load(const LightModel* program)
 		fullFragCode = fullFragCode + program->_fragCode_lighting;
 	}
 	
-	// LightModel::MRT mrt = program->getMRT();
+	LightModel::MRT mrt = program->getMRT();
+	if(mrt == LightModel::MRT_1_Col)
+	{
+		fullFragCode = fullFragCode + glsl_mrt1;
+	}
+	else if(mrt == LightModel::MRT_2_Col_Emi)
+	{
+		fullFragCode = fullFragCode + glsl_mrt2;
+	}
+	else
+	{
+		fullFragCode = fullFragCode + program->_fragCode_mrt;
+	}
 	
 	d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
 	return d;

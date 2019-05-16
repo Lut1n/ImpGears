@@ -11,6 +11,11 @@ file(GLOB SRCS
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Utils/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/Core/*.h
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/Geometry/*.h
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.h
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.h
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/Utils/*.h
     )
 
 file(GLOB HEADERS 

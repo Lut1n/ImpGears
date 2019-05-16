@@ -3,6 +3,14 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
+void LightModel::AbstractFrag::exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
+{
+	std::vector<Vec3> outColor(10);
+	if( _lighting )_lighting->applyLighting( uniforms,varyings, _texturing, outColor );
+	if( _mrt ) _mrt->applyMRT( targets, pt, outColor );
+}
+
+//--------------------------------------------------------------
 LightModel::LightModel(Lighting l, Texturing t, MRT mrt)
 	: _lighting(l)
 	, _texturing(t)

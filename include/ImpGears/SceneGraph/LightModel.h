@@ -10,10 +10,45 @@ struct IMP_API LightModel : public Object
 {
 	Meta_Class(LightModel);
 	
+	struct TexturingCallback
+	{
+		Meta_Class(TexturingCallback)
+		
+		virtual Vec3 textureColor(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings) = 0;
+		virtual Vec3 textureNormal(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings) = 0;
+		virtual Vec3 textureEmissive(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings) = 0;
+	};
+	
+	struct LightingCallback
+	{
+		Meta_Class(LightingCallback)
+		
+		virtual void applyLighting(const UniformMap& uniforms, Varyings& varyings, TexturingCallback::Ptr& texturing, std::vector<Vec3>& outColor) = 0;
+	};
+	
+	struct MRTCallback
+	{
+		Meta_Class(MRTCallback)
+		
+		virtual void applyMRT(ImageBuf& targets, const Vec3& pt, const std::vector<Vec3>& outColor) = 0;
+	};
+	
+	struct AbstractFrag : public FragCallback
+	{
+		
+		Meta_Class(AbstractFrag)
+		virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings);
+		
+		TexturingCallback::Ptr _texturing;
+		LightingCallback::Ptr _lighting;
+		MRTCallback::Ptr _mrt;
+	};
+	
 	enum Texturing
 	{
 		Texturing_PlainColor = 0,
-		Texturing_Samplers,
+		Texturing_Samplers_CN,
+		Texturing_Samplers_CNE,
 		Texturing_Customized,
 	};
 	
@@ -47,9 +82,9 @@ struct IMP_API LightModel : public Object
 	MRT _mrt;
 	
 	GeometryRenderer::VertCallback::Ptr _vertCb;
-	FragCallback::Ptr _fragCb_texturing;
-	FragCallback::Ptr _fragCb_lighting;
-	FragCallback::Ptr _fragCb_mrt;
+	TexturingCallback::Ptr _texturingCb;
+	LightingCallback::Ptr _lightingCb;
+	MRTCallback::Ptr _mrtCb;
 	
 	std::string _vertCode;
 	std::string _fragCode_texturing;

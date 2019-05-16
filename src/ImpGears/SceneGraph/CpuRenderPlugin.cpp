@@ -10,6 +10,8 @@
 #include <Graphics/GeometryRenderer.h>
 #include <Graphics/CpuBlinnPhong.h>
 
+#include "LightModelImpl.h"
+
 #include <iostream>
 
 /*IMP_EXTERN IMP_API imp::RenderPlugin::Ptr loadRenderPlugin()
@@ -176,27 +178,58 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const TextureSampler* sampler)
 //--------------------------------------------------------------
 CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const LightModel* program)
 {
+	LightModel::AbstractFrag::Ptr frag = LightModel::AbstractFrag::create();
+	
 	ShaData::Ptr d = ShaData::create();
+	d->vertCb = DefaultVertCb::create();
+	d->fragCb = frag;
 	
 	LightModel::Lighting li = program->getLighting();
-	// LightModel::Texturing te = program->getTexturing();
-	// LightModel::MRT mrt = program->getMRT();
-	
 	if(li == LightModel::Lighting_None)
 	{
-		d->vertCb = nullptr;
-		d->fragCb = nullptr;
+		frag->_lighting = NoLighting::create();
 	}
 	else if(li == LightModel::Lighting_Phong)
 	{
-		d->vertCb = nullptr;
-		d->fragCb = CpuBlinnPhong::create();
+		frag->_lighting = PhongLighting::create();
 	}
 	else
 	{
-		d->vertCb = program->_vertCb;
-		d->fragCb = program->_fragCb_lighting;
+		frag->_lighting = program->_lightingCb;
 	}
+	
+	LightModel::Texturing te = program->getTexturing();
+	if(te == LightModel::Texturing_PlainColor)
+	{
+		frag->_texturing = PlainColorCb::create();
+	}
+	else if(te == LightModel::Texturing_Samplers_CN)
+	{
+		frag->_texturing = SamplerCbCN::create();
+	}
+	else if(te == LightModel::Texturing_Samplers_CNE)
+	{
+		frag->_texturing = SamplerCbCNE::create();
+	}
+	else
+	{
+		frag->_texturing = program->_texturingCb;
+	}
+	
+	LightModel::MRT mrt = program->getMRT();
+	if(mrt == LightModel::MRT_1_Col)
+	{
+		frag->_mrt = Mrt1ColorCb::create();
+	}
+	else if(mrt == LightModel::MRT_2_Col_Emi)
+	{
+		frag->_mrt = Mrt1ColorCb::create();
+	}
+	else
+	{
+		frag->_mrt = program->_mrtCb;
+	}
+	
 	
 	return d;
 }

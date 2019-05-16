@@ -6,62 +6,174 @@
 
 #include <ctime>
 
+#define RES 512
+
+using namespace imp;
+
+void hsym(Image& image, const Vec4& col)
+{
+    for(int i=0;i<image.width();++i)
+    {
+        for(int j=0;j<image.height();++j)
+        {
+            Vec4 cc = image.getPixel(i,j); cc[3] = 255.0;
+            if(cc == col)image.setPixel(image.width()-1-i,j,col);
+        }
+    }
+}
+
+Image::Ptr generateImage()
+{
+    Image::Ptr image = Image::create(16,16,3);
+    
+    Vec4 bgcol(0,128,200,255);
+    Vec4 fgcol(255,128,200,255);
+	
+    Rasterizer rast;
+    rast.setTarget(image);
+    rast.setColor(fgcol);
+    
+    float offset = 5.0;
+    image->fill(bgcol);
+    
+    rast.square(Vec3(offset+2.0,4.0,0.0),4.0);
+    rast.grid(Vec3(offset+2.0,0.0,0.0),Vec3(offset+3.0,7.0,0.0),1);
+    rast.rectangle(Vec3(offset+5.0,1.0,0.0),Vec3(offset+5.0,3.0,0.0));
+    rast.rectangle(Vec3(offset+4.0,3.0,0.0),Vec3(offset+4.0,4.0,0.0));
+    rast.dot(Vec3(offset+1.0,0.0,0.0));
+    
+    rast.setColor(bgcol);
+    rast.dot(Vec3(offset+2.0,4.0,0.0));
+    
+    hsym(*image.get(),fgcol);
+    
+    return image;
+}
+
+struct Custom : public LightModel::TexturingCallback
+{
+	Meta_Class(Custom)
+	
+	Image::Ptr im;
+	
+	virtual Vec3 textureColor(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
+	{
+		// return Vec3(1.0);
+		ImageSampler sampler(im);
+		return sampler.get(uv);
+	}
+	
+	virtual Vec3 textureNormal(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
+	{
+		return Vec3(0.0,0.0,1.0);
+		/*ImageSampler sampler(im);
+		return sampler.get(uv) * 2.0 - 1.0;*/
+	}
+	
+	virtual Vec3 textureEmissive(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
+	{
+		// return Vec3(0.0);
+		ImageSampler sampler(im);
+		return sampler.get(uv) * Vec3(1.0*(1.0-uv[1]),0.0,0.0);
+	}
+};
+
+#define GLSL_CODE( code ) #code
+
+/// =========== FRAGMENT SHADER SOURCE =====================
+static std::string glsl_texturing = GLSL_CODE(
+
+uniform sampler2D u_sampler_test;
+
+vec3 textureColor(vec2 uv)
+{
+	return texture2D(u_sampler_test, uv).xyz;
+}
+
+vec3 textureNormal(vec2 uv)
+{
+	return vec3(0.0,0.0,1.0);
+}
+
+vec3 textureEmissive(vec2 uv)
+{
+	return texture2D(u_sampler_test,uv).xyz  * vec3(1.0*(1.0-uv[1]),0.0,0.0);
+}
+
+);
+
+
 struct IGStuff
 {
-	imp::GraphRenderer::Ptr renderer;
-	imp::SceneNode::Ptr graphRoot;
-	imp::Camera::Ptr camera;
-	imp::Target::Ptr target;
+	GraphRenderer::Ptr renderer;
+	SceneNode::Ptr graphRoot;
+	Camera::Ptr camera;
+	Target::Ptr target;
 	
-	imp::Vec4 viewport;
-	imp::Vec3 initCamPos;
+	Vec4 viewport;
+	Vec3 initCamPos;
 	
 	IGStuff(const std::string& arg)
 	{
-		imp::LightModel::Ptr model = imp::LightModel::create(imp::LightModel::Lighting_Phong,imp::LightModel::Texturing_PlainColor);
+		Custom::Ptr customTexturing = Custom::create();
+		customTexturing->im = generateImage();
+		LightModel::Ptr model = LightModel::create(LightModel::Lighting_Phong, LightModel::Texturing_Customized);
+		model->_texturingCb = customTexturing;
+		model->_fragCode_texturing = glsl_texturing;
 		
-		viewport.set(0.0,0.0,512.0,512.0);
+		TextureSampler::Ptr sampler_test = TextureSampler::create();
+		sampler_test->setSource( customTexturing->im );
 		
-		target = imp::Target::create();
-		target->create(512,512,1,true);
+		renderer = GraphRenderer::create();
+		target = Target::create();
 		
-		renderer = imp::GraphRenderer::create();
-		if(arg != "-gpu") renderer->setTarget(target);
+		viewport.set(0.0,0.0,512,512);
+		
+		if(arg != "-gpu")
+		{
+			viewport.set(0.0,0.0,RES,RES);
+			target->create(RES,RES,1,true);
+			renderer->setTarget(target);
+		}
+		
 		renderer->getInitState()->setViewport( viewport );
 	
-		imp::Geometry cubeGeo = imp::Geometry::cube();
-		cubeGeo.generateColors(imp::Vec3(1.0,1.0,1.0));
+		Geometry cubeGeo = Geometry::cube();
+		cubeGeo.generateColors(Vec3(1.0,1.0,1.0));
 		cubeGeo.generateNormals();
-		cubeGeo.generateTexCoords(2.0);
-		imp::Geometry::intoCCW( cubeGeo );
+		cubeGeo.generateTexCoords(1.0);
+		Geometry::intoCCW( cubeGeo );
 		
-		imp::GeoNode::Ptr cubeNode = imp::GeoNode::create(cubeGeo);
+		GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);
 		cubeNode->setShader(model);
-		cubeNode->setColor(imp::Vec3(1.0));
+		cubeNode->setColor(Vec3(1.0));
 		
 		initCamPos.set(10,0,3);
 		
-		imp::Uniform::Ptr u_lightPos = imp::Uniform::create("u_lightPos", imp::Uniform::Type_3f);
-		imp::Uniform::Ptr u_lightCol = imp::Uniform::create("u_lightCol", imp::Uniform::Type_3f);
-		imp::Uniform::Ptr u_lightAtt = imp::Uniform::create("u_lightAtt", imp::Uniform::Type_3f);
-		u_lightPos->set(imp::Vec3(10.0,5.0,5.0));
-		u_lightCol->set(imp::Vec3(1.0));
-		u_lightAtt->set(imp::Vec3(30.0,1.0,0.0));
+		Uniform::Ptr u_lightPos = Uniform::create("u_lightPos", Uniform::Type_3f);
+		Uniform::Ptr u_lightCol = Uniform::create("u_lightCol", Uniform::Type_3f);
+		Uniform::Ptr u_lightAtt = Uniform::create("u_lightAtt", Uniform::Type_3f);
+		Uniform::Ptr u_sampler_test = Uniform::create("u_sampler_test", Uniform::Type_Sampler);
+		u_lightPos->set(Vec3(10.0,5.0,5.0));
+		u_lightCol->set(Vec3(1.0));
+		u_lightAtt->set(Vec3(30.0,1.0,0.0));
+		u_sampler_test->set(sampler_test);
 		cubeNode->getState()->setUniform(u_lightPos);
 		cubeNode->getState()->setUniform(u_lightCol);
 		cubeNode->getState()->setUniform(u_lightAtt);
+		cubeNode->getState()->setUniform(u_sampler_test);
 		
-		camera = imp::Camera::create();
+		camera = Camera::create();
 		camera->setPosition( initCamPos );
 		
-		graphRoot = imp::SceneNode::create();
+		graphRoot = SceneNode::create();
 		graphRoot->addNode(camera);
 		graphRoot->addNode(cubeNode);
 	};
 	
 	void updateCamera(float angle)
 	{
-		camera->setPosition( initCamPos * imp::Matrix3::rotationZ(angle) );
+		camera->setPosition( initCamPos * Matrix3::rotationZ(angle) );
 	}
 	
 	void render()
@@ -105,7 +217,7 @@ int main(int argc, char* argv[])
 
 		if(engine_arg != "-gpu") 
 		{
-			imp::Image::Ptr res = engine.target->get(0)->getSource();
+			Image::Ptr res = engine.target->get(0)->getSource();
 			texture.update(res->data(),res->width(),res->height(),0,0);
 			sprite.setScale( 512.0 / res->width(), -512.0 / res->height() );
 			sprite.setPosition( 0, 512 );

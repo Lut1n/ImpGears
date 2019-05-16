@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
 	node4->setRotation(Vec3(3.14 * 0.1, 0.0, 3.14 * 0.25));
 	
 
-	GeoNode::Ptr node1 = GeoNode::create(coords, false);
+	GeoNode::Ptr node1 = GeoNode::create(coords, true);
 	node1->setColor(Vec3(1.0,1.0,0.0));
 	node1->setPosition(Vec3(0.3,0.0,-0.2));
 	

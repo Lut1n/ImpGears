@@ -33,14 +33,14 @@ uniform vec3 u_color;
 
 varying vec2 v_texCoord;
 
-void main()
+void lighting(out vec3 outColor, out vec3 outEmi)
 {
 	vec3 color = u_color * gl_Color.xyz;
 	color *= textureColor(v_texCoord);
 	vec3 emi = textureEmissive(v_texCoord);
-	color = max(emi,color);
 	
-	gl_FragData[0] = vec4(color, 1.0);
+	outColor = max(emi,color);
+	outEmi = emi;
 }
 
 );
@@ -137,7 +137,7 @@ varying vec2 v_texCoord;
 varying vec3 v_m;
 varying vec3 v_n;
 
-vec3 phong()
+void lighting(out vec3 outColor, out vec3 outEmi)
 {
 	float lightPower = u_lightAtt[0];
 	float shininess = u_lightAtt[1];
@@ -188,12 +188,38 @@ vec3 phong()
 	vec3 emi = textureEmissive(v_texCoord);
 	colModelRes = max(emi,colModelRes);
 	
-	return clamp( colModelRes,0.0,1.0 );
+	outColor = clamp( colModelRes,0.0,1.0 );
+	outEmi = clamp(emi,0.0,1.0);
 }
+
+);
+
+
+static std::string glsl_mrt1 = GLSL_CODE(
 
 void main()
 {
-	gl_FragData[0] = vec4(phong(),1.0);
+	vec3 outColor;
+	vec3 outEmi;
+	
+	lighting(outColor,outEmi);
+	
+	gl_FragData[0] = vec4(outColor,1.0);
+}
+
+);
+
+static std::string glsl_mrt2 = GLSL_CODE(
+
+void main()
+{
+	vec3 outColor;
+	vec3 outEmi;
+	
+	lighting(outColor,outEmi);
+	
+	gl_FragData[0] = vec4(outColor,1.0);
+	gl_FragData[1] = vec4(outEmi,1.0);
 }
 
 );

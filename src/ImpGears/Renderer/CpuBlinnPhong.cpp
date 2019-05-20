@@ -1,4 +1,4 @@
-#include <Graphics/CpuBlinnPhong.h>
+#include <Renderer/CpuBlinnPhong.h>
 #include <Core/Matrix3.h>
 
 IMPGEARS_BEGIN

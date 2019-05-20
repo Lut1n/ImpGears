@@ -1,7 +1,7 @@
 #include <Core/Object.h>
-#include <SceneGraph/Target.h>
+#include <Renderer/Target.h>
 
-#include <SceneGraph/SceneGraph.h>
+#include <SceneGraph/Graph.h>
 
 IMPGEARS_BEGIN
 

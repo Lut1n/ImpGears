@@ -4,8 +4,8 @@
 #include <Core/Object.h>
 #include <Geometry/Polyhedron.h>
 #include <Geometry/Geometry.h>
-#include <SceneGraph/SceneNode.h>
-#include <Graphics/Uniform.h>
+#include <SceneGraph/Node.h>
+#include <Renderer/Uniform.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN

@@ -1,5 +1,5 @@
 #include <Core/Matrix3.h>
-#include <SceneGraph/GraphRenderer.h>
+#include <SceneGraph/Graph.h>
 #include <SceneGraph/GeoNode.h>
 #include <Descriptors/ImageIO.h>
 

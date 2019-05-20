@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 #include <Graphics/Image.h>
 
-#include <SceneGraph/TextureSampler.h>
+#include <Renderer/TextureSampler.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN

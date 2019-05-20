@@ -5,9 +5,9 @@
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
 #include <Core/Vec4.h>
-#include <Graphics/Uniform.h>
+#include <Renderer/Uniform.h>
 #include <SceneGraph/LightModel.h>
-#include <SceneGraph/Target.h>
+#include <Renderer/Target.h>
 
 #include <map>
 

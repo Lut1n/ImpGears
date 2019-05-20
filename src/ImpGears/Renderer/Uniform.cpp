@@ -1,4 +1,4 @@
-#include <Graphics/Uniform.h>
+#include <Renderer/Uniform.h>
 #include <Core/Math.h>
 
 #include <cstdio>

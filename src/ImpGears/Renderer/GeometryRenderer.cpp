@@ -1,4 +1,4 @@
-#include <Graphics/GeometryRenderer.h>
+#include <Renderer/GeometryRenderer.h>
 
 IMPGEARS_BEGIN
 

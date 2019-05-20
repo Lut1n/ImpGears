@@ -2,7 +2,7 @@
 #define IMP_QUADNODE_H
 
 #include <Renderer/RenderPlugin.h>
-#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Node.h>
 #include <Geometry/Geometry.h>
 
 IMPGEARS_BEGIN

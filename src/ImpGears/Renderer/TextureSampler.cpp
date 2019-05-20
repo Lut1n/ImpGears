@@ -1,4 +1,4 @@
-#include <SceneGraph/TextureSampler.h>
+#include <Renderer/TextureSampler.h>
 
 IMPGEARS_BEGIN
 

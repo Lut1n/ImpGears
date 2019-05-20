@@ -1,7 +1,7 @@
 #ifndef IMP_LIGHT_MODEL_H
 #define IMP_LIGHT_MODEL_H
 
-#include <Graphics/GeometryRenderer.h>
+#include <Renderer/GeometryRenderer.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN

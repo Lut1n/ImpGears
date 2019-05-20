@@ -1,4 +1,4 @@
-#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Node.h>
 
 IMPGEARS_BEGIN
 

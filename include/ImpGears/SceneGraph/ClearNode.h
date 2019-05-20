@@ -1,7 +1,7 @@
 #ifndef IMP_CLEARNODE_H
 #define IMP_CLEARNODE_H
 
-#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Node.h>
 
 IMPGEARS_BEGIN
 

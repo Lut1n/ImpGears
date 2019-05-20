@@ -4,7 +4,7 @@
 #include <Core/Math.h>
 #include <Core/Vec3.h>
 #include <Graphics/Image.h>
-#include <Graphics/Uniform.h>
+#include <Renderer/Uniform.h>
 
 #include <map>
 #include <vector>

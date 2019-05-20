@@ -1,14 +1,14 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <SceneGraph/TextureSampler.h>
-#include <SceneGraph/Target.h>
+#include <Renderer/TextureSampler.h>
+#include <Renderer/Target.h>
 #include <Renderer/CpuRenderPlugin.h>
-#include <Graphics/Uniform.h>
+#include <Renderer/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include <Graphics/Rasterizer.h>
-#include <Graphics/GeometryRenderer.h>
-#include <Graphics/CpuBlinnPhong.h>
+#include <Renderer/GeometryRenderer.h>
+#include <Renderer/CpuBlinnPhong.h>
 
 #include "LightModelImpl.h"
 

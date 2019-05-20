@@ -2,7 +2,7 @@
 #define IMP_SCENEVISITOR_H
 
 #include <SceneGraph/Visitor.h>
-#include <SceneGraph/SceneNode.h>
+#include <SceneGraph/Node.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/State.h>
 #include <Core/Matrix4.h>

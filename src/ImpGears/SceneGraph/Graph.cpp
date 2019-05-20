@@ -1,4 +1,4 @@
-#include <SceneGraph/SceneGraph.h>
+#include <SceneGraph/Graph.h>
 
 #include <Renderer/CpuRenderPlugin.h>
 

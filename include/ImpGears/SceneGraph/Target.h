@@ -5,7 +5,7 @@
 #include <Graphics/Image.h>
 
 #include <SceneGraph/TextureSampler.h>
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

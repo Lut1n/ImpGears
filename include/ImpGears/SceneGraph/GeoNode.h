@@ -6,7 +6,7 @@
 #include <Geometry/Geometry.h>
 #include <SceneGraph/SceneNode.h>
 #include <Graphics/Uniform.h>
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

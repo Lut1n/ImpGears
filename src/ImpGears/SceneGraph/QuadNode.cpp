@@ -1,6 +1,6 @@
 #include <SceneGraph/QuadNode.h>
 
-#include <SceneGraph/GraphRenderer.h>
+#include <SceneGraph/SceneGraph.h>
 
 IMPGEARS_BEGIN
 

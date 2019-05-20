@@ -5,7 +5,7 @@
 
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/SceneVisitor.h>
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

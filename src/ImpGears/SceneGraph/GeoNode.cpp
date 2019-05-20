@@ -1,6 +1,5 @@
 #include <SceneGraph/GeoNode.h>
-// #include <SceneGraph/BasicShader.h>
-#include <SceneGraph/GraphRenderer.h>
+#include <SceneGraph/SceneGraph.h>
 
 
 IMPGEARS_BEGIN

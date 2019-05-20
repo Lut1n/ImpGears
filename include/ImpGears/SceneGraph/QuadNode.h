@@ -1,7 +1,7 @@
 #ifndef IMP_QUADNODE_H
 #define IMP_QUADNODE_H
 
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 #include <SceneGraph/SceneNode.h>
 #include <Geometry/Geometry.h>
 

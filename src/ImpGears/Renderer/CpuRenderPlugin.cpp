@@ -2,7 +2,7 @@
 #include <SceneGraph/State.h>
 #include <SceneGraph/TextureSampler.h>
 #include <SceneGraph/Target.h>
-#include <SceneGraph/CpuRenderPlugin.h>
+#include <Renderer/CpuRenderPlugin.h>
 #include <Graphics/Uniform.h>
 #include <Geometry/Geometry.h>
 

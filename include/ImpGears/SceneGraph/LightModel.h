@@ -2,7 +2,7 @@
 #define IMP_LIGHT_MODEL_H
 
 #include <Graphics/GeometryRenderer.h>
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

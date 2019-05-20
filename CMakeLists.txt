@@ -10,11 +10,13 @@ file(GLOB SRCS
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Descriptors/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Geometry/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/Renderer/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.cpp
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Core/*.h
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Descriptors/*.h
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Geometry/*.h
     ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.h
+    ${PROJECT_SOURCE_DIR}/src/ImpGears/Renderer/*.h
     ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.h
     )
 
@@ -23,6 +25,7 @@ file(GLOB HEADERS
     ${PROJECT_SOURCE_DIR}/include/ImpGears/Descriptors/*.h
     ${PROJECT_SOURCE_DIR}/include/ImpGears/Geometry/*.h
     ${PROJECT_SOURCE_DIR}/include/ImpGears/Graphics/*.h
+    ${PROJECT_SOURCE_DIR}/include/ImpGears/Renderer/*.h
     ${PROJECT_SOURCE_DIR}/include/ImpGears/SceneGraph/*.h
     )
 

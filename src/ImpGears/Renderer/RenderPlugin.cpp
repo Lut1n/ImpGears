@@ -1,4 +1,4 @@
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 #include <dlfcn.h>
 

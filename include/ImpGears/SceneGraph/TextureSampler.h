@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 #include <Graphics/Sampler.h>
 
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

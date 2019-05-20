@@ -1,6 +1,6 @@
-#include <SceneGraph/GraphRenderer.h>
+#include <SceneGraph/SceneGraph.h>
 
-#include <SceneGraph/CpuRenderPlugin.h>
+#include <Renderer/CpuRenderPlugin.h>
 
 #include <cstdlib>
 

@@ -2,7 +2,7 @@
 #define IMP_JSON_IMAGEOP_H
 
 #include <Graphics/ImageOperation.h>
-#include <Utils/JsonReaderWriter.h>
+#include <Descriptors/JsonReaderWriter.h>
 
 // #include <ctime>
 // #include <iostream>

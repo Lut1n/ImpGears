@@ -1,9 +1,9 @@
 #include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/GeoNode.h>
-#include <Utils/ImageIO.h>
-#include <Utils/FileInfo.h>
-#include <Utils/JsonImageOp.h>
+#include <Descriptors/ImageIO.h>
+#include <Descriptors/FileInfo.h>
+#include <Descriptors/JsonImageOp.h>
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>

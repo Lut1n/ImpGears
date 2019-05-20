@@ -2,7 +2,7 @@
 #define IMP_JSON_GEOMETRYOP_H
 
 #include <Geometry/Geometry.h>
-#include <Utils/JsonReaderWriter.h>
+#include <Descriptors/JsonReaderWriter.h>
 
 #include <map>
 

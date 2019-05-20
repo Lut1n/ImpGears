@@ -1,7 +1,7 @@
 #include <Core/Matrix3.h>
 #include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/GeoNode.h>
-#include <Utils/ImageIO.h>
+#include <Descriptors/ImageIO.h>
 
 #include <SFML/Graphics.hpp>
 

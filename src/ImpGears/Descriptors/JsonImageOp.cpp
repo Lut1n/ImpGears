@@ -1,7 +1,7 @@
 #include <Graphics/ImageOperation.h>
-#include <Utils/ImageIO.h>
-#include <Utils/JsonImageOp.h>
-#include <Utils/FileInfo.h>
+#include <Descriptors/ImageIO.h>
+#include <Descriptors/JsonImageOp.h>
+#include <Descriptors/FileInfo.h>
 
 #include <ctime>
 #include <iostream>

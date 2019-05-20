@@ -1,10 +1,6 @@
-#include <Utils/JsonImageOp.h>
-// #include <Utils/JsonReaderWriter.h>
+#include <Descriptors/JsonImageOp.h>
 
-// #include <ctime>
 #include <iostream>
-// #include <fstream>
-// #include <map>
 
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])

@@ -1,6 +1,7 @@
 #include <Geometry/Geometry.h>
 #include <Core/Matrix3.h>
 #include <Core/Perlin.h>
+#include <Core/Math.h>
 
 #include <cmath>
 
@@ -535,19 +536,26 @@ void Geometry::generateColors(const Vec3& color)
 	_hasColors = true;
 }
 
-void getUV(Vec3& d, float& u, float& v)
+void getUV(Vec3& tc, Vec3& d, float& u, float& v)
 {
 	Vec3 fs[6] = {-Vec3::X,-Vec3::Y,-Vec3::Z,Vec3::X,Vec3::Y,Vec3::Z};
 	float p[6]; int j=0;
-	for(int i=0;i<6;++i) { p[i] = fs[i].dot(d); if(p[j]>p[i])j=i; }
+	for(int i=0;i<6;++i) { p[i] = fs[i].dot(tc); if(p[j]<p[i])j=i; }
 	
 	Vec3 x, y;
-	if(j==0 || j==3) { x=Vec3::Y; y=Vec3::Z; }
-	if(j==1 || j==4) { x=Vec3::Z; y=Vec3::X; }
-	if(j==2 || j==5) { x=Vec3::X; y=Vec3::Y; }
+	if(j==0) { x=-Vec3::Y; y=-Vec3::Z; }
+	if(j==1) { x=-Vec3::Z; y=-Vec3::X; }
+	if(j==2) { x=-Vec3::X; -y=Vec3::Y; }
+	if(j==3) { x=Vec3::Y; y=Vec3::Z; }
+	if(j==4) { x=Vec3::Z; y=Vec3::X; }
+	if(j==5) { x=Vec3::X; y=Vec3::Y; }
 	
-	u = x.dot(d);
-	v = y.dot(d);
+	// 45 deg = 0.785398 rad
+	u = d.angleFrom(fs[j], y) / 0.785398;
+	v = d.angleFrom(fs[j], x) / 0.785398;
+	
+	u = u*0.5 + 0.5;
+	v = v*0.5 + 0.5;
 }
 
 void Geometry::generateTexCoords(float resFactor)
@@ -559,12 +567,18 @@ void Geometry::generateTexCoords(float resFactor)
 	for(auto v : _vertices) grav_cent += v;
 	grav_cent /= size();
 	
-	for(int i=0;i<size();++i)
+	for(int i=0;i<size();i+=3)
 	{
-		Vec3 dir = at(i) - grav_cent; dir.normalize();
-		float u,v;
-		getUV(dir, u, v);
-		_texCoords[i] = Geometry::TexCoord(u*resFactor,v*resFactor);
+		Vec3 triDir = (at(i)+at(i+1)+at(i+2))/3.0 - grav_cent;
+		triDir.normalize();
+		
+		for(int j=0;j<3;++j)
+		{
+			float u,v;
+			Vec3 dir = at(i+j) - grav_cent; dir.normalize();
+			getUV(triDir, dir, u, v);
+			_texCoords[i+j] = Geometry::TexCoord(u*resFactor,v*resFactor);
+		}
 	}
 }
 

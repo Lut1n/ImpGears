@@ -1,6 +1,7 @@
 #include <Core/Matrix3.h>
 #include <SceneGraph/GraphRenderer.h>
 #include <SceneGraph/GeoNode.h>
+#include <Utils/ImageIO.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -24,7 +25,7 @@ void hsym(Image& image, const Vec4& col)
 
 Image::Ptr generateImage()
 {
-    Image::Ptr image = Image::create(16,16,3);
+    Image::Ptr image = Image::create(12,12,3);
     
     Vec4 bgcol(0,128,200,255);
     Vec4 fgcol(255,128,200,255);
@@ -33,19 +34,22 @@ Image::Ptr generateImage()
     rast.setTarget(image);
     rast.setColor(fgcol);
     
-    float offset = 5.0;
+    float offsetX = 6.0;
+    float offsetY = 2.0;
     image->fill(bgcol);
     
-    rast.square(Vec3(offset+2.0,4.0,0.0),4.0);
-    rast.grid(Vec3(offset+2.0,0.0,0.0),Vec3(offset+3.0,7.0,0.0),1);
-    rast.rectangle(Vec3(offset+5.0,1.0,0.0),Vec3(offset+5.0,3.0,0.0));
-    rast.rectangle(Vec3(offset+4.0,3.0,0.0),Vec3(offset+4.0,4.0,0.0));
-    rast.dot(Vec3(offset+1.0,0.0,0.0));
+    rast.square(Vec3(offsetX+2.0,offsetY+4.0,0.0),4.0);
+    rast.grid(Vec3(offsetX+2.0,offsetY+0.0,0.0),Vec3(offsetX+3.0,offsetY+7.0,0.0),1);
+    rast.rectangle(Vec3(offsetX+5.0,offsetY+1.0,0.0),Vec3(offsetX+5.0,offsetY+3.0,0.0));
+    rast.rectangle(Vec3(offsetX+4.0,offsetY+3.0,0.0),Vec3(offsetX+4.0,offsetY+4.0,0.0));
+    rast.dot(Vec3(offsetX+1.0,offsetY+0.0,0.0));
     
     rast.setColor(bgcol);
-    rast.dot(Vec3(offset+2.0,4.0,0.0));
+    rast.dot(Vec3(offsetX+2.0,offsetY+4.0,0.0));
     
     hsym(*image.get(),fgcol);
+	
+    imp::ImageIO::save(image,"out.tga");
     
     return image;
 }
@@ -58,9 +62,7 @@ struct Custom : public LightModel::TexturingCallback
 	
 	virtual Vec3 textureColor(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
 	{
-		// return Vec3(1.0);
-		ImageSampler sampler(im);
-		return sampler.get(uv);
+		return Vec3(1.0);
 	}
 	
 	virtual Vec3 textureNormal(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
@@ -74,7 +76,7 @@ struct Custom : public LightModel::TexturingCallback
 	{
 		// return Vec3(0.0);
 		ImageSampler sampler(im);
-		return sampler.get(uv) * Vec3(1.0*(1.0-uv[1]),0.0,0.0);
+		return sampler.get(uv) * Vec3(1.0,0.0,0.0);
 	}
 };
 
@@ -87,7 +89,7 @@ uniform sampler2D u_sampler_test;
 
 vec3 textureColor(vec2 uv)
 {
-	return texture2D(u_sampler_test, uv).xyz;
+	return vec3(1.0);
 }
 
 vec3 textureNormal(vec2 uv)
@@ -97,7 +99,8 @@ vec3 textureNormal(vec2 uv)
 
 vec3 textureEmissive(vec2 uv)
 {
-	return texture2D(u_sampler_test,uv).xyz  * vec3(1.0*(1.0-uv[1]),0.0,0.0);
+	// return vec3(0.0);
+	return texture2D(u_sampler_test,uv).xyz  * vec3(1.0,0.0,0.0);
 }
 
 );
@@ -123,6 +126,7 @@ struct IGStuff
 		
 		TextureSampler::Ptr sampler_test = TextureSampler::create();
 		sampler_test->setSource( customTexturing->im );
+		sampler_test->setMode(ImageSampler::Mode_Repeat);
 		
 		renderer = GraphRenderer::create();
 		target = Target::create();
@@ -138,6 +142,7 @@ struct IGStuff
 		
 		renderer->getInitState()->setViewport( viewport );
 	
+		// Geometry cubeGeo = Geometry::sphere(8,1.0);
 		Geometry cubeGeo = Geometry::cube();
 		cubeGeo.generateColors(Vec3(1.0,1.0,1.0));
 		cubeGeo.generateNormals();
@@ -154,14 +159,20 @@ struct IGStuff
 		Uniform::Ptr u_lightCol = Uniform::create("u_lightCol", Uniform::Type_3f);
 		Uniform::Ptr u_lightAtt = Uniform::create("u_lightAtt", Uniform::Type_3f);
 		Uniform::Ptr u_sampler_test = Uniform::create("u_sampler_test", Uniform::Type_Sampler);
+		// Uniform::Ptr u_sampler_color = Uniform::create("u_sampler_color", Uniform::Type_Sampler);
+		// Uniform::Ptr u_sampler_normal = Uniform::create("u_sampler_normal", Uniform::Type_Sampler);
 		u_lightPos->set(Vec3(10.0,5.0,5.0));
 		u_lightCol->set(Vec3(1.0));
 		u_lightAtt->set(Vec3(30.0,1.0,0.0));
 		u_sampler_test->set(sampler_test);
+		// u_sampler_color->set(sampler_test);
+		// u_sampler_normal->set(sampler_test);
 		cubeNode->getState()->setUniform(u_lightPos);
 		cubeNode->getState()->setUniform(u_lightCol);
 		cubeNode->getState()->setUniform(u_lightAtt);
 		cubeNode->getState()->setUniform(u_sampler_test);
+		// cubeNode->getState()->setUniform(u_sampler_color);
+		// cubeNode->getState()->setUniform(u_sampler_normal);
 		
 		camera = Camera::create();
 		camera->setPosition( initCamPos );

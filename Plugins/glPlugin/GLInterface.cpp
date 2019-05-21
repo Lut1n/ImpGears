@@ -1,8 +1,8 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <SceneGraph/TextureSampler.h>
-#include <SceneGraph/Target.h>
-#include <Graphics/Uniform.h>
+#include <Renderer/TextureSampler.h>
+#include <Renderer/Target.h>
+#include <Renderer/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include "GlError.h"
@@ -186,52 +186,52 @@ GlPlugin::Data::Ptr GlPlugin::load(const TextureSampler* sampler)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const LightModel* program)
+GlPlugin::Data::Ptr GlPlugin::load(const ReflexionModel* program)
 {
 	ProgData::Ptr d = ProgData::create();
 	
 	std::string fullVertCode = basicVert;
 	std::string fullFragCode;
 	
-	LightModel::Texturing te = program->getTexturing();
+	ReflexionModel::Texturing te = program->getTexturing();
 	
-	if(te == LightModel::Texturing_PlainColor)
+	if(te == ReflexionModel::Texturing_PlainColor)
 	{
 		fullFragCode = fullFragCode + glsl_samplerNone;
 	}
-	else if(te == LightModel::Texturing_Samplers_CN)
+	else if(te == ReflexionModel::Texturing_Samplers_CN)
 	{
 		fullFragCode = fullFragCode + glsl_samplerCN;
 	}
-	else if(te == LightModel::Texturing_Samplers_CNE)
+	else if(te == ReflexionModel::Texturing_Samplers_CNE)
 	{
 		fullFragCode = fullFragCode + glsl_samplerCNE;
 	}
-	else if(te == LightModel::Texturing_Customized)
+	else if(te == ReflexionModel::Texturing_Customized)
 	{
 		fullFragCode = fullFragCode + program->_fragCode_texturing;
 	}
 	
-	LightModel::Lighting li = program->getLighting();
-	if(li == LightModel::Lighting_None)
+	ReflexionModel::Lighting li = program->getLighting();
+	if(li == ReflexionModel::Lighting_None)
 	{
 		fullFragCode = fullFragCode + basicFrag;
 	}
-	else if(li == LightModel::Lighting_Phong)
+	else if(li == ReflexionModel::Lighting_Phong)
 	{
 		fullFragCode = fullFragCode + glsl_invMat3 + glsl_phong;
 	}
-	else if(li == LightModel::Lighting_Customized)
+	else if(li == ReflexionModel::Lighting_Customized)
 	{
 		fullFragCode = fullFragCode + program->_fragCode_lighting;
 	}
 	
-	LightModel::MRT mrt = program->getMRT();
-	if(mrt == LightModel::MRT_1_Col)
+	ReflexionModel::MRT mrt = program->getMRT();
+	if(mrt == ReflexionModel::MRT_1_Col)
 	{
 		fullFragCode = fullFragCode + glsl_mrt1;
 	}
-	else if(mrt == LightModel::MRT_2_Col_Emi)
+	else if(mrt == ReflexionModel::MRT_2_Col_Emi)
 	{
 		fullFragCode = fullFragCode + glsl_mrt2;
 	}

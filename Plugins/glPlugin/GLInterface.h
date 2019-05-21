@@ -1,7 +1,7 @@
 #ifndef GLINTERFACE_H_INCLUDED
 #define GLINTERFACE_H_INCLUDED
 
-#include <SceneGraph/RenderPlugin.h>
+#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
@@ -25,7 +25,7 @@ public:
 	
 	virtual Data::Ptr load(const TextureSampler* samper);
 	
-	virtual Data::Ptr load(const LightModel* program);
+	virtual Data::Ptr load(const ReflexionModel* program);
 	
 	virtual void update(Data::Ptr data, const TextureSampler* sampler);
 	

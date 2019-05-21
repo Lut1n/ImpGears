@@ -7,38 +7,46 @@
 #include <SceneGraph/State.h>
 #include <Core/Matrix4.h>
 
+#include <Renderer/RenderQueue.h>
+
 #include <vector>
 
 IMPGEARS_BEGIN
 
-class IMP_API SceneVisitor : public Visitor
+class IMP_API RenderVisitor : public Visitor
 {
 public:
 
-	Meta_Class(SceneVisitor)
+	Meta_Class(RenderVisitor)
 	
 	using MatrixStack = std::vector<Matrix4>;
 	using StateStack = std::vector<State::Ptr>;
 
-	SceneVisitor();
-	virtual ~SceneVisitor();
+	RenderVisitor();
+	virtual ~RenderVisitor();
 	
 	virtual void reset();
 
 	virtual void apply( Node* node );
-	virtual void applyDefault( Node* node );
-	virtual void applyCamera( Camera* node );
 	virtual void push( Node* node );
 	virtual void pop();
+	
+	RenderQueue::Ptr getQueue() { return _queue; }
 
 protected:
-
+	
+	virtual void applyDefault( Node* node );
+	virtual void applyCamera( Camera* node );
+	virtual void applyClearNode( ClearNode* node );
+	
 	MatrixStack _matrices;
 	StateStack _states;
 	Uniform::Ptr u_proj;
-	Uniform::Ptr u_view;
+	// Uniform::Ptr u_view;
 	Uniform::Ptr u_model;
 	Uniform::Ptr u_normal;
+	
+	RenderQueue::Ptr _queue;
 };
 
 IMPGEARS_END

@@ -45,6 +45,8 @@ class IMP_API Uniform : public Object
 	
 	~Uniform();
 	
+	void clone(const Uniform& other);
+	
 	void set(float float1);
 	
 	void set(const Vec2& vec2);

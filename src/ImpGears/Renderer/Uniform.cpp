@@ -21,6 +21,22 @@ Uniform::~Uniform()
 }
 
 //--------------------------------------------------------------
+void Uniform::clone(const Uniform& other)
+{
+	_id = other._id;
+	_type = other._type;
+	_mode = other._mode;
+	_value_1i = other._value_1i;
+	_value_1f = other._value_1f;
+	_value_2f = other._value_2f;
+	_value_3f = other._value_3f;
+	_value_4f = other._value_4f;
+	_value_mat3 = other._value_mat3;
+	_value_mat4 = other._value_mat4;
+	_sampler = other._sampler;
+}
+
+//--------------------------------------------------------------
 void Uniform::set(float float1)
 {
 	_type = Type_1f;

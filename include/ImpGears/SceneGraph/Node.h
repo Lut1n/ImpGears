@@ -11,7 +11,6 @@
 
 IMPGEARS_BEGIN
 
-/// \brief Defines a scene node. Has to be added to a scene for rendering.
 class IMP_API Node : public Object
 {
 public:

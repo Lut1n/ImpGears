@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 
 #include <SceneGraph/ClearNode.h>
-#include <Renderer/SceneVisitor.h>
+#include <Renderer/RenderVisitor.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
@@ -33,7 +33,7 @@ protected:
 	
 	ClearNode::Ptr _initNode;
 	State::Ptr _initState;
-	SceneVisitor::Ptr _visitor;
+	RenderVisitor::Ptr _visitor;
 };
 
 IMPGEARS_END

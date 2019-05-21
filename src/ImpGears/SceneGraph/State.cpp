@@ -226,8 +226,12 @@ void State::setShader(ReflexionModel::Ptr shader)
 //--------------------------------------------------------------
 void State::setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms)
 {
-	for(auto kv : uniforms) _uniforms[kv.first] = kv.second;
-	_uniformsChanged = true;
+	clearUniforms();
+	for(auto kv : uniforms)
+	{
+		_uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
+		_uniforms[kv.first]->clone( *kv.second );
+	}
 }
 
 //--------------------------------------------------------------
@@ -240,7 +244,8 @@ void State::clearUniforms()
 //--------------------------------------------------------------
 void State::setUniform(const Uniform::Ptr& uniform)
 {
-	_uniforms[ uniform->getID() ] = uniform;
+	_uniforms[ uniform->getID() ] =  Uniform::create("no id",Uniform::Type_Undefined);
+	_uniforms[ uniform->getID() ]->clone( *uniform );
 	_uniformsChanged = true;
 }
 

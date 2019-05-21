@@ -32,7 +32,7 @@ Graph::Graph()
     _initState->setDepthTest( true );
 	_initState->setTarget(nullptr);
 	
-	_visitor = SceneVisitor::create();
+	_visitor = RenderVisitor::create();
 }
 
 //--------------------------------------------------------------
@@ -43,6 +43,9 @@ Graph::~Graph()
 //---------------------------------------------------------------
 void Graph::renderScene(const Node::Ptr& scene)
 {
+	static Uniform::Ptr u_view;
+	if(u_view == nullptr) u_view = Uniform::create("u_view",Uniform::Type_Mat4);
+	
 	Visitor::Ptr visitor = _visitor;
 
 	_visitor->reset();
@@ -50,6 +53,16 @@ void Graph::renderScene(const Node::Ptr& scene)
 	_visitor->apply(_initNode.get());
 	scene->accept(visitor);
 	_visitor->pop();
+	
+	RenderQueue::Ptr queue = _visitor->getQueue();
+	u_view->set( queue->_camera->getViewMatrix() );
+		
+	for(int i=0;i<(int)queue->_nodes.size();++i)
+	{
+		queue->_states[i]->setUniform(u_view);
+		queue->_states[i]->apply();
+		queue->_nodes[i]->render();
+	}	
 }
 
 //---------------------------------------------------------------

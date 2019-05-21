@@ -1,41 +1,46 @@
-#include <Renderer/SceneVisitor.h>
+#include <Renderer/RenderVisitor.h>
 #include <SceneGraph/Camera.h>
+#include <SceneGraph/ClearNode.h>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-SceneVisitor::SceneVisitor()
+RenderVisitor::RenderVisitor()
 {
 	u_proj = Uniform::create("u_proj",Uniform::Type_Mat4);
-	u_view = Uniform::create("u_view",Uniform::Type_Mat4);
+	// u_view = Uniform::create("u_view",Uniform::Type_Mat4);
 	u_model = Uniform::create("u_model",Uniform::Type_Mat4);
 	u_normal = Uniform::create("u_normal",Uniform::Type_Mat3);
 }
 
 //--------------------------------------------------------------
-SceneVisitor::~SceneVisitor()
+RenderVisitor::~RenderVisitor()
 {
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::reset()
+void RenderVisitor::reset()
 {
+	_queue = RenderQueue::create();
 	u_model->set( Matrix4() );
 	u_proj->set( Matrix4() );
-	u_view->set( Matrix4() );
+	// u_view->set( Matrix4() );
 	u_normal->set( Matrix3() );
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::apply( Node* node )
+void RenderVisitor::apply( Node* node )
 {
 	Camera* asCamera = dynamic_cast<Camera*>( node );
+	ClearNode* asClear = dynamic_cast<ClearNode*>( node );
+	
 	if( asCamera ) applyCamera(asCamera);
+	else if( asClear ) applyClearNode(asClear);
 	else applyDefault(node);
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::applyDefault( Node* node )
+void RenderVisitor::applyDefault( Node* node )
 {
 	State::Ptr topState = _states.back();
 	
@@ -50,25 +55,39 @@ void SceneVisitor::applyDefault( Node* node )
 	
 	topState->setUniform(u_proj);
 	topState->setUniform(u_model);
-	topState->setUniform(u_view);
+	// topState->setUniform(u_view);
 	topState->setUniform(u_normal);
-	topState->apply();
 	
-	node->render();
+	
+	_queue->_states.push_back(topState);
+	_queue->_nodes.push_back(node);
+	// _queue->_modelMats.push_back();
+	
+	// topState->apply();
+	// node->render();
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::applyCamera( Camera* node )
+void RenderVisitor::applyCamera( Camera* node )
 {
 	Matrix4 m = _matrices.back();
 	Vec3 translation = Vec3(m(3,0),m(3,1),m(3,2));
 	node->setAbsolutePosition( translation );
 	node->lookAt();
-	u_view->set( node->getViewMatrix() );
+	// u_view->set( node->getViewMatrix() );
+	_queue->_camera = node;
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::push( Node* node )
+void RenderVisitor::applyClearNode( ClearNode* node )
+{
+	State::Ptr topState = _states.back();
+	_queue->_states.push_back(topState);
+	_queue->_nodes.push_back(node);
+}
+
+//--------------------------------------------------------------
+void RenderVisitor::push( Node* node )
 {
 	State::Ptr state = State::create();
 	if(_states.size() > 0) state->clone(_states.back(),State::CloneOpt_All);
@@ -80,7 +99,7 @@ void SceneVisitor::push( Node* node )
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::pop()
+void RenderVisitor::pop()
 {
 	_states.pop_back();
 	_matrices.pop_back();

@@ -10,7 +10,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API GeoNode : public SceneNode
+class IMP_API GeoNode : public Node
 {
     public:
 		
@@ -21,7 +21,7 @@ class IMP_API GeoNode : public SceneNode
 	bool _wireframe;
 	bool _loaded;
 	Vec3 _color;
-	LightModel::Ptr _shader;
+	ReflexionModel::Ptr _shader;
 	Uniform::Ptr u_color;
 	
 	GeoNode(const Polyhedron& buf, bool wireframe = false);
@@ -30,7 +30,7 @@ class IMP_API GeoNode : public SceneNode
 	
 	void setColor(const Vec3& color);
 	
-	void setShader(LightModel::Ptr shader);
+	void setShader(ReflexionModel::Ptr shader);
 	
 	virtual ~GeoNode();
 	

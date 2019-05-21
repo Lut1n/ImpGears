@@ -7,19 +7,19 @@
 
 IMPGEARS_BEGIN
 
-template<typename Ty>
+class Node;
 class IMP_API Visitor : public Object
 {
 public:
 
 	Meta_Class(Visitor)
 
-	Visitor() {}
-	virtual ~Visitor() {}
+	Visitor();
+	virtual ~Visitor();
 
-	virtual void apply( Ty node ) = 0;
+	virtual void apply( Node* ) = 0;
 	
-	virtual void push( Ty node ) = 0;
+	virtual void push( Node* ) = 0;
 	virtual void pop() = 0;
 };
 

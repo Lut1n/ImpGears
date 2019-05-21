@@ -1,9 +1,9 @@
-#include <SceneGraph/LightModel.h>
+#include <SceneGraph/ReflexionModel.h>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-void LightModel::AbstractFrag::exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
+void ReflexionModel::AbstractFrag::exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
 {
 	std::vector<Vec3> outColor(10);
 	if( _lighting )_lighting->applyLighting( uniforms,varyings, _texturing, outColor );
@@ -11,7 +11,7 @@ void LightModel::AbstractFrag::exec(ImageBuf& targets, const Vec3& pt, const Uni
 }
 
 //--------------------------------------------------------------
-LightModel::LightModel(Lighting l, Texturing t, MRT mrt)
+ReflexionModel::ReflexionModel(Lighting l, Texturing t, MRT mrt)
 	: _lighting(l)
 	, _texturing(t)
 	, _mrt(mrt)
@@ -19,42 +19,42 @@ LightModel::LightModel(Lighting l, Texturing t, MRT mrt)
 }
 
 //--------------------------------------------------------------
-LightModel::~LightModel()
+ReflexionModel::~ReflexionModel()
 {
 }
 
 //--------------------------------------------------------------
-void LightModel::setTexturing(Texturing t)
+void ReflexionModel::setTexturing(Texturing t)
 {
 	_texturing = t;
 }
 
 //--------------------------------------------------------------
-LightModel::Texturing LightModel::getTexturing() const
+ReflexionModel::Texturing ReflexionModel::getTexturing() const
 {
 	return _texturing;
 }
 
 //--------------------------------------------------------------
-void LightModel::setLighting(Lighting l)
+void ReflexionModel::setLighting(Lighting l)
 {
 	_lighting = l;
 }
 
 //--------------------------------------------------------------
-LightModel::Lighting LightModel::getLighting() const
+ReflexionModel::Lighting ReflexionModel::getLighting() const
 {
 	return _lighting;
 }
 
 //--------------------------------------------------------------
-void LightModel::setMRT(MRT mrt)
+void ReflexionModel::setMRT(MRT mrt)
 {
 	_mrt = mrt;
 }
 
 //--------------------------------------------------------------
-LightModel::MRT LightModel::getMRT() const
+ReflexionModel::MRT ReflexionModel::getMRT() const
 {
 	return _mrt;
 }

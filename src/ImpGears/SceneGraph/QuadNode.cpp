@@ -27,10 +27,10 @@ QuadNode::~QuadNode()
 
 void QuadNode::render()
 {
-	if(GraphRenderer::s_interface != nullptr)
+	if(Graph::s_interface != nullptr)
 	{
-		if(_gData == nullptr) _gData = GraphRenderer::s_interface->load(&_geo);
-		GraphRenderer::s_interface->draw(_gData);
+		if(_gData == nullptr) _gData = Graph::s_interface->load(&_geo);
+		Graph::s_interface->draw(_gData);
 	}
 }
 

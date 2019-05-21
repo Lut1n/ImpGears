@@ -3,7 +3,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-SceneNode::SceneNode()
+Node::Node()
 	: _state(nullptr)
 	, _position(0.0)
     , _rotation(0.0)
@@ -13,24 +13,24 @@ SceneNode::SceneNode()
 }
 
 //--------------------------------------------------------------
-SceneNode::~SceneNode()
+Node::~Node()
 {
 }
 
 //--------------------------------------------------------------
-void SceneNode::addNode(const SceneNode::Ptr& node)
+void Node::addNode(const Node::Ptr& node)
 {
     _children.push_back( node );
 }
 
 //--------------------------------------------------------------
-void SceneNode::remNode(const SceneNode::Ptr& node)
+void Node::remNode(const Node::Ptr& node)
 {
     _children.remove( node );
 }
 
 //--------------------------------------------------------------
-void SceneNode::accept( Visitor<SceneNode*>::Ptr& visitor )
+void Node::accept( Visitor::Ptr& visitor )
 {
     update();
 	computeMatrices();
@@ -42,7 +42,7 @@ void SceneNode::accept( Visitor<SceneNode*>::Ptr& visitor )
 }
 
 //--------------------------------------------------------------
-void SceneNode::computeMatrices()
+void Node::computeMatrices()
 {
 	_modelMatrix =
 		Matrix4::scale(_scale.x(), _scale.y(), _scale.z())

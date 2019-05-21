@@ -1,4 +1,4 @@
-#include <SceneGraph/SceneVisitor.h>
+#include <Renderer/SceneVisitor.h>
 #include <SceneGraph/Camera.h>
 
 IMPGEARS_BEGIN
@@ -27,7 +27,7 @@ void SceneVisitor::reset()
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::apply( SceneNode* node )
+void SceneVisitor::apply( Node* node )
 {
 	Camera* asCamera = dynamic_cast<Camera*>( node );
 	if( asCamera ) applyCamera(asCamera);
@@ -35,7 +35,7 @@ void SceneVisitor::apply( SceneNode* node )
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::applyDefault( SceneNode* node )
+void SceneVisitor::applyDefault( Node* node )
 {
 	State::Ptr topState = _states.back();
 	
@@ -68,7 +68,7 @@ void SceneVisitor::applyCamera( Camera* node )
 }
 
 //--------------------------------------------------------------
-void SceneVisitor::push( SceneNode* node )
+void SceneVisitor::push( Node* node )
 {
 	State::Ptr state = State::create();
 	if(_states.size() > 0) state->clone(_states.back(),State::CloneOpt_All);

@@ -1,5 +1,5 @@
-#ifndef IMP_SCENENODE_H
-#define IMP_SCENENODE_H
+#ifndef IMP_NODE_H
+#define IMP_NODE_H
 
 #include <Core/Object.h>
 #include <Core/Vec3.h>
@@ -12,16 +12,16 @@
 IMPGEARS_BEGIN
 
 /// \brief Defines a scene node. Has to be added to a scene for rendering.
-class IMP_API SceneNode : public Object
+class IMP_API Node : public Object
 {
 public:
 
-	Meta_Class(SceneNode)
+	Meta_Class(Node)
 
-	using NodeList = std::list<SceneNode::Ptr>;
+	using NodeList = std::list<Node::Ptr>;
 
-	SceneNode();
-	virtual ~SceneNode();
+	Node();
+	virtual ~Node();
 
 	virtual void update() {}
 	virtual void render() {};
@@ -34,10 +34,10 @@ public:
 	const Vec3& getRotation() const {return _rotation;}
 	const Vec3& getScale() const {return _scale;}
 	
-	void addNode(const SceneNode::Ptr& sceneNode);
-	void remNode(const SceneNode::Ptr& sceneNode);
+	void addNode(const Node::Ptr& sceneNode);
+	void remNode(const Node::Ptr& sceneNode);
 	
-	void accept( Visitor<SceneNode*>::Ptr& visitor );
+	void accept( Visitor::Ptr& visitor );
 	
 	void computeMatrices();
 
@@ -59,4 +59,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_SCENENODE_H
+#endif // IMP_NODE_H

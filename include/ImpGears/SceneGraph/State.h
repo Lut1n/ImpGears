@@ -6,7 +6,7 @@
 #include <Core/Matrix4.h>
 #include <Core/Vec4.h>
 #include <Renderer/Uniform.h>
-#include <SceneGraph/LightModel.h>
+#include <SceneGraph/ReflexionModel.h>
 #include <Renderer/Target.h>
 
 #include <map>
@@ -69,13 +69,13 @@ public:
 	void setLineWidth(float lw);
 	
 	void setTarget(Target::Ptr target);
-	void setShader(LightModel::Ptr shader);
+	void setShader(ReflexionModel::Ptr shader);
 	void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
 	void clearUniforms();
 	void setUniform(const Uniform::Ptr& uniform);
 	
 	Target::Ptr getTarget() { return _target; }
-	LightModel::Ptr getShader() { return _shader; }
+	ReflexionModel::Ptr getShader() { return _shader; }
 
 protected:
 private:
@@ -88,7 +88,7 @@ private:
 	bool _depthTest;
 	
 	Target::Ptr _target;
-	LightModel::Ptr _shader;
+	ReflexionModel::Ptr _shader;
 	std::map<std::string,Uniform::Ptr> _uniforms;
 	
 	bool _projectionChanged;

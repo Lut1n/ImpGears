@@ -176,20 +176,20 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const TextureSampler* sampler)
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const LightModel* program)
+CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const ReflexionModel* program)
 {
-	LightModel::AbstractFrag::Ptr frag = LightModel::AbstractFrag::create();
+	ReflexionModel::AbstractFrag::Ptr frag = ReflexionModel::AbstractFrag::create();
 	
 	ShaData::Ptr d = ShaData::create();
 	d->vertCb = DefaultVertCb::create();
 	d->fragCb = frag;
 	
-	LightModel::Lighting li = program->getLighting();
-	if(li == LightModel::Lighting_None)
+	ReflexionModel::Lighting li = program->getLighting();
+	if(li == ReflexionModel::Lighting_None)
 	{
 		frag->_lighting = NoLighting::create();
 	}
-	else if(li == LightModel::Lighting_Phong)
+	else if(li == ReflexionModel::Lighting_Phong)
 	{
 		frag->_lighting = PhongLighting::create();
 	}
@@ -198,16 +198,16 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const LightModel* program)
 		frag->_lighting = program->_lightingCb;
 	}
 	
-	LightModel::Texturing te = program->getTexturing();
-	if(te == LightModel::Texturing_PlainColor)
+	ReflexionModel::Texturing te = program->getTexturing();
+	if(te == ReflexionModel::Texturing_PlainColor)
 	{
 		frag->_texturing = PlainColorCb::create();
 	}
-	else if(te == LightModel::Texturing_Samplers_CN)
+	else if(te == ReflexionModel::Texturing_Samplers_CN)
 	{
 		frag->_texturing = SamplerCbCN::create();
 	}
-	else if(te == LightModel::Texturing_Samplers_CNE)
+	else if(te == ReflexionModel::Texturing_Samplers_CNE)
 	{
 		frag->_texturing = SamplerCbCNE::create();
 	}
@@ -216,12 +216,12 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const LightModel* program)
 		frag->_texturing = program->_texturingCb;
 	}
 	
-	LightModel::MRT mrt = program->getMRT();
-	if(mrt == LightModel::MRT_1_Col)
+	ReflexionModel::MRT mrt = program->getMRT();
+	if(mrt == ReflexionModel::MRT_1_Col)
 	{
 		frag->_mrt = Mrt1ColorCb::create();
 	}
-	else if(mrt == LightModel::MRT_2_Col_Emi)
+	else if(mrt == ReflexionModel::MRT_2_Col_Emi)
 	{
 		frag->_mrt = Mrt1ColorCb::create();
 	}

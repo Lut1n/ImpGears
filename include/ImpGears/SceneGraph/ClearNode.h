@@ -5,7 +5,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API ClearNode : public SceneNode
+class IMP_API ClearNode : public Node
 {
 public:
 	

@@ -1,14 +1,14 @@
-#ifndef IMP_LIGHT_MODEL_H
-#define IMP_LIGHT_MODEL_H
+#ifndef IMP_REFLEXION_MODEL_H
+#define IMP_REFLEXION_MODEL_H
 
 #include <Renderer/GeometryRenderer.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
-struct IMP_API LightModel : public Object
+struct IMP_API ReflexionModel : public Object
 {
-	Meta_Class(LightModel);
+	Meta_Class(ReflexionModel);
 	
 	struct TexturingCallback
 	{
@@ -65,8 +65,8 @@ struct IMP_API LightModel : public Object
 		MRT_2_Col_Emi,
 	};
 	
-	LightModel(Lighting l = Lighting_None, Texturing t = Texturing_PlainColor, MRT mrt = MRT_1_Col);
-	virtual ~LightModel();
+	ReflexionModel(Lighting l = Lighting_None, Texturing t = Texturing_PlainColor, MRT mrt = MRT_1_Col);
+	virtual ~ReflexionModel();
 	
 	void setTexturing(Texturing t);
 	Texturing getTexturing() const;
@@ -96,4 +96,4 @@ struct IMP_API LightModel : public Object
 
 IMPGEARS_END
 
-#endif // IMP_LIGHT_MODEL_H
+#endif // IMP_REFLEXION_MODEL_H

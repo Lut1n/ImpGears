@@ -1,13 +1,13 @@
-#include <SceneGraph/LightModel.h>
+#include <SceneGraph/ReflexionModel.h>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-struct NoLighting : public LightModel::LightingCallback
+struct NoLighting : public ReflexionModel::LightingCallback
 {
 	Meta_Class(NoLighting)
 	
-	virtual void applyLighting(const UniformMap& uniforms, Varyings& varyings, LightModel::TexturingCallback::Ptr& texturing, std::vector<Vec3>& outColor)
+	virtual void applyLighting(const UniformMap& uniforms, Varyings& varyings, ReflexionModel::TexturingCallback::Ptr& texturing, std::vector<Vec3>& outColor)
     {
 		Vec2 tex = Vec2(varyings.get("texUV"));
 		Vec3 color = texturing->textureColor(tex,uniforms,varyings) * varyings.get("color") * uniforms.getVec3("u_color");
@@ -19,11 +19,11 @@ struct NoLighting : public LightModel::LightingCallback
 };
 
 //--------------------------------------------------------------
-struct PhongLighting : public LightModel::LightingCallback
+struct PhongLighting : public ReflexionModel::LightingCallback
 {
 	Meta_Class(PhongLighting)
 	
-	virtual void applyLighting(const UniformMap& uniforms, Varyings& varyings, LightModel::TexturingCallback::Ptr& texturing, std::vector<Vec3>& outColor)
+	virtual void applyLighting(const UniformMap& uniforms, Varyings& varyings, ReflexionModel::TexturingCallback::Ptr& texturing, std::vector<Vec3>& outColor)
     {
 		const Matrix4& view = uniforms.getMat4("u_view");
 		const Vec3& lightPos = uniforms.getVec3("u_lightPos");
@@ -83,7 +83,7 @@ struct PhongLighting : public LightModel::LightingCallback
 };
 
 //--------------------------------------------------------------
-struct PlainColorCb : public LightModel::TexturingCallback
+struct PlainColorCb : public ReflexionModel::TexturingCallback
 {
 	Meta_Class(PlainColorCb)
 	
@@ -102,7 +102,7 @@ struct PlainColorCb : public LightModel::TexturingCallback
 };
 
 //--------------------------------------------------------------
-struct SamplerCbCN : public LightModel::TexturingCallback
+struct SamplerCbCN : public ReflexionModel::TexturingCallback
 {
 	Meta_Class(SamplerCbCN)
 	
@@ -132,7 +132,7 @@ struct SamplerCbCN : public LightModel::TexturingCallback
 };
 
 //--------------------------------------------------------------
-struct SamplerCbCNE : public LightModel::TexturingCallback
+struct SamplerCbCNE : public ReflexionModel::TexturingCallback
 {
 	Meta_Class(SamplerCbCN)
 	
@@ -157,7 +157,7 @@ struct SamplerCbCNE : public LightModel::TexturingCallback
 };
 
 //--------------------------------------------------------------
-struct Mrt1ColorCb : public LightModel::MRTCallback
+struct Mrt1ColorCb : public ReflexionModel::MRTCallback
 {
 	Meta_Class(Mrt1ColorCb)
 	
@@ -169,7 +169,7 @@ struct Mrt1ColorCb : public LightModel::MRTCallback
 };
 
 //--------------------------------------------------------------
-struct Mrt2ColorEmiCb : public LightModel::MRTCallback
+struct Mrt2ColorEmiCb : public ReflexionModel::MRTCallback
 {
 	Meta_Class(Mrt2ColorEmiCb)
 	

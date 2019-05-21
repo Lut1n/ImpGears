@@ -12,7 +12,7 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 	buf.getTriangles(_geo._vertices);
 	_wireframe = wireframe;
 	
-	_shader = LightModel::create();
+	_shader = ReflexionModel::create();
 	u_color = Uniform::create("u_color", Uniform::Type_3f);
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(_color);
@@ -27,7 +27,7 @@ GeoNode::GeoNode(const Geometry& geo, bool wireframe)
 	_geo = geo;
 	_wireframe = wireframe;
 	
-	_shader = LightModel::create();
+	_shader = ReflexionModel::create();
 	u_color = Uniform::create("u_color", Uniform::Type_3f);
 	_color = Vec3(0.0,0.0,1.0);
 	u_color->set(_color);
@@ -44,7 +44,7 @@ void GeoNode::setColor(const Vec3& color)
 }
 
 //--------------------------------------------------------------
-void GeoNode::setShader(LightModel::Ptr shader)
+void GeoNode::setShader(ReflexionModel::Ptr shader)
 {
 	_shader = shader;
 	// _shader->addUniform(u_color);
@@ -79,12 +79,12 @@ void GeoNode::update()
 //--------------------------------------------------------------
 void GeoNode::render()
 { 
-	if(GraphRenderer::s_interface != nullptr )
+	if(Graph::s_interface != nullptr )
 	{
 		if(_gBuffer == nullptr)
-			_gBuffer = GraphRenderer::s_interface->load(&_geo);
+			_gBuffer = Graph::s_interface->load(&_geo);
 		if(_gBuffer != nullptr)
-		GraphRenderer::s_interface->draw(_gBuffer);
+		Graph::s_interface->draw(_gBuffer);
 	}
 }
 

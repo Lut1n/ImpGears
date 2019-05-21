@@ -15,7 +15,7 @@ class State;
 class Geometry;
 class TextureSampler;
 class Target;
-class LightModel;
+class ReflexionModel;
 
 class IMP_API RenderPlugin : public Object
 {
@@ -35,7 +35,7 @@ public:
 	
 	virtual Data::Ptr load(const TextureSampler* sampler) = 0;
 	
-	virtual Data::Ptr load(const LightModel* program) = 0;
+	virtual Data::Ptr load(const ReflexionModel* program) = 0;
 	
 	virtual void update(Data::Ptr data, const TextureSampler* sampler) = 0;
 	

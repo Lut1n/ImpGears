@@ -1,24 +1,24 @@
-#ifndef IMP_GRAPHRENDERER_H
-#define IMP_GRAPHRENDERER_H
+#ifndef IMP_GRAPH_H
+#define IMP_GRAPH_H
 
 #include <Core/Object.h>
 
 #include <SceneGraph/ClearNode.h>
-#include <SceneGraph/SceneVisitor.h>
+#include <Renderer/SceneVisitor.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API GraphRenderer : public Object
+class IMP_API Graph : public Object
 {
 public:
 
-	Meta_Class(GraphRenderer)
+	Meta_Class(Graph)
 	
-	GraphRenderer();
-	virtual ~GraphRenderer();
+	Graph();
+	virtual ~Graph();
 
-	void renderScene(const SceneNode::Ptr& scene);
+	void renderScene(const Node::Ptr& scene);
 	
 	State::Ptr getInitState() { return _initState; }
 	
@@ -38,4 +38,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_GRAPHRENDERER_H
+#endif // IMP_GRAPH_H

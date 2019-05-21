@@ -5,8 +5,7 @@
 
 IMPGEARS_BEGIN
 
-/// \brief Defines a scene camera.
-class IMP_API Camera : public SceneNode
+class IMP_API Camera : public Node
 {
 public:
 	

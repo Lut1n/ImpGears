@@ -118,35 +118,35 @@ const State& State::operator=(const State& other)
 //--------------------------------------------------------------
 void State::apply() const
 {
-	if(GraphRenderer::s_interface == nullptr) return;
+	if(Graph::s_interface == nullptr) return;
 		
 		
 	if(_faceCullingChanged)
-		GraphRenderer::s_interface->setCulling(_faceCullingMode);
+		Graph::s_interface->setCulling(_faceCullingMode);
 	
 	if(_blendModeChanged)
-		GraphRenderer::s_interface->setBlend(_blendMode);
+		Graph::s_interface->setBlend(_blendMode);
 	
 	if(_lineWidthChanged)
-		GraphRenderer::s_interface->setLineW(_lineWidth);
+		Graph::s_interface->setLineW(_lineWidth);
 	
 	if(_depthTestChanged)
-		GraphRenderer::s_interface->setDepthTest(_depthTest);
+		Graph::s_interface->setDepthTest(_depthTest);
 	
 	if(_viewportChanged)
-		GraphRenderer::s_interface->setViewport(_viewport);
+		Graph::s_interface->setViewport(_viewport);
 	
 	if(_targetChanged)
 	{
 		if(_target == nullptr)
 		{
-			GraphRenderer::s_interface->unbind(nullptr);
+			Graph::s_interface->unbind(nullptr);
 		}
 		else 
 		{
 			if(_target->_d == nullptr)
-				GraphRenderer::s_interface->init(_target.get());
-			GraphRenderer::s_interface->bind(_target->_d);
+				Graph::s_interface->init(_target.get());
+			Graph::s_interface->bind(_target->_d);
 			_target->change();
 		}
 	}
@@ -156,13 +156,13 @@ void State::apply() const
 		if(_shaderChanged)
 		{
 			if(_shader->_d == nullptr)
-				_shader->_d = GraphRenderer::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
-			GraphRenderer::s_interface->bind(_shader->_d);
+				_shader->_d = Graph::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
+			Graph::s_interface->bind(_shader->_d);
 		}
 		if(_shader->_d != nullptr && _uniformsChanged)
 		{
 			for(auto u : _uniforms)
-				GraphRenderer::s_interface->update(_shader->_d, u.second);
+				Graph::s_interface->update(_shader->_d, u.second);
 		}
 	}
 }
@@ -217,7 +217,7 @@ void State::setTarget(Target::Ptr target)
 }
 
 //--------------------------------------------------------------
-void State::setShader(LightModel::Ptr shader)
+void State::setShader(ReflexionModel::Ptr shader)
 {
 	_shader = shader;
 	_shaderChanged = true;

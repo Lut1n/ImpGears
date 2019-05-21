@@ -20,7 +20,7 @@ public:
 	
 	virtual Data::Ptr load(const TextureSampler* sampler);
 	
-	virtual Data::Ptr load(const LightModel* program);
+	virtual Data::Ptr load(const ReflexionModel* program);
 	
 	virtual void update(Data::Ptr data, const TextureSampler* sampler);
 	

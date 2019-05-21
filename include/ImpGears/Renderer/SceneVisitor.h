@@ -11,7 +11,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API SceneVisitor : public Visitor<SceneNode*>
+class IMP_API SceneVisitor : public Visitor
 {
 public:
 
@@ -25,10 +25,10 @@ public:
 	
 	virtual void reset();
 
-	virtual void apply( SceneNode* node );
-	virtual void applyDefault( SceneNode* node );
+	virtual void apply( Node* node );
+	virtual void applyDefault( Node* node );
 	virtual void applyCamera( Camera* node );
-	virtual void push( SceneNode* node );
+	virtual void push( Node* node );
 	virtual void pop();
 
 protected:

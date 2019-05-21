@@ -7,7 +7,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API QuadNode : public SceneNode
+class IMP_API QuadNode : public Node
 {
 public:
 

@@ -90,13 +90,13 @@ void Target::change()
 //--------------------------------------------------------------
 void Target::update()
 {
-	if(GraphRenderer::s_interface != nullptr
+	if(Graph::s_interface != nullptr
 		&& _hasChanged)
 	{
 		for(int i=0;i<(int)_targets.size();++i)
 		{
 			TextureSampler::Ptr& img = _targets[i];
-			GraphRenderer::s_interface->bringBack(img->getSource(),img->_d,i);
+			Graph::s_interface->bringBack(img->getSource(),img->_d,i);
 		}
 		_hasChanged = false;
 	}

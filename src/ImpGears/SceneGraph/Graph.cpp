@@ -6,10 +6,10 @@
 
 IMPGEARS_BEGIN
 
-RenderPlugin::Ptr GraphRenderer::s_interface;
+RenderPlugin::Ptr Graph::s_interface;
 
 //--------------------------------------------------------------
-GraphRenderer::GraphRenderer()
+Graph::Graph()
 {
 	s_interface = PluginManager::open("libglPlugin");
 	if(s_interface == nullptr) { s_interface = CpuRenderPlugin::create(); std::cout << "fallback to CPU rendering" << std::endl; }
@@ -36,14 +36,14 @@ GraphRenderer::GraphRenderer()
 }
 
 //--------------------------------------------------------------
-GraphRenderer::~GraphRenderer()
+Graph::~Graph()
 {
 }
 
 //---------------------------------------------------------------
-void GraphRenderer::renderScene(const SceneNode::Ptr& scene)
+void Graph::renderScene(const Node::Ptr& scene)
 {
-	Visitor<SceneNode*>::Ptr visitor = _visitor;
+	Visitor::Ptr visitor = _visitor;
 
 	_visitor->reset();
 	_visitor->push(_initNode.get());
@@ -53,25 +53,25 @@ void GraphRenderer::renderScene(const SceneNode::Ptr& scene)
 }
 
 //---------------------------------------------------------------
-void GraphRenderer::setClearColor(const Vec4& color)
+void Graph::setClearColor(const Vec4& color)
 {
 	_initNode->setColor(color);
 }
 
 //---------------------------------------------------------------
-void GraphRenderer::setClearDepth(float depth)
+void Graph::setClearDepth(float depth)
 {
 	_initNode->setDepth(depth);
 }
 
 //---------------------------------------------------------------
-void GraphRenderer::setTarget(const Target::Ptr& target)
+void Graph::setTarget(const Target::Ptr& target)
 {
 	_initNode->setTarget(target);
 }
 
 //---------------------------------------------------------------
-void GraphRenderer::setDefaultTarget()
+void Graph::setDefaultTarget()
 {
 	_initNode->setTarget(nullptr);
 }

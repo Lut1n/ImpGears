@@ -54,7 +54,7 @@ Image::Ptr generateImage()
     return image;
 }
 
-struct Custom : public LightModel::TexturingCallback
+struct Custom : public ReflexionModel::TexturingCallback
 {
 	Meta_Class(Custom)
 	
@@ -108,8 +108,8 @@ vec3 textureEmissive(vec2 uv)
 
 struct IGStuff
 {
-	GraphRenderer::Ptr renderer;
-	SceneNode::Ptr graphRoot;
+	Graph::Ptr renderer;
+	Node::Ptr graphRoot;
 	Camera::Ptr camera;
 	Target::Ptr target;
 	
@@ -120,7 +120,7 @@ struct IGStuff
 	{
 		Custom::Ptr customTexturing = Custom::create();
 		customTexturing->im = generateImage();
-		LightModel::Ptr model = LightModel::create(LightModel::Lighting_Phong, LightModel::Texturing_Customized);
+		ReflexionModel::Ptr model = ReflexionModel::create(ReflexionModel::Lighting_Phong, ReflexionModel::Texturing_Customized);
 		model->_texturingCb = customTexturing;
 		model->_fragCode_texturing = glsl_texturing;
 		
@@ -128,7 +128,7 @@ struct IGStuff
 		sampler_test->setSource( customTexturing->im );
 		sampler_test->setMode(ImageSampler::Mode_Repeat);
 		
-		renderer = GraphRenderer::create();
+		renderer = Graph::create();
 		target = Target::create();
 		
 		viewport.set(0.0,0.0,512,512);
@@ -177,7 +177,7 @@ struct IGStuff
 		camera = Camera::create();
 		camera->setPosition( initCamPos );
 		
-		graphRoot = SceneNode::create();
+		graphRoot = Node::create();
 		graphRoot->addNode(camera);
 		graphRoot->addNode(cubeNode);
 	};

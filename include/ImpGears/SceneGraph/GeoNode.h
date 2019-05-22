@@ -5,6 +5,7 @@
 #include <Geometry/Polyhedron.h>
 #include <Geometry/Geometry.h>
 #include <SceneGraph/Node.h>
+#include <SceneGraph/Material.h>
 #include <Renderer/Uniform.h>
 #include <Renderer/RenderPlugin.h>
 
@@ -17,6 +18,7 @@ class IMP_API GeoNode : public Node
 	Meta_Class(GeoNode)
 	
 	Geometry _geo;
+	Material::Ptr _material;
 	RenderPlugin::Data::Ptr _gBuffer;
 	bool _wireframe;
 	bool _loaded;
@@ -31,6 +33,7 @@ class IMP_API GeoNode : public Node
 	void setColor(const Vec3& color);
 	
 	void setShader(ReflexionModel::Ptr shader);
+	void setMaterial(const Material::Ptr material);
 	
 	virtual ~GeoNode();
 	

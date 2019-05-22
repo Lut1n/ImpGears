@@ -33,9 +33,11 @@ void RenderVisitor::apply( Node* node )
 {
 	Camera* asCamera = dynamic_cast<Camera*>( node );
 	ClearNode* asClear = dynamic_cast<ClearNode*>( node );
+	LightNode* asLight = dynamic_cast<LightNode*>( node );
 	
 	if( asCamera ) applyCamera(asCamera);
 	else if( asClear ) applyClearNode(asClear);
+	else if( asLight ) applyLightNode(asLight);
 	else applyDefault(node);
 }
 
@@ -76,6 +78,15 @@ void RenderVisitor::applyCamera( Camera* node )
 	node->lookAt();
 	// u_view->set( node->getViewMatrix() );
 	_queue->_camera = node;
+}
+
+//--------------------------------------------------------------
+void RenderVisitor::applyLightNode( LightNode* node )
+{
+	Matrix4 m = _matrices.back();
+	node->_worldPosition = Vec3(m(3,0),m(3,1),m(3,2));
+	
+	_queue->_lights.push_back(node);
 }
 
 //--------------------------------------------------------------

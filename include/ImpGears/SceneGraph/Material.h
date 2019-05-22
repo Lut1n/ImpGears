@@ -15,8 +15,6 @@ public:
 	Material();
 	virtual ~Material();
 
-private:
-
 	ImageSampler::Ptr _baseColor;
 	float _shininess;
 };

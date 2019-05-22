@@ -14,8 +14,7 @@ public:
 	LightNode();
 	virtual ~LightNode();
 
-private:
-
+	Vec3 _worldPosition;
 	Vec3 _color;
 	float _power;
 };

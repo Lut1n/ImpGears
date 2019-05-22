@@ -3,6 +3,7 @@
 
 #include <SceneGraph/Node.h>
 #include <SceneGraph/Camera.h>
+#include <SceneGraph/LightNode.h>
 #include <SceneGraph/State.h>
 
 #include <vector>
@@ -19,7 +20,7 @@ public:
 	virtual ~RenderQueue();
 	
 	const Camera* _camera;
-	// std::vector<const LightNode*> _lights;
+	std::vector<LightNode*> _lights;
 	
 	std::vector<State::Ptr> _states;
 	std::vector<Node*> _nodes;

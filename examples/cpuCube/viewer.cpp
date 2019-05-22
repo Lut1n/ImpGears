@@ -2,6 +2,7 @@
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/GeoNode.h>
 #include <SceneGraph/Camera.h>
+#include <SceneGraph/LightNode.h>
 #include <Descriptors/ImageIO.h>
 
 #include <Renderer/SceneRenderer.h>
@@ -92,7 +93,7 @@ uniform sampler2D u_sampler_test;
 
 vec3 textureColor(vec2 uv)
 {
-	return vec3(1.0);
+	return vec3(0.2,0.2,1.0);
 }
 
 vec3 textureNormal(vec2 uv)
@@ -115,6 +116,7 @@ struct IGStuff
 	Graph::Ptr graph;
 	Node::Ptr root;
 	Camera::Ptr camera;
+	LightNode::Ptr light;
 	Target::Ptr target;
 	
 	Vec4 viewport;
@@ -154,27 +156,20 @@ struct IGStuff
 		cubeGeo.generateTexCoords(1.0);
 		Geometry::intoCCW( cubeGeo );
 		
+		Material::Ptr material = Material::create();
+		material->_shininess = 1.0;
 		GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);
 		cubeNode->setShader(model);
-		cubeNode->setColor(Vec3(1.0));
+		cubeNode->setMaterial(material);
 		
 		initCamPos.set(10,0,3);
 		
-		Uniform::Ptr u_lightPos = Uniform::create("u_lightPos", Uniform::Type_3f);
-		Uniform::Ptr u_lightCol = Uniform::create("u_lightCol", Uniform::Type_3f);
-		Uniform::Ptr u_lightAtt = Uniform::create("u_lightAtt", Uniform::Type_3f);
 		Uniform::Ptr u_sampler_test = Uniform::create("u_sampler_test", Uniform::Type_Sampler);
 		// Uniform::Ptr u_sampler_color = Uniform::create("u_sampler_color", Uniform::Type_Sampler);
 		// Uniform::Ptr u_sampler_normal = Uniform::create("u_sampler_normal", Uniform::Type_Sampler);
-		u_lightPos->set(Vec3(10.0,5.0,5.0));
-		u_lightCol->set(Vec3(1.0));
-		u_lightAtt->set(Vec3(30.0,1.0,0.0));
 		u_sampler_test->set(sampler_test);
 		// u_sampler_color->set(sampler_test);
 		// u_sampler_normal->set(sampler_test);
-		cubeNode->getState()->setUniform(u_lightPos);
-		cubeNode->getState()->setUniform(u_lightCol);
-		cubeNode->getState()->setUniform(u_lightAtt);
 		cubeNode->getState()->setUniform(u_sampler_test);
 		// cubeNode->getState()->setUniform(u_sampler_color);
 		// cubeNode->getState()->setUniform(u_sampler_normal);
@@ -182,9 +177,15 @@ struct IGStuff
 		camera = Camera::create();
 		camera->setPosition( initCamPos );
 		
+		light = LightNode::create();
+		light->setPosition(Vec3(10.0,5.0,5.0));
+		light->_color = Vec3(1.0);
+		light->_power = 30.0;
+		
 		root = Node::create();
 		root->addNode(camera);
 		root->addNode(cubeNode);
+		root->addNode(light);
 		graph->setRoot(root);
 		
 	};

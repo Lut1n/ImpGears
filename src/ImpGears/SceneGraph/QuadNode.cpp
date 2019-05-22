@@ -27,6 +27,10 @@ QuadNode::QuadNode()
 	_geo.setTexCoords(texCoords);
 	_geo.setNormals(normals);
 	
+	Uniform::Ptr u_color = Uniform::create("u_color",Uniform::Type_3f);
+	u_color->set(Vec3(1.0));
+	getState()->setUniform(u_color);
+	
 	// Geometry::intoCCW( _geo );
 }
 

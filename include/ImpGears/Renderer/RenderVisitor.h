@@ -37,6 +37,7 @@ protected:
 	
 	virtual void applyDefault( Node* node );
 	virtual void applyCamera( Camera* node );
+	virtual void applyLightNode( LightNode* node );
 	virtual void applyClearNode( ClearNode* node );
 	
 	MatrixStack _matrices;

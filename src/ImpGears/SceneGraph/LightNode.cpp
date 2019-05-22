@@ -10,6 +10,13 @@ LightNode::LightNode()
 }
 
 //--------------------------------------------------------------
+LightNode::LightNode(const Vec3& color, float power)
+	: _color(color)
+	, _power(power)
+{
+}
+
+//--------------------------------------------------------------
 LightNode::~LightNode()
 {
 }

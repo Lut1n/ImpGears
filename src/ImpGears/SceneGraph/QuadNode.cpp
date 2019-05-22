@@ -5,15 +5,16 @@
 IMPGEARS_BEGIN
 
 QuadNode::QuadNode()
+	: GeoNode(Geometry(),false)
 {
-	// quad generation
-	Vec3 p1 = -Vec3::X-Vec3::Y;
-	Vec3 p2 = -Vec3::X+Vec3::Y;
-	Vec3 p3 = Vec3::X-Vec3::Y;
-	Vec3 p4 = Vec3::X+Vec3::Y;
-	_geo = Geometry::quad(p1,p2,p3,p4);
+	_loaded = true;
 	
-	_geo.generateColors(Vec3(1.0));
+	// quad generation
+	Vec3 p1(-1,-1,0);
+	Vec3 p2(-1,+1,0);
+	Vec3 p3(+1,-1,0);
+	Vec3 p4(+1,+1,0);
+	_geo = Geometry::quad(p1,p2,p3,p4);
 	
 	// texture coords generation
 	// and normals generation
@@ -26,27 +27,17 @@ QuadNode::QuadNode()
 	}
 	_geo.setTexCoords(texCoords);
 	_geo.setNormals(normals);
-	
-	Uniform::Ptr u_color = Uniform::create("u_color",Uniform::Type_3f);
-	u_color->set(Vec3(1.0));
-	getState()->setUniform(u_color);
-	
-	// Geometry::intoCCW( _geo );
+	_geo.generateColors(Vec3(1.0));
 }
 
 QuadNode::~QuadNode()
 {
-	// TODO release _gData
 }
 
 
-void QuadNode::render()
+void QuadNode::update()
 {
-	if(SceneRenderer::s_interface != nullptr)
-	{
-		if(_gData == nullptr) _gData = SceneRenderer::s_interface->load(&_geo);
-		SceneRenderer::s_interface->draw(_gData);
-	}
+	// do nothing
 }
 
 IMPGEARS_END

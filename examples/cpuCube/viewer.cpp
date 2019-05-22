@@ -89,7 +89,7 @@ struct Custom : public ReflexionModel::TexturingCallback
 /// =========== FRAGMENT SHADER SOURCE =====================
 static std::string glsl_texturing = GLSL_CODE(
 
-uniform sampler2D u_sampler_test;
+uniform sampler2D u_sampler_color;
 
 vec3 textureColor(vec2 uv)
 {
@@ -104,7 +104,7 @@ vec3 textureNormal(vec2 uv)
 vec3 textureEmissive(vec2 uv)
 {
 	// return vec3(0.0);
-	return texture2D(u_sampler_test,uv).xyz  * vec3(1.0,0.0,0.0);
+	return texture2D(u_sampler_color,uv).xyz  * vec3(1.0,0.0,0.0);
 }
 
 );
@@ -130,10 +130,6 @@ struct IGStuff
 		model->_texturingCb = customTexturing;
 		model->_fragCode_texturing = glsl_texturing;
 		
-		TextureSampler::Ptr sampler_test = TextureSampler::create();
-		sampler_test->setSource( customTexturing->im );
-		sampler_test->setMode(ImageSampler::Mode_Repeat);
-		
 		renderer = SceneRenderer::create();
 		target = Target::create();
 		
@@ -156,31 +152,22 @@ struct IGStuff
 		cubeGeo.generateTexCoords(1.0);
 		Geometry::intoCCW( cubeGeo );
 		
-		Material::Ptr material = Material::create();
-		material->_shininess = 1.0;
+		Material::Ptr material = Material::create(Vec3(1.0),4.0);
+		material->_baseColor = TextureSampler::create();
+		material->_baseColor->setSource( customTexturing->im );
+		material->_baseColor->setMode(ImageSampler::Mode_Repeat);
+		material->_normalmap = material->_baseColor;
+		
 		GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);
 		cubeNode->setShader(model);
 		cubeNode->setMaterial(material);
 		
 		initCamPos.set(10,0,3);
-		
-		Uniform::Ptr u_sampler_test = Uniform::create("u_sampler_test", Uniform::Type_Sampler);
-		// Uniform::Ptr u_sampler_color = Uniform::create("u_sampler_color", Uniform::Type_Sampler);
-		// Uniform::Ptr u_sampler_normal = Uniform::create("u_sampler_normal", Uniform::Type_Sampler);
-		u_sampler_test->set(sampler_test);
-		// u_sampler_color->set(sampler_test);
-		// u_sampler_normal->set(sampler_test);
-		cubeNode->getState()->setUniform(u_sampler_test);
-		// cubeNode->getState()->setUniform(u_sampler_color);
-		// cubeNode->getState()->setUniform(u_sampler_normal);
-		
 		camera = Camera::create();
 		camera->setPosition( initCamPos );
 		
-		light = LightNode::create();
-		light->setPosition(Vec3(10.0,5.0,5.0));
-		light->_color = Vec3(1.0);
-		light->_power = 30.0;
+		light = LightNode::create(Vec3(1.0), 30.0);
+		light->setPosition(Vec3(10.0,5.0,10.0));
 		
 		root = Node::create();
 		root->addNode(camera);

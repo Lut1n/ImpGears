@@ -1,13 +1,11 @@
 #ifndef IMP_QUADNODE_H
 #define IMP_QUADNODE_H
 
-#include <Renderer/RenderPlugin.h>
-#include <SceneGraph/Node.h>
-#include <Geometry/Geometry.h>
+#include <SceneGraph/GeoNode.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API QuadNode : public Node
+class IMP_API QuadNode : public GeoNode
 {
 public:
 
@@ -16,12 +14,7 @@ public:
 	QuadNode();
 	virtual ~QuadNode();
 
-	virtual void render();
-	
-protected:
-	
-	Geometry _geo;
-	RenderPlugin::Data::Ptr _gData;
+	virtual void update();
 };
 
 IMPGEARS_END

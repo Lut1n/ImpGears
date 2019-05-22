@@ -13,10 +13,15 @@ public:
 	Meta_Class(Material)
 	
 	Material();
+	Material(const Vec3& color, float shininess);
 	virtual ~Material();
 
 	ImageSampler::Ptr _baseColor;
+	ImageSampler::Ptr _normalmap;
+	ImageSampler::Ptr _emissive;
+	
 	float _shininess;
+	Vec3 _color;
 };
 
 IMPGEARS_END

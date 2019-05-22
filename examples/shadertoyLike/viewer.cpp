@@ -83,6 +83,12 @@ int main(int argc, char* argv[])
 	State::Ptr state = graph->getInitState();
 	state->setOrthographicProjection(-1.f, 1.f, -1.f, 1.f, 0.f, 1.f);
     state->setViewport(0.0, 0.0, 512.0, 512.0);
+	
+	
+	// Target::Ptr target = Target::create();
+	// target->create(512, 512,1);
+	// state->setTarget(target);
+
 
     std::cout << "defaultshader.vert + " << arg[1] << std::endl;
 	std::string c_vert = loadText("defaultshader.vert");
@@ -94,33 +100,23 @@ int main(int argc, char* argv[])
     Uniform::Ptr u_time = Uniform::create("u_timer",Uniform::Type_1f);
 	u_time->set(0.f);
 	
-	Image::Ptr image = generateImage();
-	TextureSampler::Ptr sampler = TextureSampler::create();
-	sampler->setSource(image);
-	Uniform::Ptr u_sampler = Uniform::create("u_test",Uniform::Type_Sampler);
-	u_sampler->set(sampler);
-	
 	QuadNode::Ptr screen = QuadNode::create();
-    state->setShader(shader);
+    screen->setShader(shader);
+	state = screen->getState();
 	state->setUniform(u_time);
-	state->setUniform(u_sampler);
 	
-	Material::Ptr material = Material::create();
-	material->_shininess = 8.0;
+	Image::Ptr image = generateImage();
+	Material::Ptr material = Material::create(Vec3(1.0),8.0);
+	material->_baseColor = TextureSampler::create();
+	material->_baseColor->setSource(image);
 	
-	LightNode::Ptr light = LightNode::create();
-	light->_power = 3.0;
+	LightNode::Ptr light = LightNode::create(Vec3(1.0),3.0);
 	
-	// screen->setMaterial(material);
+	screen->setMaterial(material);
 	screen->addNode(light);
 	
 	Node::Ptr root = screen;
 	graph->setRoot(root);
-	
-	// Target::Ptr target = Target::create();
-	// target->create(512, 512,1);
-	// state->setTarget(target);
-
     sf::Clock timer;
 	
 	SceneRenderer::Ptr renderer = SceneRenderer::create();

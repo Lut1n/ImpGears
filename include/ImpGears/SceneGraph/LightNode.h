@@ -12,6 +12,7 @@ public:
 	Meta_Class(LightNode)
 	
 	LightNode();
+	LightNode(const Vec3& color, float power);
 	virtual ~LightNode();
 
 	Vec3 _worldPosition;

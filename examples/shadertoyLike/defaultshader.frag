@@ -1,5 +1,5 @@
 uniform float u_timer;
-uniform sampler2D u_test;
+uniform sampler2D u_sampler_color;
 
 float hash(vec3 uvw, float seed){
     return fract(sin(seed + dot(uvw ,vec3(12.9898,8.233936,3.672893))) * 43758.5453);
@@ -71,7 +71,7 @@ vec3 textureColor(vec2 uv)
     vec3 uvw = vec3(uv,u_timer * 0.02);
     vec3 uvw2 = mainNoise(uvw,10).xyz;
     uvw += uvw2 * 0.05;
-	return texture2D(u_test,uvw.xy).xyz;
+	return texture2D(u_sampler_color,uvw.xy).xyz;
 }
 
 vec3 textureNormal(vec2 uv)

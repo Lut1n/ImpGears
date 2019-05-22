@@ -22,15 +22,10 @@ class IMP_API GeoNode : public Node
 	RenderPlugin::Data::Ptr _gBuffer;
 	bool _wireframe;
 	bool _loaded;
-	Vec3 _color;
 	ReflexionModel::Ptr _shader;
-	Uniform::Ptr u_color;
 	
 	GeoNode(const Polyhedron& buf, bool wireframe = false);
-	
 	GeoNode(const Geometry& geo, bool wireframe = false);
-	
-	void setColor(const Vec3& color);
 	
 	void setShader(ReflexionModel::Ptr shader);
 	void setMaterial(const Material::Ptr material);
@@ -39,6 +34,7 @@ class IMP_API GeoNode : public Node
 	
 	virtual void update();
 	virtual void render();
+	
 };
 
 IMPGEARS_END

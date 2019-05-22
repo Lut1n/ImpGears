@@ -50,12 +50,20 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 	static Uniform::Ptr u_lightPos;
 	static Uniform::Ptr u_lightAtt;
 	static Uniform::Ptr u_lightCol;
+	static Uniform::Ptr u_color;
+	static Uniform::Ptr u_sampler_color;
+	static Uniform::Ptr u_sampler_normal;
+	static Uniform::Ptr u_sampler_emissive;
 	if(u_view == nullptr)
 	{
 		u_view = Uniform::create("u_view",Uniform::Type_Mat4);
 		u_lightPos = Uniform::create("u_lightPos",Uniform::Type_3f);
 		u_lightAtt = Uniform::create("u_lightAtt",Uniform::Type_3f);
 		u_lightCol = Uniform::create("u_lightCol",Uniform::Type_3f);
+		u_color = Uniform::create("u_color",Uniform::Type_3f);
+		u_sampler_color = Uniform::create("u_sampler_color",Uniform::Type_Sampler);
+		u_sampler_normal = Uniform::create("u_sampler_normal",Uniform::Type_Sampler);
+		u_sampler_emissive = Uniform::create("u_sampler_emissive",Uniform::Type_Sampler);
 	}
 	
 	Visitor::Ptr visitor = _visitor;
@@ -80,14 +88,40 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 		}
 		
 		GeoNode* geode = dynamic_cast<GeoNode*>( queue->_nodes[i] );
-		if(geode && geode->_material) latt[1] = geode->_material->_shininess;
-		else latt[1] = 0.0;
+		if(geode && geode->_material)
+		{
+			Material::Ptr mat = geode->_material;
+			latt[1] = mat->_shininess;
+			u_color->set(mat->_color);
+			
+			if(mat->_baseColor)
+			{
+				u_sampler_color->set(mat->_baseColor);
+				queue->_states[i]->setUniform(u_sampler_color);
+			}
+			if(mat->_normalmap)
+			{
+				u_sampler_normal->set(mat->_normalmap);
+				queue->_states[i]->setUniform(u_sampler_normal);
+			}
+			if(mat->_emissive)
+			{
+				u_sampler_emissive->set(mat->_emissive);
+				queue->_states[i]->setUniform(u_sampler_emissive);
+			}
+		}
+		else
+		{
+			latt[1] = 0.0;
+			u_color->set(Vec3(1.0));
+		}
 		
 		u_lightAtt->set( latt );
 		queue->_states[i]->setUniform(u_view);
 		queue->_states[i]->setUniform(u_lightPos);
 		queue->_states[i]->setUniform(u_lightCol);
 		queue->_states[i]->setUniform(u_lightAtt);
+		queue->_states[i]->setUniform(u_color);
 		queue->_states[i]->apply();
 		queue->_nodes[i]->render();
 	}	

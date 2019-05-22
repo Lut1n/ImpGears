@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	Graph::Ptr graph = Graph::create();
 	graph->setClearColor(Vec4(1.0,0.0,0.0,1.0));
 	State::Ptr state = graph->getInitState();
-	state->setOrthographicProjection(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+	state->setOrthographicProjection(-1.f, 1.f, -1.f, 1.f, 0.f, 1.f);
     state->setViewport(0.0, 0.0, 512.0, 512.0);
 
     std::cout << "defaultshader.vert + " << arg[1] << std::endl;

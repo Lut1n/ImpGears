@@ -21,7 +21,7 @@ QuadNode::QuadNode()
 	Geometry::BufType normals;
 	for(auto v : _geo._vertices)
 	{
-		texCoords.push_back(v);
+		texCoords.push_back(v*0.5+0.5);
 		normals.push_back(Vec3(0.0,0.0,1.0));
 	}
 	_geo.setTexCoords(texCoords);

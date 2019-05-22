@@ -1,5 +1,5 @@
 #include <SceneGraph/ClearNode.h>
-#include <SceneGraph/Graph.h>
+#include <Renderer/SceneRenderer.h>
 
 IMPGEARS_BEGIN
 
@@ -18,8 +18,8 @@ ClearNode::~ClearNode()
 //--------------------------------------------------------------
 void ClearNode::render()
 {
-	if(Graph::s_interface != nullptr)
-		Graph::s_interface->apply(this);
+	if(SceneRenderer::s_interface != nullptr)
+		SceneRenderer::s_interface->apply(this);
 }
 
 //--------------------------------------------------------------

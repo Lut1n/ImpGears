@@ -1,5 +1,5 @@
 #include <SceneGraph/State.h>
-#include <SceneGraph/Graph.h>
+#include <Renderer/SceneRenderer.h>
 
 IMPGEARS_BEGIN
 
@@ -118,35 +118,35 @@ const State& State::operator=(const State& other)
 //--------------------------------------------------------------
 void State::apply() const
 {
-	if(Graph::s_interface == nullptr) return;
+	if(SceneRenderer::s_interface == nullptr) return;
 		
 		
 	if(_faceCullingChanged)
-		Graph::s_interface->setCulling(_faceCullingMode);
+		SceneRenderer::s_interface->setCulling(_faceCullingMode);
 	
 	if(_blendModeChanged)
-		Graph::s_interface->setBlend(_blendMode);
+		SceneRenderer::s_interface->setBlend(_blendMode);
 	
 	if(_lineWidthChanged)
-		Graph::s_interface->setLineW(_lineWidth);
+		SceneRenderer::s_interface->setLineW(_lineWidth);
 	
 	if(_depthTestChanged)
-		Graph::s_interface->setDepthTest(_depthTest);
+		SceneRenderer::s_interface->setDepthTest(_depthTest);
 	
 	if(_viewportChanged)
-		Graph::s_interface->setViewport(_viewport);
+		SceneRenderer::s_interface->setViewport(_viewport);
 	
 	if(_targetChanged)
 	{
 		if(_target == nullptr)
 		{
-			Graph::s_interface->unbind(nullptr);
+			SceneRenderer::s_interface->unbind(nullptr);
 		}
 		else 
 		{
 			if(_target->_d == nullptr)
-				Graph::s_interface->init(_target.get());
-			Graph::s_interface->bind(_target->_d);
+				SceneRenderer::s_interface->init(_target.get());
+			SceneRenderer::s_interface->bind(_target->_d);
 			_target->change();
 		}
 	}
@@ -156,13 +156,13 @@ void State::apply() const
 		if(_shaderChanged)
 		{
 			if(_shader->_d == nullptr)
-				_shader->_d = Graph::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
-			Graph::s_interface->bind(_shader->_d);
+				_shader->_d = SceneRenderer::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
+			SceneRenderer::s_interface->bind(_shader->_d);
 		}
 		if(_shader->_d != nullptr && _uniformsChanged)
 		{
 			for(auto u : _uniforms)
-				Graph::s_interface->update(_shader->_d, u.second);
+				SceneRenderer::s_interface->update(_shader->_d, u.second);
 		}
 	}
 }

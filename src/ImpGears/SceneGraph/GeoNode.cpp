@@ -1,5 +1,5 @@
 #include <SceneGraph/GeoNode.h>
-#include <SceneGraph/Graph.h>
+#include <Renderer/SceneRenderer.h>
 
 
 IMPGEARS_BEGIN
@@ -79,12 +79,12 @@ void GeoNode::update()
 //--------------------------------------------------------------
 void GeoNode::render()
 { 
-	if(Graph::s_interface != nullptr )
+	if(SceneRenderer::s_interface != nullptr )
 	{
 		if(_gBuffer == nullptr)
-			_gBuffer = Graph::s_interface->load(&_geo);
+			_gBuffer = SceneRenderer::s_interface->load(&_geo);
 		if(_gBuffer != nullptr)
-		Graph::s_interface->draw(_gBuffer);
+		SceneRenderer::s_interface->draw(_gBuffer);
 	}
 }
 

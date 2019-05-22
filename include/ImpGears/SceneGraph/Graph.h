@@ -4,8 +4,7 @@
 #include <Core/Object.h>
 
 #include <SceneGraph/ClearNode.h>
-#include <Renderer/RenderVisitor.h>
-#include <Renderer/RenderPlugin.h>
+#include <SceneGraph/Visitor.h>
 
 IMPGEARS_BEGIN
 
@@ -17,23 +16,22 @@ public:
 	
 	Graph();
 	virtual ~Graph();
-
-	void renderScene(const Node::Ptr& scene);
 	
 	State::Ptr getInitState() { return _initState; }
+	
+	void accept(Visitor::Ptr& visitor);
+	void setRoot(Node::Ptr& node);
 	
 	void setClearColor(const Vec4& color);
 	void setClearDepth(float depth);
 	void setTarget(const Target::Ptr& target);
 	void setDefaultTarget();
-	
-	static RenderPlugin::Ptr s_interface;
 
 protected:
 	
+	Node::Ptr _root;
 	ClearNode::Ptr _initNode;
 	State::Ptr _initState;
-	RenderVisitor::Ptr _visitor;
 };
 
 IMPGEARS_END

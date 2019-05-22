@@ -1,7 +1,7 @@
 #include <Core/Object.h>
 #include <Renderer/Target.h>
 
-#include <SceneGraph/Graph.h>
+#include <Renderer/SceneRenderer.h>
 
 IMPGEARS_BEGIN
 
@@ -90,13 +90,13 @@ void Target::change()
 //--------------------------------------------------------------
 void Target::update()
 {
-	if(Graph::s_interface != nullptr
+	if(SceneRenderer::s_interface != nullptr
 		&& _hasChanged)
 	{
 		for(int i=0;i<(int)_targets.size();++i)
 		{
 			TextureSampler::Ptr& img = _targets[i];
-			Graph::s_interface->bringBack(img->getSource(),img->_d,i);
+			SceneRenderer::s_interface->bringBack(img->getSource(),img->_d,i);
 		}
 		_hasChanged = false;
 	}

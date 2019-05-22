@@ -1,6 +1,6 @@
 #include <SceneGraph/QuadNode.h>
 
-#include <SceneGraph/Graph.h>
+#include <Renderer/SceneRenderer.h>
 
 IMPGEARS_BEGIN
 
@@ -27,10 +27,10 @@ QuadNode::~QuadNode()
 
 void QuadNode::render()
 {
-	if(Graph::s_interface != nullptr)
+	if(SceneRenderer::s_interface != nullptr)
 	{
-		if(_gData == nullptr) _gData = Graph::s_interface->load(&_geo);
-		Graph::s_interface->draw(_gData);
+		if(_gData == nullptr) _gData = SceneRenderer::s_interface->load(&_geo);
+		SceneRenderer::s_interface->draw(_gData);
 	}
 }
 

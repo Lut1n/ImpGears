@@ -11,12 +11,23 @@ QuadNode::QuadNode()
 	Vec3 p2 = -Vec3::X+Vec3::Y;
 	Vec3 p3 = Vec3::X-Vec3::Y;
 	Vec3 p4 = Vec3::X+Vec3::Y;
-	_geo = Geometry::quad(p1,p2,p3,p4); Geometry::intoCCW( _geo );
-	Geometry::TexCoordBuf texCoords;
+	_geo = Geometry::quad(p1,p2,p3,p4);
+	
+	_geo.generateColors(Vec3(1.0));
 	
 	// texture coords generation
-	for(auto v : _geo._vertices) {texCoords.push_back(v);}
+	// and normals generation
+	Geometry::TexCoordBuf texCoords;
+	Geometry::BufType normals;
+	for(auto v : _geo._vertices)
+	{
+		texCoords.push_back(v);
+		normals.push_back(Vec3(0.0,0.0,1.0));
+	}
 	_geo.setTexCoords(texCoords);
+	_geo.setNormals(normals);
+	
+	// Geometry::intoCCW( _geo );
 }
 
 QuadNode::~QuadNode()

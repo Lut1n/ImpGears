@@ -2,8 +2,8 @@
 #include <SceneGraph/Camera.h>
 #include <Graphics/Image.h>
 #include <Descriptors/JsonImageOp.h>
-#include <Graphics/GeometryRenderer.h>
-#include <Graphics/CpuBlinnPhong.h>
+#include <Renderer/GeometryRenderer.h>
+#include <Renderer/CpuBlinnPhong.h>
 
 #include <Core/Vec4.h>
 #include <Core/Matrix3.h>

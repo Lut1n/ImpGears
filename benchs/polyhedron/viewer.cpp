@@ -1,9 +1,11 @@
-#include <SceneGraph/GraphRenderer.h>
+#include <SceneGraph/Graph.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/GeoNode.h>
 #include <Descriptors/ImageIO.h>
 #include <Descriptors/FileInfo.h>
 #include <Descriptors/JsonImageOp.h>
+
+#include <Renderer/SceneRenderer.h>
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
@@ -81,8 +83,8 @@ int main(int argc, char* argv[])
 	sf::RenderWindow window(sf::VideoMode(512, 512), "My window", sf::Style::Default, sf::ContextSettings(24));
 	window.setFramerateLimit(60);
 	
-	GraphRenderer::Ptr graph = GraphRenderer::create();
-	ClearNode::Ptr root = ClearNode::create();
+	Graph::Ptr graph = Graph::create();
+	Node::Ptr root = ClearNode::create();
 	
 	Camera::Ptr camera = Camera::create();
 	camera->setPosition(Vec3(3.0f, 0.0f, 0.0f));
@@ -122,7 +124,10 @@ int main(int argc, char* argv[])
 	node1->setColor(Vec3(1.0,1.0,0.0));
 	node1->setPosition(Vec3(0.3,0.0,-0.2));
 	
-	imp::LightModel::Ptr s = imp::LightModel::create(imp::LightModel::Lighting_Phong,imp::LightModel::Texturing_Customized);
+	imp::ReflexionModel::Ptr s = imp::ReflexionModel::create(
+		imp::ReflexionModel::Lighting_Phong,
+		imp::ReflexionModel::Texturing_Customized);
+	
 	s->_fragCode_texturing = fragSimple;
 	Geometry mush = generateRockHat(1.0, 4.0);
 	GeoNode::Ptr geomush = GeoNode::create(mush, false);
@@ -142,6 +147,9 @@ int main(int argc, char* argv[])
 	root->addNode(node2);
 	node2->addNode(node3);
 	node3->addNode(node4);
+	graph->setRoot(root);
+	
+	SceneRenderer::Ptr renderer = SceneRenderer::create();
 	
 	bool stopLoop = false;
     while (window.isOpen())
@@ -163,11 +171,12 @@ int main(int argc, char* argv[])
 		Vec3 lp(cos(t)*4.0,sin(t)*3.0,1.0);
 		node1->setPosition(lp);
 		u_lightPos->set(lp);
+		geomush->getState()->setUniform(u_lightPos);
 		// geomush->setPosition(Vec3(cos(t+3.14)*5.0,sin(t+3.14)*5.0,0.0));
 		// geomush->setRotation(Vec3(t * 0.1, 0.0, t * 0.25));
 		
 		// rendering
-		graph->renderScene( root );
+		renderer->render( graph );
 		window.display();
     }
     

@@ -1,7 +1,10 @@
 #include <Core/Matrix3.h>
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/GeoNode.h>
+#include <SceneGraph/Camera.h>
 #include <Descriptors/ImageIO.h>
+
+#include <Renderer/SceneRenderer.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -108,8 +111,9 @@ vec3 textureEmissive(vec2 uv)
 
 struct IGStuff
 {
-	Graph::Ptr renderer;
-	Node::Ptr graphRoot;
+	SceneRenderer::Ptr renderer;
+	Graph::Ptr graph;
+	Node::Ptr root;
 	Camera::Ptr camera;
 	Target::Ptr target;
 	
@@ -128,19 +132,20 @@ struct IGStuff
 		sampler_test->setSource( customTexturing->im );
 		sampler_test->setMode(ImageSampler::Mode_Repeat);
 		
-		renderer = Graph::create();
+		renderer = SceneRenderer::create();
 		target = Target::create();
 		
 		viewport.set(0.0,0.0,512,512);
+		
+		graph = Graph::create();
+		graph->getInitState()->setViewport( viewport );
 		
 		if(arg != "-gpu")
 		{
 			viewport.set(0.0,0.0,RES,RES);
 			target->create(RES,RES,1,true);
-			renderer->setTarget(target);
+			graph->setTarget(target);
 		}
-		
-		renderer->getInitState()->setViewport( viewport );
 	
 		// Geometry cubeGeo = Geometry::sphere(8,1.0);
 		Geometry cubeGeo = Geometry::cube();
@@ -177,9 +182,11 @@ struct IGStuff
 		camera = Camera::create();
 		camera->setPosition( initCamPos );
 		
-		graphRoot = Node::create();
-		graphRoot->addNode(camera);
-		graphRoot->addNode(cubeNode);
+		root = Node::create();
+		root->addNode(camera);
+		root->addNode(cubeNode);
+		graph->setRoot(root);
+		
 	};
 	
 	void updateCamera(float angle)
@@ -189,7 +196,7 @@ struct IGStuff
 	
 	void render()
 	{
-		renderer->renderScene( graphRoot );
+		renderer->render( graph );
 	}
 };
 

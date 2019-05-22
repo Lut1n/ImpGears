@@ -34,7 +34,9 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 	scene->accept(visitor);
 	
 	RenderQueue::Ptr queue = _visitor->getQueue();
-	u_view->set( queue->_camera->getViewMatrix() );
+	Matrix4 view;
+	if(queue->_camera) view = queue->_camera->getViewMatrix();
+	u_view->set( view );
 		
 	for(int i=0;i<(int)queue->_nodes.size();++i)
 	{

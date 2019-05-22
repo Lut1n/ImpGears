@@ -1,5 +1,5 @@
-varying vec2 v_texCoord;
 uniform float u_timer;
+uniform sampler2D u_test;
 
 float hash(vec3 uvw, float seed){
     return fract(sin(seed + dot(uvw ,vec3(12.9898,8.233936,3.672893))) * 43758.5453);
@@ -51,12 +51,12 @@ float valuenoise(vec3 uvw, int octave, float persist)
 }
 
 
-vec4 mainNoise(vec3 uvw)
+vec4 mainNoise(vec3 uvw, int octave)
 {
-    vec3 color = vec3(valuenoise(uvw, 8, 0.8));
-    vec3 c1 = vec3(0.0,1.0,0.0);
-    vec3 c2 = vec3(1.0,0.0,1.0);
-    float f = pow(length(color),6.0);
+    vec3 color = vec3(valuenoise(uvw, octave, 0.8));
+    vec3 c1 = vec3(1.0,0.0,0.0);
+    vec3 c2 = vec3(0.1,0.2,0.3);
+    float f = pow(length(color),8.0);
     color = mix(c1,c2,f);
     return vec4(color,1.0);
 }
@@ -66,10 +66,23 @@ float frac(float f)
     return f - floor(f);
 }
 
-void main()
+vec3 textureColor(vec2 uv)
 {
-    // w is u_timer
-    vec3 uvw = vec3(v_texCoord,u_timer * 0.1);
-    gl_FragData[0] = vec4(vec3(mainNoise(uvw)), 1.0);
+    vec3 uvw = vec3(uv,u_timer * 0.02);
+    vec3 uvw2 = mainNoise(uvw,10).xyz;
+    uvw += uvw2 * 0.05;
+	return texture2D(u_test,uvw.xy).xyz;
+}
+
+vec3 textureNormal(vec2 uv)
+{
+	return vec3(0.0,0.0,1.0);
+}
+
+vec3 textureEmissive(vec2 uv)
+{
+	// return vec3(0.0);
+    vec3 uvw = vec3(uv,u_timer * 0.02);
+    return vec3(mainNoise(uvw,10));
 }
 

@@ -97,13 +97,9 @@ int main(int argc, char* argv[])
 	// shader->_vertCode = c_vert;
 	shader->_fragCode_texturing = c_frag;
 	
-    Uniform::Ptr u_time = Uniform::create("u_timer",Uniform::Type_1f);
-	u_time->set(0.f);
-	
 	QuadNode::Ptr screen = QuadNode::create();
     screen->setShader(shader);
 	state = screen->getState();
-	state->setUniform(u_time);
 	
 	Image::Ptr image = generateImage();
 	Material::Ptr material = Material::create(Vec3(1.0),8.0);
@@ -143,10 +139,8 @@ int main(int argc, char* argv[])
 		}
 		
 		float sec = timer.getElapsedTime().asMilliseconds() / 1000.0;
-        u_time->set(sec);
-		state->setUniform(u_time);
+		state->setUniform("u_timer", sec);
 		light->setPosition( Vec3(std::sin(sec)*2.0,0.0,1.0) );
-		// light->setPosition( Vec3(0.0,0.0,1.0) );
 		
         renderer->render( graph );
 

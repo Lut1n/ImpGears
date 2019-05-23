@@ -249,4 +249,68 @@ void State::setUniform(const Uniform::Ptr& uniform)
 	_uniformsChanged = true;
 }
 
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, int i1)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_1i);
+	_uniforms[ name ]->set(i1);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, float f1)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_1f);
+	_uniforms[ name ]->set(f1);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, const Vec2& f2)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_2f);
+	_uniforms[ name ]->set(f2);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, const Vec3& f3)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_3f);
+	_uniforms[ name ]->set(f3);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, const Vec4& f4)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_4f);
+	_uniforms[ name ]->set(f4);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, const Matrix3& mat3)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_Mat3);
+	_uniforms[ name ]->set(mat3);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, const Matrix4& mat4)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_Mat4);
+	_uniforms[ name ]->set(mat4);
+	_uniformsChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setUniform(const std::string&& name, const ImageSampler::Ptr& sampler, int index)
+{
+	_uniforms[ name ] =  Uniform::create(name,Uniform::Type_Sampler);
+	_uniforms[ name ]->set(sampler, index);
+	_uniformsChanged = true;
+}
+
 IMPGEARS_END

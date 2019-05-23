@@ -45,27 +45,7 @@ LightNode* closest(Node* node, const std::vector<LightNode*>& ls)
 
 //---------------------------------------------------------------
 void SceneRenderer::render(const Graph::Ptr& scene)
-{
-	static Uniform::Ptr u_view;
-	static Uniform::Ptr u_lightPos;
-	static Uniform::Ptr u_lightAtt;
-	static Uniform::Ptr u_lightCol;
-	static Uniform::Ptr u_color;
-	static Uniform::Ptr u_sampler_color;
-	static Uniform::Ptr u_sampler_normal;
-	static Uniform::Ptr u_sampler_emissive;
-	if(u_view == nullptr)
-	{
-		u_view = Uniform::create("u_view",Uniform::Type_Mat4);
-		u_lightPos = Uniform::create("u_lightPos",Uniform::Type_3f);
-		u_lightAtt = Uniform::create("u_lightAtt",Uniform::Type_3f);
-		u_lightCol = Uniform::create("u_lightCol",Uniform::Type_3f);
-		u_color = Uniform::create("u_color",Uniform::Type_3f);
-		u_sampler_color = Uniform::create("u_sampler_color",Uniform::Type_Sampler);
-		u_sampler_normal = Uniform::create("u_sampler_normal",Uniform::Type_Sampler);
-		u_sampler_emissive = Uniform::create("u_sampler_emissive",Uniform::Type_Sampler);
-	}
-	
+{	
 	Visitor::Ptr visitor = _visitor;
 	_visitor->reset();
 	scene->accept(visitor);
@@ -73,8 +53,10 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 	RenderQueue::Ptr queue = _visitor->getQueue();
 	Matrix4 view;
 	if(queue->_camera) view = queue->_camera->getViewMatrix();
-	u_view->set( view );
 	
+	Vec3 lightPos(0.0);
+	Vec3 lightCol(1.0);
+	Vec3 color(1.0);
 	Vec3 latt(0.0);
 	
 	for(int i=0;i<(int)queue->_nodes.size();++i)
@@ -82,8 +64,8 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 		LightNode* light = closest(queue->_nodes[i], queue->_lights);
 		if(light)
 		{
-			u_lightPos->set( light->_worldPosition );
-			u_lightCol->set( light->_color );
+			lightPos = light->_worldPosition;
+			lightCol = light->_color;
 			latt[0] = light->_power;
 		}
 		
@@ -92,36 +74,26 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 		{
 			Material::Ptr mat = geode->_material;
 			latt[1] = mat->_shininess;
-			u_color->set(mat->_color);
+			color = mat->_color;
 			
 			if(mat->_baseColor)
-			{
-				u_sampler_color->set(mat->_baseColor);
-				queue->_states[i]->setUniform(u_sampler_color);
-			}
+				queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
 			if(mat->_normalmap)
-			{
-				u_sampler_normal->set(mat->_normalmap);
-				queue->_states[i]->setUniform(u_sampler_normal);
-			}
+				queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
 			if(mat->_emissive)
-			{
-				u_sampler_emissive->set(mat->_emissive);
-				queue->_states[i]->setUniform(u_sampler_emissive);
-			}
+				queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
 		}
 		else
 		{
 			latt[1] = 0.0;
-			u_color->set(Vec3(1.0));
+			color = Vec3(1.0);
 		}
 		
-		u_lightAtt->set( latt );
-		queue->_states[i]->setUniform(u_view);
-		queue->_states[i]->setUniform(u_lightPos);
-		queue->_states[i]->setUniform(u_lightCol);
-		queue->_states[i]->setUniform(u_lightAtt);
-		queue->_states[i]->setUniform(u_color);
+		queue->_states[i]->setUniform("u_view", view);
+		queue->_states[i]->setUniform("u_lightPos", lightPos);
+		queue->_states[i]->setUniform("u_lightCol", lightCol);
+		queue->_states[i]->setUniform("u_lightAtt", latt);
+		queue->_states[i]->setUniform("u_color", color);
 		queue->_states[i]->apply();
 		queue->_nodes[i]->render();
 	}	

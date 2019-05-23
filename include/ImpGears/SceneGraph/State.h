@@ -74,6 +74,15 @@ public:
 	void clearUniforms();
 	void setUniform(const Uniform::Ptr& uniform);
 	
+	void setUniform(const std::string&& name, int i1);
+	void setUniform(const std::string&& name, float f1);
+	void setUniform(const std::string&& name, const Vec2& f2);
+	void setUniform(const std::string&& name, const Vec3& f3);
+	void setUniform(const std::string&& name, const Vec4& f4);
+	void setUniform(const std::string&& name, const Matrix3& mat3);
+	void setUniform(const std::string&& name, const Matrix4& mat4);
+	void setUniform(const std::string&& name, const ImageSampler::Ptr& sampler, int index);
+	
 	Target::Ptr getTarget() { return _target; }
 	ReflexionModel::Ptr getShader() { return _shader; }
 

@@ -62,11 +62,9 @@ struct Custom : public ReflexionModel::TexturingCallback
 {
 	Meta_Class(Custom)
 	
-	Image::Ptr im;
-	
 	virtual Vec3 textureColor(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
 	{
-		return Vec3(1.0);
+		return Vec3(0.2,0.2,1.0);
 	}
 	
 	virtual Vec3 textureNormal(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
@@ -79,8 +77,8 @@ struct Custom : public ReflexionModel::TexturingCallback
 	virtual Vec3 textureEmissive(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings)
 	{
 		// return Vec3(0.0);
-		ImageSampler sampler(im);
-		return sampler.get(uv) * Vec3(1.0,0.0,0.0);
+		ImageSampler::Ptr sampler = uniforms.getSampler("u_sampler_color");
+		return sampler->get(uv) * Vec3(1.0,0.0,0.0);
 	}
 };
 
@@ -125,7 +123,7 @@ struct IGStuff
 	IGStuff(const std::string& arg)
 	{
 		Custom::Ptr customTexturing = Custom::create();
-		customTexturing->im = generateImage();
+		Image::Ptr im = generateImage();
 		ReflexionModel::Ptr model = ReflexionModel::create(ReflexionModel::Lighting_Phong, ReflexionModel::Texturing_Customized);
 		model->_texturingCb = customTexturing;
 		model->_fragCode_texturing = glsl_texturing;
@@ -154,7 +152,7 @@ struct IGStuff
 		
 		Material::Ptr material = Material::create(Vec3(1.0),4.0);
 		material->_baseColor = TextureSampler::create();
-		material->_baseColor->setSource( customTexturing->im );
+		material->_baseColor->setSource( im );
 		material->_baseColor->setMode(ImageSampler::Mode_Repeat);
 		material->_normalmap = material->_baseColor;
 		

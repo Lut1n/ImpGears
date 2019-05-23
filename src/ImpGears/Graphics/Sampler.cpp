@@ -119,4 +119,11 @@ ImageSampler::Mode ImageSampler::getMode() const
 	return _mode;
 }
 
+//--------------------------------------------------------------
+void ImageSampler::setInternalSrc(int w, int h, int chnl)
+{
+	Image::Ptr src = Image::create(w,h,chnl);
+	setSource(src);
+}
+
 IMPGEARS_END

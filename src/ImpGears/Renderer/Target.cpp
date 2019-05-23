@@ -26,7 +26,7 @@ void Target::create(int w, int h, int count, bool hasDepth)
 	_targets.resize(count);
 	for(int i=0;i<count;++i)
 	{
-		_targets[i] = TextureSampler::create();
+		_targets[i] = ImageSampler::create();
 		_targets[i]->setInternalSrc(w,h,4);
 	}
 	
@@ -34,7 +34,7 @@ void Target::create(int w, int h, int count, bool hasDepth)
 }
 
 //--------------------------------------------------------------
-void Target::create(const std::vector<TextureSampler::Ptr>& textures, bool hasDepth)
+void Target::create(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth)
 {
 	_targets = textures;;
 	_hasDepthBuffer = hasDepth;
@@ -48,7 +48,7 @@ void Target::destroy()
 }
 
 //--------------------------------------------------------------
-TextureSampler::Ptr Target::get(int n)
+ImageSampler::Ptr Target::get(int n)
 {
 	update();
 	return _targets[n];
@@ -96,7 +96,7 @@ void Target::update()
 	{
 		for(int i=0;i<(int)_targets.size();++i)
 		{
-			TextureSampler::Ptr& img = _targets[i];
+			ImageSampler::Ptr& img = _targets[i];
 			SceneRenderer::s_interface->bringBack(img.get());
 		}
 		_hasChanged = false;

@@ -151,9 +151,7 @@ struct IGStuff
 		Geometry::intoCCW( cubeGeo );
 		
 		Material::Ptr material = Material::create(Vec3(1.0),4.0);
-		material->_baseColor = TextureSampler::create();
-		material->_baseColor->setSource( im );
-		material->_baseColor->setMode(ImageSampler::Mode_Repeat);
+		material->_baseColor = ImageSampler::create(im,ImageSampler::Mode_Repeat);
 		material->_normalmap = material->_baseColor;
 		
 		GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);

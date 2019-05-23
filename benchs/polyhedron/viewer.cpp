@@ -40,7 +40,7 @@ Geometry generateRockHat(float radius, int sub)
 }
 
 // -----------------------------------------------------------------------------------------------------------------------
-void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& normalSampler)
+void loadSamplers(ImageSampler::Ptr& colorSampler, ImageSampler::Ptr& normalSampler)
 {
 	if( !fileExists("./cache/scene_color.tga") || !fileExists("./cache/scene_normals.tga") )
 	{
@@ -49,21 +49,21 @@ void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& normal
 		generateImageFromJson("textures.json");
 	}
 	
-	colorSampler =TextureSampler::create();
+	colorSampler =ImageSampler::create();
 	colorSampler->setSource( ImageIO::load("./cache/scene_color.tga") );
-	colorSampler->setMode(TextureSampler::Mode_Repeat);
-	colorSampler->setInterpo(TextureSampler::Interpo_Linear);
+	colorSampler->setMode(ImageSampler::Mode_Repeat);
+	colorSampler->setInterpo(ImageSampler::Interpo_Linear);
 	
-	normalSampler =TextureSampler::create();
+	normalSampler =ImageSampler::create();
 	normalSampler->setSource( ImageIO::load("./cache/scene_normals.tga") );
-	normalSampler->setMode(TextureSampler::Mode_Repeat);
-	normalSampler->setInterpo(TextureSampler::Interpo_Linear);
+	normalSampler->setMode(ImageSampler::Mode_Repeat);
+	normalSampler->setInterpo(ImageSampler::Interpo_Linear);
 }
 
 int main(int argc, char* argv[])
 {
 	
-	TextureSampler::Ptr colorSampler, normalSampler;
+	ImageSampler::Ptr colorSampler, normalSampler;
 	loadSamplers(colorSampler, normalSampler);
 	
 	sf::Clock clock;

@@ -61,6 +61,8 @@ public:
 	void setMode(Mode mode);
 	Mode getMode() const;
 	
+	void setInternalSrc(int w, int h, int chnl);
+	
 protected:
 	
 	Image::Ptr _src;

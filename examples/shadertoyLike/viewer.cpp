@@ -103,8 +103,7 @@ int main(int argc, char* argv[])
 	
 	Image::Ptr image = generateImage();
 	Material::Ptr material = Material::create(Vec3(1.0),8.0);
-	material->_baseColor = TextureSampler::create();
-	material->_baseColor->setSource(image);
+	material->_baseColor = ImageSampler::create(image);
 	
 	LightNode::Ptr light = LightNode::create(Vec3(1.0),3.0);
 	
@@ -132,7 +131,7 @@ int main(int argc, char* argv[])
             std::cout << "[reload shaders] defaultshader.vert + " << arg[1] << std::endl;
 			modifLast = modif;
 			c_frag = loadText(arg[1]);
-			shader->_d = NULL;
+			shader->_d = -1;
 			// shader->vertCode = c_vert;
 			shader->_fragCode_texturing = c_frag;
             screen->getState()->setShader(shader);

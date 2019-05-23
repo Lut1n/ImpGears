@@ -1,6 +1,6 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <Renderer/TextureSampler.h>
+#include <Graphics/Sampler.h>
 #include <Renderer/Target.h>
 #include <Renderer/CpuRenderPlugin.h>
 #include <Renderer/Uniform.h>
@@ -299,7 +299,7 @@ void CpuRenderPlugin::unbind(Target* target)
 {
 	s_internalState->target = &s_internalState->defaultTarget;
 
-	TextureSampler::Ptr tgt = s_internalState->target->get(0);
+	ImageSampler::Ptr tgt = s_internalState->target->get(0);
 	Image::Ptr sourceTgt = tgt->getSource();
 	s_internalState->geoRenderer.setTarget(0,sourceTgt,Vec4(0.0));
 }

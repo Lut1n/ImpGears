@@ -4,7 +4,6 @@
 #include <Core/Object.h>
 #include <Graphics/Image.h>
 
-#include <Renderer/TextureSampler.h>
 #include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
@@ -19,13 +18,13 @@ public:
 	virtual ~Target();
 
 	void create(int w, int h, int count = 1, bool hasDepth = false);
-	void create(const std::vector<TextureSampler::Ptr>& textures, bool hasDepth = false);
+	void create(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth = false);
 
 	void destroy();
 
 	bool hasDepth() const;
 
-	TextureSampler::Ptr get(int n);
+	ImageSampler::Ptr get(int n);
 	
 	int width() const;
 	int height() const;
@@ -38,7 +37,7 @@ public:
 	
 protected:
 	
-	std::vector<TextureSampler::Ptr> _targets;
+	std::vector<ImageSampler::Ptr> _targets;
 	bool _hasDepthBuffer;
 	bool _hasChanged;
 };

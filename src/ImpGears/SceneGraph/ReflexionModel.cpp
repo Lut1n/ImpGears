@@ -16,6 +16,7 @@ ReflexionModel::ReflexionModel(Lighting l, Texturing t, MRT mrt)
 	, _texturing(t)
 	, _mrt(mrt)
 {
+	_d = -1;
 }
 
 //--------------------------------------------------------------

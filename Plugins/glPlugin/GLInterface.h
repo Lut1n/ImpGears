@@ -21,26 +21,29 @@ public:
 	virtual void setViewport(Vec4 vp);
 	virtual void setDepthTest(int mode);
 	
-	virtual Data::Ptr load(const Geometry* geo);
+	virtual int load(const Geometry* geo);
+	virtual int load(const ImageSampler* sampler);
+	virtual int load(const ReflexionModel* program);
 	
-	virtual Data::Ptr load(const TextureSampler* samper);
+	virtual void update(const ImageSampler* sampler);
 	
-	virtual Data::Ptr load(const ReflexionModel* program);
-	
-	virtual void update(Data::Ptr data, const TextureSampler* sampler);
-	
-	virtual void bind(Data::Ptr data);
+	virtual void bind(Target* target);
+	virtual void bind(ReflexionModel* reflexion);
+	virtual void bind(Geometry* geo);
+	virtual void bind(ImageSampler* geo);
 	
 	virtual void init(Target* target);
-	
 	virtual void unbind(Target* target);
 	
-	virtual void bringBack(Image::Ptr img, Data::Ptr data, int n = 0);
+	virtual void bringBack(ImageSampler* sampler);
 	
-	virtual void draw(Data::Ptr data);
+	virtual void draw(Geometry* geo);
 	
-	virtual void update(Data::Ptr d, const Uniform::Ptr& uniform);
+	virtual void update(ReflexionModel* reflexion, const Uniform::Ptr& uniform);
 	
+	struct Priv;
+	
+	static Priv* s_internalState;
 };
 
 IMPGEARS_END

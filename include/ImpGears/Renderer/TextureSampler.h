@@ -25,8 +25,6 @@ public:
 	void setMaxMipmapLvl(int maxLvl);
 	int getMaxMipmapLvl() const;
 	
-	RenderPlugin::Data::Ptr _d;
-	
 protected:
 	
 	bool _hasMipmap;

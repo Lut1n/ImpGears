@@ -31,25 +31,31 @@ public:
 	
 	virtual void apply(const ClearNode* clear) = 0;
 	
-	virtual Data::Ptr load(const Geometry* geo) = 0;
+	virtual int load(const Geometry* geo) = 0;
 	
-	virtual Data::Ptr load(const TextureSampler* sampler) = 0;
+	virtual int load(const ImageSampler* sampler) = 0;
 	
-	virtual Data::Ptr load(const ReflexionModel* program) = 0;
+	virtual int load(const ReflexionModel* program) = 0;
 	
-	virtual void update(Data::Ptr data, const TextureSampler* sampler) = 0;
+	virtual void update(const ImageSampler* sampler) = 0;
 	
-	virtual void bind(Data::Ptr data) = 0;
+	virtual void bind(Target* target) = 0;
+	
+	virtual void bind(ReflexionModel* reflexion) = 0;
+	
+	virtual void bind(Geometry* geo) = 0;
+	
+	virtual void bind(ImageSampler* geo) = 0;
 	
 	virtual void init(Target* target) = 0;
 	
 	virtual void unbind(Target* target) = 0;
 	
-	virtual void bringBack(Image::Ptr img, Data::Ptr data, int n = 0) = 0;
+	virtual void bringBack(ImageSampler* sampler) = 0;
 	
-	virtual void draw(Data::Ptr data) = 0;
+	virtual void draw(Geometry* geo) = 0;
 	
-	virtual void update(Data::Ptr d, const Uniform::Ptr& uniform) = 0;
+	virtual void update(ReflexionModel* reflexion, const Uniform::Ptr& uniform) = 0;
 	
 	virtual void setCulling(int mode) = 0;
 	

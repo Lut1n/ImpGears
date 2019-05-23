@@ -8,6 +8,7 @@ IMPGEARS_BEGIN
 GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 {
 	_loaded = false;
+	_gBuffer = -1;
 	_geo.setPrimitive(Geometry::Primitive_Triangles);
 	buf.getTriangles(_geo._vertices);
 	_wireframe = wireframe;
@@ -21,6 +22,7 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 GeoNode::GeoNode(const Geometry& geo, bool wireframe)
 {
 	_loaded = false;
+	_gBuffer = -1;
 	_geo = geo;
 	_wireframe = wireframe;
 	
@@ -73,10 +75,13 @@ void GeoNode::render()
 { 
 	if(SceneRenderer::s_interface != nullptr )
 	{
-		if(_gBuffer == nullptr)
-			_gBuffer = SceneRenderer::s_interface->load(&_geo);
-		if(_gBuffer != nullptr)
-		SceneRenderer::s_interface->draw(_gBuffer);
+		if(_gBuffer == -1)
+		{
+			SceneRenderer::s_interface->load(&_geo);
+			_gBuffer = 0;
+		}
+		
+		if(_gBuffer != -1) SceneRenderer::s_interface->draw(&_geo);
 	}
 }
 

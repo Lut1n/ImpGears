@@ -144,9 +144,12 @@ void State::apply() const
 		}
 		else 
 		{
-			if(_target->_d == nullptr)
+			if(_target->_d == -1)
+			{
 				SceneRenderer::s_interface->init(_target.get());
-			SceneRenderer::s_interface->bind(_target->_d);
+				_target->_d = 0;
+			}
+			SceneRenderer::s_interface->bind(_target.get());
 			_target->change();
 		}
 	}
@@ -155,14 +158,17 @@ void State::apply() const
 	{
 		if(_shaderChanged)
 		{
-			if(_shader->_d == nullptr)
-				_shader->_d = SceneRenderer::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
-			SceneRenderer::s_interface->bind(_shader->_d);
+			if(_shader->_d == -1)
+			{
+				SceneRenderer::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
+				_shader->_d = 0;
+			}
+			SceneRenderer::s_interface->bind(_shader.get());
 		}
-		if(_shader->_d != nullptr && _uniformsChanged)
+		if(_shader->_d != -1 && _uniformsChanged)
 		{
 			for(auto u : _uniforms)
-				SceneRenderer::s_interface->update(_shader->_d, u.second);
+				SceneRenderer::s_interface->update(_shader.get(), u.second);
 		}
 	}
 }

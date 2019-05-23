@@ -62,20 +62,61 @@ struct FboData : public RenderPlugin::Data
 };
 
 //--------------------------------------------------------------
+struct GlPlugin::Priv
+{
+	std::map<const Geometry*,VboData::Ptr> vertexBuffers;
+	std::map<const ImageSampler*,TexData::Ptr> samplers;
+	std::map<const ReflexionModel*,ProgData::Ptr> callbacks;
+	std::map<const Target*,FboData::Ptr> renderTargets;
+	
+	VboData::Ptr getVbo(const Geometry* g)
+	{
+		auto it=vertexBuffers.find(g);
+		if(it==vertexBuffers.end())return nullptr;
+		else return it->second;
+	}
+	TexData::Ptr getTex(const ImageSampler* is)
+	{
+		auto it=samplers.find(is);
+		if(it==samplers.end())return nullptr;
+		else return it->second;
+	}
+	ProgData::Ptr getProg(const ReflexionModel* cb)
+	{
+		auto it=callbacks.find(cb);
+		if(it==callbacks.end())return nullptr;
+		else return it->second;
+	}
+	FboData::Ptr getFbo(const Target* t)
+	{
+		auto it=renderTargets.find(t);
+		if(it==renderTargets.end())return nullptr;
+		else return it->second;
+	}
+};
+
+//--------------------------------------------------------------
+GlPlugin::Priv* GlPlugin::s_internalState = nullptr;
+
+//--------------------------------------------------------------
 void GlPlugin::init()
 {
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
+	if(s_internalState == nullptr)
 	{
-		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
-		exit(0);
-	}
+		s_internalState = new Priv();
+		GLenum err = glewInit();
+		if (GLEW_OK != err)
+		{
+			std::cout << "Error: " << glewGetErrorString(err) << std::endl;
+			exit(0);
+		}
 
-	int major, minor;
-	glGetIntegerv(GL_MAJOR_VERSION, &major);
-	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	std::cout << "OGL version " << major << "." << minor << std::endl;
-	std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
+		int major, minor;
+		glGetIntegerv(GL_MAJOR_VERSION, &major);
+		glGetIntegerv(GL_MINOR_VERSION, &minor);
+		std::cout << "OGL version " << major << "." << minor << std::endl;
+		std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
+	}
 }
 
 //--------------------------------------------------------------
@@ -160,33 +201,34 @@ void GlPlugin::setDepthTest(int mode)
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const Geometry* geo)
+int GlPlugin::load(const Geometry* geo)
 {
 	VboData::Ptr d = VboData::create();
 	d->vbo.load(*geo);
-	return d;
+	s_internalState->vertexBuffers[geo] = d;
+	return 0;
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const TextureSampler* sampler)
+int GlPlugin::load(const ImageSampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
-	if(sampler->_d == nullptr)
+	TexData::Ptr d = s_internalState->getTex(sampler);
+	if(d == nullptr)
 	{
 		TexData::Ptr d = TexData::create();
 		d->tex = Texture::create();
 		d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 		d->tex->setSmooth( sampler->getInterpo() != ImageSampler::Interpo_Nearest );
 		d->tex->setRepeated( sampler->getMode() == ImageSampler::Mode_Repeat );
-		d->tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
-		return d;
+		// d->tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
+		s_internalState->samplers[sampler] = d;
 	}
-	// sampler->_d = d;
-	return sampler->_d;
+	return 0;
 }
 
 //--------------------------------------------------------------
-GlPlugin::Data::Ptr GlPlugin::load(const ReflexionModel* program)
+int GlPlugin::load(const ReflexionModel* program)
 {
 	ProgData::Ptr d = ProgData::create();
 	
@@ -241,42 +283,45 @@ GlPlugin::Data::Ptr GlPlugin::load(const ReflexionModel* program)
 	}
 	
 	d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
-	return d;
+	s_internalState->callbacks[program] = d;
+	return 0;
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(Data::Ptr data, const TextureSampler* sampler)
+void GlPlugin::update(const ImageSampler* sampler)
 {
-	if(data->ty == Ty_Tex)
+	TexData::Ptr d = s_internalState->getTex(sampler);
+	if(d)
 	{
 		Image::Ptr img = sampler->getSource();
-		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(data);
 		d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 	}
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(Data::Ptr data)
+void GlPlugin::bind(Target* target)
 {
-	if(data->ty == Ty_Tgt)
-	{
-		// _target->bind();
-		FboData::Ptr d = std::dynamic_pointer_cast<FboData>( data );
-		d->frames.bind();
-	}
-	else if(data->ty == Ty_Shader)
-	{
-		ProgData::Ptr d = std::dynamic_pointer_cast<ProgData>( data );
-		d->sha.use();
-	}
-	else if(data->ty == Ty_Vbo)
-	{
-	}
-	else if(data->ty == Ty_Tex)
-	{
-		TexData::Ptr d = std::dynamic_pointer_cast<TexData>( data );
-		d->tex->bind();
-	}
+	FboData::Ptr d = s_internalState->getFbo(target);
+	if(d) d->frames.bind();
+}
+
+//--------------------------------------------------------------
+void GlPlugin::bind(ReflexionModel* reflexion)
+{
+	ProgData::Ptr d = s_internalState->getProg(reflexion);
+	if(d) d->sha.use();
+}
+
+//--------------------------------------------------------------
+void GlPlugin::bind(Geometry* geo)
+{
+}
+
+//--------------------------------------------------------------
+void GlPlugin::bind(ImageSampler* sampler)
+{
+		TexData::Ptr d = s_internalState->getTex(sampler);
+		if(d) d->tex->bind();
 }
 
 //--------------------------------------------------------------
@@ -287,16 +332,18 @@ void GlPlugin::init(Target* target)
 	std::vector<Texture::Ptr> textures;
 	for(int i=0;i<target->count();++i)
 	{
-		TextureSampler::Ptr s = target->get(i);
-		if(s->_d == nullptr) s->_d = load(s.get());
-		TexData::Ptr dtex = std::dynamic_pointer_cast<TexData>( s->_d );
+		ImageSampler::Ptr s = target->get(i);
+		// TexData::Ptr dtex = s_internalState->samplers.at(s.get());
+		if(s_internalState->samplers.find(s.get()) == s_internalState->samplers.end()) load(s.get());
+		TexData::Ptr dtex = s_internalState->getTex(s.get());
 		Texture::Ptr t = dtex->tex;
 		textures.push_back(t);
 	}
 	
 	d->frames.build(textures, target->hasDepth());
 	// d->frames.build(target->width(), target->height(), target->count(), target->hasDepth());
-	target->_d = d;
+	target->_d = 0;
+	s_internalState->renderTargets[target] = d;
 }
 
 //--------------------------------------------------------------
@@ -306,38 +353,31 @@ void GlPlugin::unbind(Target* target)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bringBack(Image::Ptr img, Data::Ptr data, int n)
+void GlPlugin::bringBack(ImageSampler* sampler)
 {
-	if(data->ty == Ty_Tex)
+	TexData::Ptr d = s_internalState->getTex(sampler);
+	if(d)
 	{
-		TexData::Ptr d = std::dynamic_pointer_cast<TexData>( data );
+		Image::Ptr img = sampler->getSource();
 		d->tex->saveToImage(img);
 	}
+}
+
+//--------------------------------------------------------------
+void GlPlugin::draw(Geometry* geo)
+{
+	VboData::Ptr d = s_internalState->getVbo(geo);
+	if(d) d->vbo.draw();
+}
+
+//--------------------------------------------------------------
+void GlPlugin::update(ReflexionModel* reflexion, const Uniform::Ptr& uniform)
+{
+	ProgData::Ptr sha = s_internalState->getProg(reflexion);
+	if(sha == nullptr) return;
 	
-	if(data->ty == Ty_Tgt && n>=0)
-	{
-		FboData::Ptr d = std::dynamic_pointer_cast<FboData>( data );
-		Texture::Ptr tex = d->frames.getTexture(n);
-		tex->saveToImage(img);
-	}
-}
-
-//--------------------------------------------------------------
-void GlPlugin::draw(Data::Ptr data)
-{
-	if(data->ty == Ty_Vbo)
-	{
-		VboData::Ptr d = std::dynamic_pointer_cast<VboData>(data);
-		d->vbo.draw();
-	}
-}
-
-//--------------------------------------------------------------
-void GlPlugin::update(Data::Ptr data, const Uniform::Ptr& uniform)
-{
 	std::string uId = uniform->getID();
 	Uniform::Type type = uniform->getType();
-	ProgData::Ptr sha = std::dynamic_pointer_cast<ProgData>(data);
 	std::int32_t uniformLocation = sha->sha.locate(uId);
     if(uniformLocation == -1) return;
 	
@@ -376,11 +416,15 @@ void GlPlugin::update(Data::Ptr data, const Uniform::Ptr& uniform)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
-		TextureSampler::Ptr sampler = std::dynamic_pointer_cast<TextureSampler>( uniform->getSampler() );
-		if(sampler->_d == nullptr) sampler->_d = load(sampler.get());
-		TexData::Ptr d = std::dynamic_pointer_cast<TexData>(sampler->_d);
-		glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
-		glUniform1i(uniformLocation, uniform->getInt1());
+		ImageSampler::Ptr sampler = std::dynamic_pointer_cast<ImageSampler>( uniform->getSampler() );
+		TexData::Ptr d = s_internalState->getTex(sampler.get());
+		if(d == nullptr) load(sampler.get());
+		d = s_internalState->getTex(sampler.get());
+		if(d)
+		{
+			glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
+			glUniform1i(uniformLocation, uniform->getInt1());
+		}
 	}
 	else
 	{

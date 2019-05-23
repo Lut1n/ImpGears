@@ -7,8 +7,7 @@ TextureSampler::TextureSampler()
 	: _hasMipmap(false)
 	, _maxMipmapLvl(1000)
 {
-	setInternalSrc(128,128,4);
-	_d = NULL;
+	setInternalSrc(128,128,4);;
 }
 
 //--------------------------------------------------------------

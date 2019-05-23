@@ -19,7 +19,7 @@ class IMP_API GeoNode : public Node
 	
 	Geometry _geo;
 	Material::Ptr _material;
-	RenderPlugin::Data::Ptr _gBuffer;
+	int _gBuffer;
 	bool _wireframe;
 	bool _loaded;
 	ReflexionModel::Ptr _shader;

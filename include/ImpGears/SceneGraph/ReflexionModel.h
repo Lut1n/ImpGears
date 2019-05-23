@@ -91,7 +91,7 @@ struct IMP_API ReflexionModel : public Object
 	std::string _fragCode_lighting;
 	std::string _fragCode_mrt;
 	
-	RenderPlugin::Data::Ptr _d;
+	int _d;
 };
 
 IMPGEARS_END

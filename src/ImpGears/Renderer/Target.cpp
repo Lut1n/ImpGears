@@ -11,6 +11,7 @@ Target::Target()
 {
 	_hasChanged = false;
 	_hasDepthBuffer = false;
+	_d = -1;
 }
 
 //--------------------------------------------------------------
@@ -96,7 +97,7 @@ void Target::update()
 		for(int i=0;i<(int)_targets.size();++i)
 		{
 			TextureSampler::Ptr& img = _targets[i];
-			SceneRenderer::s_interface->bringBack(img->getSource(),img->_d,i);
+			SceneRenderer::s_interface->bringBack(img.get());
 		}
 		_hasChanged = false;
 	}

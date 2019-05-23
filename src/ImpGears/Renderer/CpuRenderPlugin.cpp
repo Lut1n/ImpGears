@@ -25,22 +25,6 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-struct CpuRenderPlugin::Priv
-{
-	Priv() : _targetOverride(false) {}
-	
-	// Rasterizer rast;
-	GeometryRenderer geoRenderer;
-	Target defaultTarget;
-	Target* target;
-	bool _targetOverride;
-};
-
-//--------------------------------------------------------------
-CpuRenderPlugin::Priv* CpuRenderPlugin::s_internalState = nullptr;
-
-
-//--------------------------------------------------------------
 struct GeoData : public RenderPlugin::Data
 {
 	Meta_Class(GeoData)
@@ -55,7 +39,7 @@ struct ImgData : public RenderPlugin::Data
 	Meta_Class(ImgData)
 	ImgData() { ty=RenderPlugin::Ty_Tex; }
 	
-	const TextureSampler* sampler;
+	const ImageSampler* sampler;
 };
 
 //--------------------------------------------------------------
@@ -78,6 +62,26 @@ struct TgtData : public RenderPlugin::Data
 };
 
 //--------------------------------------------------------------
+struct CpuRenderPlugin::Priv
+{
+	Priv() : _targetOverride(false) {}
+	
+	std::map<const Geometry*,GeoData::Ptr> vertexBuffers;
+	std::map<const ImageSampler*,ImgData::Ptr> samplers;
+	std::map<const ReflexionModel*,ShaData::Ptr> callbacks;
+	std::map<const Target*,TgtData::Ptr> renderTargets;
+	
+	// Rasterizer rast;
+	GeometryRenderer geoRenderer;
+	Target defaultTarget;
+	Target* target;
+	bool _targetOverride;
+};
+
+//--------------------------------------------------------------
+CpuRenderPlugin::Priv* CpuRenderPlugin::s_internalState = nullptr;
+
+//--------------------------------------------------------------
 void CpuRenderPlugin::init()
 {
 	std::cout << "CPU Renderer init" << std::endl;
@@ -90,7 +94,7 @@ void CpuRenderPlugin::init()
 		s_internalState->defaultTarget.create( (int)vp[2] , (int)vp[3], 1, true);
 		s_internalState->target = &s_internalState->defaultTarget;
 		
-		TextureSampler::Ptr tgt = s_internalState->defaultTarget.get(0);
+		ImageSampler::Ptr tgt = s_internalState->defaultTarget.get(0);
 		Image::Ptr sourceTgt = tgt->getSource();
 		s_internalState->geoRenderer.setTarget(0,sourceTgt, Vec4(0.0));
 		// s_internalState->geoRenderer.setTarget(1,s_internalState->depth, Vec4(255.0));
@@ -158,25 +162,27 @@ void CpuRenderPlugin::setDepthTest(int mode)
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const Geometry* geo)
+int CpuRenderPlugin::load(const Geometry* geo)
 {
 	GeoData::Ptr d = GeoData::create();
 	d->geo = geo;
-	return d;
+	s_internalState->vertexBuffers[geo] = d;
+	return 0;
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const TextureSampler* sampler)
+int CpuRenderPlugin::load(const ImageSampler* sampler)
 {
 	Image::Ptr img = sampler->getSource();
 	ImgData::Ptr d = ImgData::create();
 	d->sampler = sampler;
+	s_internalState->samplers[sampler] = d;
 	
-	return d;
+	return 0;
 }
 
 //--------------------------------------------------------------
-CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const ReflexionModel* program)
+int CpuRenderPlugin::load(const ReflexionModel* program)
 {
 	ReflexionModel::AbstractFrag::Ptr frag = ReflexionModel::AbstractFrag::create();
 	
@@ -230,58 +236,54 @@ CpuRenderPlugin::Data::Ptr CpuRenderPlugin::load(const ReflexionModel* program)
 		frag->_mrt = program->_mrtCb;
 	}
 	
+	s_internalState->callbacks[program] = d;
+	return 0;
+}
+
+//--------------------------------------------------------------
+void CpuRenderPlugin::update(const ImageSampler* sampler)
+{
+	ImgData::Ptr d = s_internalState->samplers.at(sampler);
+	if(d) d->sampler = sampler;
+}
+
+//--------------------------------------------------------------
+void CpuRenderPlugin::bind(Target* target)
+{
+	TgtData::Ptr d = s_internalState->renderTargets.at(target);
+	if(d)
+		s_internalState->target = d->tgt;
+	else
+		s_internalState->target = &s_internalState->defaultTarget;
 	
-	return d;
+	ImageSampler::Ptr tgt = s_internalState->target->get(0);
+	Image::Ptr sourceTgt = tgt->getSource();
+	s_internalState->geoRenderer.setTarget(0,sourceTgt,Vec4(0.0));
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::update(Data::Ptr data, const TextureSampler* sampler)
+void CpuRenderPlugin::bind(ReflexionModel* reflexion)
 {
-	if(data->ty == Ty_Tex)
+	ShaData::Ptr d = s_internalState->callbacks.at(reflexion);
+	if(d)
 	{
-		// Image::Ptr img = sampler->getSource();
-		ImgData::Ptr d = std::dynamic_pointer_cast<ImgData>(data);
-		d->sampler = sampler;
+		GeometryRenderer& georender = s_internalState->geoRenderer;
+		if(d->vertCb == nullptr) georender.setDefaultVertCallback();
+		else georender.setVertCallback(d->vertCb);
+		if(d->fragCb == nullptr) georender.setDefaultFragCallback();
+		else georender.setFragCallback(d->fragCb);
 	}
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bind(Data::Ptr data)
+void CpuRenderPlugin::bind(Geometry* geo)
 {
-	if(data->ty == Ty_Tgt)
-	{
-		// _target->bind();
-		TgtData::Ptr d = std::dynamic_pointer_cast<TgtData>( data );
-		
-		if(d->tgt != nullptr)
-			s_internalState->target = d->tgt;
-		else
-			s_internalState->target = &s_internalState->defaultTarget;
-		
-		TextureSampler::Ptr tgt = s_internalState->target->get(0);
-		Image::Ptr sourceTgt = tgt->getSource();
-		s_internalState->geoRenderer.setTarget(0,sourceTgt,Vec4(0.0));
-	}
-	else if(data->ty == Ty_Shader)
-	{
-		ShaData::Ptr d = std::dynamic_pointer_cast<ShaData>( data );
-		if(d.get() != nullptr)
-		{
-			GeometryRenderer& georender = s_internalState->geoRenderer;
-			if(d->vertCb == nullptr) georender.setDefaultVertCallback();
-			else georender.setVertCallback(d->vertCb);
-			if(d->fragCb == nullptr) georender.setDefaultFragCallback();
-			else georender.setFragCallback(d->fragCb);
-		}
-	}
-	else if(data->ty == Ty_Vbo)
-	{
-	}
-	else if(data->ty == Ty_Tex)
-	{
-		ImgData::Ptr d = std::dynamic_pointer_cast<ImgData>( data );
-		// d->tex.bind();
-	}
+}
+
+//--------------------------------------------------------------
+void CpuRenderPlugin::bind(ImageSampler* sampler)
+{
+	ImgData::Ptr d = s_internalState->samplers.at(sampler);
 }
 
 //--------------------------------------------------------------
@@ -289,7 +291,7 @@ void CpuRenderPlugin::init(Target* target)
 {
 	TgtData::Ptr d = TgtData::create();
 	d->tgt = target;
-	target->_d = d;
+	s_internalState->renderTargets[target] = d;
 }
 
 //--------------------------------------------------------------
@@ -303,35 +305,22 @@ void CpuRenderPlugin::unbind(Target* target)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bringBack(Image::Ptr img, Data::Ptr data, int n)
+void CpuRenderPlugin::bringBack(ImageSampler* sampler)
 {
-	/*if(data->ty == Ty_Tex)
-	{
-		ImgData::Ptr d = static_cast<ImgData::Ptr>( data );
-		d->tex.saveToImage(img);
-	}
-	
-	if(data->ty == Ty_Tgt && n>=0)
-	{
-		TgtData::Ptr d = static_cast<TgtData::Ptr>( data );
-		Texture::Ptr tex = d->frames.getTexture(n);
-		tex->saveToImage(img);
-	}*/
-	
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::draw(Data::Ptr data)
+void CpuRenderPlugin::draw(Geometry* geo)
 {
-	if(data->ty == Ty_Vbo)
+	GeoData::Ptr d = s_internalState->vertexBuffers.at(geo);
+	if(d)
 	{
-		GeoData::Ptr d = std::dynamic_pointer_cast<GeoData>(data);
 		s_internalState->geoRenderer.render( *(d->geo) );
 	}
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::update(Data::Ptr data, const Uniform::Ptr& uniform)
+void CpuRenderPlugin::update(ReflexionModel* reflexion, const Uniform::Ptr& uniform)
 {
 	GeometryRenderer& r = s_internalState->geoRenderer;
 	

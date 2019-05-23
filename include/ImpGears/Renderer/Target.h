@@ -34,7 +34,7 @@ public:
 	void change();
 	void update();
 	
-	RenderPlugin::Data::Ptr _d;
+	int _d;
 	
 protected:
 	

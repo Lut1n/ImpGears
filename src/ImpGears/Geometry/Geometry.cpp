@@ -1,6 +1,6 @@
 #include <Geometry/Geometry.h>
 #include <Core/Matrix3.h>
-#include <Core/Perlin.h>
+#include <Core/Noise.h>
 #include <Core/Math.h>
 
 #include <cmath>
@@ -144,8 +144,8 @@ void Geometry::noiseBump(unsigned int octaveCount, double persistence, double fr
 {
 	for(unsigned int i=0; i<_vertices.size();++i)
 	{
-		// double noise = simplexOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
-		 double noise = perlinOctave(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
+		// double noise = fbmSimplex(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
+		 double noise = fbmPerlin(_vertices[i].x(), _vertices[i].y(), _vertices[i].z(), octaveCount, persistence, freq, 1.0);
 		//double noise = (frac( std::sin( _vertices[i].dot( Vec3(84.135815, 12.64412, 2.38741) ) ) * 1354.1468 ) -0.5)*2.0;
 		Vec3 n(_vertices[i]);
 		n.normalize();

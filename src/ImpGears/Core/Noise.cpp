@@ -1,4 +1,4 @@
-#include <Core/Perlin.h>
+#include <Core/Noise.h>
 #include <Core/Math.h>
 
 #include <ctime>
@@ -148,7 +148,7 @@ double perlinDot(int* vec, double x, double y, double z, double w)
 	return vec[0]*x + vec[1]*y + vec[2]*z + vec[3]*w;
 }
 
-double perlinMain(double x, double y, double z, int tileSize)
+double perlin(double x, double y, double z, int tileSize)
 {
 	PermutationTable::getInstance()->init(0);
 	
@@ -200,7 +200,7 @@ fx - 1., fy - 1., fz - 1.);
 }
 
 // simplex 2D
-double simplexMain(double x, double y, int tileSize)
+double simplex(double x, double y, int tileSize)
 {
 	PermutationTable::getInstance()->init(0);
 	
@@ -257,18 +257,18 @@ double simplexMain(double x, double y, int tileSize)
 }
 
 // simple 3D
-double simplexMain(double x, double y, double z, int tileSize)
+double simplex(double x, double y, double z, int tileSize)
 {
 	return 0.0;
 }
 
 // simplex 4D
-double simplexMain(double x, double y, double z, double w, int tileSize)
+double simplex(double x, double y, double z, double w, int tileSize)
 {
 	return 0.0;
 }
 
-double perlinOctave(double x, double y, double z, unsigned int octaveCount, double persistence, double freq, double tiles)
+double fbmPerlin(double x, double y, double z, unsigned int octaveCount, double persistence, double freq, double tiles)
 {
     double total = 0;
     double frequency = freq;
@@ -278,7 +278,7 @@ double perlinOctave(double x, double y, double z, unsigned int octaveCount, doub
 		
 		int tileSize = frequency*tiles;
 		if(tileSize <= 0)tileSize = 1;
-        total += perlinMain(x * frequency, y * frequency, z * frequency, tileSize) * amplitude;
+        total += perlin(x * frequency, y * frequency, z * frequency, tileSize) * amplitude;
 		
         maxValue += amplitude;
         
@@ -289,7 +289,7 @@ double perlinOctave(double x, double y, double z, unsigned int octaveCount, doub
     return total/maxValue;
 }
 
-double simplexOctave(double x, double y, double z, unsigned int octaveCount, double persistence, double freq, double tiles)
+double fbmSimplex(double x, double y, double z, unsigned int octaveCount, double persistence, double freq, double tiles)
 {
     double total = 0;
     double frequency = freq;
@@ -299,7 +299,7 @@ double simplexOctave(double x, double y, double z, unsigned int octaveCount, dou
 		
 		int tileSize = frequency*tiles;
 		if(tileSize <= 0)tileSize = 1;
-        total += simplexMain(x * frequency, y * frequency, tileSize) * amplitude;
+        total += simplex(x * frequency, y * frequency, tileSize) * amplitude;
 		
         maxValue += amplitude;
         
@@ -309,7 +309,5 @@ double simplexOctave(double x, double y, double z, unsigned int octaveCount, dou
     
     return total/maxValue;
 }
-
-
 
 IMPGEARS_END

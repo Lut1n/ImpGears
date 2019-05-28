@@ -14,7 +14,6 @@ public:
 	ClearNode();
 	virtual ~ClearNode();
 
-	virtual void render();
 	virtual void update();
 	
 	void setColor(const Vec4& color) { _color=color; }

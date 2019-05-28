@@ -7,6 +7,8 @@
 #include <Renderer/RenderPlugin.h>
 
 #include <SceneGraph/Graph.h>
+#include <SceneGraph/ClearNode.h>
+#include <SceneGraph/GeoNode.h>
 
 IMPGEARS_BEGIN
 
@@ -26,6 +28,10 @@ public:
 protected:
 	
 	RenderVisitor::Ptr _visitor;
+	
+	void applyState(const State::Ptr& state);
+	void applyClear(ClearNode* clearNode);
+	void drawGeometry(GeoNode* geoNode);
 };
 
 IMPGEARS_END

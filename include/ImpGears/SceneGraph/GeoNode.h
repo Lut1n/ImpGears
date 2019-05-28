@@ -22,18 +22,16 @@ class IMP_API GeoNode : public Node
 	int _gBuffer;
 	bool _wireframe;
 	bool _loaded;
-	ReflexionModel::Ptr _shader;
 	
 	GeoNode(const Polyhedron& buf, bool wireframe = false);
 	GeoNode(const Geometry& geo, bool wireframe = false);
 	
-	void setShader(ReflexionModel::Ptr shader);
+	void setReflexion(ReflexionModel::Ptr reflexion);
 	void setMaterial(const Material::Ptr material);
 	
 	virtual ~GeoNode();
 	
 	virtual void update();
-	virtual void render();
 	
 };
 

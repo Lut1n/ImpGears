@@ -1,8 +1,6 @@
 #include <Renderer/SceneRenderer.h>
 #include <Renderer/CpuRenderPlugin.h>
 
-#include <SceneGraph/GeoNode.h>
-
 #include <cstdlib>
 
 IMPGEARS_BEGIN
@@ -70,7 +68,8 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 		}
 		
 		GeoNode* geode = dynamic_cast<GeoNode*>( queue->_nodes[i] );
-		if(geode && geode->_material)
+		ClearNode* clear = dynamic_cast<ClearNode*>( queue->_nodes[i] );
+		if(geode)
 		{
 			Material::Ptr mat = geode->_material;
 			latt[1] = mat->_shininess;
@@ -82,21 +81,84 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 				queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
 			if(mat->_emissive)
 				queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+		
+			queue->_states[i]->setUniform("u_view", view);
+			queue->_states[i]->setUniform("u_lightPos", lightPos);
+			queue->_states[i]->setUniform("u_lightCol", lightCol);
+			queue->_states[i]->setUniform("u_lightAtt", latt);
+			queue->_states[i]->setUniform("u_color", color);
+			applyState(queue->_states[i]);
+			drawGeometry(geode);
 		}
-		else
+		else if(clear)
 		{
-			latt[1] = 0.0;
-			color = Vec3(1.0);
+			applyClear(clear);
+		}
+	}
+}
+
+
+//---------------------------------------------------------------
+void SceneRenderer::applyState(const State::Ptr& state)
+{
+	if(s_interface == nullptr) return;
+		
+	s_interface->setCulling(state->getFaceCullingMode());
+	s_interface->setBlend(state->getBlendMode());
+	s_interface->setLineW(state->getLineWidth());
+	s_interface->setDepthTest(state->getDepthTest());
+	s_interface->setViewport(state->getViewport());
+	
+	if(state->getTarget() == nullptr)
+	{
+		s_interface->unbind(nullptr);
+	}
+	else 
+	{
+		Target::Ptr target = state->getTarget();
+		if(target->_d == -1)
+		{
+			s_interface->init(target.get());
+			target->_d = 0;
+		}
+		s_interface->bind(target.get());
+		target->change();
+	}
+	
+	ReflexionModel::Ptr reflexion = state->getReflexion();
+	if(reflexion->_d == -1)
+	{
+		s_interface->load( reflexion.get() );
+		reflexion->_d = 0;
+	}
+	s_interface->bind(reflexion.get());
+	
+	if(reflexion->_d != -1)
+	{
+		const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
+		for(auto u : uniforms) SceneRenderer::s_interface->update(reflexion.get(), u.second);
+	}
+}
+
+//---------------------------------------------------------------
+void SceneRenderer::applyClear(ClearNode* clearNode)
+{
+	if(s_interface != nullptr) s_interface->apply(clearNode);
+}
+
+//---------------------------------------------------------------
+void SceneRenderer::drawGeometry(GeoNode* geoNode)
+{
+	if(s_interface != nullptr )
+	{
+		if(geoNode->_gBuffer == -1)
+		{
+			s_interface->load(&geoNode->_geo);
+			geoNode->_gBuffer = 0;
 		}
 		
-		queue->_states[i]->setUniform("u_view", view);
-		queue->_states[i]->setUniform("u_lightPos", lightPos);
-		queue->_states[i]->setUniform("u_lightCol", lightCol);
-		queue->_states[i]->setUniform("u_lightAtt", latt);
-		queue->_states[i]->setUniform("u_color", color);
-		queue->_states[i]->apply();
-		queue->_nodes[i]->render();
-	}	
+		if(geoNode->_gBuffer != -1) s_interface->draw(&geoNode->_geo);
+	}
 }
 
 IMPGEARS_END

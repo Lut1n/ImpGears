@@ -14,11 +14,23 @@ using namespace imp;
 
 #include "shader.h"
 
+void F1(Geometry& geo)
+{
+	float freq = 0.5;
+	float ampl = 0.2;
+	
+	for(auto& v : geo._vertices)
+	{
+		float d = Vec3(v[0],v[1],0.0).length();
+		v.z() += std::sin( d * 2.0 * 3.141592 * freq ) * ampl;
+	}
+}
+
 Geometry generateRockHat(float radius, int sub)
 {
     imp::Geometry geometry = imp::Geometry::sphere(sub,radius);
 	geometry *= 0.5;
-    geometry.scale(Vec3(0.7,0.7,1.5));
+    geometry.scale(Vec3(1.0,1.0,1.5));
 	geometry.generateNormals();
 	geometry.generateColors(Vec3(1.0,0.3,1.0));
 	geometry.generateTexCoords(2.0);
@@ -32,10 +44,49 @@ Geometry generateRockHat(float radius, int sub)
 	geo2.generateNormals();
 	geo2.generateColors(Vec3(1.0,0.3,0.4));
 	geo2.generateTexCoords(2.0);
+	F1(geo2);
 	
 	geometry += geo2;
 	Geometry::intoCCW( geometry );
        
+    return geometry;
+}
+
+
+Geometry generateLeaf()
+{
+	float freq = 10.0;
+	float ampl = 0.5;
+	
+	Path path = Path::circle(40,100);
+	
+	for(int i=0;i<path.count();++i)
+	{
+		Vec3 p = path.vertex(i); p.normalize();
+		// float r = std::atan2(p[1],p[0]);
+		float r = p.angleFrom(Vec3::Y);
+		float v = std::sin(r * freq);// if(v<0.0)v=0.0;else v=1.0;
+		path.vertex(i) = p * (1.0+v*ampl);
+		
+		float h = p.y();
+		path.vertex(i) *= Vec3(0.7,1.5-h,1.0);
+	}
+	
+    imp::Geometry geometry = imp::Geometry::extrude(path, 0.1);
+	geometry.generateColors(Vec3(0.2,1.0,0.3));
+	Geometry::intoCCW( geometry );
+	
+	float freq2 = 0.2;
+	float ampl2 = 0.2;
+	for(int i=0;i<geometry.size();++i)
+	{
+		Vec3 p = geometry._vertices[i];
+		float d = Vec3(p[0],p[1],0.0).length();
+		geometry._vertices[i] += Vec3::Z * std::sin(d * 2.0 * 3.1415 * freq2) * ampl2;
+	}
+	geometry.generateNormals();
+	geometry.generateTexCoords(2.0);
+	
     return geometry;
 }
 
@@ -114,7 +165,7 @@ int main(int argc, char* argv[])
 	GeoNode::Ptr node1 = GeoNode::create(coords, true);
 	node1->setPosition(Vec3(0.3,0.0,-0.2));
 	
-	imp::ReflexionModel::Ptr s = imp::ReflexionModel::create(
+	imp::ReflexionModel::Ptr r = imp::ReflexionModel::create(
 		imp::ReflexionModel::Lighting_Phong,
 		imp::ReflexionModel::Texturing_Customized);
 	
@@ -122,12 +173,14 @@ int main(int argc, char* argv[])
 	material->_baseColor = colorSampler;
 	material->_normalmap = normalSampler;
 	
-	s->_fragCode_texturing = fragSimple;
-	Geometry mush = generateRockHat(1.0, 4.0);
+	r->_fragCode_texturing = fragSimple;
+	Geometry mush = generateLeaf();
+	// Geometry mush = generateRockHat(1.0, 8.0);
 	GeoNode::Ptr geomush = GeoNode::create(mush, false);
 	geomush->setPosition(Vec3(1.0,0.0,0.0));
+	geomush->setRotation(Vec3(0.0,90,0.0));
 	geomush->setScale(Vec3(0.3));
-	geomush->setShader(s);
+	geomush->setReflexion(r);
 	geomush->setMaterial(material);
 	
 	LightNode::Ptr light = LightNode::create(Vec3(1.0),30.f);

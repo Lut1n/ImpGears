@@ -1,5 +1,4 @@
 #include <SceneGraph/GeoNode.h>
-#include <Renderer/SceneRenderer.h>
 
 
 IMPGEARS_BEGIN
@@ -13,9 +12,10 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 	buf.getTriangles(_geo._vertices);
 	_wireframe = wireframe;
 	
-	_shader = ReflexionModel::create();
+	ReflexionModel::Ptr reflexion = ReflexionModel::create();
+	getState()->setReflexion(reflexion);
+	
 	_material = Material::create();
-	getState()->setShader(_shader);
 }
 
 //--------------------------------------------------------------
@@ -26,16 +26,16 @@ GeoNode::GeoNode(const Geometry& geo, bool wireframe)
 	_geo = geo;
 	_wireframe = wireframe;
 	
-	_shader = ReflexionModel::create();
+	ReflexionModel::Ptr reflexion = ReflexionModel::create();
+	getState()->setReflexion(reflexion);
+	
 	_material = Material::create();
-	getState()->setShader(_shader);
 }
 
 //--------------------------------------------------------------
-void GeoNode::setShader(ReflexionModel::Ptr shader)
+void GeoNode::setReflexion(ReflexionModel::Ptr reflexion)
 {
-	_shader = shader;
-	getState()->setShader(_shader);
+	getState()->setReflexion(reflexion);
 }
 
 //--------------------------------------------------------------
@@ -67,21 +67,6 @@ void GeoNode::update()
 			}
 		}
 		_loaded = true;
-	}
-}
-
-//--------------------------------------------------------------
-void GeoNode::render()
-{ 
-	if(SceneRenderer::s_interface != nullptr )
-	{
-		if(_gBuffer == -1)
-		{
-			SceneRenderer::s_interface->load(&_geo);
-			_gBuffer = 0;
-		}
-		
-		if(_gBuffer != -1) SceneRenderer::s_interface->draw(&_geo);
 	}
 }
 

@@ -12,7 +12,7 @@ State::State()
 	, _lineWidth(1.0)
 	, _depthTest(false)
 	, _target(nullptr)
-	, _shader(nullptr)
+	, _reflexion(nullptr)
 	, _uniforms()
 	, _projectionChanged(false)
 	, _viewportChanged(false)
@@ -21,7 +21,7 @@ State::State()
 	, _lineWidthChanged(false)
 	, _depthTestChanged(false)
 	, _targetChanged(false)
-	, _shaderChanged(false)
+	, _reflexionChanged(false)
 	, _uniformsChanged(false)
 {
 }
@@ -35,7 +35,7 @@ State::State(const State& other)
 	, _lineWidth(other._lineWidth)
 	, _depthTest(other._depthTest)
 	, _target(other._target)
-	, _shader(other._shader)
+	, _reflexion(other._reflexion)
 	, _uniforms(other._uniforms)
 	, _projectionChanged(other._projectionChanged)
 	, _viewportChanged(other._viewportChanged)
@@ -44,7 +44,7 @@ State::State(const State& other)
 	, _lineWidthChanged(other._lineWidthChanged)
 	, _depthTestChanged(other._depthTestChanged)
 	, _targetChanged(other._targetChanged)
-	, _shaderChanged(other._shaderChanged)
+	, _reflexionChanged(other._reflexionChanged)
 	, _uniformsChanged(other._uniformsChanged)
 {
 }
@@ -66,7 +66,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		_lineWidth = other->_lineWidth;
 		_depthTest = other->_depthTest;
 		_target = other->_target;
-		_shader = other->_shader;
+		_reflexion = other->_reflexion;
 		_uniforms = other->_uniforms;
 		_projectionChanged = other->_projectionChanged;
 		_viewportChanged = other->_viewportChanged;
@@ -75,7 +75,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		_lineWidthChanged = other->_lineWidthChanged;
 		_depthTestChanged = other->_depthTestChanged;
 		_targetChanged = other->_targetChanged;
-		_shaderChanged = other->_shaderChanged;
+		_reflexionChanged = other->_reflexionChanged;
 	}
 	else if(opt == CloneOpt_IfChanged)
 	{
@@ -86,7 +86,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
 		if(other->_depthTestChanged) setDepthTest(other->_depthTest);
 		if(other->_targetChanged) setTarget(other->_target);
-		if(other->_shaderChanged) setShader(other->_shader);
+		if(other->_reflexionChanged) setReflexion(other->_reflexion);
 		if(other->_uniformsChanged) setUniforms(other->_uniforms);
 	}
 }
@@ -101,7 +101,7 @@ const State& State::operator=(const State& other)
 	_lineWidth = other._lineWidth;
 	_depthTest = other._depthTest;
 	_target = other._target;
-	_shader = other._shader;
+	_reflexion = other._reflexion;
 	_uniforms = other._uniforms;
 	_projectionChanged = other._projectionChanged;
 	_viewportChanged = other._viewportChanged;
@@ -110,67 +110,9 @@ const State& State::operator=(const State& other)
 	_lineWidthChanged = other._lineWidthChanged;
 	_depthTestChanged = other._depthTestChanged;
 	_targetChanged = other._targetChanged;
-	_shaderChanged = other._shaderChanged;
+	_reflexionChanged = other._reflexionChanged;
 
 	return *this;
-}
-
-//--------------------------------------------------------------
-void State::apply() const
-{
-	if(SceneRenderer::s_interface == nullptr) return;
-		
-		
-	if(_faceCullingChanged)
-		SceneRenderer::s_interface->setCulling(_faceCullingMode);
-	
-	if(_blendModeChanged)
-		SceneRenderer::s_interface->setBlend(_blendMode);
-	
-	if(_lineWidthChanged)
-		SceneRenderer::s_interface->setLineW(_lineWidth);
-	
-	if(_depthTestChanged)
-		SceneRenderer::s_interface->setDepthTest(_depthTest);
-	
-	if(_viewportChanged)
-		SceneRenderer::s_interface->setViewport(_viewport);
-	
-	if(_targetChanged)
-	{
-		if(_target == nullptr)
-		{
-			SceneRenderer::s_interface->unbind(nullptr);
-		}
-		else 
-		{
-			if(_target->_d == -1)
-			{
-				SceneRenderer::s_interface->init(_target.get());
-				_target->_d = 0;
-			}
-			SceneRenderer::s_interface->bind(_target.get());
-			_target->change();
-		}
-	}
-	
-	if(_shader != nullptr)
-	{
-		if(_shaderChanged)
-		{
-			if(_shader->_d == -1)
-			{
-				SceneRenderer::s_interface->load( _shader.get() );//->vertCode, _shader->fragCode);
-				_shader->_d = 0;
-			}
-			SceneRenderer::s_interface->bind(_shader.get());
-		}
-		if(_shader->_d != -1 && _uniformsChanged)
-		{
-			for(auto u : _uniforms)
-				SceneRenderer::s_interface->update(_shader.get(), u.second);
-		}
-	}
 }
 
 //--------------------------------------------------------------
@@ -223,10 +165,10 @@ void State::setTarget(Target::Ptr target)
 }
 
 //--------------------------------------------------------------
-void State::setShader(ReflexionModel::Ptr shader)
+void State::setReflexion(ReflexionModel::Ptr shader)
 {
-	_shader = shader;
-	_shaderChanged = true;
+	_reflexion = shader;
+	_reflexionChanged = true;
 }
 
 //--------------------------------------------------------------

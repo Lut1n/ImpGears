@@ -52,8 +52,6 @@ public:
 
 	void setBlendMode(BlendMode blendMode){_blendMode = blendMode; _blendModeChanged=true;}
 	BlendMode getBlendMode() const{return _blendMode;}
-	
-	void apply() const;
 
 	void setPerspectiveProjection(float fovx, float ratio, float nearValue, float farValue);
 	void setOrthographicProjection(float left, float right, float bottom, float top, float nearValue, float farValue);
@@ -62,14 +60,17 @@ public:
 	const Matrix4& getProjectionMatrix() const {return _projection;}
 	
 	void setDepthTest(bool depthTest);
+	bool getDepthTest() const {return _depthTest;}
 	
 	void setViewport(float x, float y, float width, float height);
 	void setViewport(const Vec4& viewport);
+	const Vec4 getViewport() const {return _viewport;}
 	
 	void setLineWidth(float lw);
+	float getLineWidth() const {return _lineWidth;}
 	
 	void setTarget(Target::Ptr target);
-	void setShader(ReflexionModel::Ptr shader);
+	void setReflexion(ReflexionModel::Ptr reflexion);
 	void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
 	void clearUniforms();
 	void setUniform(const Uniform::Ptr& uniform);
@@ -82,9 +83,11 @@ public:
 	void setUniform(const std::string&& name, const Matrix3& mat3);
 	void setUniform(const std::string&& name, const Matrix4& mat4);
 	void setUniform(const std::string&& name, const ImageSampler::Ptr& sampler, int index);
+	const std::map<std::string,Uniform::Ptr>& getUniforms() const {return _uniforms;}
+	
 	
 	Target::Ptr getTarget() { return _target; }
-	ReflexionModel::Ptr getShader() { return _shader; }
+	ReflexionModel::Ptr getReflexion() { return _reflexion; }
 
 protected:
 private:
@@ -97,7 +100,7 @@ private:
 	bool _depthTest;
 	
 	Target::Ptr _target;
-	ReflexionModel::Ptr _shader;
+	ReflexionModel::Ptr _reflexion;
 	std::map<std::string,Uniform::Ptr> _uniforms;
 	
 	bool _projectionChanged;
@@ -107,7 +110,7 @@ private:
 	bool _lineWidthChanged;
 	bool _depthTestChanged;
 	bool _targetChanged;
-	bool _shaderChanged;
+	bool _reflexionChanged;
 	bool _uniformsChanged;
 };
 

@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 	shader->_fragCode_texturing = c_frag;
 	
 	QuadNode::Ptr screen = QuadNode::create();
-    screen->setShader(shader);
+    screen->setReflexion(shader);
 	state = screen->getState();
 	
 	Image::Ptr image = generateImage();
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 			shader->_d = -1;
 			// shader->vertCode = c_vert;
 			shader->_fragCode_texturing = c_frag;
-            screen->getState()->setShader(shader);
+            screen->getState()->setReflexion(shader);
 		}
 		
 		float sec = timer.getElapsedTime().asMilliseconds() / 1000.0;

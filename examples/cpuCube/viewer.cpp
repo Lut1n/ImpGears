@@ -155,7 +155,7 @@ struct IGStuff
 		material->_normalmap = material->_baseColor;
 		
 		GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);
-		cubeNode->setShader(model);
+		cubeNode->setReflexion(model);
 		cubeNode->setMaterial(material);
 		
 		initCamPos.set(10,0,3);

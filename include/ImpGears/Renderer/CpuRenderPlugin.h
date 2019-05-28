@@ -24,7 +24,7 @@ public:
 	
 	virtual void update(const ImageSampler* sampler);
 	
-	virtual void bind(Target* target);
+	virtual void bind(RenderTarget* target);
 	
 	virtual void bind(ReflexionModel* reflexion);
 	
@@ -32,9 +32,9 @@ public:
 	
 	virtual void bind(ImageSampler* geo);
 	
-	virtual void init(Target* target);
+	virtual void init(RenderTarget* target);
 	
-	virtual void unbind(Target* target);
+	virtual void unbind(RenderTarget* target);
 	
 	virtual void bringBack(ImageSampler* sampler);
 	

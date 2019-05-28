@@ -3,7 +3,6 @@
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/Material.h>
-#include <Renderer/Target.h>
 
 #include <SFML/Graphics.hpp>
 #include <SceneGraph/QuadNode.h>

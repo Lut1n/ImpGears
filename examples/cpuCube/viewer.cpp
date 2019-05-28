@@ -115,7 +115,7 @@ struct IGStuff
 	Node::Ptr root;
 	Camera::Ptr camera;
 	LightNode::Ptr light;
-	Target::Ptr target;
+	RenderTarget::Ptr target;
 	
 	Vec4 viewport;
 	Vec3 initCamPos;
@@ -129,19 +129,20 @@ struct IGStuff
 		model->_fragCode_texturing = glsl_texturing;
 		
 		renderer = SceneRenderer::create();
-		target = Target::create();
+		target = RenderTarget::create();
 		
 		viewport.set(0.0,0.0,512,512);
-		
-		graph = Graph::create();
-		graph->getInitState()->setViewport( viewport );
 		
 		if(arg != "-gpu")
 		{
 			viewport.set(0.0,0.0,RES,RES);
 			target->create(RES,RES,1,true);
-			graph->setTarget(target);
+			renderer->setRenderTarget(target);
+			renderer->setDirectRendering(false);
 		}
+		
+		graph = Graph::create();
+		graph->getInitState()->setViewport( viewport );
 	
 		// Geometry cubeGeo = Geometry::sphere(8,1.0);
 		Geometry cubeGeo = Geometry::cube();
@@ -190,7 +191,7 @@ int main(int argc, char* argv[])
 {
 	int sfDepthBufferBits = 24;
 	sf::RenderWindow window(sf::VideoMode(512, 512), "Example cube", sf::Style::Default, sf::ContextSettings(sfDepthBufferBits));
-	sf::Texture texture; texture.create(512, 512);
+	sf::Texture texture; texture.create(512, 512); // texture.setSmooth(true);
 	sf::Sprite sprite(texture);
 	
 	std::string engine_arg = ""; if(argc > 1) engine_arg = argv[1];

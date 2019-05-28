@@ -24,8 +24,6 @@ public:
 	
 	void setClearColor(const Vec4& color);
 	void setClearDepth(float depth);
-	void setTarget(const Target::Ptr& target);
-	void setDefaultTarget();
 
 protected:
 	

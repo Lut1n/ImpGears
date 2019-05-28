@@ -1,5 +1,5 @@
 #include <Core/Object.h>
-#include <Renderer/Target.h>
+#include <Renderer/RenderTarget.h>
 
 #include <Renderer/SceneRenderer.h>
 
@@ -7,7 +7,7 @@ IMPGEARS_BEGIN
 
 
 //--------------------------------------------------------------
-Target::Target()
+RenderTarget::RenderTarget()
 {
 	_hasChanged = false;
 	_hasDepthBuffer = false;
@@ -15,13 +15,13 @@ Target::Target()
 }
 
 //--------------------------------------------------------------
-Target::~Target()
+RenderTarget::~RenderTarget()
 {
 	
 }
 
 //--------------------------------------------------------------
-void Target::create(int w, int h, int count, bool hasDepth)
+void RenderTarget::create(int w, int h, int count, bool hasDepth)
 {
 	_targets.resize(count);
 	for(int i=0;i<count;++i)
@@ -34,28 +34,28 @@ void Target::create(int w, int h, int count, bool hasDepth)
 }
 
 //--------------------------------------------------------------
-void Target::create(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth)
+void RenderTarget::create(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth)
 {
 	_targets = textures;;
 	_hasDepthBuffer = hasDepth;
 }
 
 //--------------------------------------------------------------
-void Target::destroy()
+void RenderTarget::destroy()
 {
 	_targets.clear();
 	_hasDepthBuffer = false;
 }
 
 //--------------------------------------------------------------
-ImageSampler::Ptr Target::get(int n)
+ImageSampler::Ptr RenderTarget::get(int n)
 {
 	update();
 	return _targets[n];
 }
 
 //--------------------------------------------------------------
-int Target::width() const
+int RenderTarget::width() const
 {
 	int w = 0;
 	if(_targets.size() > 0) w = _targets[0]->getSource()->width();
@@ -63,7 +63,7 @@ int Target::width() const
 }
 
 //--------------------------------------------------------------
-int Target::height() const
+int RenderTarget::height() const
 {
 	int h = 0;
 	if(_targets.size() > 0) h = _targets[0]->getSource()->height();
@@ -71,25 +71,25 @@ int Target::height() const
 }
 
 //--------------------------------------------------------------
-int Target::count() const
+int RenderTarget::count() const
 {
 	return _targets.size();
 }
 
 //--------------------------------------------------------------
-bool Target::hasDepth() const
+bool RenderTarget::hasDepth() const
 {
 	return _hasDepthBuffer;
 }
 
 //--------------------------------------------------------------
-void Target::change()
+void RenderTarget::change()
 {
 	_hasChanged = true;
 }
 
 //--------------------------------------------------------------
-void Target::update()
+void RenderTarget::update()
 {
 	if(SceneRenderer::s_interface != nullptr
 		&& _hasChanged)

@@ -1,5 +1,5 @@
-#ifndef IMP_TARGET_H
-#define IMP_TARGET_H
+#ifndef IMP_RENDERTARGET_H
+#define IMP_RENDERTARGET_H
 
 #include <Core/Object.h>
 #include <Graphics/Image.h>
@@ -8,14 +8,14 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API Target : public Object
+class IMP_API RenderTarget : public Object
 {
 public:
 	
-	Meta_Class(Target);
+	Meta_Class(RenderTarget);
 	
-	Target();
-	virtual ~Target();
+	RenderTarget();
+	virtual ~RenderTarget();
 
 	void create(int w, int h, int count = 1, bool hasDepth = false);
 	void create(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth = false);
@@ -44,4 +44,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_TARGET_H
+#endif // IMP_RENDERTARGET_H

@@ -16,6 +16,7 @@ SceneRenderer::SceneRenderer()
 	if(s_interface != nullptr) s_interface->init();
 	
 	_visitor = RenderVisitor::create();
+	_direct = true;
 }
 
 //--------------------------------------------------------------
@@ -109,13 +110,13 @@ void SceneRenderer::applyState(const State::Ptr& state)
 	s_interface->setDepthTest(state->getDepthTest());
 	s_interface->setViewport(state->getViewport());
 	
-	if(state->getTarget() == nullptr)
+	if(_direct)
 	{
 		s_interface->unbind(nullptr);
 	}
-	else 
+	else if(_targets)
 	{
-		Target::Ptr target = state->getTarget();
+		RenderTarget::Ptr target = _targets;
 		if(target->_d == -1)
 		{
 			s_interface->init(target.get());

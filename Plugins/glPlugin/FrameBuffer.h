@@ -1,5 +1,5 @@
-#ifndef IMP_RENDERTARGET_H
-#define IMP_RENDERTARGET_H
+#ifndef IMP_FRAMEBUFFER_H
+#define IMP_FRAMEBUFFER_H
 
 #include <Core/Object.h>
 
@@ -40,4 +40,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_RENDERTARGET_H
+#endif // IMP_FRAMEBUFFER_H

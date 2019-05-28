@@ -5,6 +5,7 @@
 
 #include <Renderer/RenderVisitor.h>
 #include <Renderer/RenderPlugin.h>
+#include <Renderer/RenderTarget.h>
 
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/ClearNode.h>
@@ -23,10 +24,17 @@ public:
 
 	void render(const Graph::Ptr& scene);
 	
+	void setDirectRendering(bool direct) {_direct = direct;}
+	bool isDirectRendering() const {return _direct;}
+	void setRenderTarget( RenderTarget::Ptr& targets ) {_targets = targets;}
+	RenderTarget::Ptr getRenderTarget() const { return _targets; }
+	
 	static RenderPlugin::Ptr s_interface;
 
 protected:
 	
+	bool _direct;
+	RenderTarget::Ptr _targets;
 	RenderVisitor::Ptr _visitor;
 	
 	void applyState(const State::Ptr& state);

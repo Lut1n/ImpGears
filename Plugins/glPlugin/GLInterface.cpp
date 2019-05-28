@@ -1,7 +1,7 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <Renderer/TextureSampler.h>
-#include <Renderer/Target.h>
+#include <Graphics/Sampler.h>
+#include <Renderer/RenderTarget.h>
 #include <Renderer/Uniform.h>
 #include <Geometry/Geometry.h>
 
@@ -67,7 +67,7 @@ struct GlPlugin::Priv
 	std::map<const Geometry*,VboData::Ptr> vertexBuffers;
 	std::map<const ImageSampler*,TexData::Ptr> samplers;
 	std::map<const ReflexionModel*,ProgData::Ptr> callbacks;
-	std::map<const Target*,FboData::Ptr> renderTargets;
+	std::map<const RenderTarget*,FboData::Ptr> renderTargets;
 	
 	VboData::Ptr getVbo(const Geometry* g)
 	{
@@ -87,7 +87,7 @@ struct GlPlugin::Priv
 		if(it==callbacks.end())return nullptr;
 		else return it->second;
 	}
-	FboData::Ptr getFbo(const Target* t)
+	FboData::Ptr getFbo(const RenderTarget* t)
 	{
 		auto it=renderTargets.find(t);
 		if(it==renderTargets.end())return nullptr;
@@ -299,7 +299,7 @@ void GlPlugin::update(const ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(Target* target)
+void GlPlugin::bind(RenderTarget* target)
 {
 	FboData::Ptr d = s_internalState->getFbo(target);
 	if(d) d->frames.bind();
@@ -325,7 +325,7 @@ void GlPlugin::bind(ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::init(Target* target)
+void GlPlugin::init(RenderTarget* target)
 {
 	FboData::Ptr d = FboData::create();
 	
@@ -347,7 +347,7 @@ void GlPlugin::init(Target* target)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::unbind(Target* target)
+void GlPlugin::unbind(RenderTarget* target)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

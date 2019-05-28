@@ -14,7 +14,7 @@ class ClearNode;
 class State;
 class Geometry;
 class TextureSampler;
-class Target;
+class RenderTarget;
 class ReflexionModel;
 
 class IMP_API RenderPlugin : public Object
@@ -39,7 +39,7 @@ public:
 	
 	virtual void update(const ImageSampler* sampler) = 0;
 	
-	virtual void bind(Target* target) = 0;
+	virtual void bind(RenderTarget* target) = 0;
 	
 	virtual void bind(ReflexionModel* reflexion) = 0;
 	
@@ -47,9 +47,9 @@ public:
 	
 	virtual void bind(ImageSampler* geo) = 0;
 	
-	virtual void init(Target* target) = 0;
+	virtual void init(RenderTarget* target) = 0;
 	
-	virtual void unbind(Target* target) = 0;
+	virtual void unbind(RenderTarget* target) = 0;
 	
 	virtual void bringBack(ImageSampler* sampler) = 0;
 	

@@ -1,7 +1,7 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
 #include <Graphics/Sampler.h>
-#include <Renderer/Target.h>
+#include <Renderer/RenderTarget.h>
 #include <Renderer/CpuRenderPlugin.h>
 #include <Renderer/Uniform.h>
 #include <Geometry/Geometry.h>
@@ -58,7 +58,7 @@ struct TgtData : public RenderPlugin::Data
 	Meta_Class(TgtData)
 	TgtData() { ty=RenderPlugin::Ty_Tgt; }
 	
-	Target* tgt;
+	RenderTarget* tgt;
 };
 
 //--------------------------------------------------------------
@@ -69,12 +69,12 @@ struct CpuRenderPlugin::Priv
 	std::map<const Geometry*,GeoData::Ptr> vertexBuffers;
 	std::map<const ImageSampler*,ImgData::Ptr> samplers;
 	std::map<const ReflexionModel*,ShaData::Ptr> callbacks;
-	std::map<const Target*,TgtData::Ptr> renderTargets;
+	std::map<const RenderTarget*,TgtData::Ptr> renderRenderTargets;
 	
 	// Rasterizer rast;
 	GeometryRenderer geoRenderer;
-	Target defaultTarget;
-	Target* target;
+	RenderTarget defaultRenderTarget;
+	RenderTarget* target;
 	bool _targetOverride;
 };
 
@@ -91,10 +91,10 @@ void CpuRenderPlugin::init()
 		s_internalState = new CpuRenderPlugin::Priv();
 		s_internalState->geoRenderer.setViewport( vp );
 		
-		s_internalState->defaultTarget.create( (int)vp[2] , (int)vp[3], 1, true);
-		s_internalState->target = &s_internalState->defaultTarget;
+		s_internalState->defaultRenderTarget.create( (int)vp[2] , (int)vp[3], 1, true);
+		s_internalState->target = &s_internalState->defaultRenderTarget;
 		
-		ImageSampler::Ptr tgt = s_internalState->defaultTarget.get(0);
+		ImageSampler::Ptr tgt = s_internalState->defaultRenderTarget.get(0);
 		Image::Ptr sourceTgt = tgt->getSource();
 		s_internalState->geoRenderer.setTarget(0,sourceTgt, Vec4(0.0));
 		// s_internalState->geoRenderer.setTarget(1,s_internalState->depth, Vec4(255.0));
@@ -248,13 +248,13 @@ void CpuRenderPlugin::update(const ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bind(Target* target)
+void CpuRenderPlugin::bind(RenderTarget* target)
 {
-	TgtData::Ptr d = s_internalState->renderTargets.at(target);
+	TgtData::Ptr d = s_internalState->renderRenderTargets.at(target);
 	if(d)
 		s_internalState->target = d->tgt;
 	else
-		s_internalState->target = &s_internalState->defaultTarget;
+		s_internalState->target = &s_internalState->defaultRenderTarget;
 	
 	ImageSampler::Ptr tgt = s_internalState->target->get(0);
 	Image::Ptr sourceTgt = tgt->getSource();
@@ -287,17 +287,17 @@ void CpuRenderPlugin::bind(ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::init(Target* target)
+void CpuRenderPlugin::init(RenderTarget* target)
 {
 	TgtData::Ptr d = TgtData::create();
 	d->tgt = target;
-	s_internalState->renderTargets[target] = d;
+	s_internalState->renderRenderTargets[target] = d;
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::unbind(Target* target)
+void CpuRenderPlugin::unbind(RenderTarget* target)
 {
-	s_internalState->target = &s_internalState->defaultTarget;
+	s_internalState->target = &s_internalState->defaultRenderTarget;
 
 	ImageSampler::Ptr tgt = s_internalState->target->get(0);
 	Image::Ptr sourceTgt = tgt->getSource();

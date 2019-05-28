@@ -7,7 +7,6 @@
 #include <Core/Vec4.h>
 #include <Renderer/Uniform.h>
 #include <SceneGraph/ReflexionModel.h>
-#include <Renderer/Target.h>
 
 #include <map>
 
@@ -69,7 +68,6 @@ public:
 	void setLineWidth(float lw);
 	float getLineWidth() const {return _lineWidth;}
 	
-	void setTarget(Target::Ptr target);
 	void setReflexion(ReflexionModel::Ptr reflexion);
 	void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
 	void clearUniforms();
@@ -86,7 +84,6 @@ public:
 	const std::map<std::string,Uniform::Ptr>& getUniforms() const {return _uniforms;}
 	
 	
-	Target::Ptr getTarget() { return _target; }
 	ReflexionModel::Ptr getReflexion() { return _reflexion; }
 
 protected:
@@ -99,7 +96,6 @@ private:
 	float _lineWidth;
 	bool _depthTest;
 	
-	Target::Ptr _target;
 	ReflexionModel::Ptr _reflexion;
 	std::map<std::string,Uniform::Ptr> _uniforms;
 	
@@ -109,7 +105,6 @@ private:
 	bool _blendModeChanged;
 	bool _lineWidthChanged;
 	bool _depthTestChanged;
-	bool _targetChanged;
 	bool _reflexionChanged;
 	bool _uniformsChanged;
 };

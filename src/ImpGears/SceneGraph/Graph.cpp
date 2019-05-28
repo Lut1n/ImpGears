@@ -19,7 +19,6 @@ Graph::Graph()
     _initState->setViewport(0.0,0.0,500.0,500.0);
     _initState->setLineWidth(1.0);
     _initState->setDepthTest( true );
-	_initState->setTarget(nullptr);
 }
 
 //--------------------------------------------------------------
@@ -52,18 +51,6 @@ void Graph::setClearColor(const Vec4& color)
 void Graph::setClearDepth(float depth)
 {
 	_initNode->setDepth(depth);
-}
-
-//---------------------------------------------------------------
-void Graph::setTarget(const Target::Ptr& target)
-{
-	_initNode->setTarget(target);
-}
-
-//---------------------------------------------------------------
-void Graph::setDefaultTarget()
-{
-	_initNode->setTarget(nullptr);
 }
 
 IMPGEARS_END

@@ -8,7 +8,7 @@
 #include <Core/Vec4.h>
 #include <Core/Matrix3.h>
 #include <Core/Matrix4.h>
-#include <Core/Perlin.h>
+#include <Core/Noise.h>
 #include <fstream>
 
 #include <SFML/Graphics.hpp>
@@ -96,8 +96,8 @@ struct CopyOp : public ImageOperation
 	virtual void apply(const Vec2& uv, Vec4& outColor)
 	{
 		ImageSampler sampler(src), sampler2(src2);
-		sampler.setInterpo(TextureSampler::Interpo_Linear);
-		sampler2.setInterpo(TextureSampler::Interpo_Linear);
+		sampler.setInterpo(ImageSampler::Interpo_Linear);
+		sampler2.setInterpo(ImageSampler::Interpo_Linear);
 		Vec3 col = sampler.get(uv);
 		Vec3 col2 = sampler2.get(uv);
 		
@@ -108,7 +108,7 @@ struct CopyOp : public ImageOperation
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
-void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& illuSampler, TextureSampler::Ptr& normalSampler)
+void loadSamplers(ImageSampler::Ptr& colorSampler, ImageSampler::Ptr& illuSampler, ImageSampler::Ptr& normalSampler)
 {
 	if( !fileExists("./cache/scene_color.tga") || !fileExists("./cache/scene_normals.tga") )
 	{
@@ -124,20 +124,20 @@ void loadSamplers(TextureSampler::Ptr& colorSampler, TextureSampler::Ptr& illuSa
 		
 	}
 	
-	colorSampler =TextureSampler::create();
+	colorSampler =ImageSampler::create();
 	colorSampler->setSource( ImageIO::load("./cache/scene_color.tga") );
-	colorSampler->setMode(TextureSampler::Mode_Repeat);
-	colorSampler->setInterpo(TextureSampler::Interpo_Linear);
+	colorSampler->setMode(ImageSampler::Mode_Repeat);
+	colorSampler->setInterpo(ImageSampler::Interpo_Linear);
 	
-	normalSampler =TextureSampler::create();
+	normalSampler =ImageSampler::create();
 	normalSampler->setSource( ImageIO::load("./cache/scene_normals.tga") );
-	normalSampler->setMode(TextureSampler::Mode_Repeat);
-	normalSampler->setInterpo(TextureSampler::Interpo_Linear);
+	normalSampler->setMode(ImageSampler::Mode_Repeat);
+	normalSampler->setInterpo(ImageSampler::Interpo_Linear);
 	
-	illuSampler =TextureSampler::create();
+	illuSampler =ImageSampler::create();
 	illuSampler->setSource( ImageIO::load("./cache/scene_illu.tga") );
-	illuSampler->setMode(TextureSampler::Mode_Repeat);
-	illuSampler->setInterpo(TextureSampler::Interpo_Linear);
+	illuSampler->setMode(ImageSampler::Mode_Repeat);
+	illuSampler->setInterpo(ImageSampler::Interpo_Linear);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     Vec3 lightColor(0.3,1.0,0.3);
     Vec3 lightAttn(30.0,4.0,0.0);
 	
-	TextureSampler::Ptr sampler, nsampler, illusampler;
+	ImageSampler::Ptr sampler, nsampler, illusampler;
 	loadSamplers(sampler,illusampler, nsampler);
 	Image::Ptr rgbtarget = Image::create(INTERN_RES,INTERN_RES,4);
 	

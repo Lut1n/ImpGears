@@ -11,7 +11,6 @@ State::State()
 	, _blendMode(BlendMode_SrcAlphaBased)
 	, _lineWidth(1.0)
 	, _depthTest(false)
-	, _target(nullptr)
 	, _reflexion(nullptr)
 	, _uniforms()
 	, _projectionChanged(false)
@@ -20,7 +19,6 @@ State::State()
 	, _blendModeChanged(false)
 	, _lineWidthChanged(false)
 	, _depthTestChanged(false)
-	, _targetChanged(false)
 	, _reflexionChanged(false)
 	, _uniformsChanged(false)
 {
@@ -34,7 +32,6 @@ State::State(const State& other)
 	, _blendMode(other._blendMode)
 	, _lineWidth(other._lineWidth)
 	, _depthTest(other._depthTest)
-	, _target(other._target)
 	, _reflexion(other._reflexion)
 	, _uniforms(other._uniforms)
 	, _projectionChanged(other._projectionChanged)
@@ -43,7 +40,6 @@ State::State(const State& other)
 	, _blendModeChanged(other._blendModeChanged)
 	, _lineWidthChanged(other._lineWidthChanged)
 	, _depthTestChanged(other._depthTestChanged)
-	, _targetChanged(other._targetChanged)
 	, _reflexionChanged(other._reflexionChanged)
 	, _uniformsChanged(other._uniformsChanged)
 {
@@ -65,7 +61,6 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		_blendMode = other->_blendMode;
 		_lineWidth = other->_lineWidth;
 		_depthTest = other->_depthTest;
-		_target = other->_target;
 		_reflexion = other->_reflexion;
 		_uniforms = other->_uniforms;
 		_projectionChanged = other->_projectionChanged;
@@ -74,7 +69,6 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		_blendModeChanged = other->_blendModeChanged;
 		_lineWidthChanged = other->_lineWidthChanged;
 		_depthTestChanged = other->_depthTestChanged;
-		_targetChanged = other->_targetChanged;
 		_reflexionChanged = other->_reflexionChanged;
 	}
 	else if(opt == CloneOpt_IfChanged)
@@ -85,7 +79,6 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
 		if(other->_blendModeChanged) setBlendMode(other->_blendMode);
 		if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
 		if(other->_depthTestChanged) setDepthTest(other->_depthTest);
-		if(other->_targetChanged) setTarget(other->_target);
 		if(other->_reflexionChanged) setReflexion(other->_reflexion);
 		if(other->_uniformsChanged) setUniforms(other->_uniforms);
 	}
@@ -100,7 +93,6 @@ const State& State::operator=(const State& other)
 	_blendMode = other._blendMode;
 	_lineWidth = other._lineWidth;
 	_depthTest = other._depthTest;
-	_target = other._target;
 	_reflexion = other._reflexion;
 	_uniforms = other._uniforms;
 	_projectionChanged = other._projectionChanged;
@@ -109,7 +101,6 @@ const State& State::operator=(const State& other)
 	_blendModeChanged = other._blendModeChanged;
 	_lineWidthChanged = other._lineWidthChanged;
 	_depthTestChanged = other._depthTestChanged;
-	_targetChanged = other._targetChanged;
 	_reflexionChanged = other._reflexionChanged;
 
 	return *this;
@@ -155,13 +146,6 @@ void State::setLineWidth(float lw)
 {
     _lineWidth = lw;
     _lineWidthChanged = true;
-}
-
-//--------------------------------------------------------------
-void State::setTarget(Target::Ptr target)
-{
-	_target = target;
-	_targetChanged = true;
 }
 
 //--------------------------------------------------------------

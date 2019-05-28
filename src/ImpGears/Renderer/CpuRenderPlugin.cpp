@@ -1,10 +1,7 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
-#include <Graphics/Sampler.h>
-#include <Renderer/RenderTarget.h>
 #include <Renderer/CpuRenderPlugin.h>
 #include <Renderer/Uniform.h>
-#include <Geometry/Geometry.h>
 
 #include <Graphics/Rasterizer.h>
 #include <Renderer/GeometryRenderer.h>
@@ -30,7 +27,7 @@ struct GeoData : public RenderPlugin::Data
 	Meta_Class(GeoData)
 	GeoData() { ty=RenderPlugin::Ty_Vbo; }
 	
-	const Geometry* geo;
+	Geometry::Ptr geo;
 };
 
 //--------------------------------------------------------------
@@ -39,7 +36,7 @@ struct ImgData : public RenderPlugin::Data
 	Meta_Class(ImgData)
 	ImgData() { ty=RenderPlugin::Ty_Tex; }
 	
-	const ImageSampler* sampler;
+	ImageSampler::Ptr sampler;
 };
 
 //--------------------------------------------------------------
@@ -58,7 +55,7 @@ struct TgtData : public RenderPlugin::Data
 	Meta_Class(TgtData)
 	TgtData() { ty=RenderPlugin::Ty_Tgt; }
 	
-	RenderTarget* tgt;
+	RenderTarget::Ptr tgt;
 };
 
 //--------------------------------------------------------------
@@ -66,15 +63,15 @@ struct CpuRenderPlugin::Priv
 {
 	Priv() : _targetOverride(false) {}
 	
-	std::map<const Geometry*,GeoData::Ptr> vertexBuffers;
-	std::map<const ImageSampler*,ImgData::Ptr> samplers;
-	std::map<const ReflexionModel*,ShaData::Ptr> callbacks;
-	std::map<const RenderTarget*,TgtData::Ptr> renderRenderTargets;
+	std::map<Geometry::Ptr,GeoData::Ptr> vertexBuffers;
+	std::map<ImageSampler::Ptr,ImgData::Ptr> samplers;
+	std::map<ReflexionModel::Ptr,ShaData::Ptr> callbacks;
+	std::map<RenderTarget::Ptr,TgtData::Ptr> renderTargets;
 	
 	// Rasterizer rast;
 	GeometryRenderer geoRenderer;
-	RenderTarget defaultRenderTarget;
-	RenderTarget* target;
+	RenderTarget::Ptr defaultRenderTarget;
+	RenderTarget::Ptr target;
 	bool _targetOverride;
 };
 
@@ -91,10 +88,11 @@ void CpuRenderPlugin::init()
 		s_internalState = new CpuRenderPlugin::Priv();
 		s_internalState->geoRenderer.setViewport( vp );
 		
-		s_internalState->defaultRenderTarget.create( (int)vp[2] , (int)vp[3], 1, true);
-		s_internalState->target = &s_internalState->defaultRenderTarget;
+		s_internalState->defaultRenderTarget = RenderTarget::create();
+		s_internalState->defaultRenderTarget->create( (int)vp[2] , (int)vp[3], 1, true);
+		s_internalState->target = s_internalState->defaultRenderTarget;
 		
-		ImageSampler::Ptr tgt = s_internalState->defaultRenderTarget.get(0);
+		ImageSampler::Ptr tgt = s_internalState->defaultRenderTarget->get(0);
 		Image::Ptr sourceTgt = tgt->getSource();
 		s_internalState->geoRenderer.setTarget(0,sourceTgt, Vec4(0.0));
 		// s_internalState->geoRenderer.setTarget(1,s_internalState->depth, Vec4(255.0));
@@ -102,7 +100,7 @@ void CpuRenderPlugin::init()
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::apply(const ClearNode* clear)
+void CpuRenderPlugin::apply(ClearNode::Ptr& clear)
 {
 	GeometryRenderer& r = s_internalState->geoRenderer;
 	
@@ -162,28 +160,35 @@ void CpuRenderPlugin::setDepthTest(int mode)
 }
 
 //--------------------------------------------------------------
-int CpuRenderPlugin::load(const Geometry* geo)
+int CpuRenderPlugin::load(Geometry::Ptr& geo)
 {
-	GeoData::Ptr d = GeoData::create();
-	d->geo = geo;
-	s_internalState->vertexBuffers[geo] = d;
+	if(s_internalState->vertexBuffers.find(geo) == s_internalState->vertexBuffers.end())
+	{
+		GeoData::Ptr d = GeoData::create();
+		d->geo = geo;
+		s_internalState->vertexBuffers[geo] = d;
+	}
 	return 0;
 }
 
 //--------------------------------------------------------------
-int CpuRenderPlugin::load(const ImageSampler* sampler)
+int CpuRenderPlugin::load(ImageSampler::Ptr& sampler)
 {
-	Image::Ptr img = sampler->getSource();
-	ImgData::Ptr d = ImgData::create();
-	d->sampler = sampler;
-	s_internalState->samplers[sampler] = d;
+	if(s_internalState->samplers.find(sampler) == s_internalState->samplers.end())
+	{
+		ImgData::Ptr d = ImgData::create();
+		d->sampler = sampler;
+		s_internalState->samplers[sampler] = d;
+	}
+	return 0;
+}
+
+//--------------------------------------------------------------
+int CpuRenderPlugin::load(ReflexionModel::Ptr& program)
+{
+	if(s_internalState->callbacks.find(program) != s_internalState->callbacks.end())
+		return 0;
 	
-	return 0;
-}
-
-//--------------------------------------------------------------
-int CpuRenderPlugin::load(const ReflexionModel* program)
-{
 	ReflexionModel::AbstractFrag::Ptr frag = ReflexionModel::AbstractFrag::create();
 	
 	ShaData::Ptr d = ShaData::create();
@@ -241,20 +246,20 @@ int CpuRenderPlugin::load(const ReflexionModel* program)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::update(const ImageSampler* sampler)
+void CpuRenderPlugin::update(ImageSampler::Ptr& sampler)
 {
 	ImgData::Ptr d = s_internalState->samplers.at(sampler);
 	if(d) d->sampler = sampler;
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bind(RenderTarget* target)
+void CpuRenderPlugin::bind(RenderTarget::Ptr& target)
 {
-	TgtData::Ptr d = s_internalState->renderRenderTargets.at(target);
+	TgtData::Ptr d = s_internalState->renderTargets.at(target);
 	if(d)
 		s_internalState->target = d->tgt;
 	else
-		s_internalState->target = &s_internalState->defaultRenderTarget;
+		s_internalState->target = s_internalState->defaultRenderTarget;
 	
 	ImageSampler::Ptr tgt = s_internalState->target->get(0);
 	Image::Ptr sourceTgt = tgt->getSource();
@@ -262,7 +267,7 @@ void CpuRenderPlugin::bind(RenderTarget* target)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bind(ReflexionModel* reflexion)
+void CpuRenderPlugin::bind(ReflexionModel::Ptr& reflexion)
 {
 	ShaData::Ptr d = s_internalState->callbacks.at(reflexion);
 	if(d)
@@ -276,28 +281,31 @@ void CpuRenderPlugin::bind(ReflexionModel* reflexion)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bind(Geometry* geo)
+void CpuRenderPlugin::bind(Geometry::Ptr& geo)
 {
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bind(ImageSampler* sampler)
+void CpuRenderPlugin::bind(ImageSampler::Ptr& sampler)
 {
 	ImgData::Ptr d = s_internalState->samplers.at(sampler);
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::init(RenderTarget* target)
+void CpuRenderPlugin::init(RenderTarget::Ptr& target)
 {
-	TgtData::Ptr d = TgtData::create();
-	d->tgt = target;
-	s_internalState->renderRenderTargets[target] = d;
+	if(s_internalState->renderTargets.find(target) == s_internalState->renderTargets.end())
+	{
+		TgtData::Ptr d = TgtData::create();
+		d->tgt = target;
+		s_internalState->renderTargets[target] = d;
+	}
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::unbind(RenderTarget* target)
+void CpuRenderPlugin::unbind()
 {
-	s_internalState->target = &s_internalState->defaultRenderTarget;
+	s_internalState->target = s_internalState->defaultRenderTarget;
 
 	ImageSampler::Ptr tgt = s_internalState->target->get(0);
 	Image::Ptr sourceTgt = tgt->getSource();
@@ -305,12 +313,12 @@ void CpuRenderPlugin::unbind(RenderTarget* target)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::bringBack(ImageSampler* sampler)
+void CpuRenderPlugin::bringBack(ImageSampler::Ptr& sampler)
 {
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::draw(Geometry* geo)
+void CpuRenderPlugin::draw(Geometry::Ptr& geo)
 {
 	GeoData::Ptr d = s_internalState->vertexBuffers.at(geo);
 	if(d)
@@ -320,7 +328,7 @@ void CpuRenderPlugin::draw(Geometry* geo)
 }
 
 //--------------------------------------------------------------
-void CpuRenderPlugin::update(ReflexionModel* reflexion, const Uniform::Ptr& uniform)
+void CpuRenderPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 {
 	GeometryRenderer& r = s_internalState->geoRenderer;
 	

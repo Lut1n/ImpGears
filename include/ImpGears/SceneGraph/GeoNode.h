@@ -7,7 +7,6 @@
 #include <SceneGraph/Node.h>
 #include <SceneGraph/Material.h>
 #include <Renderer/Uniform.h>
-#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 
@@ -17,14 +16,14 @@ class IMP_API GeoNode : public Node
 		
 	Meta_Class(GeoNode)
 	
-	Geometry _geo;
+	Geometry::Ptr _geo;
 	Material::Ptr _material;
 	int _gBuffer;
 	bool _wireframe;
 	bool _loaded;
 	
 	GeoNode(const Polyhedron& buf, bool wireframe = false);
-	GeoNode(const Geometry& geo, bool wireframe = false);
+	GeoNode(const Geometry::Ptr& geo, bool wireframe = false);
 	
 	void setReflexion(ReflexionModel::Ptr reflexion);
 	void setMaterial(const Material::Ptr material);

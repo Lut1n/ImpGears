@@ -11,7 +11,6 @@ RenderTarget::RenderTarget()
 {
 	_hasChanged = false;
 	_hasDepthBuffer = false;
-	_d = -1;
 }
 
 //--------------------------------------------------------------
@@ -97,7 +96,7 @@ void RenderTarget::update()
 		for(int i=0;i<(int)_targets.size();++i)
 		{
 			ImageSampler::Ptr& img = _targets[i];
-			SceneRenderer::s_interface->bringBack(img.get());
+			SceneRenderer::s_interface->bringBack(img);
 		}
 		_hasChanged = false;
 	}

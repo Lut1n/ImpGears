@@ -5,6 +5,7 @@
 #include <SceneGraph/Node.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/State.h>
+#include <SceneGraph/ClearNode.h>
 #include <Core/Matrix4.h>
 
 #include <Renderer/RenderQueue.h>

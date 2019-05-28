@@ -14,33 +14,33 @@ public:
 	
 	virtual void init();
 	
-	virtual void apply(const ClearNode* clear);
+	virtual void apply(ClearNode::Ptr& clear);
 	
-	virtual int load(const Geometry* geo);
+	virtual int load(Geometry::Ptr& geo);
 	
-	virtual int load(const ImageSampler* sampler);
+	virtual int load(ImageSampler::Ptr& sampler);
 	
-	virtual int load(const ReflexionModel* program);
+	virtual int load(ReflexionModel::Ptr& program);
 	
-	virtual void update(const ImageSampler* sampler);
+	virtual void update(ImageSampler::Ptr& sampler);
 	
-	virtual void bind(RenderTarget* target);
+	virtual void bind(RenderTarget::Ptr& target);
 	
-	virtual void bind(ReflexionModel* reflexion);
+	virtual void bind(ReflexionModel::Ptr& reflexion);
 	
-	virtual void bind(Geometry* geo);
+	virtual void bind(Geometry::Ptr& geo);
 	
-	virtual void bind(ImageSampler* geo);
+	virtual void bind(ImageSampler::Ptr& geo);
 	
-	virtual void init(RenderTarget* target);
+	virtual void init(RenderTarget::Ptr& target);
 	
-	virtual void unbind(RenderTarget* target);
+	virtual void unbind();
 	
-	virtual void bringBack(ImageSampler* sampler);
+	virtual void bringBack(ImageSampler::Ptr& sampler);
 	
-	virtual void draw(Geometry* geo);
+	virtual void draw(Geometry::Ptr& geo);
 	
-	virtual void update(ReflexionModel* reflexion, const Uniform::Ptr& uniform);
+	virtual void update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform);
 	
 	virtual void setCulling(int mode);
 	

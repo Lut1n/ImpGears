@@ -2,9 +2,7 @@
 #define IMP_RENDERTARGET_H
 
 #include <Core/Object.h>
-#include <Graphics/Image.h>
-
-#include <Renderer/RenderPlugin.h>
+#include <Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
 
@@ -32,8 +30,6 @@ public:
 	
 	void change();
 	void update();
-	
-	int _d;
 	
 protected:
 	

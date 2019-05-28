@@ -112,39 +112,36 @@ void SceneRenderer::applyState(const State::Ptr& state)
 	
 	if(_direct)
 	{
-		s_interface->unbind(nullptr);
+		s_interface->unbind();
 	}
 	else if(_targets)
 	{
 		RenderTarget::Ptr target = _targets;
-		if(target->_d == -1)
-		{
-			s_interface->init(target.get());
-			target->_d = 0;
-		}
-		s_interface->bind(target.get());
+		s_interface->init(target);
+		s_interface->bind(target);
 		target->change();
 	}
 	
 	ReflexionModel::Ptr reflexion = state->getReflexion();
-	if(reflexion->_d == -1)
-	{
-		s_interface->load( reflexion.get() );
-		reflexion->_d = 0;
-	}
-	s_interface->bind(reflexion.get());
-	
-	if(reflexion->_d != -1)
-	{
-		const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
-		for(auto u : uniforms) SceneRenderer::s_interface->update(reflexion.get(), u.second);
-	}
+	s_interface->load(reflexion);
+	s_interface->bind(reflexion);
+	const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
+	for(auto u : uniforms) SceneRenderer::s_interface->update(reflexion, u.second);
 }
 
 //---------------------------------------------------------------
 void SceneRenderer::applyClear(ClearNode* clearNode)
 {
-	if(s_interface != nullptr) s_interface->apply(clearNode);
+	static ClearNode::Ptr clear;
+	if(clear.get() == nullptr)
+	{
+		clear = ClearNode::create();
+		clear->setDepth(1);
+		clear->setColor( Vec4(0.0) );
+		clear->enableDepth(true);
+		clear->enableColor(true);
+	}
+	if(s_interface != nullptr) s_interface->apply(clear);
 }
 
 //---------------------------------------------------------------
@@ -152,13 +149,8 @@ void SceneRenderer::drawGeometry(GeoNode* geoNode)
 {
 	if(s_interface != nullptr )
 	{
-		if(geoNode->_gBuffer == -1)
-		{
-			s_interface->load(&geoNode->_geo);
-			geoNode->_gBuffer = 0;
-		}
-		
-		if(geoNode->_gBuffer != -1) s_interface->draw(&geoNode->_geo);
+		s_interface->load(geoNode->_geo);
+		s_interface->draw(geoNode->_geo);
 	}
 }
 

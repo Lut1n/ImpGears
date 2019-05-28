@@ -8,8 +8,8 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 {
 	_loaded = false;
 	_gBuffer = -1;
-	_geo.setPrimitive(Geometry::Primitive_Triangles);
-	buf.getTriangles(_geo._vertices);
+	_geo->setPrimitive(Geometry::Primitive_Triangles);
+	buf.getTriangles(_geo->_vertices);
 	_wireframe = wireframe;
 	
 	ReflexionModel::Ptr reflexion = ReflexionModel::create();
@@ -19,7 +19,7 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 }
 
 //--------------------------------------------------------------
-GeoNode::GeoNode(const Geometry& geo, bool wireframe)
+GeoNode::GeoNode(const Geometry::Ptr& geo, bool wireframe)
 {
 	_loaded = false;
 	_gBuffer = -1;
@@ -54,16 +54,16 @@ void GeoNode::update()
 { 
 	if(!_loaded)
 	{
-		if(_geo.getPrimitive()==Geometry::Primitive_Triangles)
+		if(_geo->getPrimitive()==Geometry::Primitive_Triangles)
 		{
 			if(_wireframe)
 			{
-				_geo = Geometry::intoLineBuf( _geo );
-				_geo.setPrimitive(Geometry::Primitive_Lines);
+				*_geo = Geometry::intoLineBuf( *_geo );
+				_geo->setPrimitive(Geometry::Primitive_Lines);
 			}
 			else
 			{
-				Geometry::intoCCW(_geo);
+				Geometry::intoCCW(*_geo);
 			}
 		}
 		_loaded = true;

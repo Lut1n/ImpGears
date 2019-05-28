@@ -145,11 +145,12 @@ struct IGStuff
 		graph->getInitState()->setViewport( viewport );
 	
 		// Geometry cubeGeo = Geometry::sphere(8,1.0);
-		Geometry cubeGeo = Geometry::cube();
-		cubeGeo.generateColors(Vec3(1.0,1.0,1.0));
-		cubeGeo.generateNormals();
-		cubeGeo.generateTexCoords(1.0);
-		Geometry::intoCCW( cubeGeo );
+		Geometry::Ptr cubeGeo = Geometry::create();
+		*cubeGeo = Geometry::cube();
+		cubeGeo->generateColors(Vec3(1.0,1.0,1.0));
+		cubeGeo->generateNormals();
+		cubeGeo->generateTexCoords(1.0);
+		Geometry::intoCCW( *cubeGeo );
 		
 		Material::Ptr material = Material::create(Vec3(1.0),4.0);
 		material->_baseColor = ImageSampler::create(im,ImageSampler::Mode_Repeat);

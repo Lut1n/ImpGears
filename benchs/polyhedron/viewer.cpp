@@ -142,9 +142,10 @@ int main(int argc, char* argv[])
 	xAxe.generateColors(Vec3(1.0,0.0,0.0));
 	yAxe.generateColors(Vec3(0.0,1.0,0.0));
 	zAxe.generateColors(Vec3(0.0,0.0,1.0));
-	Geometry coords = xAxe + yAxe + zAxe;
-	coords.setPrimitive(Geometry::Primitive_Triangles);
-	coords *= 0.2;
+	Geometry::Ptr coords = Geometry::create();
+	*coords = xAxe + yAxe + zAxe;
+	coords->setPrimitive(Geometry::Primitive_Triangles);
+	(*coords) *= 0.2;
 
 	Geometry point = Geometry::sphere(4, 0.1);
 	point.setPrimitive(Geometry::Primitive_Triangles);
@@ -174,7 +175,8 @@ int main(int argc, char* argv[])
 	material->_normalmap = normalSampler;
 	
 	r->_fragCode_texturing = fragSimple;
-	Geometry mush = generateLeaf();
+	Geometry::Ptr mush = Geometry::create();
+	*mush = generateLeaf();
 	// Geometry mush = generateRockHat(1.0, 8.0);
 	GeoNode::Ptr geomush = GeoNode::create(mush, false);
 	geomush->setPosition(Vec3(1.0,0.0,0.0));

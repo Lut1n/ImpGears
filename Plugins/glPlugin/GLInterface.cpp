@@ -64,30 +64,30 @@ struct FboData : public RenderPlugin::Data
 //--------------------------------------------------------------
 struct GlPlugin::Priv
 {
-	std::map<const Geometry*,VboData::Ptr> vertexBuffers;
-	std::map<const ImageSampler*,TexData::Ptr> samplers;
-	std::map<const ReflexionModel*,ProgData::Ptr> callbacks;
-	std::map<const RenderTarget*,FboData::Ptr> renderTargets;
+	std::map<Geometry::Ptr,VboData::Ptr> vertexBuffers;
+	std::map<ImageSampler::Ptr,TexData::Ptr> samplers;
+	std::map<ReflexionModel::Ptr,ProgData::Ptr> callbacks;
+	std::map<RenderTarget::Ptr,FboData::Ptr> renderTargets;
 	
-	VboData::Ptr getVbo(const Geometry* g)
+	VboData::Ptr getVbo(Geometry::Ptr& g)
 	{
 		auto it=vertexBuffers.find(g);
 		if(it==vertexBuffers.end())return nullptr;
 		else return it->second;
 	}
-	TexData::Ptr getTex(const ImageSampler* is)
+	TexData::Ptr getTex(ImageSampler::Ptr& is)
 	{
 		auto it=samplers.find(is);
 		if(it==samplers.end())return nullptr;
 		else return it->second;
 	}
-	ProgData::Ptr getProg(const ReflexionModel* cb)
+	ProgData::Ptr getProg(ReflexionModel::Ptr& cb)
 	{
 		auto it=callbacks.find(cb);
 		if(it==callbacks.end())return nullptr;
 		else return it->second;
 	}
-	FboData::Ptr getFbo(const RenderTarget* t)
+	FboData::Ptr getFbo(RenderTarget::Ptr& t)
 	{
 		auto it=renderTargets.find(t);
 		if(it==renderTargets.end())return nullptr;
@@ -120,7 +120,7 @@ void GlPlugin::init()
 }
 
 //--------------------------------------------------------------
-void GlPlugin::apply(const ClearNode* clear)
+void GlPlugin::apply(ClearNode::Ptr& clear)
 {
 	GLbitfield bitfield = 0;
 	
@@ -201,23 +201,27 @@ void GlPlugin::setDepthTest(int mode)
 }
 
 //--------------------------------------------------------------
-int GlPlugin::load(const Geometry* geo)
+int GlPlugin::load(Geometry::Ptr& geo)
 {
-	VboData::Ptr d = VboData::create();
-	d->vbo.load(*geo);
-	s_internalState->vertexBuffers[geo] = d;
+	VboData::Ptr d = s_internalState->getVbo(geo);
+	if(d == nullptr)
+	{
+		d = VboData::create();
+		d->vbo.load(*geo);
+		s_internalState->vertexBuffers[geo] = d;
+	}
 	return 0;
 }
 
 //--------------------------------------------------------------
-int GlPlugin::load(const ImageSampler* sampler)
+int GlPlugin::load(ImageSampler::Ptr& sampler)
 {
-	Image::Ptr img = sampler->getSource();
 	TexData::Ptr d = s_internalState->getTex(sampler);
 	if(d == nullptr)
 	{
-		TexData::Ptr d = TexData::create();
+		d = TexData::create();
 		d->tex = Texture::create();
+		Image::Ptr img = sampler->getSource();
 		d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
 		d->tex->setSmooth( sampler->getInterpo() != ImageSampler::Interpo_Nearest );
 		d->tex->setRepeated( sampler->getMode() == ImageSampler::Mode_Repeat );
@@ -228,9 +232,12 @@ int GlPlugin::load(const ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-int GlPlugin::load(const ReflexionModel* program)
+int GlPlugin::load(ReflexionModel::Ptr& program)
 {
-	ProgData::Ptr d = ProgData::create();
+	ProgData::Ptr d = s_internalState->getProg(program);
+	if(d != nullptr) return 0;
+	
+	d = ProgData::create();
 	
 	std::string fullVertCode = basicVert;
 	std::string fullFragCode;
@@ -288,7 +295,7 @@ int GlPlugin::load(const ReflexionModel* program)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(const ImageSampler* sampler)
+void GlPlugin::update(ImageSampler::Ptr& sampler)
 {
 	TexData::Ptr d = s_internalState->getTex(sampler);
 	if(d)
@@ -299,61 +306,65 @@ void GlPlugin::update(const ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(RenderTarget* target)
+void GlPlugin::bind(RenderTarget::Ptr& target)
 {
 	FboData::Ptr d = s_internalState->getFbo(target);
 	if(d) d->frames.bind();
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(ReflexionModel* reflexion)
+void GlPlugin::bind(ReflexionModel::Ptr& reflexion)
 {
 	ProgData::Ptr d = s_internalState->getProg(reflexion);
 	if(d) d->sha.use();
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(Geometry* geo)
+void GlPlugin::bind(Geometry::Ptr& geo)
 {
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bind(ImageSampler* sampler)
+void GlPlugin::bind(ImageSampler::Ptr& sampler)
 {
 		TexData::Ptr d = s_internalState->getTex(sampler);
 		if(d) d->tex->bind();
 }
 
 //--------------------------------------------------------------
-void GlPlugin::init(RenderTarget* target)
+void GlPlugin::init(RenderTarget::Ptr& target)
 {
-	FboData::Ptr d = FboData::create();
-	
-	std::vector<Texture::Ptr> textures;
-	for(int i=0;i<target->count();++i)
+	FboData::Ptr d = s_internalState->getFbo(target);
+	if(d == nullptr)
 	{
-		ImageSampler::Ptr s = target->get(i);
-		// TexData::Ptr dtex = s_internalState->samplers.at(s.get());
-		if(s_internalState->samplers.find(s.get()) == s_internalState->samplers.end()) load(s.get());
-		TexData::Ptr dtex = s_internalState->getTex(s.get());
-		Texture::Ptr t = dtex->tex;
-		textures.push_back(t);
+		d = FboData::create();
+		
+		std::vector<Texture::Ptr> textures;
+		for(int i=0;i<target->count();++i)
+		{
+			ImageSampler::Ptr s = target->get(i);
+			// TexData::Ptr dtex = s_internalState->samplers.at(s);
+			if(s_internalState->getTex(s) == nullptr) load(s);
+			TexData::Ptr dtex = s_internalState->getTex(s);
+			Texture::Ptr t = dtex->tex;
+			textures.push_back(t);
+		}
+		
+		d->frames.build(textures, target->hasDepth());
+		// d->frames.build(target->width(), target->height(), target->count(), target->hasDepth());
+		// target->_d = 0;
+		s_internalState->renderTargets[target] = d;
 	}
-	
-	d->frames.build(textures, target->hasDepth());
-	// d->frames.build(target->width(), target->height(), target->count(), target->hasDepth());
-	target->_d = 0;
-	s_internalState->renderTargets[target] = d;
 }
 
 //--------------------------------------------------------------
-void GlPlugin::unbind(RenderTarget* target)
+void GlPlugin::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //--------------------------------------------------------------
-void GlPlugin::bringBack(ImageSampler* sampler)
+void GlPlugin::bringBack(ImageSampler::Ptr& sampler)
 {
 	TexData::Ptr d = s_internalState->getTex(sampler);
 	if(d)
@@ -364,14 +375,14 @@ void GlPlugin::bringBack(ImageSampler* sampler)
 }
 
 //--------------------------------------------------------------
-void GlPlugin::draw(Geometry* geo)
+void GlPlugin::draw(Geometry::Ptr& geo)
 {
 	VboData::Ptr d = s_internalState->getVbo(geo);
 	if(d) d->vbo.draw();
 }
 
 //--------------------------------------------------------------
-void GlPlugin::update(ReflexionModel* reflexion, const Uniform::Ptr& uniform)
+void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 {
 	ProgData::Ptr sha = s_internalState->getProg(reflexion);
 	if(sha == nullptr) return;
@@ -416,10 +427,10 @@ void GlPlugin::update(ReflexionModel* reflexion, const Uniform::Ptr& uniform)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
-		ImageSampler::Ptr sampler = std::dynamic_pointer_cast<ImageSampler>( uniform->getSampler() );
-		TexData::Ptr d = s_internalState->getTex(sampler.get());
-		if(d == nullptr) load(sampler.get());
-		d = s_internalState->getTex(sampler.get());
+		ImageSampler::Ptr sampler = uniform->getSampler();
+		TexData::Ptr d = s_internalState->getTex(sampler);
+		if(d == nullptr) load(sampler);
+		d = s_internalState->getTex(sampler);
 		if(d)
 		{
 			glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());

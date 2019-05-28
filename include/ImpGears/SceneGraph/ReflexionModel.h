@@ -2,7 +2,6 @@
 #define IMP_REFLEXION_MODEL_H
 
 #include <Renderer/GeometryRenderer.h>
-#include <Renderer/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

@@ -47,6 +47,7 @@ public:
 	Meta_Class(ImageSampler)
 	
 	ImageSampler(Image::Ptr src = nullptr, Mode mode = Mode_Clamp);
+	ImageSampler(int w, int h, int chnl, const Vec4& color);
 	void setSource(Image::Ptr src);
 	Image::Ptr getSource() const;
 	

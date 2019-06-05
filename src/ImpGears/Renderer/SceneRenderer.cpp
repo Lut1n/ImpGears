@@ -10,10 +10,16 @@ RenderPlugin::Ptr SceneRenderer::s_interface;
 //--------------------------------------------------------------
 SceneRenderer::SceneRenderer()
 {
-	s_interface = PluginManager::open("libglPlugin");
-	if(s_interface == nullptr) { s_interface = CpuRenderPlugin::create(); std::cout << "fallback to CPU rendering" << std::endl; }
-	if(s_interface == nullptr) { std::cout << "fallback failed..." << std::endl; }
-	if(s_interface != nullptr) s_interface->init();
+	if(s_interface == nullptr)
+	{
+		s_interface = PluginManager::open("libglPlugin");
+		if(s_interface == nullptr) { s_interface = CpuRenderPlugin::create(); std::cout << "fallback to CPU rendering" << std::endl; }
+		if(s_interface == nullptr) { std::cout << "fallback failed..." << std::endl; }
+		if(s_interface != nullptr)
+		{
+			s_interface->init();
+		}
+	}
 	
 	_visitor = RenderVisitor::create();
 	_direct = true;

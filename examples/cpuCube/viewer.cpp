@@ -154,7 +154,6 @@ struct IGStuff
 		
 		Material::Ptr material = Material::create(Vec3(1.0),4.0);
 		material->_baseColor = ImageSampler::create(im,ImageSampler::Mode_Repeat);
-		material->_normalmap = material->_baseColor;
 		
 		GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);
 		cubeNode->setReflexion(model);
@@ -178,6 +177,7 @@ struct IGStuff
 	void updateCamera(float angle)
 	{
 		camera->setPosition( initCamPos * Matrix3::rotationZ(angle) );
+		// light->setPosition( Vec3(10.0,5.0,10.0) * Matrix3::rotationZ(angle) );
 	}
 	
 	void render()

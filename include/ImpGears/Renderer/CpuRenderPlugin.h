@@ -2,7 +2,7 @@
 #define IMP_CPURENDER_PLUGIN_H
 
 #include <Core/Object.h>
-#include <Renderer/RenderPlugin.h>
+#include <Plugins/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

@@ -1,4 +1,4 @@
-#include <Renderer/RenderPlugin.h>
+#include <Plugins/RenderPlugin.h>
 
 #include <dlfcn.h>
 

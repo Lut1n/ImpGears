@@ -1,7 +1,7 @@
 #ifndef GLINTERFACE_H_INCLUDED
 #define GLINTERFACE_H_INCLUDED
 
-#include <Renderer/RenderPlugin.h>
+#include <Plugins/RenderPlugin.h>
 
 IMPGEARS_BEGIN
 

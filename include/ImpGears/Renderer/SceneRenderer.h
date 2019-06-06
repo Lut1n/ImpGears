@@ -4,8 +4,9 @@
 #include <Core/Object.h>
 
 #include <Renderer/RenderVisitor.h>
-#include <Renderer/RenderPlugin.h>
 #include <Renderer/RenderTarget.h>
+
+#include <Plugins/RenderPlugin.h>
 
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/ClearNode.h>

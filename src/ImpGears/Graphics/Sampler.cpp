@@ -32,7 +32,7 @@ ImageSampler::ImageSampler(Image::Ptr src, Mode mode)
 ImageSampler::ImageSampler(int w, int h, int chnl, const Vec4& color)
 {
 	Image::Ptr src = Image::create(w,h,chnl);
-	src->fill(color);
+	src->fill(color * 255.0);
 	setSource(src);
 }
 

@@ -16,7 +16,7 @@ Material::Material()
 	{
 		s_default_baseColor = ImageSampler::create(8,8,4,Vec4(1.0));
 		s_default_emissive = ImageSampler::create(8,8,4,Vec4(0.0,0.0,0.0,1.0));
-		s_default_normalmap = ImageSampler::create(8,8,4,Vec4(0.0,0.0,1.0,1.0));
+		s_default_normalmap = ImageSampler::create(8,8,3,Vec3(0.5,0.5,1.0));
 	}
 	
 	_baseColor = s_default_baseColor;
@@ -33,7 +33,7 @@ Material::Material(const Vec3& color, float shininess)
 	{
 		s_default_baseColor = ImageSampler::create(8,8,4,Vec4(1.0));
 		s_default_emissive = ImageSampler::create(8,8,4,Vec4(0.0,0.0,0.0,1.0));
-		s_default_normalmap = ImageSampler::create(8,8,4,Vec4(0.0,0.0,1.0,1.0));
+		s_default_normalmap = ImageSampler::create(8,8,3,Vec3(0.5,0.5,1.0));
 	}
 	
 	_baseColor = s_default_baseColor;

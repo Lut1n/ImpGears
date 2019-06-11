@@ -273,7 +273,7 @@ bool JsonTexCoordsOperation::load(JsonObject* jo)
 Geometry JsonTexCoordsOperation::generate(Geometry& in)
 {
 	Geometry res = in;
-	res.generateTexCoords(_factor);
+	res.generateTexCoords( Geometry::TexGenMode_Cubic, _factor);
 	return res;
 }
 

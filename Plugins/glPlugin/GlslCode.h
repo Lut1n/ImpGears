@@ -72,8 +72,8 @@ mat3 inverse(mat3 m)
 /// =========== FRAGMENT SHADER SOURCE =====================
 static std::string glsl_samplerCN = GLSL_CODE(
 
-uniform sampler2D u_sampler_normal;
 uniform sampler2D u_sampler_color;
+uniform sampler2D u_sampler_normal;
 
 vec3 textureColor(vec2 uv)
 {
@@ -102,8 +102,8 @@ vec3 textureEmissive(vec2 uv){ return vec3(0.0,0.0,0.0); }
 /// =========== FRAGMENT SHADER SOURCE =====================
 static std::string glsl_samplerCNE = GLSL_CODE(
 
-uniform sampler2D u_sampler_normal;
 uniform sampler2D u_sampler_color;
+uniform sampler2D u_sampler_normal;
 uniform sampler2D u_sampler_emissive;
 
 vec3 textureColor(vec2 uv)

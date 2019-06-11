@@ -426,13 +426,13 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 	else if(type == Uniform::Type_Sampler)
 	{
 		glEnable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
 		ImageSampler::Ptr sampler = uniform->getSampler();
 		TexData::Ptr d = s_internalState->getTex(sampler);
 		if(d == nullptr) load(sampler);
 		d = s_internalState->getTex(sampler);
 		if(d)
 		{
+			glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
 			glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
 			glUniform1i(uniformLocation, uniform->getInt1());
 		}

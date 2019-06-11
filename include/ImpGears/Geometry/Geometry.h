@@ -33,6 +33,20 @@ class IMP_API Geometry : public Object
 		Primitive_Triangles
 	};
 	
+	enum NormalGenMode
+	{
+		NormalGenMode_Spheric,
+		NormalGenMode_Cylindric,
+		NormalGenMode_PerFace,
+	};
+	
+	enum TexGenMode
+	{
+		TexGenMode_Spheric,
+		TexGenMode_Cylindric,
+		TexGenMode_Cubic,
+	};
+	
 	Primitive _prim;
 	BufType _vertices;
 	BufType _colors;
@@ -106,8 +120,10 @@ class IMP_API Geometry : public Object
 	void setNormals(const BufType& normals);
 	
 	void generateColors(const Vec3& color);
-	void generateNormals();
-	void generateTexCoords(float resFactor = 1.0);
+	void generateNormals( NormalGenMode genMode = NormalGenMode_Spheric );
+	void generateTexCoords( TexGenMode genMode = TexGenMode_Cubic, float resFactor = 1.0);
+	
+	void interpolateNormals();
 	
 	static void intoCCW( Geometry& buf );
 

@@ -117,7 +117,6 @@ struct IGStuff
 	LightNode::Ptr light;
 	RenderTarget::Ptr target;
 	
-	Vec4 viewport;
 	Vec3 initCamPos;
 	
 	IGStuff(const std::string& arg)
@@ -130,18 +129,18 @@ struct IGStuff
 		
 		renderer = SceneRenderer::create();
 		target = RenderTarget::create();
+		target->create(RES,RES,1,true);
+		renderer->setRenderTarget(target);
 		
-		viewport.set(0.0,0.0,512,512);
+		Vec4 viewport(0.0,0.0,512,512);
+		graph = Graph::create();
 		
 		if(arg != "-gpu")
 		{
 			viewport.set(0.0,0.0,RES,RES);
-			target->create(RES,RES,1,true);
-			renderer->setRenderTarget(target);
 			renderer->setDirectRendering(false);
 		}
 		
-		graph = Graph::create();
 		graph->getInitState()->setViewport( viewport );
 	
 		// Geometry cubeGeo = Geometry::sphere(8,1.0);
@@ -149,7 +148,7 @@ struct IGStuff
 		*cubeGeo = Geometry::cube();
 		cubeGeo->generateColors(Vec3(1.0,1.0,1.0));
 		cubeGeo->generateNormals();
-		cubeGeo->generateTexCoords(1.0);
+		cubeGeo->generateTexCoords(Geometry::TexGenMode_Cubic, 1.0);
 		Geometry::intoCCW( *cubeGeo );
 		
 		Material::Ptr material = Material::create(Vec3(1.0),4.0);

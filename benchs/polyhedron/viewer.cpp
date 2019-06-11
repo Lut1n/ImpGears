@@ -33,7 +33,7 @@ Geometry generateRockHat(float radius, int sub)
     geometry.scale(Vec3(1.0,1.0,1.5));
 	geometry.generateNormals();
 	geometry.generateColors(Vec3(1.0,0.3,1.0));
-	geometry.generateTexCoords(2.0);
+	geometry.generateTexCoords( Geometry::TexGenMode_Cubic, 2.0);
 	
 	
     imp::Geometry geo2 = imp::Geometry::sphere(sub,radius);
@@ -43,7 +43,7 @@ Geometry generateRockHat(float radius, int sub)
 	geo2 += Vec3(0.0,0.0,radius);
 	geo2.generateNormals();
 	geo2.generateColors(Vec3(1.0,0.3,0.4));
-	geo2.generateTexCoords(2.0);
+	geo2.generateTexCoords( Geometry::TexGenMode_Cubic,2.0);
 	F1(geo2);
 	
 	geometry += geo2;
@@ -85,7 +85,7 @@ Geometry generateLeaf()
 		geometry._vertices[i] += Vec3::Z * std::sin(d * 2.0 * 3.1415 * freq2) * ampl2;
 	}
 	geometry.generateNormals();
-	geometry.generateTexCoords(2.0);
+	geometry.generateTexCoords(Geometry::TexGenMode_Cubic,2.0);
 	
     return geometry;
 }

@@ -497,7 +497,7 @@ void Geometry::setTexCoords(const TexCoordBuf& coords)
 	_hasTexCoords = true;
 }
 
-void Geometry::generateNormals()
+void Geometry::generateNormals( NormalGenMode genMode )
 {
 	_normals = BufType(size());
 	_hasNormals = true;
@@ -509,24 +509,53 @@ void Geometry::generateNormals()
 	
 	for(int i=0;i<size();i+=3)
 	{
-		/*Vec3 dir = at(i) - grav_cent;
-		Vec3 dx = at(i+1) - at(i); dx.normalize();
-		Vec3 dy = at(i+2) - at(i); dy.normalize();
+		Vec3 n1,n2,n3;
 		
-		Vec3 n = dx.cross(dy);
-		if( n.dot(dir) < 0.0 ) n *= -1.0;
+		if( genMode == NormalGenMode_PerFace )
+		{
+			//Vec3 dir = at(i) - grav_cent;
+			Vec3 dx = at(i+1) - at(i); // dx.normalize();
+			Vec3 dy = at(i+2) - at(i); // dy.normalize();
+			
+			Vec3 n = dx.cross(dy); n.normalize();
+			// if( n.dot(dir) < 0.0 ) n *= -1.0;
+			
+			n1 = n;
+			n2 = n;
+			n3 = n;
+		}
 		
-		_normals[i] = n;
-		_normals[i+1] = n;
-		_normals[i+2] = n;*/
-		
-		Vec3 n1 = at(i) - grav_cent; n1.normalize();
-		Vec3 n2 = at(i+1) - grav_cent; n2.normalize();
-		Vec3 n3 = at(i+2) - grav_cent; n3.normalize();
-		
+		if( genMode == NormalGenMode_Spheric )
+		{
+			n1 = at(i) - grav_cent; n1.normalize();
+			n2 = at(i+1) - grav_cent; n2.normalize();
+			n3 = at(i+2) - grav_cent; n3.normalize();
+		}
 		_normals[i] = n1;
 		_normals[i+1] = n2;
 		_normals[i+2] = n3;
+	}
+}
+
+void Geometry::interpolateNormals()
+{
+	std::vector<int> done;
+	for(int i=0;i<(int)_vertices.size();++i)
+	{
+		if(std::find(done.begin(),done.end(),i) != done.end()) continue;
+		Vec3 n(0.0);
+		std::vector<int> indexes;
+		for(int j=0;j<(int)_vertices.size();++j) if(_vertices[j]==_vertices[i])
+		{
+			n += _normals[j];
+			indexes.push_back(j);
+		}
+		n /= indexes.size();
+		for(auto it : indexes)
+		{
+			_normals[it] = n;
+			done.push_back(it);
+		}
 	}
 }
 
@@ -558,7 +587,7 @@ void getUV(Vec3& tc, Vec3& d, float& u, float& v)
 	v = v*0.5 + 0.5;
 }
 
-void Geometry::generateTexCoords(float resFactor)
+void Geometry::generateTexCoords( TexGenMode genMode, float resFactor)
 {	
 	_texCoords = TexCoordBuf(size());
 	_hasTexCoords = true;

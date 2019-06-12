@@ -90,7 +90,7 @@ void RenderTarget::change()
 //--------------------------------------------------------------
 void RenderTarget::update()
 {
-	if(SceneRenderer::s_interface != nullptr
+	/*if(SceneRenderer::s_interface != nullptr
 		&& _hasChanged)
 	{
 		for(int i=0;i<(int)_targets.size();++i)
@@ -99,7 +99,7 @@ void RenderTarget::update()
 			SceneRenderer::s_interface->bringBack(img);
 		}
 		_hasChanged = false;
-	}
+	}*/
 	
 }
 

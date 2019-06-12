@@ -15,7 +15,7 @@ using namespace imp;
 Geometry generateTerrain(const ImageSampler::Ptr& hm)
 {
     imp::Geometry geometry = imp::Geometry::cube();
-	geometry = geometry.subdivise(30);
+	geometry = geometry.subdivise(10);
 	geometry.generateColors(Vec3(1.0));
 	geometry.generateTexCoords(Geometry::TexGenMode_Cubic,4.0);
 	geometry.scale(Vec3(1.0,1.0,0.01));
@@ -30,7 +30,7 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
 	}
 	geometry.scale(Vec3(5.0,5.0,1.0));
 	geometry.generateNormals(Geometry::NormalGenMode_PerFace);
-	// geometry.interpolateNormals();
+	geometry.interpolateNormals();
        
     return geometry;
 }
@@ -111,6 +111,10 @@ int main(int argc, char* argv[])
 	{
 		viewport.set(0.0,0.0,RES,RES);
 		renderer->setDirectRendering(false);
+	}
+	else
+	{
+		renderer->loadRenderPlugin("libglPlugin");
 	}
 	
 	graph->getInitState()->setViewport( viewport );

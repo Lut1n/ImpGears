@@ -103,6 +103,7 @@ void GlPlugin::init()
 {
 	if(s_internalState == nullptr)
 	{
+		std::cout << "GPU Renderer init" << std::endl;
 		s_internalState = new Priv();
 		GLenum err = glewInit();
 		if (GLEW_OK != err)

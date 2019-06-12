@@ -5,24 +5,26 @@
 
 IMPGEARS_BEGIN
 
-RenderPlugin::Ptr SceneRenderer::s_interface;
-
 //--------------------------------------------------------------
 SceneRenderer::SceneRenderer()
 {
-	if(s_interface == nullptr)
-	{
-		s_interface = PluginManager::open("libglPlugin");
-		if(s_interface == nullptr) { s_interface = CpuRenderPlugin::create(); std::cout << "fallback to CPU rendering" << std::endl; }
-		if(s_interface == nullptr) { std::cout << "fallback failed..." << std::endl; }
-		if(s_interface != nullptr)
-		{
-			s_interface->init();
-		}
-	}
-	
 	_visitor = RenderVisitor::create();
 	_direct = true;
+
+	_renderPlugin = CpuRenderPlugin::create();
+	_renderPlugin->init();
+}
+
+//--------------------------------------------------------------
+void SceneRenderer::loadRenderPlugin(const std::string& renderPlugin)
+{
+	_renderPlugin = PluginManager::open(renderPlugin);
+	if(_renderPlugin == nullptr)
+	{
+		std::cout << "fallback to CPU rendering" << std::endl;
+		_renderPlugin = CpuRenderPlugin::create();
+	}
+	_renderPlugin->init();
 }
 
 //--------------------------------------------------------------
@@ -108,31 +110,31 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 //---------------------------------------------------------------
 void SceneRenderer::applyState(const State::Ptr& state)
 {
-	if(s_interface == nullptr) return;
+	if(_renderPlugin == nullptr) return;
 		
-	s_interface->setCulling(state->getFaceCullingMode());
-	s_interface->setBlend(state->getBlendMode());
-	s_interface->setLineW(state->getLineWidth());
-	s_interface->setDepthTest(state->getDepthTest());
-	s_interface->setViewport(state->getViewport());
+	_renderPlugin->setCulling(state->getFaceCullingMode());
+	_renderPlugin->setBlend(state->getBlendMode());
+	_renderPlugin->setLineW(state->getLineWidth());
+	_renderPlugin->setDepthTest(state->getDepthTest());
+	_renderPlugin->setViewport(state->getViewport());
 	
 	if(_direct)
 	{
-		s_interface->unbind();
+		_renderPlugin->unbind();
 	}
 	else if(_targets)
 	{
 		RenderTarget::Ptr target = _targets;
-		s_interface->init(target);
-		s_interface->bind(target);
+		_renderPlugin->init(target);
+		_renderPlugin->bind(target);
 		target->change();
 	}
 	
 	ReflexionModel::Ptr reflexion = state->getReflexion();
-	s_interface->load(reflexion);
-	s_interface->bind(reflexion);
+	_renderPlugin->load(reflexion);
+	_renderPlugin->bind(reflexion);
 	const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
-	for(auto u : uniforms) SceneRenderer::s_interface->update(reflexion, u.second);
+	for(auto u : uniforms) SceneRenderer::_renderPlugin->update(reflexion, u.second);
 }
 
 //---------------------------------------------------------------
@@ -147,16 +149,16 @@ void SceneRenderer::applyClear(ClearNode* clearNode)
 		clear->enableDepth(true);
 		clear->enableColor(true);
 	}
-	if(s_interface != nullptr) s_interface->apply(clear);
+	if(_renderPlugin != nullptr) _renderPlugin->apply(clear);
 }
 
 //---------------------------------------------------------------
 void SceneRenderer::drawGeometry(GeoNode* geoNode)
 {
-	if(s_interface != nullptr )
+	if(_renderPlugin != nullptr )
 	{
-		s_interface->load(geoNode->_geo);
-		s_interface->draw(geoNode->_geo);
+		_renderPlugin->load(geoNode->_geo);
+		_renderPlugin->draw(geoNode->_geo);
 	}
 }
 

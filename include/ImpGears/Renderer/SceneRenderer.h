@@ -30,7 +30,9 @@ public:
 	void setRenderTarget( RenderTarget::Ptr& targets ) {_targets = targets;}
 	RenderTarget::Ptr getRenderTarget() const { return _targets; }
 	
-	static RenderPlugin::Ptr s_interface;
+	void loadRenderPlugin(const std::string& renderPlugin);
+	
+	RenderPlugin::Ptr _renderPlugin;
 
 protected:
 	

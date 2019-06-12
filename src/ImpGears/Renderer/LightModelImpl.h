@@ -33,7 +33,8 @@ struct PhongLighting : public ReflexionModel::LightingCallback
 		float shininess = lightAtt[1];
 		
 		Vec2 tex = Vec2(varyings.get("texUV"));
-		Vec3 color = texturing->textureColor(tex,uniforms,varyings) * varyings.get("color") * uniforms.getVec3("u_color");
+		Vec3 color = texturing->textureColor(tex,uniforms,varyings);
+		color *= varyings.get("color") * uniforms.getVec3("u_color");
 		Vec3 frag_pos = varyings.get("m_vert");
 		Vec3 normal = varyings.get("normal");
 		Vec3 light_dir = lightPos - frag_pos;

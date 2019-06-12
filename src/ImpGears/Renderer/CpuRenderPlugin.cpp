@@ -81,9 +81,9 @@ CpuRenderPlugin::Priv* CpuRenderPlugin::s_internalState = nullptr;
 //--------------------------------------------------------------
 void CpuRenderPlugin::init()
 {
-	std::cout << "CPU Renderer init" << std::endl;
 	if(s_internalState == nullptr)
 	{
+		std::cout << "CPU Renderer init" << std::endl;
 		imp::Vec4 vp(0.0,0.0,512.0,512.0);
 		s_internalState = new CpuRenderPlugin::Priv();
 		s_internalState->geoRenderer.setViewport( vp );

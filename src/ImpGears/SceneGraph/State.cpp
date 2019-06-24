@@ -1,5 +1,4 @@
 #include <SceneGraph/State.h>
-#include <Renderer/SceneRenderer.h>
 
 IMPGEARS_BEGIN
 

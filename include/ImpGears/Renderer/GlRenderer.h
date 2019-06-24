@@ -1,5 +1,5 @@
-#ifndef IMP_SCENE_RENDERER_H
-#define IMP_SCENE_RENDERER_H
+#ifndef IMP_GL_RENDERER_H
+#define IMP_GL_RENDERER_H
 
 #include <Core/Object.h>
 
@@ -14,14 +14,14 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API SceneRenderer : public Object
+class IMP_API GlRenderer : public Object
 {
 public:
 
-	Meta_Class(SceneRenderer)
+	Meta_Class(GlRenderer)
 	
-	SceneRenderer();
-	virtual ~SceneRenderer();
+	GlRenderer();
+	virtual ~GlRenderer();
 
 	void render(const Graph::Ptr& scene);
 	
@@ -47,4 +47,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_SCENE_RENDERER_H
+#endif // IMP_GL_RENDERER_H

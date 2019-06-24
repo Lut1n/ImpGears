@@ -1,4 +1,4 @@
-#include <Renderer/SceneRenderer.h>
+#include <Renderer/GlRenderer.h>
 #include <Renderer/CpuRenderPlugin.h>
 
 #include <cstdlib>
@@ -6,7 +6,7 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-SceneRenderer::SceneRenderer()
+GlRenderer::GlRenderer()
 {
 	_visitor = RenderVisitor::create();
 	_direct = true;
@@ -16,7 +16,7 @@ SceneRenderer::SceneRenderer()
 }
 
 //--------------------------------------------------------------
-void SceneRenderer::loadRenderPlugin(const std::string& renderPlugin)
+void GlRenderer::loadRenderPlugin(const std::string& renderPlugin)
 {
 	_renderPlugin = PluginManager::open(renderPlugin);
 	if(_renderPlugin == nullptr)
@@ -28,7 +28,7 @@ void SceneRenderer::loadRenderPlugin(const std::string& renderPlugin)
 }
 
 //--------------------------------------------------------------
-SceneRenderer::~SceneRenderer()
+GlRenderer::~GlRenderer()
 {
 }
 
@@ -51,7 +51,7 @@ LightNode* closest(Node* node, const std::vector<LightNode*>& ls)
 }
 
 //---------------------------------------------------------------
-void SceneRenderer::render(const Graph::Ptr& scene)
+void GlRenderer::render(const Graph::Ptr& scene)
 {	
 	Visitor::Ptr visitor = _visitor;
 	_visitor->reset();
@@ -108,7 +108,7 @@ void SceneRenderer::render(const Graph::Ptr& scene)
 
 
 //---------------------------------------------------------------
-void SceneRenderer::applyState(const State::Ptr& state)
+void GlRenderer::applyState(const State::Ptr& state)
 {
 	if(_renderPlugin == nullptr) return;
 		
@@ -134,11 +134,11 @@ void SceneRenderer::applyState(const State::Ptr& state)
 	_renderPlugin->load(reflexion);
 	_renderPlugin->bind(reflexion);
 	const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
-	for(auto u : uniforms) SceneRenderer::_renderPlugin->update(reflexion, u.second);
+	for(auto u : uniforms) GlRenderer::_renderPlugin->update(reflexion, u.second);
 }
 
 //---------------------------------------------------------------
-void SceneRenderer::applyClear(ClearNode* clearNode)
+void GlRenderer::applyClear(ClearNode* clearNode)
 {
 	static ClearNode::Ptr clear;
 	if(clear.get() == nullptr)
@@ -153,7 +153,7 @@ void SceneRenderer::applyClear(ClearNode* clearNode)
 }
 
 //---------------------------------------------------------------
-void SceneRenderer::drawGeometry(GeoNode* geoNode)
+void GlRenderer::drawGeometry(GeoNode* geoNode)
 {
 	if(_renderPlugin != nullptr )
 	{

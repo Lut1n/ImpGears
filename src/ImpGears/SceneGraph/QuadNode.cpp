@@ -1,7 +1,5 @@
 #include <SceneGraph/QuadNode.h>
 
-#include <Renderer/SceneRenderer.h>
-
 IMPGEARS_BEGIN
 
 QuadNode::QuadNode()

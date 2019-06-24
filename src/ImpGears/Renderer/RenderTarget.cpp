@@ -1,7 +1,7 @@
 #include <Core/Object.h>
 #include <Renderer/RenderTarget.h>
 
-#include <Renderer/SceneRenderer.h>
+#include <Renderer/GlRenderer.h>
 
 IMPGEARS_BEGIN
 

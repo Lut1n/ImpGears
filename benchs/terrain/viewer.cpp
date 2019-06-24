@@ -5,7 +5,7 @@
 #include <Descriptors/FileInfo.h>
 #include <Descriptors/JsonImageOp.h>
 
-#include <Renderer/SceneRenderer.h>
+#include <Renderer/GlRenderer.h>
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 	
 	ImageSampler::Ptr sampler, color;
 	loadSamplers(sampler,color);
-	RenderTarget::Ptr target;
+	Image::Ptr target;
 	
 	sf::Clock clock;
 	
@@ -100,17 +100,17 @@ int main(int argc, char* argv[])
 	
 	int RES = 128;
 	Vec4 viewport(0.0,0.0,512,512);
-	SceneRenderer::Ptr renderer = SceneRenderer::create();
-	target = RenderTarget::create();
-	target->create(RES,RES,1,true);
-	renderer->setRenderTarget(target);
+	GlRenderer::Ptr renderer = GlRenderer::create();
+	target = Image::create(RES,RES,4);
+	// target->create(RES,RES,1,true);
+	renderer->setTarget(target);
 	
 	std::string arg = "";
 	if(argc>1) arg = argv[1];
 	if(arg != "-gpu")
 	{
 		viewport.set(0.0,0.0,RES,RES);
-		renderer->setDirectRendering(false);
+		renderer->setDirect(false);
 	}
 	else
 	{
@@ -141,9 +141,8 @@ int main(int argc, char* argv[])
 		renderer->render( graph );
 		if(arg != "-gpu") 
 		{
-			Image::Ptr res = target->get(0)->getSource();
-			texture.update(res->data(),res->width(),res->height(),0,0);
-			sprite.setScale( 512.0 / res->width(), -512.0 / res->height() );
+			texture.update(target->data(),target->width(),target->height(),0,0);
+			sprite.setScale( 512.0 / target->width(), -512.0 / target->height() );
 			sprite.setPosition( 0, 512 );
 			window.draw(sprite);
 		}

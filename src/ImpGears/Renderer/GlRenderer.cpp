@@ -7,12 +7,15 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 GlRenderer::GlRenderer()
+	: SceneRenderer()
 {
-	_visitor = RenderVisitor::create();
-	_direct = true;
-
 	_renderPlugin = CpuRenderPlugin::create();
 	_renderPlugin->init();
+}
+
+//--------------------------------------------------------------
+GlRenderer::~GlRenderer()
+{
 }
 
 //--------------------------------------------------------------
@@ -25,11 +28,6 @@ void GlRenderer::loadRenderPlugin(const std::string& renderPlugin)
 		_renderPlugin = CpuRenderPlugin::create();
 	}
 	_renderPlugin->init();
-}
-
-//--------------------------------------------------------------
-GlRenderer::~GlRenderer()
-{
 }
 
 //---------------------------------------------------------------
@@ -52,7 +50,14 @@ LightNode* closest(Node* node, const std::vector<LightNode*>& ls)
 
 //---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
-{	
+{
+	if(_renderTargets == nullptr)
+	{
+		ImageSampler::Ptr sampler = ImageSampler::create(_target);
+		_renderTargets = RenderTarget::create();
+		_renderTargets->create({ sampler }, true);
+	}
+	
 	Visitor::Ptr visitor = _visitor;
 	_visitor->reset();
 	scene->accept(visitor);
@@ -118,16 +123,16 @@ void GlRenderer::applyState(const State::Ptr& state)
 	_renderPlugin->setDepthTest(state->getDepthTest());
 	_renderPlugin->setViewport(state->getViewport());
 	
-	if(_direct)
+	if(!_direct && _renderTargets)
 	{
-		_renderPlugin->unbind();
-	}
-	else if(_targets)
-	{
-		RenderTarget::Ptr target = _targets;
+		RenderTarget::Ptr target = _renderTargets;
 		_renderPlugin->init(target);
 		_renderPlugin->bind(target);
 		target->change();
+	}
+	else
+	{
+		_renderPlugin->unbind();
 	}
 	
 	ReflexionModel::Ptr reflexion = state->getReflexion();

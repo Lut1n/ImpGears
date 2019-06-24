@@ -1,20 +1,17 @@
 #ifndef IMP_GL_RENDERER_H
 #define IMP_GL_RENDERER_H
 
-#include <Core/Object.h>
-
-#include <Renderer/RenderVisitor.h>
+#include <Renderer/SceneRenderer.h>
 #include <Renderer/RenderTarget.h>
 
 #include <Plugins/RenderPlugin.h>
 
-#include <SceneGraph/Graph.h>
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/GeoNode.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API GlRenderer : public Object
+class IMP_API GlRenderer : public SceneRenderer
 {
 public:
 
@@ -23,12 +20,7 @@ public:
 	GlRenderer();
 	virtual ~GlRenderer();
 
-	void render(const Graph::Ptr& scene);
-	
-	void setDirectRendering(bool direct) {_direct = direct;}
-	bool isDirectRendering() const {return _direct;}
-	void setRenderTarget( RenderTarget::Ptr& targets ) {_targets = targets;}
-	RenderTarget::Ptr getRenderTarget() const { return _targets; }
+	virtual void render(const Graph::Ptr& scene);
 	
 	void loadRenderPlugin(const std::string& renderPlugin);
 	
@@ -36,9 +28,7 @@ public:
 
 protected:
 	
-	bool _direct;
-	RenderTarget::Ptr _targets;
-	RenderVisitor::Ptr _visitor;
+	RenderTarget::Ptr _renderTargets;
 	
 	void applyState(const State::Ptr& state);
 	void applyClear(ClearNode* clearNode);

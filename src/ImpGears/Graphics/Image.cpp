@@ -79,6 +79,18 @@ Vec4 Image::getPixel(int x, int y) const
 }
 
 //--------------------------------------------------------------
+void Image::setPixel(const Vec2& uv, const Vec4& col)
+{
+	setPixel(uv[0],uv[1],col);
+}
+
+//--------------------------------------------------------------
+Vec4 Image::getPixel(const Vec2& uv) const
+{
+	return getPixel(uv[0],uv[1]);
+}
+
+//--------------------------------------------------------------
 void Image::fill(const Vec4& col)
 {
     if(_dims[2]==4)

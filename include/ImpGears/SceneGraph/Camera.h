@@ -23,6 +23,8 @@ public:
 	void setAbsolutePosition(const Vec3& pos) { _absolutePosition=pos; }
 	
 	static Camera* getActiveCamera() {return s_activeCamera;}
+	
+	const Vec3& getAbsolutePosition() const {return _absolutePosition;}
 
 private:
 

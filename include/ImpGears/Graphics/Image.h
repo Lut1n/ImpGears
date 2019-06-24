@@ -2,6 +2,7 @@
 #define IMP_IMAGE_H
 
 #include <Core/Object.h>
+#include <Core/Vec2.h>
 #include <Core/Vec4.h>
 #include <Core/Grid.h>
 
@@ -24,6 +25,10 @@ public:
 	
     void setPixel(int x, int y, const Vec4& col);
     Vec4 getPixel(int x, int y) const;
+	
+    void setPixel(const Vec2& uv, const Vec4& col);
+    Vec4 getPixel(const Vec2& uv) const;
+	
     void fill(const Vec4& col);
 	
 	void resize(int w, int h, int chnls);

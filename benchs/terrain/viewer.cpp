@@ -6,6 +6,7 @@
 #include <Descriptors/JsonImageOp.h>
 
 #include <Renderer/GlRenderer.h>
+#include <Renderer/CpuRenderer.h>
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
@@ -58,6 +59,8 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
 
 int main(int argc, char* argv[])
 {
+	std::string arg = "";
+	if(argc>1) arg = argv[1];
 	
 	ImageSampler::Ptr sampler, color;
 	loadSamplers(sampler,color);
@@ -100,13 +103,16 @@ int main(int argc, char* argv[])
 	
 	int RES = 128;
 	Vec4 viewport(0.0,0.0,512,512);
-	GlRenderer::Ptr renderer = GlRenderer::create();
+	SceneRenderer::Ptr renderer;
+	if(arg != "-gpu")
+		renderer = CpuRenderer::create();
+	else
+		renderer = GlRenderer::create();
+	
 	target = Image::create(RES,RES,4);
 	// target->create(RES,RES,1,true);
 	renderer->setTarget(target);
 	
-	std::string arg = "";
-	if(argc>1) arg = argv[1];
 	if(arg != "-gpu")
 	{
 		viewport.set(0.0,0.0,RES,RES);
@@ -114,7 +120,8 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		renderer->loadRenderPlugin("libglPlugin");
+		GlRenderer& g = dynamic_cast<GlRenderer&>( *renderer );
+		g.loadRenderPlugin("libglPlugin");
 	}
 	
 	graph->getInitState()->setViewport( viewport );

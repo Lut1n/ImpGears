@@ -18,7 +18,7 @@ public:
 	CpuRenderer();
 	virtual ~CpuRenderer();
 
-	// virtual void render(const Graph::Ptr& scene);
+	virtual void render(const Graph::Ptr& scene);
 
 protected:
 	

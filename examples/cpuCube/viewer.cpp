@@ -6,6 +6,7 @@
 #include <Descriptors/ImageIO.h>
 
 #include <Renderer/GlRenderer.h>
+#include <Renderer/CpuRenderer.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -110,7 +111,7 @@ vec3 textureEmissive(vec2 uv)
 
 struct IGStuff
 {
-	GlRenderer::Ptr renderer;
+	SceneRenderer::Ptr renderer;
 	Graph::Ptr graph;
 	Node::Ptr root;
 	Camera::Ptr camera;
@@ -127,7 +128,11 @@ struct IGStuff
 		model->_texturingCb = customTexturing;
 		model->_fragCode_texturing = glsl_texturing;
 		
-		renderer = GlRenderer::create();
+		if(arg != "-gpu")
+			renderer = CpuRenderer::create();
+		else
+			renderer = GlRenderer::create();
+		
 		target = Image::create(RES,RES,4);
 		renderer->setTarget(target);
 		
@@ -141,7 +146,8 @@ struct IGStuff
 		}
 		else
 		{
-			renderer->loadRenderPlugin("libglPlugin");
+			GlRenderer& g = dynamic_cast<GlRenderer&>( *renderer );
+			g.loadRenderPlugin("libglPlugin");
 		}
 		
 		graph->getInitState()->setViewport( viewport );

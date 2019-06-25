@@ -24,7 +24,7 @@ CpuRenderer::~CpuRenderer()
 }
 
 //---------------------------------------------------------------
-/*void CpuRenderer::render(const Graph::Ptr& scene)
+void CpuRenderer::render(const Graph::Ptr& scene)
 {
 	Visitor::Ptr visitor = _visitor;
 	_visitor->reset();
@@ -77,7 +77,7 @@ CpuRenderer::~CpuRenderer()
 			applyClear(clear);
 		}
 	}
-}*/
+}
 
 
 //--------------------------------------------------------------
@@ -89,50 +89,20 @@ int prepareReflexion(GeometryRenderer& _geoRenderer, ReflexionModel::Ptr& progra
 	FragCallback::Ptr fragCb = frag;
 	
 	ReflexionModel::Lighting li = program->getLighting();
-	if(li == ReflexionModel::Lighting_None)
-	{
-		frag->_lighting = NoLighting::create();
-	}
-	else if(li == ReflexionModel::Lighting_Phong)
-	{
-		frag->_lighting = PhongLighting::create();
-	}
-	else
-	{
-		frag->_lighting = program->_lightingCb;
-	}
+	if(li == ReflexionModel::Lighting_None) frag->_lighting = NoLighting::create();
+	else if(li == ReflexionModel::Lighting_Phong) frag->_lighting = PhongLighting::create();
+	else frag->_lighting = program->_lightingCb;
 	
 	ReflexionModel::Texturing te = program->getTexturing();
-	if(te == ReflexionModel::Texturing_PlainColor)
-	{
-		frag->_texturing = PlainColorCb::create();
-	}
-	else if(te == ReflexionModel::Texturing_Samplers_CN)
-	{
-		frag->_texturing = SamplerCbCN::create();
-	}
-	else if(te == ReflexionModel::Texturing_Samplers_CNE)
-	{
-		frag->_texturing = SamplerCbCNE::create();
-	}
-	else
-	{
-		frag->_texturing = program->_texturingCb;
-	}
+	if(te == ReflexionModel::Texturing_PlainColor) frag->_texturing = PlainColorCb::create();
+	else if(te == ReflexionModel::Texturing_Samplers_CN) frag->_texturing = SamplerCbCN::create();
+	else if(te == ReflexionModel::Texturing_Samplers_CNE) frag->_texturing = SamplerCbCNE::create();
+	else frag->_texturing = program->_texturingCb;
 	
 	ReflexionModel::MRT mrt = program->getMRT();
-	if(mrt == ReflexionModel::MRT_1_Col)
-	{
-		frag->_mrt = Mrt1ColorCb::create();
-	}
-	else if(mrt == ReflexionModel::MRT_2_Col_Emi)
-	{
-		frag->_mrt = Mrt1ColorCb::create();
-	}
-	else
-	{
-		frag->_mrt = program->_mrtCb;
-	}
+	if(mrt == ReflexionModel::MRT_1_Col) frag->_mrt = Mrt1ColorCb::create();
+	else if(mrt == ReflexionModel::MRT_2_Col_Emi) frag->_mrt = Mrt1ColorCb::create();
+	else frag->_mrt = program->_mrtCb;
 	
 	if(vertCb == nullptr) _geoRenderer.setDefaultVertCallback();
 	else _geoRenderer.setVertCallback(vertCb);
@@ -169,18 +139,15 @@ void CpuRenderer::applyState(const State::Ptr& state)
 	else if(state->getFaceCullingMode() == State::FaceCullingMode_Front)
 		_geoRenderer.setCullMode(GeometryRenderer::Cull_Front);
 	
-	// _geoRenderer.setLineWidth( state->getLineWidth() );
-	// _geoRenderer.setDepthTest( state->getDepthTest() );
 	_geoRenderer.setViewport(state->getViewport());
 	
 	if(!_direct && _target)
 	{
 		_geoRenderer.setTarget(0,_target,Vec4(0.0));
 	}
-	else
-	{
-		// _renderPlugin->unbind();
-	}
+	
+	ReflexionModel::Ptr reflexion = state->getReflexion();
+	prepareReflexion(_geoRenderer,reflexion);
 	
 	const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
 	for(auto u : uniforms) updateUniform(_geoRenderer, u.second);

@@ -1,5 +1,4 @@
 #include <Renderer/GlRenderer.h>
-#include <Renderer/CpuRenderPlugin.h>
 
 #include <cstdlib>
 
@@ -9,8 +8,6 @@ IMPGEARS_BEGIN
 GlRenderer::GlRenderer()
 	: SceneRenderer()
 {
-	_renderPlugin = CpuRenderPlugin::create();
-	_renderPlugin->init();
 }
 
 //--------------------------------------------------------------
@@ -24,8 +21,7 @@ void GlRenderer::loadRenderPlugin(const std::string& renderPlugin)
 	_renderPlugin = PluginManager::open(renderPlugin);
 	if(_renderPlugin == nullptr)
 	{
-		std::cout << "fallback to CPU rendering" << std::endl;
-		_renderPlugin = CpuRenderPlugin::create();
+		return;
 	}
 	_renderPlugin->init();
 }
@@ -33,6 +29,8 @@ void GlRenderer::loadRenderPlugin(const std::string& renderPlugin)
 //---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
 {
+	if(_renderPlugin == nullptr) return;
+	
 	if(_renderTargets == nullptr)
 	{
 		ImageSampler::Ptr sampler = ImageSampler::create(_target);

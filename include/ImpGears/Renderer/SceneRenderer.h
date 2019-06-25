@@ -25,6 +25,8 @@ public:
 	bool isDirect() const {return _direct;}
 	void setTarget( Image::Ptr& target ) {_target = target;}
 	Image::Ptr getTarget() const { return _target; }
+	
+	LightNode* closest(Node* node, const std::vector<LightNode*>& ls);
 
 protected:
 	

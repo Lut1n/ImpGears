@@ -5,7 +5,7 @@
 #include <SceneGraph/LightNode.h>
 #include <Descriptors/ImageIO.h>
 
-#include <Renderer/SceneRenderer.h>
+#include <Renderer/GlRenderer.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -110,12 +110,12 @@ vec3 textureEmissive(vec2 uv)
 
 struct IGStuff
 {
-	SceneRenderer::Ptr renderer;
+	GlRenderer::Ptr renderer;
 	Graph::Ptr graph;
 	Node::Ptr root;
 	Camera::Ptr camera;
 	LightNode::Ptr light;
-	RenderTarget::Ptr target;
+	Image::Ptr target;
 	
 	Vec3 initCamPos;
 	
@@ -127,10 +127,9 @@ struct IGStuff
 		model->_texturingCb = customTexturing;
 		model->_fragCode_texturing = glsl_texturing;
 		
-		renderer = SceneRenderer::create();
-		target = RenderTarget::create();
-		target->create(RES,RES,1,true);
-		renderer->setRenderTarget(target);
+		renderer = GlRenderer::create();
+		target = Image::create(RES,RES,4);
+		renderer->setTarget(target);
 		
 		Vec4 viewport(0.0,0.0,512,512);
 		graph = Graph::create();
@@ -138,7 +137,11 @@ struct IGStuff
 		if(arg != "-gpu")
 		{
 			viewport.set(0.0,0.0,RES,RES);
-			renderer->setDirectRendering(false);
+			renderer->setDirect(false);
+		}
+		else
+		{
+			renderer->loadRenderPlugin("libglPlugin");
 		}
 		
 		graph->getInitState()->setViewport( viewport );
@@ -220,9 +223,8 @@ int main(int argc, char* argv[])
 
 		if(engine_arg != "-gpu") 
 		{
-			Image::Ptr res = engine.target->get(0)->getSource();
-			texture.update(res->data(),res->width(),res->height(),0,0);
-			sprite.setScale( 512.0 / res->width(), -512.0 / res->height() );
+			texture.update(engine.target->data(),engine.target->width(),engine.target->height(),0,0);
+			sprite.setScale( 512.0 / engine.target->width(), -512.0 / engine.target->height() );
 			sprite.setPosition( 0, 512 );
 			window.draw(sprite);
 		}

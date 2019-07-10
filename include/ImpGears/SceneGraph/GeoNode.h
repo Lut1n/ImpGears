@@ -6,7 +6,7 @@
 #include <Geometry/Geometry.h>
 #include <SceneGraph/Node.h>
 #include <SceneGraph/Material.h>
-#include <Renderer/Uniform.h>
+#include <Graphics/Uniform.h>
 
 IMPGEARS_BEGIN
 

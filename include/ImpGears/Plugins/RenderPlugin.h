@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 #include <Core/Vec4.h>
 #include <Graphics/Image.h>
-#include <Renderer/Uniform.h>
+#include <Graphics/Uniform.h>
 #include <Renderer/RenderTarget.h>
 
 #include <SceneGraph/ClearNode.h>

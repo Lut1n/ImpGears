@@ -5,8 +5,9 @@
 #include <SceneGraph/LightNode.h>
 #include <Descriptors/ImageIO.h>
 
-#include <Renderer/GlRenderer.h>
+// #include <Renderer/GlRenderer.h>
 #include <Renderer/CpuRenderer.h>
+#include <Plugins/RenderPlugin.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -131,7 +132,11 @@ struct IGStuff
 		if(arg != "-gpu")
 			renderer = CpuRenderer::create();
 		else
-			renderer = GlRenderer::create();
+		{
+			RenderPlugin::Ptr rp = PluginManager::open("libglPlugin");
+			renderer = rp->getRenderer();
+			
+		}
 		
 		target = Image::create(RES,RES,4);
 		renderer->setTarget(target);
@@ -144,11 +149,11 @@ struct IGStuff
 			viewport.set(0.0,0.0,RES,RES);
 			renderer->setDirect(false);
 		}
-		else
+		/*else
 		{
 			GlRenderer& g = dynamic_cast<GlRenderer&>( *renderer );
 			g.loadRenderPlugin("libglPlugin");
-		}
+		}*/
 		
 		graph->getInitState()->setViewport( viewport );
 	

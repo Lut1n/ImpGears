@@ -7,6 +7,8 @@
 
 #include <Renderer/SceneRenderer.h>
 
+#include <Plugins/RenderPlugin.h>
+
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 
@@ -196,7 +198,8 @@ int main(int argc, char* argv[])
 	node3->addNode(node4);
 	graph->setRoot(root);
 	
-	SceneRenderer::Ptr renderer = SceneRenderer::create();
+	RenderPlugin::Ptr rp = PluginManager::open("libglPlugin");
+	SceneRenderer::Ptr renderer = rp->getRenderer();
 	
 	bool stopLoop = false;
     while (window.isOpen())

@@ -7,7 +7,7 @@ else
 	CXXFLAGS=-Wall -std=c++11
 endif
 
-LDFLAGS= ../../libimpgears.so
+LDFLAGS= -limpgears-core -limpgears-graphics -limpgears-geometry -limpgears-descriptors
 
 all: test
 
@@ -15,7 +15,7 @@ test: test.o
 	$(CXX) -o test test.o -L /usr/lib $(LDFLAGS)
 
 test.o: test.cpp
-	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c test.cpp -o test.o
+	$(CXX) $(CXXFLAGS) -I /usr/include/ImpGears -c test.cpp -o test.o
 
 .PHONY : clean
 

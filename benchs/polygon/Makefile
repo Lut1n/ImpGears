@@ -7,7 +7,7 @@ else
 	CXXFLAGS=-Wall -std=c++11
 endif
 
-LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system ../../build/libimpgears.so
+LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -limpgears-core -limpgears-geometry -limpgears-graphics
 
 all: viewer
 
@@ -16,7 +16,7 @@ viewer: viewer.o
 
 
 viewer.o: viewer.cpp
-	$(CXX) $(CXXFLAGS) -I ../../include/ImpGears -c viewer.cpp -o viewer.o
+	$(CXX) $(CXXFLAGS) -I /usr/include/ImpGears -c viewer.cpp -o viewer.o
 	
 .PHONY : clean
 

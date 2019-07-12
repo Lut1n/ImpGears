@@ -1,4 +1,4 @@
-#include <Renderer/Uniform.h>
+#include <Graphics/Uniform.h>
 #include <Renderer/SceneRenderer.h>
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/Camera.h>
@@ -10,6 +10,8 @@
 #include <Descriptors/ImageIO.h>
 
 #include <Descriptors/FileInfo.h>
+
+#include <Plugins/RenderPlugin.h>
 #include <fstream>
 
 using namespace imp;
@@ -113,7 +115,8 @@ int main(int argc, char* argv[])
 	graph->setRoot(root);
     sf::Clock timer;
 	
-	SceneRenderer::Ptr renderer = SceneRenderer::create();
+	RenderPlugin::Ptr plugin = PluginManager::open("libglPlugin");
+	SceneRenderer::Ptr renderer = plugin->getRenderer();
     
 	bool breakLoop = false;
 	while (window.isOpen())

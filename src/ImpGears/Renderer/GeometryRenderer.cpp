@@ -69,16 +69,16 @@ struct DepthTestFragCallback : public FragCallback
 };
 
 //--------------------------------------------------------------
- struct DefaultVertCallback : public GeometryRenderer::VertCallback
- {
+struct DefaultVertCallback : public GeometryRenderer::VertCallback
+{
 	Meta_Class(DefaultVertCallback)
 
-	virtual void exec(const Vec3& vert, GeometryRenderer::Attributes& att, const UniformMap& uniforms, Varyings& out_varyings)
+	virtual void apply(const Vec3& vert, Attributes& att)
 	{
-		const Matrix4& model = uniforms.getMat4("u_model");
-		const Matrix4& view = uniforms.getMat4("u_view");
-		const Matrix4& proj = uniforms.getMat4("u_proj");
-		const Matrix3& normalMat = uniforms.getMat3("u_normal");
+		const Matrix4& model = _uniforms->getMat4("u_model");
+		const Matrix4& view = _uniforms->getMat4("u_view");
+		const Matrix4& proj = _uniforms->getMat4("u_proj");
+		const Matrix3& normalMat = _uniforms->getMat3("u_normal");
 		
 		Vec4 vertex = vert;
 		Vec4 mvertex = vertex * model;
@@ -90,15 +90,15 @@ struct DepthTestFragCallback : public FragCallback
 		mvvertex /= mvvertex.w();
 		mvpvertex /= mvpvertex.w();
 		
-		out_varyings.set("vert",vertex);
-		out_varyings.set("m_vert",mvertex);
-		out_varyings.set("mv_vert",mvvertex);
-		out_varyings.set("mvp_vert",mvpvertex);
-		out_varyings.set("color",att.color);
-		out_varyings.set("normal",normal);
-		out_varyings.set("texUV",att.texUV);
-    }
- };
+		_varyings->set("vert",vertex);
+		_varyings->set("m_vert",mvertex);
+		_varyings->set("mv_vert",mvvertex);
+		_varyings->set("mvp_vert",mvpvertex);
+		_varyings->set("color",att.color);
+		_varyings->set("normal",normal);
+		_varyings->set("texUV",att.texUV);
+	}
+};
 
 //--------------------------------------------------------------
 GeometryRenderer::GeometryRenderer()
@@ -150,7 +150,7 @@ void GeometryRenderer::render(const Geometry& geo)
 	
 	Varyings varyings[3];
 	Vec3 coords[3];
-	Attributes attribs;
+	VertCallback::Attributes attribs;
 
 	if(geo.getPrimitive() == Geometry::Primitive_Triangles)
 	{

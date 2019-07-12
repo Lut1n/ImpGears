@@ -1,6 +1,7 @@
 #ifndef IMP_CPU_RENDERER_H
 #define IMP_CPU_RENDERER_H
 
+#include <Renderer/GeometryRenderer.h>
 #include <Renderer/SceneRenderer.h>
 #include <Renderer/RenderTarget.h>
 

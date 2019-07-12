@@ -1,7 +1,6 @@
 #ifndef IMP_GL_RENDERER_H
 #define IMP_GL_RENDERER_H
 
-#include <Renderer/SceneRenderer.h>
 #include <Renderer/RenderTarget.h>
 
 #include <Plugins/RenderPlugin.h>
@@ -23,8 +22,9 @@ public:
 	virtual void render(const Graph::Ptr& scene);
 	
 	void loadRenderPlugin(const std::string& renderPlugin);
+	void setRenderPlugin(RenderPlugin* plugin);
 	
-	RenderPlugin::Ptr _renderPlugin;
+	RenderPlugin* _renderPlugin;
 
 protected:
 	

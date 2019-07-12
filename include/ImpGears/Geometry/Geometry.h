@@ -18,6 +18,23 @@ class IMP_API SignalFunctor
 	virtual double apply(double x, double y, double z) = 0;
 };
 
+class VertexOperation : public Object
+{
+	public:
+		
+	struct IMP_API Attributes
+	{
+		Vec3 color;
+		Vec3 texUV;
+		Vec3 normal;
+		
+		Attributes() : color(1.0), texUV(0.0), normal(0.0,0.0,1.0) {}
+	};
+	
+	Meta_Class(VertexOperation)
+	
+	virtual void apply(const Vec3& vertex, Attributes& att) = 0;
+};
 
 class IMP_API Geometry : public Object
 {

@@ -1,4 +1,4 @@
-#include <Renderer/GlRenderer.h>
+#include "GlRenderer.h"
 
 #include <cstdlib>
 
@@ -18,12 +18,19 @@ GlRenderer::~GlRenderer()
 //--------------------------------------------------------------
 void GlRenderer::loadRenderPlugin(const std::string& renderPlugin)
 {
-	_renderPlugin = PluginManager::open(renderPlugin);
+	/*_renderPlugin = PluginManager::open(renderPlugin);
 	if(_renderPlugin == nullptr)
 	{
 		return;
 	}
-	_renderPlugin->init();
+	_renderPlugin->init();*/
+}
+
+//---------------------------------------------------------------
+void GlRenderer::setRenderPlugin(RenderPlugin* plugin)
+{
+	_renderPlugin = plugin;
+	if(_renderPlugin != nullptr) _renderPlugin->init();
 }
 
 //---------------------------------------------------------------

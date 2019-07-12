@@ -41,6 +41,8 @@ public:
 	
 	virtual void update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform);
 	
+	virtual SceneRenderer::Ptr getRenderer();
+	
 	struct Priv;
 	
 	static Priv* s_internalState;

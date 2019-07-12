@@ -6,6 +6,7 @@
 #include <Graphics/Image.h>
 #include <Graphics/Uniform.h>
 #include <Renderer/RenderTarget.h>
+#include <Renderer/SceneRenderer.h>
 
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/State.h>
@@ -66,6 +67,8 @@ public:
 	virtual void setViewport(Vec4 vp) = 0;
 	
 	virtual void setDepthTest(int mode) = 0;
+	
+	virtual SceneRenderer::Ptr getRenderer() = 0;
 };
 
 

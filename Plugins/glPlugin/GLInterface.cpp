@@ -2,7 +2,7 @@
 #include <SceneGraph/State.h>
 #include <Graphics/Sampler.h>
 #include <Renderer/RenderTarget.h>
-#include <Renderer/Uniform.h>
+#include <Graphics/Uniform.h>
 #include <Geometry/Geometry.h>
 
 #include "GlError.h"
@@ -11,6 +11,7 @@
 #include "BufferObject.h"
 #include "FrameBuffer.h"
 #include "Program.h"
+#include "GlRenderer.h"
 
 #include <iostream>
 
@@ -454,6 +455,15 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 	}
 	
     GL_CHECKERROR("end of uniform setting");
+}
+
+
+//--------------------------------------------------------------
+SceneRenderer::Ptr GlPlugin::getRenderer()
+{
+	GlRenderer::Ptr r = GlRenderer::create();
+	r->setRenderPlugin(this);
+	return r;
 }
 
 IMPGEARS_END

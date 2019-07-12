@@ -15,19 +15,20 @@ public:
 	
 	Meta_Class(GeometryRenderer)
 	
-	struct Attributes
-	{
-		Vec3 color;
-		Vec3 texUV;
-		Vec3 normal;
-		
-		Attributes() : color(1.0) {}
-	};
-	
-	struct VertCallback : public Object
+	struct VertCallback : public VertexOperation
 	{
 		Meta_Class(VertCallback)
-		virtual void exec(const Vec3& vert, Attributes& att, const UniformMap& uniforms, Varyings& varyings) = 0;
+		
+		const UniformMap* _uniforms;
+		Varyings* _varyings;
+		
+		virtual void apply(const Vec3& vertex, Attributes& att) = 0;
+		void exec(const Vec3& vert, Attributes& att, const UniformMap& uniforms, Varyings& varyings)
+		{
+			_uniforms = &uniforms;
+			_varyings = &varyings;
+			apply(vert,att);
+		}
 	};
 	
 	enum Cull

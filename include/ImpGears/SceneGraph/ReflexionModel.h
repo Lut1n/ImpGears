@@ -1,7 +1,8 @@
 #ifndef IMP_REFLEXION_MODEL_H
 #define IMP_REFLEXION_MODEL_H
 
-#include <Renderer/GeometryRenderer.h>
+#include <Graphics/Rasterizer.h>
+#include <Geometry/Geometry.h>
 
 IMPGEARS_BEGIN
 
@@ -75,12 +76,12 @@ struct IMP_API ReflexionModel : public Object
 	
 	void setMRT(MRT mrt);
 	MRT getMRT() const;
-	
+		
 	Lighting _lighting;
 	Texturing _texturing;
 	MRT _mrt;
 	
-	GeometryRenderer::VertCallback::Ptr _vertCb;
+	VertexOperation::Ptr _vertCb;
 	TexturingCallback::Ptr _texturingCb;
 	LightingCallback::Ptr _lightingCb;
 	MRTCallback::Ptr _mrtCb;

@@ -2,39 +2,23 @@ cmake_minimum_required(VERSION 3.0)
 
 project(libimpgears)
 
-add_definitions("-Wall" "-Werror" "-g" "-std=c++11 -fvisibility='hidden'" "-g")
-add_definitions("-DIMPGEARS_BUILD_DLL" "-DIMPGEARS_DEBUG")
+# add_definitions("-Wall" "-Werror" "-g" "-std=c++11 -fvisibility='hidden'" "-g")
+# add_definitions("-DIMPGEARS_BUILD_DLL" "-DIMPGEARS_DEBUG")
 
-file(GLOB SRCS 
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Core/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Descriptors/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Geometry/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Plugins/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Renderer/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Core/*.h
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Descriptors/*.h
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Geometry/*.h
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Graphics/*.h
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Plugins/*.h
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/Renderer/*.h
-    ${PROJECT_SOURCE_DIR}/src/ImpGears/SceneGraph/*.h
-    )
 
-file(GLOB HEADERS 
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/Core/*.h
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/Descriptors/*.h
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/Geometry/*.
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/Graphics/*.hh
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/Plugins/*.h
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/Renderer/*.h
-    ${PROJECT_SOURCE_DIR}/include/ImpGears/SceneGraph/*.h
-    )
+add_subdirectory(src/ImpGears/Core)
+add_subdirectory(src/ImpGears/Geometry)
+add_subdirectory(src/ImpGears/Graphics)
+add_subdirectory(src/ImpGears/SceneGraph)
+add_subdirectory(src/ImpGears/Renderer)
+add_subdirectory(src/ImpGears/Descriptors)
+add_subdirectory(src/ImpGears/Plugins)
 
-add_library(impgears SHARED ${SRCS} ${HEADERS})
-target_include_directories(impgears PUBLIC ${PROJECT_SOURCE_DIR}/include/ImpGears)
-
+# target_include_directories(impgears PUBLIC ${PROJECT_SOURCE_DIR}/include/ImpGears)
 
 # link to DL
-target_link_libraries( impgears ${CMAKE_DL_LIBS} )
+# target_link_libraries( impgears ${CMAKE_DL_LIBS} )
+
+
+set( CMAKE_INSTALL_PREFIX /usr )
+message( "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )

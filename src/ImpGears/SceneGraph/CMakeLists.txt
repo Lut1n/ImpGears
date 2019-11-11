@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 
-add_definitions("-Wall" "-Werror" "-g" "-std=c++11 -fvisibility='hidden'" "-g")
-add_definitions("-DIMPGEARS_BUILD_DLL" "-DIMPGEARS_DEBUG")
-
 set(IG_SCENEGRAPH ImpGears/SceneGraph)
 
 file(GLOB SRCS
@@ -14,7 +11,9 @@ file(GLOB IG_SCENEGRAPH_H
     )
 
 add_library(impgears-scenegraph SHARED ${SRCS} ${IG_SCENEGRAPH_H})
-target_include_directories(impgears-scenegraph PUBLIC ${PROJECT_SOURCE_DIR}/include/ImpGears)
+
+target_link_libraries( impgears-scenegraph impgears-graphics )
+target_link_libraries( impgears-scenegraph impgears-geometry )
 
 install(TARGETS impgears-scenegraph DESTINATION lib)
 install(FILES ${IG_SCENEGRAPH_H} DESTINATION include/${IG_SCENEGRAPH})

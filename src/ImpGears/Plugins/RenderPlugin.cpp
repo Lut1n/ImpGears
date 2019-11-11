@@ -11,12 +11,7 @@ RenderPlugin::Ptr PluginManager::open(const std::string& name)
 {
 	RenderPlugin::Ptr result;
 	
-	const std::string plugin_prefix("./Plugins/");
-	const std::string plugin_postfix(".so");
-	
-	const std::string path = plugin_prefix + name + plugin_postfix;
-	
-	void* handler = dlopen(path.c_str(),RTLD_LAZY);
+	void* handler = dlopen(name.c_str(),RTLD_LAZY);
 	if(handler == nullptr)
 	{
 		std::cout << "error dlopen : " << dlerror() << std::endl;

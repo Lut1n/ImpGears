@@ -12,7 +12,7 @@ LDFLAGS=-lstdc++fs -lsfml-graphics -lsfml-window -lsfml-system -limpgears-core -
 all: viewer
 
 viewer: viewer.o
-	$(CXX) -o viewer viewer.o $(LDFLAGS)
+	$(CXX) -o viewer viewer.o -L /usr/lib $(LDFLAGS)
 
 viewer.o: viewer.cpp shader.h
 	$(CXX) $(CXXFLAGS) -I /usr/include/ImpGears -c viewer.cpp -o viewer.o

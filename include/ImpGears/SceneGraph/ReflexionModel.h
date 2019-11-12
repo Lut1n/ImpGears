@@ -33,7 +33,7 @@ struct IMP_API ReflexionModel : public Object
 		virtual void applyMRT(ImageBuf& targets, const Vec3& pt, const std::vector<Vec3>& outColor) = 0;
 	};
 	
-	struct AbstractFrag : public FragCallback
+	struct IMP_API AbstractFrag : public FragCallback
 	{
 		
 		Meta_Class(AbstractFrag)

@@ -10,7 +10,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API RTSceneRenderer : public SceneRenderer
+class RTSceneRenderer : public SceneRenderer
 {
 public:
 

@@ -11,7 +11,8 @@
 #include <Plugins/RenderPlugin.h>
 
 #include <SFML/Graphics.hpp>
-#include <filesystem>
+// #include <filesystem>
+#include <experimental/filesystem>
 
 using namespace imp;
 
@@ -44,7 +45,7 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
 	if( !fileExists("./cache/scene_terrain.tga") || !fileExists("./cache/scene_color.tga"))
 	{
 		// c++17
-		std::filesystem::create_directories("cache");
+		std::experimental::filesystem::create_directories("cache");
 		generateImageFromJson("textures.json");
 	}
 	
@@ -111,7 +112,9 @@ int main(int argc, char* argv[])
 		renderer = CpuRenderer::create();
 	else
 	{
-		rp = PluginManager::open("libglPlugin");
+        std::string pluginName = "glPlugin";
+        pluginName = "lib" + pluginName + "." + LIB_EXT;
+        rp = PluginManager::open( pluginName );
 		renderer = rp->getRenderer();
 		// GlRenderer& g = dynamic_cast<GlRenderer&>( *renderer );
 		// g.loadRenderPlugin("libglPlugin");

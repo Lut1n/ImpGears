@@ -25,37 +25,37 @@ IMP_API double SquareSignal(double t, double maxPeriodRatio = 0.5);
 IMP_API double TriangleSignal(double t, double maxPeriodRatio = 0.5);
 
 template<typename Ty>
-IMP_API Ty min(Ty a, Ty b)
+Ty min(Ty a, Ty b)
 {
 	return a<b?a:b;
 }
 
 template<typename Ty>
-IMP_API Ty max(Ty a, Ty b)
+Ty max(Ty a, Ty b)
 {
 	return a>b?a:b;
 }
 
 template<typename Ty>
-IMP_API Ty clamp(Ty x, Ty edge0 = (Ty)0, Ty edge1 = (Ty)1)
+Ty clamp(Ty x, Ty edge0 = (Ty)0, Ty edge1 = (Ty)1)
 {
 	return x>edge1?edge1:(x<edge0?edge0:x);
 }
 
 template<typename Ty>
-IMP_API Ty floor(Ty v)
+Ty floor(Ty v)
 {
 	return (Ty)static_cast<long long>(v);
 }
 
 template<typename Ty>
-IMP_API Ty frac(Ty v)
+Ty frac(Ty v)
 {
 	return v - floor(v);
 }
 
 template<typename Ty>
-IMP_API Ty smoothstep(Ty edge0, Ty edge1, float delta)
+Ty smoothstep(Ty edge0, Ty edge1, float delta)
 {
 	delta = (delta-edge0) / (edge1-edge0);
     Ty x = clamp<Ty>(delta, 0.0, 1.0); 
@@ -63,7 +63,7 @@ IMP_API Ty smoothstep(Ty edge0, Ty edge1, float delta)
 }
 
 template<int Dim,typename Ty>
-IMP_API Vec<Dim,Ty> dotClamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 = (Ty)1.0)
+Vec<Dim,Ty> dotClamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 = (Ty)1.0)
 {
 	Vec<Dim,Ty> r;
 	for(int i=0;i<Dim;++i)r[i]=clamp<Ty>(x[i],edge0,edge1);
@@ -71,7 +71,7 @@ IMP_API Vec<Dim,Ty> dotClamp(const Vec<Dim,Ty>& x, Ty edge0 = (Ty)0.0, Ty edge1 
 }
 
 template<int Dim,typename Ty>
-IMP_API Vec<Dim,Ty> dotMax(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
+Vec<Dim,Ty> dotMax(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
 {
 	Vec<Dim,Ty> r;
 	for(int i=0;i<Dim;++i)r[i]=std::max(x[i],y[i]);
@@ -79,7 +79,7 @@ IMP_API Vec<Dim,Ty> dotMax(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
 }
 
 template<int Dim,typename Ty>
-IMP_API Vec<Dim,Ty> dotMin(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
+Vec<Dim,Ty> dotMin(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
 {
 	Vec<Dim,Ty> r;
 	for(int i=0;i<Dim;++i)r[i]=std::min(x[i],y[i]);
@@ -87,13 +87,13 @@ IMP_API Vec<Dim,Ty> dotMin(const Vec<Dim,Ty>& x, const Vec<Dim,Ty>& y)
 }
 
 template<typename Ty>
-IMP_API Ty step(Ty edge, Ty x)
+Ty step(Ty edge, Ty x)
 {
     return x<edge?(Ty)0:(Ty)1;
 }
 
 template<typename Ty>
-IMP_API Ty linearstep(Ty edge0, Ty edge1, Ty x)
+Ty linearstep(Ty edge0, Ty edge1, Ty x)
 {
 	Ty range = (edge1-edge0);
 	if(range == (Ty)0) return (Ty)0;
@@ -101,13 +101,13 @@ IMP_API Ty linearstep(Ty edge0, Ty edge1, Ty x)
 }
 
 template<typename Ty>
-IMP_API Ty mix(const Ty& a, const Ty& b, float delta)
+Ty mix(const Ty& a, const Ty& b, float delta)
 {
     return (b - a)*delta + a;
 }
 
 template<typename Ty>
-IMP_API Ty mix2d(Ty oo, Ty xo, Ty oy, Ty xy, float deltaX, float deltaY)
+Ty mix2d(Ty oo, Ty xo, Ty oy, Ty xy, float deltaX, float deltaY)
 {
 	Ty lx1 = mix<Ty>(oo, xo, deltaX);
 	Ty lx2 = mix<Ty>(oy, xy, deltaX);
@@ -115,7 +115,7 @@ IMP_API Ty mix2d(Ty oo, Ty xo, Ty oy, Ty xy, float deltaX, float deltaY)
 }
 
 template<typename Ty>
-IMP_API Ty pow(const Ty& x, int p)
+Ty pow(const Ty& x, int p)
 {
     Ty res = x;
     for(int i=0;i<p;++i) res = res * x;
@@ -123,13 +123,13 @@ IMP_API Ty pow(const Ty& x, int p)
 }
 
 template<typename Ty>
-IMP_API Ty min3(Ty a, Ty b, Ty c)
+Ty min3(Ty a, Ty b, Ty c)
 {
     return std::min(a,std::min(b,c));
 }
 
 template<typename Ty>
-IMP_API Ty max3(Ty a, Ty b, Ty c)
+Ty max3(Ty a, Ty b, Ty c)
 {
     return std::max(a,std::max(b,c));
 }

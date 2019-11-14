@@ -2,8 +2,10 @@
 
 Little personal engine for 3D and image processing.
 
-Current and future improvements of this project are oriented to enable the procedural generation of a large amount of pseudo-random textures and models. And with the able to do it by two ways :
-- In real-time, using the GPU and shaders.
-- By offline rendering, with the CPU only.
+Future goals :
+- Improve procedural generation of textures and models
+- Improve offline CPU rendering
+- Modernize the use of OpenGL
+- Integrate a Vulkan alternative
 
-Key words : C++, OpenGL, pseudo-random, procedural, texture, image processing, 3D
+Key words : C++, OpenGL, procedural, texture, image processing, 3D

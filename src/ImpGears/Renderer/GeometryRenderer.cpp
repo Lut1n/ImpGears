@@ -17,7 +17,7 @@ struct DefaultPlain : public FragCallback
 //--------------------------------------------------------------
 struct DepthTestFragCallback : public FragCallback
 {
-	Image::Ptr _depthBuffer;
+        FloatImage::Ptr _depthBuffer;
 	FragCallback::Ptr _subCallback;
 	bool _depthTestEnabled;
 	float _near;
@@ -33,7 +33,7 @@ struct DepthTestFragCallback : public FragCallback
 		_subCallback = DefaultPlain::create();
 	}
 	
-	void setDepthBuffer(Image::Ptr depthBuffer)
+        void setDepthBuffer(FloatImage::Ptr depthBuffer)
 	{
 		_depthBuffer = depthBuffer;
 	}
@@ -56,7 +56,7 @@ struct DepthTestFragCallback : public FragCallback
 		// depth test
 		float depth = -varyings.get("mv_vert").z();
 		
-		float depthPx = clamp( linearstep(_near, _far, depth )  )* 255.0;
+                float depthPx = clamp( linearstep(_near, _far, depth )  );//* 255.0;
 		Vec4 depthV = _depthBuffer->getPixel(pt[0], pt[1]);
 		float curr_depth = depthV[0];
 		if( depthPx < curr_depth)
@@ -104,7 +104,7 @@ struct DefaultVertCallback : public GeometryRenderer::VertCallback
 GeometryRenderer::GeometryRenderer()
 {
 	_fragCallback = DepthTestFragCallback::create();
-	_depthBuffer = Image::create(32,32,1);
+        _depthBuffer = FloatImage::create(32,32,1);
 	setDefaultVertCallback();
 	setDefaultFragCallback();
 	_cull = Cull_Back;

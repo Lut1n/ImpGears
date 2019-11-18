@@ -4,6 +4,7 @@
 
 #include <Core/Matrix4.h>
 #include <Geometry/Geometry.h>
+#include <Graphics/FloatImage.h>
 #include <Graphics/Image.h>
 #include <Graphics/Rasterizer.h>
 
@@ -86,7 +87,7 @@ protected:
 	Vec4 _viewport;
 	Cull _cull;
 
-	Image::Ptr _depthBuffer;
+        FloatImage::Ptr _depthBuffer;
 	bool _depthTestEnabled;
 };
 

@@ -97,7 +97,7 @@ void RenderVisitor::push( Node* node )
 	_states.push_back(state);
 	
 	Matrix4 model; if(_matrices.size() > 0) model = _matrices.back();
-	_matrices.push_back(model * node->getModelMatrix());
+        _matrices.push_back(node->getModelMatrix() * model);
 }
 
 //--------------------------------------------------------------

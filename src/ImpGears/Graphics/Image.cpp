@@ -29,7 +29,7 @@ void memset32(Image::b8* ptr,const Vec4& color, int n)
 //--------------------------------------------------------------
 Image::Image(int w, int h, int chnls)
 {
-	resize(w,h,chnls);
+    resize(w,h,chnls);
 }
 
 //--------------------------------------------------------------
@@ -38,22 +38,22 @@ Image::~Image(){}
 //--------------------------------------------------------------
 void Image::copy(const Image::Ptr& other)
 {
-	std::vector<int> mask(channels());
-	for(int i=0;i<channels();++i) mask[i]=i;
-	copy(other,mask);
+    std::vector<int> mask(channels());
+    for(int i=0;i<channels();++i) mask[i]=i;
+    copy(other,mask);
 }
 
 void Image::copy(const Image::Ptr& other, const std::vector<int>& mask)
 {
-	int c = mask.size();
-	resize(other->width(), other->height(), c);
-	for(int i=0;i<width();++i) for(int j=0;j<height();++j)
-	{
-		Vec4 res;
-		Vec4 pixel = other->getPixel(i,j);
-		for(int k=0;k<c;++k) res[k] = pixel[ mask[k] ];
-		setPixel(i,j,res);
-	}
+    int c = mask.size();
+    resize(other->width(), other->height(), c);
+    for(int i=0;i<width();++i) for(int j=0;j<height();++j)
+    {
+        Vec4 res;
+        Vec4 pixel = other->getPixel(i,j);
+        for(int k=0;k<c;++k) res[k] = pixel[ mask[k] ];
+        setPixel(i,j,res);
+    }
 }
 
 //--------------------------------------------------------------
@@ -81,13 +81,13 @@ Vec4 Image::getPixel(int x, int y) const
 //--------------------------------------------------------------
 void Image::setPixel(const Vec2& uv, const Vec4& col)
 {
-	setPixel(uv[0],uv[1],col);
+    setPixel(uv[0],uv[1],col);
 }
 
 //--------------------------------------------------------------
 Vec4 Image::getPixel(const Vec2& uv) const
 {
-	return getPixel(uv[0],uv[1]);
+    return getPixel(uv[0],uv[1]);
 }
 
 //--------------------------------------------------------------
@@ -126,21 +126,21 @@ const Grid<3,Image::b8>::Ptr Image::asGrid() const
 //--------------------------------------------------------------
 const Image::b8* Image::data() const
 {
-	return _buffer;
+    return _buffer;
 }
 
 //--------------------------------------------------------------
 Image::b8* Image::data()
 {
-	return _buffer;
+    return _buffer;
 }
 
 //--------------------------------------------------------------
 void Image::resize(int w, int h, int chnls)
 {
-	_grid = Grid<3,Image::b8>::create(Dimension<3>(h,w,chnls));
-	_dims = _grid->size();
-	_buffer = _grid->data();
+    _dims = Dimension<3>(h,w,chnls);
+    _grid = Grid<3,Image::b8>::create(_dims);
+    _buffer = _grid->data();
 }
 
 IMPGEARS_END

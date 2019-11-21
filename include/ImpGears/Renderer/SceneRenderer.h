@@ -14,25 +14,26 @@ class IMP_API SceneRenderer : public Object
 {
 public:
 
-	Meta_Class(SceneRenderer)
-	
-	SceneRenderer();
-	virtual ~SceneRenderer();
+    Meta_Class(SceneRenderer)
 
-	virtual void render(const Graph::Ptr& scene) = 0;
-	
-	void setDirect(bool direct) {_direct = direct;}
-	bool isDirect() const {return _direct;}
-	void setTarget( Image::Ptr& target ) {_target = target;}
-	Image::Ptr getTarget() const { return _target; }
-	
-	LightNode* closest(Node* node, const std::vector<LightNode*>& ls);
+    SceneRenderer();
+    virtual ~SceneRenderer();
+
+    virtual void render(const Graph::Ptr& scene) = 0;
+
+    void setDirect(bool direct) {_direct = direct;}
+    bool isDirect() const {return _direct;}
+
+    void setTarget(Image::Ptr& target, int id = 0);
+    virtual Image::Ptr getTarget(bool dlFromGPU = false, int id = 0);
+
+    LightNode* closest(Node* node, const std::vector<LightNode*>& ls);
 
 protected:
-	
-	bool _direct;
-	Image::Ptr _target;
-	RenderVisitor::Ptr _visitor;
+
+    bool _direct;
+    std::vector<Image::Ptr> _targets;
+    RenderVisitor::Ptr _visitor;
 };
 
 IMPGEARS_END

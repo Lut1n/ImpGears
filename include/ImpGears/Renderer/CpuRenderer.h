@@ -14,21 +14,21 @@ class IMP_API CpuRenderer : public SceneRenderer
 {
 public:
 
-	Meta_Class(CpuRenderer)
-	
-	CpuRenderer();
-	virtual ~CpuRenderer();
+    Meta_Class(CpuRenderer)
 
-	virtual void render(const Graph::Ptr& scene);
+    CpuRenderer();
+    virtual ~CpuRenderer();
+
+    virtual void render(const Graph::Ptr& scene);
 
 protected:
-	
-	RenderTarget::Ptr _renderTargets;
-	GeometryRenderer _geoRenderer;
-	
-	void applyState(const State::Ptr& state);
-	void applyClear(ClearNode* clearNode);
-	void drawGeometry(GeoNode* geoNode);
+
+    RenderTarget::Ptr _renderTargets;
+    GeometryRenderer _geoRenderer;
+
+    void applyState(const State::Ptr& state);
+    void applyClear(ClearNode* clearNode);
+    void drawGeometry(GeoNode* geoNode);
 };
 
 IMPGEARS_END

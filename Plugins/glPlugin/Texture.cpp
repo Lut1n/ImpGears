@@ -7,14 +7,14 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 Texture::Texture(const std::string& name)
-	: _videoID(0)
-	, _width(0)
-	, _height(0)
-	, _isSmooth(false)
-	, _isRepeated(false)
-	, _hasMipmap(false)
-	, _mipmapMaxLevel(1000)
-	, _name(name)
+    : _videoID(0)
+    , _width(0)
+    , _height(0)
+    , _isSmooth(false)
+    , _isRepeated(false)
+    , _hasMipmap(false)
+    , _mipmapMaxLevel(1000)
+    , _name(name)
 {
     glGenTextures(1, &_videoID);
     GL_CHECKERROR("gen texture");
@@ -32,41 +32,43 @@ Texture::~Texture()
 void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32_t height, int chnls)
 {
     update();
-	
+
     std::int32_t glInternalFormat = 0;
     std::int32_t glDataFormat = 0;
     std::int32_t glDataType = GL_UNSIGNED_BYTE;
-	
-	if(chnls == 1)
-	{
-        // case PixelFormat_R16 :
-		glDataFormat = GL_RED;
-        glInternalFormat = GL_DEPTH_COMPONENT16;
-	}
-	else if(chnls == 3)
-	{
-		glDataFormat = GL_RGB;
-		glInternalFormat = GL_RGB8;
-	}
-	else if(chnls == 4)
-	{
-		glDataFormat = GL_RGBA;
-		glInternalFormat = GL_RGBA8;
-	}
-	else if(chnls == 2)
-	{
-        // case PixelFormat_R16 :
-		// glDataFormat = GL_DEPTH_COMPONENT;
-        // glInternalFormat = GL_DEPTH_COMPONENT16;
-	}
-	else
-	{	
-		std::cerr << "impError : " << _name << " texture format error (" << chnls << " chnls)" << std::endl;
-	}
 
+    if(chnls == 1)
+    {
+    // case PixelFormat_R16 :
+        glDataFormat = GL_RED;
+        glInternalFormat = GL_DEPTH_COMPONENT16;
+    }
+    else if(chnls == 3)
+    {
+        glDataFormat = GL_RGB;
+        glInternalFormat = GL_RGB8;
+    }
+    else if(chnls == 4)
+    {
+        glDataFormat = GL_RGBA;
+        glInternalFormat = GL_RGBA8;
+    }
+    else if(chnls == 2)
+    {
+        // case PixelFormat_R16 :
+        // glDataFormat = GL_DEPTH_COMPONENT;
+        // glInternalFormat = GL_DEPTH_COMPONENT16;
+    }
+    else
+    {
+        std::cerr << "impError : " << _name << " texture format error (" << chnls << " chnls)" << std::endl;
+    }
+
+    _width = width;
+    _height = height;
+
+    glActiveTexture(GL_TEXTURE0);
     bind();
-	_width = width;
-	_height = height;
     glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, width, height,0, glDataFormat, glDataType, buf);
     GL_CHECKERROR("texture update gpu Texture");
     unbind();
@@ -81,31 +83,33 @@ void Texture::loadFromImage(const Image::Ptr img)
 //--------------------------------------------------------------
 void Texture::saveToImage(Image::Ptr& img)
 {
-	int chnls = img->channels();
+    int chnls = img->channels();
     // std::int32_t glInternalFormat = 0;
     std::int32_t glDataFormat = 0;
     std::int32_t glDataType = GL_UNSIGNED_BYTE;
-	
-	if(chnls == 1)
-	{
-		glDataFormat = GL_RED;
-		// glInternalFormat = GL_DEPTH_COMPONENT16;
-	}
-	else if(chnls == 3)
-	{
-		glDataFormat = GL_RGB;
-		// glInternalFormat = GL_RGB8;
-	}
-	else if(chnls == 4)
-	{
-		glDataFormat = GL_RGBA;
-		// glInternalFormat = GL_RGBA8;
-	}
-	
-	// void glGetTexImage(GLenum target,GLint level,GLenum format,GLenum type,GLvoid * pixels);
-	GLvoid* pixels = (GLvoid*)img->data();
-	glGetTexImage(GL_TEXTURE_2D, 0, glDataFormat, glDataType, pixels);
-	
+
+    if(chnls == 1)
+    {
+        glDataFormat = GL_RED;
+        // glInternalFormat = GL_DEPTH_COMPONENT16;
+    }
+    else if(chnls == 3)
+    {
+        glDataFormat = GL_RGB;
+        // glInternalFormat = GL_RGB8;
+    }
+    else if(chnls == 4)
+    {
+        glDataFormat = GL_RGBA;
+        // glInternalFormat = GL_RGBA8;
+    }
+
+    GLvoid* pixels = (GLvoid*)img->data();
+        glActiveTexture(GL_TEXTURE0);
+        bind();
+    glGetTexImage(GL_TEXTURE_2D, 0, glDataFormat, glDataType, pixels);
+        unbind();
+
     GL_CHECKERROR("Texture::saveToImage");
 }
 
@@ -124,6 +128,7 @@ void Texture::update()
             glFilterMinValue = GL_LINEAR_MIPMAP_LINEAR;
     }
 
+    glActiveTexture(GL_TEXTURE0);
     bind();
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapMode);
@@ -133,7 +138,7 @@ void Texture::update()
     {
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _mipmapMaxLevel);
-    GL_CHECKERROR("texture update 2");
+        GL_CHECKERROR("texture update 2");
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilterMagValue);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
@@ -145,7 +150,6 @@ void Texture::update()
 //--------------------------------------------------------------
 void Texture::bind() const
 {
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_videoID));
     GL_CHECKERROR("bind texture");
 }

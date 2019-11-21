@@ -16,6 +16,15 @@ public:
 
     Meta_Class(SceneRenderer)
 
+    enum Feature
+    {
+        Feature_Bloom = 0,
+        Feature_Shadow,
+        Feature_SSAO,
+
+        Feature_Count
+    };
+
     SceneRenderer();
     virtual ~SceneRenderer();
 
@@ -29,9 +38,13 @@ public:
 
     LightNode* closest(Node* node, const std::vector<LightNode*>& ls);
 
+    void enableFeature(Feature id, bool enable);
+    bool isFeatureEnabled(Feature id) const;
+
 protected:
 
     bool _direct;
+    bool _enabledFeatures[Feature_Count];
     std::vector<Image::Ptr> _targets;
     RenderVisitor::Ptr _visitor;
 };

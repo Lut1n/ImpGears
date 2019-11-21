@@ -7,6 +7,8 @@ SceneRenderer::SceneRenderer()
 {
     _visitor = RenderVisitor::create();
     _direct = true;
+
+    for(auto& f : _enabledFeatures) f=false;
 }
 
 //--------------------------------------------------------------
@@ -48,6 +50,18 @@ Image::Ptr SceneRenderer::getTarget(bool dlFromGPU, int id)
     if(dlFromGPU) { /* dl image here */ }
 
     return target;
+}
+
+//---------------------------------------------------------------
+void SceneRenderer::enableFeature(Feature id, bool enable)
+{
+    _enabledFeatures[id] = enable;
+}
+
+//---------------------------------------------------------------
+bool SceneRenderer::isFeatureEnabled(Feature id) const
+{
+    return _enabledFeatures[id];
 }
 
 IMPGEARS_END

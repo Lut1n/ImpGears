@@ -2,11 +2,14 @@
 
 #include <cstdlib>
 
+#include "BloomFX.h"
+
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 GlRenderer::GlRenderer()
     : SceneRenderer()
+    , _bloomFX(nullptr)
 {
 }
 
@@ -118,6 +121,18 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
         _renderTargets = RenderTarget::create();
         _renderTargets->build(samplers, true);
+    }
+
+    if(isFeatureEnabled(Feature_Bloom))
+    {
+        if(_bloomFX == nullptr)
+        {
+            _bloomFX = new BloomFX();
+            _bloomFX->setup( 10, Vec4(0.0,0.0,512.0,512.0) );
+        }
+
+        _bloomFX->apply(this, scene);
+        return;
     }
 
     if(!_direct && _renderTargets)

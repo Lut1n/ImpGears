@@ -10,32 +10,36 @@
 
 IMPGEARS_BEGIN
 
+struct BloomFX;
+
 class IMP_API GlRenderer : public SceneRenderer
 {
 public:
 
     Meta_Class(GlRenderer)
-	
-	GlRenderer();
-	virtual ~GlRenderer();
+
+    GlRenderer();
+    virtual ~GlRenderer();
 
     void applyRenderVisitor(const Graph::Ptr& scene);
 
-	virtual void render(const Graph::Ptr& scene);
+    virtual void render(const Graph::Ptr& scene);
 
     virtual Image::Ptr getTarget(bool dlFromGPU = false, int id = 0);
-	
-	void loadRenderPlugin(const std::string& renderPlugin);
-	void setRenderPlugin(RenderPlugin* plugin);
-	
-	RenderPlugin* _renderPlugin;
+
+    void loadRenderPlugin(const std::string& renderPlugin);
+    void setRenderPlugin(RenderPlugin* plugin);
+
+    RenderPlugin* _renderPlugin;
 
 protected:
 
+    BloomFX* _bloomFX;
+
     RenderTarget::Ptr _renderTargets;
-	
-	void applyState(const State::Ptr& state);
-	void applyClear(ClearNode* clearNode);
+
+    void applyState(const State::Ptr& state);
+    void applyClear(ClearNode* clearNode);
     void drawGeometry(GeoNode* geoNode);
 };
 

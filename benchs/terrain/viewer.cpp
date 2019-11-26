@@ -18,6 +18,8 @@ using namespace imp;
 #include "../common/inc_experimental.h"
 #define IMPLEMENT_RENDER_MODE_MANAGER
 #include "../common/RenderModeManager.h"
+#define IMPLEMENT_BASIC_GEOMETRIES
+#include "../common/basic_geometries.h"
 
 Geometry generateTerrain(const ImageSampler::Ptr& hm)
 {
@@ -33,10 +35,11 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
         uv = Vec3(uv[0],uv[2],1.0);
         uv = (uv * 0.5)  + 0.5;
         Vec3 v = geometry._vertices[k];
-        if(v[1]>0.0) v[1] += hm->get(uv)[0] * 3.0;
+        if(v[1]>0.0) v[1] = hm->get(uv)[0] * 5.0;
         geometry._vertices[k] = v;
     }
     geometry.scale(Vec3(10.0,1.0,10.0));
+    Geometry::intoCCW(geometry);
     geometry.generateNormals(Geometry::NormalGenMode_PerFace);
     geometry.interpolateNormals();
 
@@ -89,6 +92,11 @@ renderModeMngr.setArgs(argc, argv);
             imp::ReflexionModel::Texturing_Samplers_CNE,
             imp::ReflexionModel::MRT_2_Col_Emi);
 
+    imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
+            imp::ReflexionModel::Lighting_None,
+            imp::ReflexionModel::Texturing_Samplers_CNE,
+            imp::ReflexionModel::MRT_2_Col_Emi);
+
     Material::Ptr material = Material::create(Vec3(0.3,1.0,0.4), 1.0);
     material->_baseColor = color;
     // material->_emissive = color;
@@ -102,6 +110,13 @@ renderModeMngr.setArgs(argc, argv);
     terrainNode->setReflexion(r);
     terrainNode->setMaterial(material);
 
+    Geometry::Ptr coords = buildCoord();
+    coords->scale(Vec3(30.0));
+    GeoNode::Ptr coordsNode = GeoNode::create(coords, false);
+    coordsNode->setReflexion(r2);
+    coordsNode->setMaterial(material);
+    coordsNode->setPosition(Vec3(0.0,15.0,0.0));
+
     LightNode::Ptr light = LightNode::create(Vec3(1.0),10.f);
 
     Geometry::Ptr pointGeo = Geometry::create();
@@ -111,12 +126,13 @@ renderModeMngr.setArgs(argc, argv);
     pointGeo->generateNormals();
     pointGeo->generateTexCoords(Geometry::TexGenMode_Spheric);
     GeoNode::Ptr pointNode = GeoNode::create(pointGeo, false);
-    pointNode->setPosition(Vec3(0.0,0.1,0.0));
+    pointNode->setPosition(Vec3(0.0,2,0.0));
     pointNode->setReflexion(r);
     pointNode->setMaterial(light_material);
 
     root->addNode(camera);
     root->addNode(terrainNode);
+    root->addNode(coordsNode);
     root->addNode(light);
     root->addNode(pointNode);
     graph->setRoot(root);
@@ -141,13 +157,13 @@ renderModeMngr.setArgs(argc, argv);
         }
         double t = clock.getElapsedTime().asSeconds();
 
-        Vec3 lp(cos(t)*5.0,5.0,sin(t)*4.0);
+        Vec3 lp(cos(t)*5.0,10.0,sin(t)*4.0);
         light->setPosition(lp);
         pointNode->setPosition(lp);
 
-        Vec3 lp2(cos(-t * 0.2),0.5,sin(-t * 0.2));
+        Vec3 lp2(cos(-t * 0.2),1.0,sin(-t * 0.2));
         camera->setPosition(lp2*15.0);
-        camera->setTarget(Vec3(0.0f, 0.3f*10.f, 0.0f));
+        camera->setTarget(Vec3(0.0f, 10.f, 0.0f));
 
 
         if(generate_cubemap)

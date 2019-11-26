@@ -14,6 +14,8 @@ using namespace imp;
 #include "../common/inc_experimental.h"
 #define IMPLEMENT_RENDER_MODE_MANAGER
 #include "../common/RenderModeManager.h"
+#define IMPLEMENT_BASIC_GEOMETRIES
+#include "../common/basic_geometries.h"
 
 #define IMPLEMENT_LEAF_N_COORDS
 #include "mGeometry.h"
@@ -56,7 +58,7 @@ int main(int argc, char* argv[])
     pointGeo->generateNormals();
     pointGeo->generateTexCoords();
     GeoNode::Ptr pointNode = GeoNode::create(pointGeo, false);
-    pointNode->setPosition(Vec3(0.0,0.1,0.0));
+    pointNode->setPosition(Vec3(0.0,0.2,0.0));
     pointNode->setReflexion(reflexion);
     pointNode->setMaterial(light_material);
 
@@ -100,11 +102,10 @@ int main(int argc, char* argv[])
             if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
                 window.close();
         }
+
+        double t = clock.getElapsedTime().asSeconds();
         
-        if(clock.getElapsedTime().asSeconds() > 2.0*3.14) clock.restart();
-        double t = clock.getElapsedTime().asMilliseconds() / 1000.0;
-        
-        camera->setPosition(Vec3(cos(t)*2.0,1.0,sin(t)*2.0));
+        camera->setPosition(Vec3(cos(t*0.2)*1.0,0.75,sin(t*.2)*1.0));
         camera->setTarget(Vec3(0.0));
         Vec3 lp(cos(t)*4.0,1.0,sin(t)*3.0);
 

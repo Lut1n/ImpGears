@@ -158,7 +158,7 @@ void RTSceneRenderer::applyState(const State::Ptr& state)
 //---------------------------------------------------------------
 void RTSceneRenderer::applyClear(ClearNode* clearNode)
 {
-	_target->fill(Vec3(0.0));
+    for(auto& t : _targets) t->fill(Vec3(0.0));
 }
 
 //---------------------------------------------------------------
@@ -255,7 +255,7 @@ void RTSceneRenderer::drawGeometry(GeoNode* geoNode)
 		Vec2 cuv = uv * 2.0 - 1.0;
 		Vec3 ray = Vec3(cuv.x()*n_tan,cuv.y()*n_tan,-near);
 		ray.normalize();
-		rayl(uv,ray,geoNode,_target,_view);
+                rayl(uv,ray,geoNode,_targets[0],_view);
 	}
 }
 

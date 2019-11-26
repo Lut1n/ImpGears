@@ -11,8 +11,8 @@
 
 #include <SFML/Graphics.hpp>
 
-// #include <filesystem>
-#include <experimental/filesystem>
+// common stuff
+#include "../common/inc_experimental.h"
 
 using namespace imp;
 
@@ -106,13 +106,13 @@ void loadSamplers(ImageSampler::Ptr& colorSampler, ImageSampler::Ptr& normalSamp
 
     colorSampler =ImageSampler::create();
     colorSampler->setSource( ImageIO::load("./cache/scene_color.tga") );
-    colorSampler->setMode(ImageSampler::Mode_Repeat);
-    colorSampler->setInterpo(ImageSampler::Interpo_Linear);
+    colorSampler->setWrapping(ImageSampler::Wrapping_Repeat);
+    colorSampler->setFiltering(ImageSampler::Filtering_Linear);
 
     normalSampler =ImageSampler::create();
     normalSampler->setSource( ImageIO::load("./cache/scene_normals.tga") );
-    normalSampler->setMode(ImageSampler::Mode_Repeat);
-    normalSampler->setInterpo(ImageSampler::Interpo_Linear);
+    normalSampler->setWrapping(ImageSampler::Wrapping_Repeat);
+    normalSampler->setFiltering(ImageSampler::Filtering_Linear);
 }
 
 int main(int argc, char* argv[])
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     Graph::Ptr graph = Graph::create();
     Node::Ptr root = ClearNode::create();
 
-    Camera::Ptr camera = Camera::create();
+    Camera::Ptr camera = Camera::create(Vec3::Z);
     camera->setPosition(Vec3(3.0f, 0.0f, 0.0f));
     camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
 

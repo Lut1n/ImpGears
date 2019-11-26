@@ -8,7 +8,9 @@
 #include "RTSceneRenderer.h"
 
 #include <SFML/Graphics.hpp>
-#include <filesystem>
+
+// common stuff
+#include "../common/inc_experimental.h"
 
 using namespace imp;
 
@@ -48,13 +50,13 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
 	
 	sampler =ImageSampler::create();
 	sampler->setSource( ImageIO::load("./cache/scene_terrain.tga") );
-	sampler->setMode(ImageSampler::Mode_Repeat);
-	sampler->setInterpo(ImageSampler::Interpo_Linear);
+        sampler->setWrapping(ImageSampler::Wrapping_Repeat);
+        sampler->setFiltering(ImageSampler::Filtering_Linear);
 	
 	color =ImageSampler::create();
 	color->setSource( ImageIO::load("./cache/scene_color.tga") );
-	color->setMode(ImageSampler::Mode_Repeat);
-	color->setInterpo(ImageSampler::Interpo_Linear);
+        color->setWrapping(ImageSampler::Wrapping_Repeat);
+        color->setFiltering(ImageSampler::Filtering_Linear);
 }
 
 int main(int argc, char* argv[])

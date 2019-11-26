@@ -20,7 +20,9 @@
 #include <ctime>
 #include <vector>
 #include <map>
-#include <filesystem>
+
+// common stuff
+#include "../common/inc_experimental.h"
 
 using namespace imp;
 
@@ -96,8 +98,8 @@ struct CopyOp : public ImageOperation
 	virtual void apply(const Vec2& uv, Vec4& outColor)
 	{
 		ImageSampler sampler(src), sampler2(src2);
-		sampler.setInterpo(ImageSampler::Interpo_Linear);
-		sampler2.setInterpo(ImageSampler::Interpo_Linear);
+                sampler.setFiltering(ImageSampler::Filtering_Linear);
+                sampler2.setFiltering(ImageSampler::Filtering_Linear);
 		Vec3 col = sampler.get(uv);
 		Vec3 col2 = sampler2.get(uv);
 		
@@ -126,18 +128,18 @@ void loadSamplers(ImageSampler::Ptr& colorSampler, ImageSampler::Ptr& illuSample
 	
 	colorSampler =ImageSampler::create();
 	colorSampler->setSource( ImageIO::load("./cache/scene_color.tga") );
-	colorSampler->setMode(ImageSampler::Mode_Repeat);
-	colorSampler->setInterpo(ImageSampler::Interpo_Linear);
+        colorSampler->setWrapping(ImageSampler::Wrapping_Repeat);
+        colorSampler->setFiltering(ImageSampler::Filtering_Linear);
 	
 	normalSampler =ImageSampler::create();
 	normalSampler->setSource( ImageIO::load("./cache/scene_normals.tga") );
-	normalSampler->setMode(ImageSampler::Mode_Repeat);
-	normalSampler->setInterpo(ImageSampler::Interpo_Linear);
+        normalSampler->setWrapping(ImageSampler::Wrapping_Repeat);
+        normalSampler->setFiltering(ImageSampler::Filtering_Linear);
 	
 	illuSampler =ImageSampler::create();
 	illuSampler->setSource( ImageIO::load("./cache/scene_illu.tga") );
-	illuSampler->setMode(ImageSampler::Mode_Repeat);
-	illuSampler->setInterpo(ImageSampler::Interpo_Linear);
+        illuSampler->setWrapping(ImageSampler::Wrapping_Repeat);
+        illuSampler->setFiltering(ImageSampler::Filtering_Linear);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------

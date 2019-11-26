@@ -32,12 +32,12 @@ int main(int argc, char* argv[])
     Graph::Ptr graph = Graph::create();
     ClearNode::Ptr cn = ClearNode::create();
     cn->setColor(Vec4(0.2,0.3,255.0,255.0));
-    cn->enableColor(true);
+    cn->enableColor(false);
     Node::Ptr root = cn;
 
     Camera::Ptr camera = Camera::create();
     LightNode::Ptr light = LightNode::create(Vec3(1.0),5.f);
-    light->setPosition(Vec3(1.0,1.0,2.0));
+    light->setPosition(Vec3(1.0,2.0,1.0));
 
     imp::ReflexionModel::Ptr reflexion = imp::ReflexionModel::create(
         imp::ReflexionModel::Lighting_Phong,
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     pointGeo->generateNormals();
     pointGeo->generateTexCoords();
     GeoNode::Ptr pointNode = GeoNode::create(pointGeo, false);
-    pointNode->setPosition(Vec3(0.0,0.0,0.1));
+    pointNode->setPosition(Vec3(0.0,0.1,0.0));
     pointNode->setReflexion(reflexion);
     pointNode->setMaterial(light_material);
 
@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
     GeoNode::Ptr coordNode = GeoNode::create(coordGeo, false);
     coordNode->setPosition(Vec3(0.0,0.0,0.0));
     coordNode->setReflexion(reflexion);
+    coordNode->setScale(Vec3(2.0));
     coordNode->setMaterial(material);
 
     Geometry::Ptr leafGeo = generateLeaf();
@@ -75,7 +76,7 @@ int main(int argc, char* argv[])
     Node::Ptr vegetal = Node::create();
     vegetal->addNode(leafNode);
     vegetal->addNode(pointNode);
-    vegetal->setPosition(Vec3(0.0,0.0,0.3));
+    vegetal->setPosition(Vec3(0.0,0.3,0.0));
 
     // setup scene
     root->addNode(camera);
@@ -86,6 +87,10 @@ int main(int argc, char* argv[])
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     graph->getInitState()->setViewport( renderModeMngr.viewport );
+    // graph->getInitState()->setPerspectiveProjection(90.0, 1.0, 0.1, 1024.0);
+
+    renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
 
     while (window.isOpen())
     {
@@ -99,9 +104,9 @@ int main(int argc, char* argv[])
         if(clock.getElapsedTime().asSeconds() > 2.0*3.14) clock.restart();
         double t = clock.getElapsedTime().asMilliseconds() / 1000.0;
         
-        camera->setPosition(Vec3(cos(t)*2.0,sin(t)*2.0,1.0));
+        camera->setPosition(Vec3(cos(t)*2.0,1.0,sin(t)*2.0));
         camera->setTarget(Vec3(0.0));
-        Vec3 lp(cos(t)*4.0,sin(t)*3.0,1.0);
+        Vec3 lp(cos(t)*4.0,1.0,sin(t)*3.0);
 
         window.clear();
 

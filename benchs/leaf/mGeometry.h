@@ -42,6 +42,8 @@ Geometry::Ptr generateLeaf()
         geometry->_vertices[i] += Vec3::Z * std::sin(d*PI_2/max_d * freq2) * ampl2;
     }
 
+    geometry->rotX(-3.1415 * 0.5);
+
     return geometry;
 }
 

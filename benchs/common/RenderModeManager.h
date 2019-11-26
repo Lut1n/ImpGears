@@ -54,6 +54,10 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
             renderer = plugin->getRenderer();
             renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
             viewport.set(0.0,0.0,512,512);
+            target = Image::create(512,512,4);
+            renderer->setTarget(target, 0);
+            target2 = Image::create(512,512,4);
+            renderer->setTarget(target2, 1);
         }
         else
         {

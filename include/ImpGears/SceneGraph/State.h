@@ -83,6 +83,7 @@ public:
     void setUniform(const std::string& name, const ImageSampler::Ptr& sampler, int index);
     void setUniform(const std::string& name, const CubeMapSampler::Ptr& sampler, int index);
     const std::map<std::string,Uniform::Ptr>& getUniforms() const {return _uniforms;}
+    std::map<std::string,Uniform::Ptr>& getUniforms() {return _uniforms;}
 
 
     ReflexionModel::Ptr getReflexion() { return _reflexion; }

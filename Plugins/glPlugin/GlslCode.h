@@ -143,32 +143,39 @@ void lighting(out vec3 outColor, out vec3 outEmi)
     float shininess = u_lightAtt[1];
 
     vec3 color = u_color * gl_Color.xyz;
+
+    // model space
     vec3 light_dir = u_lightPos - v_m;
     float dist = length(light_dir);
     dist = dist * dist;
     light_dir = normalize(light_dir);
 
-    // TBN Matrix for computation in tangent space
-    vec3 n_z = v_n;
+    // inverted TBN Matrix for computation in tangent space
+    vec3 n_z = normalize(v_n);
     vec3 n_x = vec3(1.0,0.0,0.0);
-    vec3 n_y = cross(n_z,n_x); n_y=normalize(n_y);
+    vec3 n_y = cross(n_z,n_x);
+    vec3 n_x2 = vec3(0.0,1.0,0.0);
+    vec3 n_y_2 = cross(n_z,n_x2);
+    if(length(n_y) < length(n_y_2)) n_y = n_y_2;
+
+    n_y = normalize(n_y);
     n_x = cross(n_y,n_z); n_x=normalize(n_x);
-    mat3 tbn = inverse( mat3(n_x,n_y,n_z) );
+    mat3 inv_tbn = inverse( mat3(n_x,n_y,n_z) );
 
     vec3 normal = textureNormal(v_texCoord);
 
+    light_dir = inv_tbn * light_dir;
     float lambertian = max(dot(light_dir,normal),0.0);
     float specular = 0.0;
 
     if(lambertian > 0.0)
     {
         // view dir
-        vec3 view_pos = tbn * -u_view[3].xyz;
-        vec3 view_dir = view_pos - v_m;
+        vec3 view_pos = -u_view[3].xyz;
+        vec3 view_dir = inv_tbn * (view_pos - v_m);
         view_dir=normalize(view_dir);
 
         // blinn phong
-        light_dir = tbn * light_dir;
         vec3 halfDir = light_dir + view_dir;
         float specAngle = max( dot(halfDir,normal), 0.0 );
         specular = pow(specAngle, shininess);

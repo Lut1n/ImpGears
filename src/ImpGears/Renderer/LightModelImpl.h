@@ -44,25 +44,29 @@ struct PhongLighting : public ReflexionModel::LightingCallback
 
         // TBN Matrix for computation in tangent space
         Vec3 n_z = normal;
-        Vec3 n_x = Vec3::X;
-        Vec3 n_y = n_z.cross(n_x); n_y.normalize();
+        Vec3 n_x = Vec3::X, n_x2 = Vec3::Y;
+        Vec3 n_y = n_z.cross(n_x);
+        Vec3 n_y2 = n_z.cross(n_x2);
+        if(n_y2.length2() > n_y.length2()) n_y = n_y2;
+
+        n_y.normalize();
         n_x = n_y.cross(n_z); n_x.normalize();
-        Matrix3 tbn(n_x,n_y,n_z); tbn = tbn.inverse();
+        Matrix3 inv_tbn(n_x,n_y,n_z); inv_tbn = inv_tbn.inverse();
 
                 Vec3 texnormal = texturing->textureNormal(tex,uniforms,varyings);
 
+                light_dir = light_dir * inv_tbn;
                 float lambertian = std::max(light_dir.dot(texnormal),0.f);
         float specular = 0.0;
 
         if(lambertian > 0.0)
         {
             // view dir
-            Vec3 view_pos = Vec3(-view(3,0),-view(3,1),-view(3,2)) * tbn;
-            Vec3 view_dir = view_pos - frag_pos;
+            Vec3 view_pos = Vec3(-view(3,0),-view(3,1),-view(3,2));
+            Vec3 view_dir = (view_pos - frag_pos) * inv_tbn;
             view_dir.normalize();
 
             // blinn phong
-            light_dir = light_dir * tbn;
                         Vec3 halfDir = light_dir + view_dir;
             float specAngle = std::max( halfDir.dot(texnormal), 0.f );
             specular = std::pow(specAngle, shininess);

@@ -109,6 +109,10 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene_input, bool disableF
                     queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
 
             queue->_states[i]->setUniform("u_view", view);
+            // Matrix4 model = queue->_states[i]->getUniforms()["u_model"]->getMat4();
+            // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
+            // queue->_states[i]->setUniform("u_normal", normalMat );
+
             queue->_states[i]->setUniform("u_lightPos", lightPos);
             queue->_states[i]->setUniform("u_lightCol", lightCol);
             queue->_states[i]->setUniform("u_lightAtt", latt);

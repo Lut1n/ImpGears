@@ -52,6 +52,7 @@ public:
     Image::Ptr getTarget(int id);
     const Image::Ptr getTarget(int id) const;
     const Vec4& getClearColor(int id);
+    int getTargetCount() const;
 
     void setProj(const Matrix4& proj);
     void setView(const Matrix4& view);

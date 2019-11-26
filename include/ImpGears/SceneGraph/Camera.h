@@ -11,19 +11,22 @@ public:
 
     Meta_Class(Camera)
 
-    Camera(Vec3 up=Vec3(0.0,0.0,1.0),bool active = true);
+    Camera(Vec3 up=Vec3::Y,bool active = true);
     virtual ~Camera();
 
     virtual void lookAt();
 
     void activate() {s_activeCamera = this;}
-    const Vec3& getUpDir() const { return _upDir; }
-    void setTarget(const imp::Vec3& target){_target=target;}
-    const Matrix4& getViewMatrix() const{return _viewMatrix;}
-    void setAbsolutePosition(const Vec3& pos) { _absolutePosition=pos; }
-
     static Camera* getActiveCamera() {return s_activeCamera;}
 
+    const Vec3& getUpDir() const { return _upDir; }
+    void setUpDir(const Vec3& up) {_upDir = up;}
+
+    void setTarget(const imp::Vec3& target){_target=target;}
+
+    const Matrix4& getViewMatrix() const{return _viewMatrix;}
+
+    void setAbsolutePosition(const Vec3& pos) { _absolutePosition=pos; }
     const Vec3& getAbsolutePosition() const {return _absolutePosition;}
 
 private:

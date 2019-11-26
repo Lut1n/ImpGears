@@ -18,9 +18,11 @@ public:
     virtual ~Graph();
 
     State::Ptr getInitState() { return _initState; }
+    const State::Ptr& getInitState() const { return _initState; }
 
     void accept(Visitor::Ptr& visitor);
     void setRoot(Node::Ptr& node);
+    const Node::Ptr& getRoot() const {return _root;}
 
     void setClearColor(const Vec4& color);
     void setClearDepth(float depth);

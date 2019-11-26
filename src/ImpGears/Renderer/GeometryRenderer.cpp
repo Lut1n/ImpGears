@@ -223,6 +223,12 @@ void GeometryRenderer::setClearColor(int targetId, const Vec4& clearValue)
 }
 
 //--------------------------------------------------------------
+int GeometryRenderer::getTargetCount() const
+{
+    return _targets.size();
+}
+
+//--------------------------------------------------------------
 Image::Ptr GeometryRenderer::getTarget(int id)
 {
     return _targets.at(id);

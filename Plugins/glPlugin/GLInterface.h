@@ -23,6 +23,7 @@ public:
 
     virtual int load(Geometry::Ptr& geo);
     virtual int load(ImageSampler::Ptr& sampler);
+    virtual int load(CubeMapSampler::Ptr& sampler);
     virtual int load(ReflexionModel::Ptr& program);
 
     virtual void update(ImageSampler::Ptr& sampler);
@@ -31,6 +32,7 @@ public:
     virtual void bind(ReflexionModel::Ptr& reflexion);
     virtual void bind(Geometry::Ptr& geo);
     virtual void bind(ImageSampler::Ptr& geo);
+    virtual void bind(CubeMapSampler::Ptr& geo);
 
     virtual void init(RenderTarget::Ptr& target);
     virtual void unbind();

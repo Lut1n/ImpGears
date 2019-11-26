@@ -10,6 +10,7 @@
 #include "GLInterface.h"
 #include "BufferObject.h"
 #include "FrameBuffer.h"
+#include "CubeMap.h"
 #include "Program.h"
 #include "GlRenderer.h"
 
@@ -42,6 +43,7 @@ struct TexData : public RenderPlugin::Data
     TexData() { ty=RenderPlugin::Ty_Tex; }
 
     Texture::Ptr tex;
+    CubeMap::Ptr cubetex;
     std::string info;
 };
 
@@ -68,6 +70,7 @@ struct GlPlugin::Priv
 {
     std::map<Geometry::Ptr,VboData::Ptr> vertexBuffers;
     std::map<ImageSampler::Ptr,TexData::Ptr> samplers;
+    std::map<CubeMapSampler::Ptr,TexData::Ptr> cubesamplers;
     std::map<ReflexionModel::Ptr,ProgData::Ptr> callbacks;
     std::map<RenderTarget::Ptr,FboData::Ptr> renderTargets;
 
@@ -81,6 +84,12 @@ struct GlPlugin::Priv
     {
         auto it=samplers.find(is);
         if(it==samplers.end())return nullptr;
+        else return it->second;
+    }
+    TexData::Ptr getTex(CubeMapSampler::Ptr& is)
+    {
+        auto it=cubesamplers.find(is);
+        if(it==cubesamplers.end())return nullptr;
         else return it->second;
     }
     ProgData::Ptr getProg(ReflexionModel::Ptr& cb)
@@ -195,7 +204,7 @@ void GlPlugin::setDepthTest(int mode)
     {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glDepthMask(GL_TRUE);
+        glDepthMask(GL_TRUE); // depth write
     }
     else
     {
@@ -229,8 +238,8 @@ int GlPlugin::load(ImageSampler::Ptr& sampler)
             std::cout << "error no img in sampler" << std::endl;
         else
             d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
-        d->tex->setSmooth( sampler->getInterpo() != ImageSampler::Interpo_Nearest );
-        d->tex->setRepeated( sampler->getMode() == ImageSampler::Mode_Repeat );
+        d->tex->setSmooth( sampler->getFiltering() != ImageSampler::Filtering_Nearest );
+        d->tex->setRepeated( sampler->getWrapping() == ImageSampler::Wrapping_Repeat );
         // d->tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
         s_internalState->samplers[sampler] = d;
     }
@@ -238,15 +247,31 @@ int GlPlugin::load(ImageSampler::Ptr& sampler)
 }
 
 //--------------------------------------------------------------
+int GlPlugin::load(CubeMapSampler::Ptr& sampler)
+{
+    TexData::Ptr d = s_internalState->getTex(sampler);
+    if(d == nullptr)
+    {
+        d = TexData::create();
+        d->cubetex = CubeMap::create();
+        d->cubetex->loadFromImage(sampler->getSource());
+        s_internalState->cubesamplers[sampler] = d;
+    }
+    return 0;
+}
+
+//--------------------------------------------------------------
 int GlPlugin::load(ReflexionModel::Ptr& program)
 {
+    static const std::string glsl_version = ""; // "#version 330 core\n";
+
     ProgData::Ptr d = s_internalState->getProg(program);
     if(d != nullptr) return 0;
 
     d = ProgData::create();
 
     std::string fullVertCode = basicVert;
-    std::string fullFragCode;
+    std::string fullFragCode = glsl_version;
 
     ReflexionModel::Texturing te = program->getTexturing();
 
@@ -335,6 +360,13 @@ void GlPlugin::bind(ImageSampler::Ptr& sampler)
 {
     TexData::Ptr d = s_internalState->getTex(sampler);
     if(d) d->tex->bind();
+}
+
+//--------------------------------------------------------------
+void GlPlugin::bind(CubeMapSampler::Ptr& sampler)
+{
+    TexData::Ptr d = s_internalState->getTex(sampler);
+    if(d) d->cubetex->bind();
 }
 
 //--------------------------------------------------------------
@@ -444,6 +476,21 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
         }
         glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
         glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
+        glUniform1i(uniformLocation, uniform->getInt1());
+    }
+    else if(type == Uniform::Type_CubeMap)
+    {
+        CubeMapSampler::Ptr sampler = uniform->getCubeMap();
+        TexData::Ptr d = s_internalState->getTex(sampler);
+        if(d == nullptr)
+        {
+            load(sampler);
+            d = s_internalState->getTex(sampler);
+            if(d == nullptr) std::cout << "error loading cubemap" << std::endl;
+            else d->info = "loaded from uniform sampler";
+        }
+        glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, d->cubetex->getVideoID());
         glUniform1i(uniformLocation, uniform->getInt1());
     }
     else

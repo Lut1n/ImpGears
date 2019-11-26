@@ -11,6 +11,7 @@
 IMPGEARS_BEGIN
 
 struct BloomFX;
+struct EnvironmentFX;
 
 class IMP_API GlRenderer : public SceneRenderer
 {
@@ -21,7 +22,7 @@ public:
     GlRenderer();
     virtual ~GlRenderer();
 
-    void applyRenderVisitor(const Graph::Ptr& scene);
+    void applyRenderVisitor(const Graph::Ptr& scene, bool disableFX = false);
 
     virtual void render(const Graph::Ptr& scene);
 
@@ -30,17 +31,19 @@ public:
     void loadRenderPlugin(const std::string& renderPlugin);
     void setRenderPlugin(RenderPlugin* plugin);
 
+    void applyState(const State::Ptr& state);
+    void applyClear(ClearNode* clearNode);
+    void drawGeometry(GeoNode* geoNode);
+
     RenderPlugin* _renderPlugin;
 
 protected:
 
     BloomFX* _bloomFX;
+    EnvironmentFX* _envFX;
+
 
     RenderTarget::Ptr _renderTargets;
-
-    void applyState(const State::Ptr& state);
-    void applyClear(ClearNode* clearNode);
-    void drawGeometry(GeoNode* geoNode);
 };
 
 IMPGEARS_END

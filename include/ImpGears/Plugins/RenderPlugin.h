@@ -48,7 +48,7 @@ public:
     virtual void bind(Geometry::Ptr& geo) = 0;
 
     virtual void bind(ImageSampler::Ptr& sampler) = 0;
-    virtual int bind(CubeMapSampler::Ptr& sampler) = 0;
+    virtual void bind(CubeMapSampler::Ptr& sampler) = 0;
 
     virtual void init(RenderTarget::Ptr& target) = 0;
 

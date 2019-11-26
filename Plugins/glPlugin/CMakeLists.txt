@@ -27,6 +27,7 @@ target_link_libraries(glPlugin impgears-graphics )
 target_link_libraries(glPlugin impgears-scenegraph )
 target_link_libraries(glPlugin impgears-renderer )
 target_link_libraries(glPlugin impgears-plugins )
+target_link_libraries(glPlugin impgears-descriptors )
 
 #link to ogl extension wrangler
 find_package( GLEW REQUIRED )

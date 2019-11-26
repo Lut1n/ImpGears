@@ -1,8 +1,10 @@
 #include "GlRenderer.h"
+#include "CubeMap.h"
 
 #include <cstdlib>
 
 #include "BloomFX.h"
+#include "EnvironmentFX.h"
 
 IMPGEARS_BEGIN
 
@@ -10,6 +12,7 @@ IMPGEARS_BEGIN
 GlRenderer::GlRenderer()
     : SceneRenderer()
     , _bloomFX(nullptr)
+    , _envFX(nullptr)
 {
 }
 
@@ -51,8 +54,22 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene)
+void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene_input, bool disableFX)
 {
+    Graph::Ptr scene = scene_input;
+
+    if(!disableFX && isFeatureEnabled(Feature_Shadow))
+    {
+        if(_envFX == nullptr)
+        {
+            _envFX = new EnvironmentFX();
+            _envFX->setup();
+        }
+
+        scene = _envFX->begin(this, scene_input);
+    }
+
+
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
     scene->accept(visitor);
@@ -106,6 +123,11 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene)
     }
 
     _renderPlugin->unbind();
+
+    if(!disableFX && isFeatureEnabled(Feature_Shadow))
+    {
+        _envFX->end(this, scene_input);
+    }
 }
 
 //---------------------------------------------------------------
@@ -146,7 +168,6 @@ void GlRenderer::render(const Graph::Ptr& scene)
         _renderPlugin->unbind();
     }
 
-
     applyRenderVisitor(scene);
 }
 
@@ -175,14 +196,13 @@ void GlRenderer::applyState(const State::Ptr& state)
 void GlRenderer::applyClear(ClearNode* clearNode)
 {
     static ClearNode::Ptr clear;
-    if(clear.get() == nullptr)
-    {
-        clear = ClearNode::create();
-        clear->setDepth(1);
-        clear->setColor( Vec4(0.0) );
-        clear->enableDepth(true);
-        clear->enableColor(true);
-    }
+    if(clear.get() == nullptr) clear = ClearNode::create();
+
+    clear->setDepth( clearNode->getDepth() );
+    clear->setColor( clearNode->getColor() );
+    clear->enableDepth( clearNode->isDepthEnable() );
+    clear->enableColor( clearNode->isColorEnable() );
+
     if(_renderPlugin != nullptr) _renderPlugin->apply(clear);
 }
 

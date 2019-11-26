@@ -1,5 +1,7 @@
 #include <Graphics/Uniform.h>
 
+#include <Descriptors/ImageIO.h>
+
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/Material.h>

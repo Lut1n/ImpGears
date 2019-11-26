@@ -168,13 +168,13 @@ struct IGStuff
         Geometry::intoCCW( *cubeGeo );
         
         Material::Ptr material = Material::create(Vec3(1.0),4.0);
-        material->_baseColor = ImageSampler::create(im,ImageSampler::Mode_Repeat);
+        material->_baseColor = ImageSampler::create(im,ImageSampler::Wrapping_Repeat);
         
         GeoNode::Ptr cubeNode = GeoNode::create(cubeGeo);
         cubeNode->setReflexion(model);
         cubeNode->setMaterial(material);
         
-        initCamPos.set(10,0,3);
+        initCamPos.set(5,0,5);
         camera = Camera::create();
         camera->setPosition( initCamPos );
         
@@ -191,7 +191,7 @@ struct IGStuff
 
     void updateCamera(float angle)
     {
-        camera->setPosition( initCamPos * Matrix3::rotationZ(angle) );
+        camera->setPosition( initCamPos * Matrix3::rotationXYZ(Vec3(angle)) );
         // light->setPosition( Vec3(10.0,5.0,10.0) * Matrix3::rotationZ(angle) );
     }
 

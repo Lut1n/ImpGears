@@ -2,9 +2,9 @@ DEBUG=yes
 CXX=g++
 
 ifeq ($(DEBUG),yes)
-	CXXFLAGS=-Wall -std=c++11 -g
+	CXXFLAGS=-Wall -std=c++17 -g
 else
-	CXXFLAGS=-Wall -std=c++11
+	CXXFLAGS=-Wall -std=c++17
 endif
 
 LDFLAGS= -limpgears-core

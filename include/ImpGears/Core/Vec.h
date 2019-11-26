@@ -11,7 +11,7 @@ IMPGEARS_BEGIN
 #define FOR_I(CMD) for(int i=0;i<Dim;++i){CMD}
 
 template<int Dim, typename Ty>
-class IMP_API Vec : public Object
+class Vec : public Object
 {
 	
     public:

@@ -10,7 +10,7 @@
 IMPGEARS_BEGIN
 
 template<int Dim>
-class IMP_API Dimension : public Vec<Dim,int>
+class Dimension : public Vec<Dim,int>
 {
 	public:
 		
@@ -27,7 +27,7 @@ class IMP_API Dimension : public Vec<Dim,int>
 using IntRect = Vec<4,int>;
 
 template<int Dim, typename Ty>
-class IMP_API Grid : public Object
+class Grid : public Object
 {
     public:
 	
@@ -99,7 +99,7 @@ protected:
 
 
 template<typename Ty>
-class IMP_API Layer : public Grid<2,Ty>
+class Layer : public Grid<2,Ty>
 {
 public:
 	Meta_Class(Layer)

@@ -7,7 +7,7 @@
 IMPGEARS_BEGIN
 
 template<int Cn, int Rn, typename Ty>
-class IMP_API Matrix : public Object
+class Matrix : public Object
 {
 	// Column major
 	// Prefix notation

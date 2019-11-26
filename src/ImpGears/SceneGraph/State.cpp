@@ -244,4 +244,12 @@ void State::setUniform(const std::string& name, const ImageSampler::Ptr& sampler
     _uniformsChanged = true;
 }
 
+//--------------------------------------------------------------
+void State::setUniform(const std::string& name, const CubeMapSampler::Ptr& sampler, int index)
+{
+    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_CubeMap);
+    _uniforms[ name ]->set(sampler, index);
+    _uniformsChanged = true;
+}
+
 IMPGEARS_END

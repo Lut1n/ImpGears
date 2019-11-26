@@ -34,6 +34,7 @@ void Uniform::clone(const Uniform& other)
     _value_mat3 = other._value_mat3;
     _value_mat4 = other._value_mat4;
     _sampler = other._sampler;
+    _cubemap = other._cubemap;
 }
 
 //--------------------------------------------------------------
@@ -94,6 +95,14 @@ void Uniform::set(const ImageSampler::Ptr& sampler, int textureUnit)
 }
 
 //--------------------------------------------------------------
+void Uniform::set(const CubeMapSampler::Ptr& cubemap, int textureUnit)
+{
+    _type = Type_CubeMap;
+    _value_1i = textureUnit;
+    _cubemap = cubemap;
+}
+
+//--------------------------------------------------------------
 void Uniform::mix(const Uniform::Ptr& u1, const Uniform::Ptr& u2, float delta)
 {
     if(u1->_type != u2->_type) return;
@@ -111,6 +120,7 @@ void Uniform::mix(const Uniform::Ptr& u1, const Uniform::Ptr& u2, float delta)
         if(_type == Type_Mat3) _value_mat3 = u1->_value_mat3;
         if(_type == Type_Mat4) _value_mat4 = u1->_value_mat4;
         if(_type == Type_Sampler) {_sampler = u1->_sampler; _value_1i = u1->_value_1i; }
+        if(_type == Type_CubeMap) {_cubemap = u1->_cubemap; _value_1i = u1->_value_1i; }
 
         return;
     }
@@ -124,6 +134,7 @@ void Uniform::mix(const Uniform::Ptr& u1, const Uniform::Ptr& u2, float delta)
         if(_type == Type_Mat3) _value_mat3 = u1->_value_mat3;
         if(_type == Type_Mat4) _value_mat4 = u1->_value_mat4;
         if(_type == Type_Sampler) {_sampler = u1->_sampler; _value_1i = u1->_value_1i; }
+        if(_type == Type_CubeMap) {_cubemap = u1->_cubemap; _value_1i = u1->_value_1i; }
     }
 }
 

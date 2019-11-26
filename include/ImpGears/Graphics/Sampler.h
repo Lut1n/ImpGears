@@ -46,7 +46,7 @@ public:
 
     Meta_Class(ImageSampler)
 
-    ImageSampler(Image::Ptr src = nullptr, Wrapping Wrapping = Wrapping_Clamp);
+    ImageSampler(Image::Ptr src = nullptr, Wrapping wrapping = Wrapping_Clamp);
     ImageSampler(int w, int h, int chnl, const Vec4& color);
     void setSource(Image::Ptr src);
     Image::Ptr getSource() const;
@@ -59,7 +59,7 @@ public:
     Vec4 get(const Vec2& uv);
     Vec4 get(float u, float v);
 
-    void setWrapping(Wrapping Wrapping);
+    void setWrapping(Wrapping wrapping);
     Wrapping getWrapping() const;
 
     void setInternalSrc(int w, int h, int chnl);
@@ -67,6 +67,40 @@ public:
 protected:
 
     Image::Ptr _src;
+    Wrapping _wrapping;
+    Vec2 _dims;
+};
+
+
+//--------------------------------------------------------------
+class IMP_API CubeMapSampler : public Sampler< Vec3, Vec4 >
+{
+public:
+
+    Meta_Class(CubeMapSampler)
+
+    CubeMapSampler(Image::Ptr src = nullptr, Wrapping wrapping = Wrapping_Clamp);
+    CubeMapSampler(const std::vector<Image::Ptr>& src, Wrapping wrapping = Wrapping_Clamp);
+    CubeMapSampler(int w, int h, int chnl, const Vec4& color);
+    void setSource(const std::vector<Image::Ptr>& src);
+    const std::vector<Image::Ptr>& getSource() const;
+
+    virtual Vec4 operator()(const Vec3& uv);
+
+    void set(const Vec3& uvw, const Vec4& color);
+    void set(float u, float v, float w, const Vec4& color);
+
+    Vec4 get(const Vec3& uvw);
+    Vec4 get(float u, float v, float w);
+
+    void setWrapping(Wrapping wrapping);
+    Wrapping getWrapping() const;
+
+    void setInternalSrc(int w, int h, int chnl);
+
+protected:
+
+    std::vector<Image::Ptr> _src;
     Wrapping _wrapping;
     Vec2 _dims;
 };

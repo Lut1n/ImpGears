@@ -21,6 +21,28 @@ inline float applyWrapping(float& c, ImageSampler::Wrapping wrapping)
     return clamp(c,0.f,1.f);
 };
 
+
+//--------------------------------------------------------------
+inline float applyWrapping(float& c, CubeMapSampler::Wrapping wrapping)
+{
+    if(wrapping == CubeMapSampler::Wrapping_Mirror)
+    {
+        if(c < 0.0) c = -c;
+        else if(c >= 1.0)  c = 2.0-c;
+    }
+    else if(wrapping == CubeMapSampler::Wrapping_Repeat)
+    {
+        while(c < 0.0) c += 1.0;
+        while(c >= 1.0) c -= 1.0;
+    }
+
+    return clamp(c,0.f,1.f);
+};
+
+
+
+
+
 //--------------------------------------------------------------
 ImageSampler::ImageSampler(Image::Ptr src, Wrapping wrapping)
     : _wrapping(wrapping)
@@ -133,6 +155,119 @@ void ImageSampler::setInternalSrc(int w, int h, int chnl)
 {
     Image::Ptr src = Image::create(w,h,chnl);
     setSource(src);
+}
+
+
+
+
+
+
+
+//--------------------------------------------------------------
+CubeMapSampler::CubeMapSampler(Image::Ptr src, Wrapping wrapping)
+    : _wrapping(wrapping)
+{
+    std::vector<Image::Ptr> imglist(6, src);
+    setSource(imglist);
+}
+
+//--------------------------------------------------------------
+CubeMapSampler::CubeMapSampler(const std::vector<Image::Ptr>& src, Wrapping wrapping)
+    : _wrapping(wrapping)
+{
+    setSource(src);
+}
+
+//--------------------------------------------------------------
+CubeMapSampler::CubeMapSampler(int w, int h, int chnl, const Vec4& color)
+    : _wrapping(Wrapping_Clamp)
+{
+    Image::Ptr src = Image::create(w,h,chnl);
+    src->fill(color * 255.0);
+    std::vector<Image::Ptr> imglist(6, src);
+    setSource(imglist);
+}
+
+//--------------------------------------------------------------
+void CubeMapSampler::setSource(const std::vector<Image::Ptr>& src)
+{
+    _src = src;
+
+    if(_src.size() > 0 && _src[0] != nullptr)
+        _dims=Vec2((float)_src[0]->width(),(float)_src[0]->height());
+    else
+        _dims=Vec2(0.0);
+}
+
+//--------------------------------------------------------------
+const std::vector<Image::Ptr>& CubeMapSampler::getSource() const
+{
+    return _src;
+}
+
+//--------------------------------------------------------------
+Vec4 CubeMapSampler::operator()(const Vec3& uvw)
+{
+    return get(uvw);
+}
+
+//--------------------------------------------------------------
+Vec4 CubeMapSampler::get(const Vec3& uvw_orig)
+{
+    if(_src.size() == 0 || _src[0] == nullptr) return Vec4(1.0);
+
+    Vec3 uvw = uvw_orig;
+    for(int i=0;i<3;++i)uvw[i]=applyWrapping(uvw[i],_wrapping);
+    Vec3 coords = uvw * _dims;
+
+    Vec4 px;
+    if( getFiltering() == Filtering_Nearest )
+    {
+        // todo
+    }
+    else
+    {
+        // todo
+    }
+    return px / 255.0;
+}
+
+//--------------------------------------------------------------
+void CubeMapSampler::set(const Vec3& uvw_orig, const Vec4& color)
+{
+    // todo
+}
+
+//--------------------------------------------------------------
+void CubeMapSampler::set(float u, float v, float w, const Vec4& color)
+{
+    set(Vec3(u,v,w),color);
+}
+
+//--------------------------------------------------------------
+Vec4 CubeMapSampler::get(float u, float v, float w)
+{
+    return get(Vec3(u,v,w));
+}
+
+//--------------------------------------------------------------
+void CubeMapSampler::setWrapping(Wrapping wrapping)
+{
+    _wrapping = wrapping;
+}
+
+//--------------------------------------------------------------
+CubeMapSampler::Wrapping CubeMapSampler::getWrapping() const
+{
+    return _wrapping;
+}
+
+//--------------------------------------------------------------
+void CubeMapSampler::setInternalSrc(int w, int h, int chnl)
+{
+    Image::Ptr src = Image::create(w,h,chnl);
+    std::vector<Image::Ptr> imglist(6, src);
+    setSource(imglist);
 }
 
 IMPGEARS_END

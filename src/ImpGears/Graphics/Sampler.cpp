@@ -5,14 +5,14 @@
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-inline float applyMode(float& c, ImageSampler::Mode mode)
+inline float applyWrapping(float& c, ImageSampler::Wrapping wrapping)
 {
-    if(mode == ImageSampler::Mode_Mirror)
+    if(wrapping == ImageSampler::Wrapping_Mirror)
     {
         if(c < 0.0) c = -c;
         else if(c >= 1.0)  c = 2.0-c;
     }
-    else if(mode == ImageSampler::Mode_Repeat)
+    else if(wrapping == ImageSampler::Wrapping_Repeat)
     {
         while(c < 0.0) c += 1.0;
         while(c >= 1.0) c -= 1.0;
@@ -22,15 +22,15 @@ inline float applyMode(float& c, ImageSampler::Mode mode)
 };
 
 //--------------------------------------------------------------
-ImageSampler::ImageSampler(Image::Ptr src, Mode mode)
-    : _mode(mode)
+ImageSampler::ImageSampler(Image::Ptr src, Wrapping wrapping)
+    : _wrapping(wrapping)
 {
     setSource(src);
 }
 
 //--------------------------------------------------------------
 ImageSampler::ImageSampler(int w, int h, int chnl, const Vec4& color)
-    : _mode(Mode_Clamp)
+    : _wrapping(Wrapping_Clamp)
 {
     Image::Ptr src = Image::create(w,h,chnl);
     src->fill(color * 255.0);
@@ -66,11 +66,11 @@ Vec4 ImageSampler::get(const Vec2& uv_orig)
     if(_src == nullptr) return Vec4(1.0);
 
     Vec2 uv = uv_orig;
-    for(int i=0;i<2;++i)uv[i]=applyMode(uv[i],_mode);
+    for(int i=0;i<2;++i)uv[i]=applyWrapping(uv[i],_wrapping);
     Vec2 coords = uv * _dims;
 
     Vec4 px;
-    if( getInterpo() == Interpo_Nearest )
+    if( getFiltering() == Filtering_Nearest )
     {
         px = _src->getPixel( coords[0],coords[1] );
     }
@@ -84,7 +84,7 @@ Vec4 ImageSampler::get(const Vec2& uv_orig)
         Vec4 px10 = _src->getPixel( floorUV[0]+1.0,floorUV[1]+0.0 );
         Vec4 px11 = _src->getPixel( floorUV[0]+1.0,floorUV[1]+1.0 );
 
-        if( getInterpo() == Interpo_Smooth )
+        if( getFiltering() == Filtering_Smooth )
             for(int i=0;i<2;++i) fracUV[i]=smoothstep(0.0,1.0,fracUV[i]);
 
         px = mix2d(px00, px10, px01, px11, fracUV[0], fracUV[1]);
@@ -98,7 +98,7 @@ void ImageSampler::set(const Vec2& uv_orig, const Vec4& color)
     if(_src == nullptr) return;
 
     Vec2 uv = uv_orig;
-    for(int i=0;i<2;++i)uv[i]=applyMode(uv[i],_mode);
+    for(int i=0;i<2;++i)uv[i]=applyWrapping(uv[i],_wrapping);
     Vec2 coords = uv * _dims;
     Vec4 px = dotClamp(color, 0.f, 1.f) * 255.0;
     _src->setPixel( coords[0],coords[1], px );
@@ -117,15 +117,15 @@ Vec4 ImageSampler::get(float u, float v)
 }
 
 //--------------------------------------------------------------
-void ImageSampler::setMode(Mode mode)
+void ImageSampler::setWrapping(Wrapping wrapping)
 {
-    _mode = mode;
+    _wrapping = wrapping;
 }
 
 //--------------------------------------------------------------
-ImageSampler::Mode ImageSampler::getMode() const
+ImageSampler::Wrapping ImageSampler::getWrapping() const
 {
-    return _mode;
+    return _wrapping;
 }
 
 //--------------------------------------------------------------

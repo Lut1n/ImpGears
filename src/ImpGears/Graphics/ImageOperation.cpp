@@ -36,7 +36,7 @@ void HashOperation::apply(const Vec2& uv, Vec4& outColor)
 //--------------------------------------------------------------
 void NoiseOperation::apply(const Vec2& uv, Vec4& outColor)
 {
-    ImageSampler sampler(_hash, ImageSampler::Mode_Repeat);
+    ImageSampler sampler(_hash, ImageSampler::Wrapping_Repeat);
     Vec3 iv( floor(uv[0]*_freq), floor(uv[1]*_freq),0.0);
     Vec3 fv( frac(uv[0]*_freq), frac(uv[1]*_freq),0.0);
 
@@ -60,7 +60,7 @@ void NoiseOperation::apply(const Vec2& uv, Vec4& outColor)
 // thanks to Inigo Quilez	
 void VoronoiOperation::apply(const Vec2& uv, Vec4& outColor)
 {
-    ImageSampler sampler(_hash, ImageSampler::Mode_Repeat);
+    ImageSampler sampler(_hash, ImageSampler::Wrapping_Repeat);
     Vec3 iv( floor(uv[0]*_freq), floor(uv[1]*_freq),0.0);
     Vec3 fv( frac(uv[0]*_freq), frac(uv[1]*_freq),0.0);
 
@@ -153,7 +153,7 @@ void SignalOperation::apply(const Vec2& uv, Vec4& outColor)
 //--------------------------------------------------------------
 void BumpToNormalOperation::apply(const Vec2& uv, Vec4& outColor)
 {
-    ImageSampler sampler(_target, ImageSampler::Mode_Repeat);
+    ImageSampler sampler(_target, ImageSampler::Wrapping_Repeat);
 
     float xoff = 1.0/_target->width();
     float yoff = 1.0/_target->height();
@@ -172,7 +172,7 @@ void BumpToNormalOperation::apply(const Vec2& uv, Vec4& outColor)
 //--------------------------------------------------------------
 void PerturbateOperation::apply(const Vec2& uv, Vec4& outColor)
 {
-    ImageSampler sampler(_target, ImageSampler::Mode_Mirror);
+    ImageSampler sampler(_target, ImageSampler::Wrapping_Mirror);
     ImageSampler uvSampler(_uvmap);
 
     Vec4 p = uvSampler.get(uv[0],uv[1]); p *= 2.0; p -= 1.0;
@@ -185,7 +185,7 @@ void PerturbateOperation::apply(const Vec2& uv, Vec4& outColor)
 void ColorMixOperation::apply(const Vec2& uv, Vec4& outColor)
 {
     ImageSampler sampler(_target);
-    sampler.setInterpo(ImageSampler::Interpo_Linear);
+    sampler.setFiltering(ImageSampler::Filtering_Linear);
     float f = sampler(uv)[0];
     outColor = mix(_color1,_color2,f);
 }
@@ -196,7 +196,7 @@ void MorphoOperation::apply(const Vec2& uv, Vec4& outColor)
     int C=3, R=3;
     int xCenter = C / 2;
     int yCenter = R / 2;
-    ImageSampler sampler(_target, ImageSampler::Mode_Mirror);
+    ImageSampler sampler(_target, ImageSampler::Wrapping_Mirror);
 
     Vec4 e = _type<0 ? Vec4(1.0) : Vec4(0.0);
     for(int c=0;c<C;++c) for(int r=0;r<R;++r)
@@ -218,7 +218,7 @@ void Conv2dOperation::apply(const Vec2& uv, Vec4& outColor)
     int C=3, R=3;
     int xCenter = C / 2;
     int yCenter = R / 2;
-    ImageSampler sampler(_target, ImageSampler::Mode_Mirror);
+    ImageSampler sampler(_target, ImageSampler::Wrapping_Mirror);
 
     Vec4 accu=0.0;
     for(int c=0;c<C;++c) for(int r=0;r<R;++r)

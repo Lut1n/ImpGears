@@ -16,20 +16,27 @@ public:
 
     Meta_Class(Sampler)
 
-    enum Interpo
+    enum Filtering
     {
-        Interpo_Nearest,
-                Interpo_Linear,
-                Interpo_Smooth
+        Filtering_Nearest,
+        Filtering_Linear,
+        Filtering_Smooth
     };
 
-    Sampler(Interpo interpo = Interpo_Nearest) : _interpo(interpo) {}
+    enum Wrapping
+    {
+        Wrapping_Clamp,
+        Wrapping_Mirror,
+        Wrapping_Repeat
+    };
+
+    Sampler(Filtering filtering = Filtering_Nearest) : _filtering(filtering) {}
 
     virtual TyOut operator()(const TyIn& t) = 0;
-    void setInterpo(Interpo interpo) {_interpo = interpo;}
-    Interpo getInterpo() const {return _interpo;}
+    void setFiltering(Filtering filtering) {_filtering = filtering;}
+    Filtering getFiltering() const {return _filtering;}
 
-    Interpo _interpo;
+    Filtering _filtering;
 };
 
 //--------------------------------------------------------------
@@ -37,16 +44,9 @@ class IMP_API ImageSampler : public Sampler< Vec2, Vec4 >
 {
 public:
 
-    enum Mode
-    {
-        Mode_Clamp,
-        Mode_Mirror,
-        Mode_Repeat
-    };
-
     Meta_Class(ImageSampler)
 
-    ImageSampler(Image::Ptr src = nullptr, Mode mode = Mode_Clamp);
+    ImageSampler(Image::Ptr src = nullptr, Wrapping Wrapping = Wrapping_Clamp);
     ImageSampler(int w, int h, int chnl, const Vec4& color);
     void setSource(Image::Ptr src);
     Image::Ptr getSource() const;
@@ -59,15 +59,15 @@ public:
     Vec4 get(const Vec2& uv);
     Vec4 get(float u, float v);
 
-    void setMode(Mode mode);
-    Mode getMode() const;
+    void setWrapping(Wrapping Wrapping);
+    Wrapping getWrapping() const;
 
     void setInternalSrc(int w, int h, int chnl);
 
 protected:
 
     Image::Ptr _src;
-    Mode _mode;
+    Wrapping _wrapping;
     Vec2 _dims;
 };
 

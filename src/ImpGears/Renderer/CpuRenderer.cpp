@@ -157,15 +157,10 @@ void CpuRenderer::applyState(const State::Ptr& state)
 //---------------------------------------------------------------
 void CpuRenderer::applyClear(ClearNode* clearNode)
 {
-    static ClearNode::Ptr clear;
-    if(clear.get() == nullptr)
-    {
-        clear = ClearNode::create();
-        clear->setDepth(1);
-        clear->setColor( Vec4(0.0) );
-        clear->enableDepth(true);
-        clear->enableColor(true);
-    }
+    int count = _geoRenderer.getTargetCount();
+    for(int i=0;i<count;++i)
+        _geoRenderer.setClearColor( i, clearNode->getColor()*255.0 );
+
     _geoRenderer.init();
     _geoRenderer.clearTargets();
 }

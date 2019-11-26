@@ -152,51 +152,173 @@ Image::Ptr ImageIO::load(std::string filename, const Options& opts)
     return res;
 }
 
+
+void decode_packet_header(unsigned char packet_header, bool& rl_type, int& len)
+{
+    unsigned char type_filter = 0b1000'0000;
+    unsigned char size_filter = 0b0111'1111;
+
+    rl_type = (packet_header & type_filter) == type_filter;
+    len = 1 + int(packet_header & size_filter);
+}
+
+
+void readU8(std::ifstream& is, unsigned char* buf, int size)
+{
+    is.read( reinterpret_cast<char*>(buf), size*sizeof(unsigned char) );
+}
+
+
+void readU8(std::ifstream& is, std::vector<unsigned char>& buf, int size)
+{
+    buf.resize(size);
+    readU8(is,buf.data(),size);
+}
+
+
+void readU8_rle(std::ifstream& is, unsigned char* dst, int size, int chnl)
+{
+    bool to_repeat; int run_len;
+    unsigned char packet_header;
+    std::vector<unsigned char> buf;
+
+    int progress = 0;
+    while(progress < size)
+    {
+        is.read(reinterpret_cast<char*>(&packet_header),sizeof(unsigned char));
+        decode_packet_header(packet_header, to_repeat, run_len);
+
+        if(to_repeat)
+        {
+            readU8(is, buf, chnl);
+            for(int l=0;l<run_len;++l)
+            {
+                for(int c=0;c<chnl;++c) dst[progress+c]= buf[c];
+                progress += chnl;
+            }
+        }
+        else
+        {
+            readU8(is, &dst[progress], run_len*chnl);
+            progress += run_len*chnl;
+        }
+    }
+}
+
 Image::Ptr tga_load(std::string& filename)
 {
-    unsigned short w, h; unsigned char chnl;
+    unsigned short w, h;
+    unsigned char pixel_depth;
 
     std::ifstream istrm(filename,std::ios::binary);
-    unsigned char v = 0;
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); //ID length (1o)
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Color map type (1o)
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Image type (1o)
-    
-    // if(v == 3) chnl = 1; // black and white
-    // if(v == 2) chnl = 3; // TrueColor
-    
-    v = 0;	// no color map
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // Colormap spec (5o)
-    unsigned short d = 0;
-    istrm.read(reinterpret_cast<char*>(&d), sizeof d); // X-origin (2o)
-    istrm.read(reinterpret_cast<char*>(&d), sizeof d); // Y-origin (2o)
-    
+    unsigned char id_len = 0;
+    unsigned char colormap;
+    unsigned char image_type = 0;
+    istrm.read(reinterpret_cast<char*>(&id_len), sizeof id_len); //ID length (1o)
+    istrm.read(reinterpret_cast<char*>(&colormap), sizeof colormap); // Color map type (1o)
+    istrm.read(reinterpret_cast<char*>(&image_type), sizeof image_type); // Image type (1o)
+
+    static const int NO_IMAGE = 0;
+    static const int INDEXED = 1;
+    // static const int TRUE_COLOR = 2;
+    // static const int GRAYSCALE = 3;
+    static const int INDEXED_RLE = 9;
+    static const int TRUE_COLOR_RLE = 10;
+    static const int GRAYSCALE_RLE = 11;
+    if(image_type == INDEXED || image_type == INDEXED_RLE)
+        std::cout << "TGA loader : warning - indexed color (not supported)" << std::endl;
+    if(image_type == NO_IMAGE)
+        std::cout << "TGA loader : warning - no image" << std::endl;
+
+    bool rle = image_type==INDEXED_RLE || image_type==TRUE_COLOR_RLE || image_type==GRAYSCALE_RLE;
+
+    // if(image_type == 3) chnl = 1; // black and white
+    // if(image_type == 2) chnl = 3; // TrueColor
+
+    std::vector<unsigned char> ignored;
+    readU8(istrm, ignored, 5); // colormap info (ignored)
+
+    unsigned short x_minus_o = 0;
+    unsigned short y_minus_o = 0;
+    istrm.read(reinterpret_cast<char*>(&x_minus_o), sizeof x_minus_o); // X-origin (2o)
+    istrm.read(reinterpret_cast<char*>(&y_minus_o), sizeof y_minus_o); // Y-origin (2o)
+    std::cout << "(x,y) minus o : " << x_minus_o << "; " << y_minus_o << std::endl;
+
     istrm.read(reinterpret_cast<char*>(&w), sizeof w); // width (2o)
     istrm.read(reinterpret_cast<char*>(&h), sizeof h); // height (2o)
 
-    istrm.read(reinterpret_cast<char*>(&chnl), sizeof chnl); // px depth (1o)
-    
-    // chnl = 1;	// default for black and white
-    chnl /= 8;	// 24 for RGB; 32 for RGBA
-    
-    v = 0;
-    istrm.read(reinterpret_cast<char*>(&v), sizeof v); // description (1o)
-    
-    Image::Ptr img = Image::create(w,h,chnl);
+    istrm.read(reinterpret_cast<char*>(&pixel_depth), sizeof pixel_depth); // px depth (1o)
+    int chnl = pixel_depth / 8;	// 24 for RGB; 32 for RGBA
 
-    int totalSize = img->width() * img->height() * img->channels();
-    istrm.read(reinterpret_cast<char*>(img->data()),totalSize); // image data
 
-    Image::Ptr res = Image::create(w,h,chnl);
-    if(chnl == 1) res->copy(img);
-    else if(chnl == 2) res->copy(img, {1,0});
-    else if(chnl == 3) res->copy(img, {2,1,0});
-    else if(chnl == 4) res->copy(img, {2,1,0,3});
-    return res;
+    char id_info; // description (ignored)
+    istrm.read(&id_info, sizeof(char));
+
+    Image::Ptr result = Image::create(w,h,chnl);
+    Image::Ptr tmp_img = Image::create(w,h,chnl);
+    int totalSize = result->width() * result->height() * result->channels();
+
+    if(rle) // compression run-length encoding
+    {
+        /*bool to_repeat; int run_len;
+        unsigned char packet_header;
+
+        int line = 0;
+        int col = 0;
+        int progress = 0;
+
+        std::vector<unsigned char> buf;
+
+        while(progress < totalSize)
+        {
+            istrm.read(reinterpret_cast<char*>(&packet_header),sizeof(unsigned char));
+            decode_packet_header(packet_header, to_repeat, run_len);
+
+            if(to_repeat)
+            {
+                readU8(istrm, buf, chnl);
+
+                Vec4 color(0.0,0.0,0.0,255.0);
+                for(int c=0;c<chnl;++c) color[c]= buf[c];
+
+                for(int l=0;l<run_len;++l)
+                {
+                    tmp_img->setPixel(col, line, color);
+                    if(++col >= w) { col=0; line++; }
+                }
+            }
+            else
+            {
+                readU8(istrm, buf, run_len*chnl);
+
+                for(int l=0;l<run_len;++l)
+                {
+                    Vec4 color(0.0,0.0,0.0,255.0);
+                    for(int c=0;c<chnl;++c) color[c]= buf[l*chnl+c];
+
+                    tmp_img->setPixel(col, line, color);
+                    if(++col >= w) { col=0; line++; }
+                }
+            }
+
+            progress += run_len*chnl;
+        }*/
+
+        readU8_rle(istrm, tmp_img->data(), totalSize, chnl);
+
+    }
+    else // no compression - just read
+    {
+        readU8(istrm, tmp_img->data(), totalSize);
+        // istrm.read(reinterpret_cast<char*>(tmp_img->data()),totalSize); // image data
+    }
+
+    if(chnl == 1) result = tmp_img;
+    else if(chnl == 2) result->copy(tmp_img, {1,0});
+    else if(chnl == 3) result->copy(tmp_img, {2,1,0});
+    else if(chnl == 4) result->copy(tmp_img, {2,1,0,3});
+
+    return result;
 }
 
 //--------------------------------------------------------------

@@ -11,6 +11,7 @@ State::State()
     , _lineWidth(1.0)
     , _depthTest(false)
     , _reflexion(nullptr)
+    , _renderPass(nullptr)
     , _uniforms()
     , _projectionChanged(false)
     , _viewportChanged(false)
@@ -19,6 +20,7 @@ State::State()
     , _lineWidthChanged(false)
     , _depthTestChanged(false)
     , _reflexionChanged(false)
+    , _renderPassChanged(false)
     , _uniformsChanged(false)
 {
 }
@@ -32,6 +34,7 @@ State::State(const State& other)
     , _lineWidth(other._lineWidth)
     , _depthTest(other._depthTest)
     , _reflexion(other._reflexion)
+    , _renderPass(other._renderPass)
     , _uniforms(other._uniforms)
     , _projectionChanged(other._projectionChanged)
     , _viewportChanged(other._viewportChanged)
@@ -40,6 +43,7 @@ State::State(const State& other)
     , _lineWidthChanged(other._lineWidthChanged)
     , _depthTestChanged(other._depthTestChanged)
     , _reflexionChanged(other._reflexionChanged)
+    , _renderPassChanged(other._renderPassChanged)
     , _uniformsChanged(other._uniformsChanged)
 {
 }
@@ -61,6 +65,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _lineWidth = other->_lineWidth;
         _depthTest = other->_depthTest;
         _reflexion = other->_reflexion;
+        _renderPass = other->_renderPass;
         _uniforms = other->_uniforms;
         _projectionChanged = other->_projectionChanged;
         _viewportChanged = other->_viewportChanged;
@@ -69,6 +74,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _lineWidthChanged = other->_lineWidthChanged;
         _depthTestChanged = other->_depthTestChanged;
         _reflexionChanged = other->_reflexionChanged;
+        _renderPassChanged = other->_renderPassChanged;
     }
     else if(opt == CloneOpt_IfChanged)
     {
@@ -79,6 +85,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
         if(other->_depthTestChanged) setDepthTest(other->_depthTest);
         if(other->_reflexionChanged) setReflexion(other->_reflexion);
+        if(other->_renderPassChanged) setRenderPass(other->_renderPass);
         if(other->_uniformsChanged) setUniforms(other->_uniforms);
     }
 }
@@ -93,6 +100,7 @@ const State& State::operator=(const State& other)
     _lineWidth = other._lineWidth;
     _depthTest = other._depthTest;
     _reflexion = other._reflexion;
+    _renderPass = other._renderPass;
     _uniforms = other._uniforms;
     _projectionChanged = other._projectionChanged;
     _viewportChanged = other._viewportChanged;
@@ -101,6 +109,7 @@ const State& State::operator=(const State& other)
     _lineWidthChanged = other._lineWidthChanged;
     _depthTestChanged = other._depthTestChanged;
     _reflexionChanged = other._reflexionChanged;
+    _renderPassChanged = other._renderPassChanged;
 
     return *this;
 }
@@ -152,6 +161,13 @@ void State::setReflexion(ReflexionModel::Ptr shader)
 {
     _reflexion = shader;
     _reflexionChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setRenderPass(RenderPass::Ptr renderPass)
+{
+    _renderPass = renderPass;
+    _renderPassChanged = true;
 }
 
 //--------------------------------------------------------------

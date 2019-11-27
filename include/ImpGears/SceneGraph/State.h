@@ -7,6 +7,7 @@
 #include <Core/Vec4.h>
 #include <Graphics/Uniform.h>
 #include <SceneGraph/ReflexionModel.h>
+#include <SceneGraph/RenderPass.h>
 
 #include <map>
 
@@ -69,6 +70,8 @@ public:
     float getLineWidth() const {return _lineWidth;}
 
     void setReflexion(ReflexionModel::Ptr reflexion);
+    void setRenderPass(RenderPass::Ptr renderPass);
+
     void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
     void clearUniforms();
     void setUniform(const Uniform::Ptr& uniform);
@@ -88,6 +91,8 @@ public:
 
     ReflexionModel::Ptr getReflexion() { return _reflexion; }
 
+    RenderPass::Ptr getRenderPass() { return _renderPass; }
+
 protected:
 private:
 
@@ -99,6 +104,8 @@ private:
     bool _depthTest;
 
     ReflexionModel::Ptr _reflexion;
+    RenderPass::Ptr _renderPass;
+
     std::map<std::string,Uniform::Ptr> _uniforms;
 
     bool _projectionChanged;
@@ -108,6 +115,7 @@ private:
     bool _lineWidthChanged;
     bool _depthTestChanged;
     bool _reflexionChanged;
+    bool _renderPassChanged;
     bool _uniformsChanged;
 };
 

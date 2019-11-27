@@ -39,7 +39,7 @@ Geometry::Ptr generateLeaf()
     }
     Geometry::intoCCW( *geometry );
     geometry->generateNormals(Geometry::NormalGenMode_PerFace);
-    geometry->interpolateNormals();
+    // geometry->interpolateNormals();
     // geometry.generateTexCoords(Geometry::TexGenMode_Cubic,2.0);
     geometry->generateTexCoords(Geometry::TexGenMode_Spheric);
 

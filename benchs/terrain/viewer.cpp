@@ -25,6 +25,7 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
 {
     imp::Geometry geometry = imp::Geometry::cube();
     geometry = geometry.subdivise(10);
+    Geometry::intoCCW(geometry);
     geometry.generateColors(Vec3(1.0));
     geometry.generateTexCoords(Geometry::TexGenMode_Cubic,10.0);
     geometry.scale(Vec3(1.0,1.0,1.0));
@@ -39,9 +40,8 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
         geometry._vertices[k] = v;
     }
     geometry.scale(Vec3(10.0,1.0,10.0));
-    Geometry::intoCCW(geometry);
     geometry.generateNormals(Geometry::NormalGenMode_PerFace);
-    geometry.interpolateNormals();
+    // geometry.interpolateNormals();
 
     return geometry;
 }

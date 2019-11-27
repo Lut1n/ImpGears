@@ -25,6 +25,18 @@ public:
         Feature_Count
     };
 
+    enum RenderFrame
+    {
+        RenderFrame_Default,
+        RenderFrame_ShadowMap,
+        RenderFrame_Environment,
+        RenderFrame_Lighting,
+        RenderFrame_Depth,
+        RenderFrame_Emissive,
+        RenderFrame_Normals,
+        RenderFrame_Metalness,
+    };
+
     SceneRenderer();
     virtual ~SceneRenderer();
 
@@ -41,12 +53,17 @@ public:
     void enableFeature(Feature id, bool enable);
     bool isFeatureEnabled(Feature id) const;
 
+    void setOutputFrame(RenderFrame rf){ _renderFrame = rf; }
+    RenderFrame getOutputFrame() const { return _renderFrame; }
+
 protected:
 
     bool _direct;
     bool _enabledFeatures[Feature_Count];
     std::vector<Image::Ptr> _targets;
     RenderVisitor::Ptr _visitor;
+
+    RenderFrame _renderFrame;
 };
 
 IMPGEARS_END

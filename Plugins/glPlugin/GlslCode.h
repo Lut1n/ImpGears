@@ -62,8 +62,8 @@ mat3 inverse(mat3 m)
     float det = a00 * b01 + a01 * b11 + a02 * b21;
 
     return mat3(b01, (-a22 * a01 + a02 * a21), (a12 * a01 - a02 * a11),
-                b11, (a22 * a00 - a02 * a20), (-a12 * a00 + a02 * a10),
-                b21, (-a21 * a00 + a01 * a20), (a11 * a00 - a01 * a10)) / det;
+    b11, (a22 * a00 - a02 * a20), (-a12 * a00 + a02 * a10),
+    b21, (-a21 * a00 + a01 * a20), (a11 * a00 - a01 * a10)) / det;
 }
 
 );
@@ -189,8 +189,8 @@ void lighting(out vec4 outColor, out vec4 outEmi)
     color *= textureColor(v_texCoord).xyz;
 
     vec3 colModelRes = color*0.01
-    + color*0.7 * lambertian * u_lightCol * lightPower / dist
-    + color*0.3 * specular * u_lightCol * lightPower / dist;
+            + color*0.7 * lambertian * u_lightCol * lightPower / dist
+            + color*0.3 * specular * u_lightCol * lightPower / dist;
 
     vec4 emi = textureEmissive(v_texCoord);
     // colModelRes = max(emi,colModelRes);

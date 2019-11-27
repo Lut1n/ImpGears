@@ -33,11 +33,11 @@ uniform vec3 u_color;
 
 varying vec2 v_texCoord;
 
-void lighting(out vec3 outColor, out vec3 outEmi)
+void lighting(out vec4 outColor, out vec4 outEmi)
 {
-    vec3 color = u_color * gl_Color.xyz;
+    vec4 color = vec4(u_color,1.0) * gl_Color;
     color *= textureColor(v_texCoord);
-    vec3 emi = textureEmissive(v_texCoord);
+    vec4 emi = textureEmissive(v_texCoord);
 
     outColor = max(emi,color);
     outEmi = emi;
@@ -75,9 +75,9 @@ static std::string glsl_samplerCN = GLSL_CODE(
 uniform sampler2D u_sampler_color;
 uniform sampler2D u_sampler_normal;
 
-vec3 textureColor(vec2 uv)
+vec4 textureColor(vec2 uv)
 {
-    return texture2D(u_sampler_color, uv).xyz;
+    return texture2D(u_sampler_color, uv).xyzw;
 }
 
 vec3 textureNormal(vec2 uv)
@@ -86,15 +86,15 @@ vec3 textureNormal(vec2 uv)
     return n * 2.0 - 1.0;
 }
 
-vec3 textureEmissive(vec2 uv){ return vec3(0.0,0.0,0.0); }
+vec4 textureEmissive(vec2 uv){ return vec4(0.0,0.0,0.0,0.0); }
 
 );
 
 static std::string glsl_samplerNone = GLSL_CODE(
 
-vec3 textureColor(vec2 uv){ return vec3(1.0); }
+vec4 textureColor(vec2 uv){ return vec4(1.0); }
 vec3 textureNormal(vec2 uv){ return vec3(0.0,0.0,1.0); }
-vec3 textureEmissive(vec2 uv){ return vec3(0.0,0.0,0.0); }
+vec4 textureEmissive(vec2 uv){ return vec4(0.0,0.0,0.0,0.0); }
 
 );
 
@@ -106,9 +106,9 @@ uniform sampler2D u_sampler_color;
 uniform sampler2D u_sampler_normal;
 uniform sampler2D u_sampler_emissive;
 
-vec3 textureColor(vec2 uv)
+vec4 textureColor(vec2 uv)
 {
-    return texture2D(u_sampler_color, uv).xyz;
+    return texture2D(u_sampler_color, uv).xyzw;
 }
 
 vec3 textureNormal(vec2 uv)
@@ -117,9 +117,9 @@ vec3 textureNormal(vec2 uv)
     return n * 2.0 - 1.0;
 }
 
-vec3 textureEmissive(vec2 uv)
+vec4 textureEmissive(vec2 uv)
 {
-    return texture2D(u_sampler_emissive,uv).xyz;
+    return texture2D(u_sampler_emissive,uv).xyzw;
 }
 
 );
@@ -137,12 +137,12 @@ varying vec2 v_texCoord;
 varying vec3 v_m;
 varying vec3 v_n;
 
-void lighting(out vec3 outColor, out vec3 outEmi)
+void lighting(out vec4 outColor, out vec4 outEmi)
 {
     float lightPower = u_lightAtt[0];
     float shininess = u_lightAtt[1];
 
-    vec3 color = u_color * gl_Color.xyz;
+    vec3 color = u_color.xyz * gl_Color.xyz;
 
     // model space
     vec3 light_dir = u_lightPos - v_m;
@@ -186,16 +186,16 @@ void lighting(out vec3 outColor, out vec3 outEmi)
     // + diffColor * lambertian * lightColor * lightPower / distance
     // + specColor * specular * lightColor * lightPower / distance
 
-    color *= textureColor(v_texCoord);
+    color *= textureColor(v_texCoord).xyz;
 
     vec3 colModelRes = color*0.01
     + color*0.7 * lambertian * u_lightCol * lightPower / dist
     + color*0.3 * specular * u_lightCol * lightPower / dist;
 
-    vec3 emi = textureEmissive(v_texCoord);
-    colModelRes = max(emi,colModelRes);
+    vec4 emi = textureEmissive(v_texCoord);
+    // colModelRes = max(emi,colModelRes);
 
-    outColor = clamp( colModelRes,0.0,1.0 );
+    outColor = vec4(clamp( colModelRes,0.0,1.0 ), 1.0);
     outEmi = clamp(emi,0.0,1.0);
 }
 
@@ -205,12 +205,12 @@ static std::string glsl_mrt1 = GLSL_CODE(
 
 void main()
 {
-    vec3 outColor;
-    vec3 outEmi;
+    vec4 outColor;
+    vec4 outEmi;
 
     lighting(outColor,outEmi);
 
-    gl_FragData[0] = vec4(outColor,1.0);
+    gl_FragData[0] = outColor;
 }
 
 );
@@ -219,13 +219,13 @@ static std::string glsl_mrt2 = GLSL_CODE(
 
 void main()
 {
-    vec3 outColor;
-    vec3 outEmi;
+    vec4 outColor;
+    vec4 outEmi;
 
     lighting(outColor,outEmi);
 
-    gl_FragData[0] = vec4(outColor,1.0);
-    gl_FragData[1] = vec4(outEmi,1.0);
+    gl_FragData[0] = outColor;
+    gl_FragData[1] = outEmi;
 }
 
 );

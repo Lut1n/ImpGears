@@ -13,15 +13,15 @@ uniform sampler2D u_input_sampler1;
 uniform sampler2D u_input_sampler2;
 varying vec2 v_texCoord;
 
-vec3 i_col(vec2 uv){return texture2D(u_input_sampler1, uv).rgb;}
-vec3 i_emi(vec2 uv){return texture2D(u_input_sampler2, uv).rgb;}
+vec4 i_col(vec2 uv){return texture2D(u_input_sampler1, uv).rgbw;}
+vec4 i_emi(vec2 uv){return texture2D(u_input_sampler2, uv).rgbw;}
 
-void lighting(out vec3 outColor, out vec3 outEmi)
+void lighting(out vec4 outColor, out vec4 outEmi)
 {
     const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
     vec2 tex_offset = 1.0 / 512.0;
-    vec3 result = i_emi(v_texCoord) * weight[0];
+    vec4 result = i_emi(v_texCoord) * weight[0];
 
     vec2 dir;
     if(u_horizontal_blur > 0.5) dir = vec2(tex_offset.x, 0.0);
@@ -33,8 +33,9 @@ void lighting(out vec3 outColor, out vec3 outEmi)
         result += i_emi(v_texCoord - dir*i) * weight[i];
     }
 
-    outEmi = clamp(result,0.0,1.0);
-    outColor = max(i_col(v_texCoord), clamp(result,0.0,1.0));
+    result = clamp(result,0.0,1.0);
+    outEmi = result;
+    outColor = max(i_col(v_texCoord), vec4(result.xyz * result.w,1.0));
 }
 
 );

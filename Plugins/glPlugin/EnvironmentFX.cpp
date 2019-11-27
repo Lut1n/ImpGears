@@ -15,11 +15,11 @@ uniform vec3 u_lightPos;
 varying vec3 v_texCoord;
 varying vec3 v_m;
 
-vec3 i_col(vec3 uvw){return texture(u_input_cube, uvw).rgb;}
+vec4 i_col(vec3 uvw){return texture(u_input_cube, uvw).xyzw;}
 
-void lighting(out vec3 outColor, out vec3 outEmi)
+void lighting(out vec4 outColor, out vec4 outEmi)
 {
-    outEmi = i_col(-v_m);
+    outEmi = vec4(0.0,0.0,0.0,1.0);
     outColor = i_col(-v_m);
 }
 

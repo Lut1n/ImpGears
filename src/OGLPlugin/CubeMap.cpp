@@ -1,5 +1,5 @@
-#include "CubeMap.h"
-#include "GlError.h"
+#include <OGLPlugin/CubeMap.h>
+#include <OGLPlugin/GlError.h>
 
 #include <iostream>
 

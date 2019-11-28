@@ -20,7 +20,7 @@ add_subdirectory(src/ImpGears/Descriptors)
 add_subdirectory(src/ImpGears/Plugins)
 
 if(BUILD_GLPLUGIN)
-    add_subdirectory(Plugins/glPlugin)
+    add_subdirectory(src/OGLPlugin)
 endif()
 
 

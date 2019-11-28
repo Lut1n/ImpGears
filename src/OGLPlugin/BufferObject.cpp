@@ -1,5 +1,5 @@
-#include "BufferObject.h"
-#include "GlError.h"
+#include <OGLPlugin/BufferObject.h>
+#include <OGLPlugin/GlError.h>
 
 #include <cstdio>
 

@@ -1,5 +1,5 @@
-#include "EnvironmentFX.h"
-#include "GlRenderer.h"
+#include <OGLPlugin/EnvironmentFX.h>
+#include <OGLPlugin/GlRenderer.h>
 
 #include <SceneGraph/QuadNode.h>
 #include <Descriptors/ImageIO.h>

@@ -5,14 +5,14 @@
 #include <Graphics/Uniform.h>
 #include <Geometry/Geometry.h>
 
-#include "GlError.h"
-#include "Texture.h"
-#include "GLInterface.h"
-#include "BufferObject.h"
-#include "FrameBuffer.h"
-#include "CubeMap.h"
-#include "Program.h"
-#include "GlRenderer.h"
+#include <OGLPlugin/GlError.h>
+#include <OGLPlugin/Texture.h>
+#include <OGLPlugin/GLInterface.h>
+#include <OGLPlugin/BufferObject.h>
+#include <OGLPlugin/FrameBuffer.h>
+#include <OGLPlugin/CubeMap.h>
+#include <OGLPlugin/Program.h>
+#include <OGLPlugin/GlRenderer.h>
 
 #include <iostream>
 
@@ -23,7 +23,7 @@ IMP_EXTERN IMP_API imp::RenderPlugin::Ptr loadRenderPlugin()
     return singleton;
 }
 
-#include "GlslCode.h"
+#include <OGLPlugin/GlslCode.h>
 
 IMPGEARS_BEGIN
 

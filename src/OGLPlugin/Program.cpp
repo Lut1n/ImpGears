@@ -1,5 +1,5 @@
-#include "Program.h"
-#include "GlError.h"
+#include <OGLPlugin/Program.h>
+#include <OGLPlugin/GlError.h>
 
 #include <cstdio>
 #include <iostream>

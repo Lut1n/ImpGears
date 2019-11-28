@@ -3,7 +3,7 @@
 
 #include <Core/Object.h>
 
-#include "Texture.h"
+#include <OGLPlugin/Texture.h>
 
 IMPGEARS_BEGIN
 

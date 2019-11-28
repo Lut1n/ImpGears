@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(libimpgears-glPlugin)
+project(libimpgears-OGLPlugin)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -12,32 +12,33 @@ file(GLOB SRCS
     )
 
 file(GLOB HEADERS 
-    ${PROJECT_SOURCE_DIR}/*.h
+    ${CMAKE_SOURCE_DIR}/include/OGLPlugin/*.h
     )
     
     
 link_directories(AFTER "/usr/lib")
-include_directories("/usr/include/ImpGears")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/include/ImpGears")
 
-add_library(glPlugin SHARED ${SRCS} ${HEADERS})
+add_library(OGLPlugin SHARED ${SRCS} ${HEADERS})
 
-target_link_libraries(glPlugin impgears-core )
-target_link_libraries(glPlugin impgears-geometry )
-target_link_libraries(glPlugin impgears-graphics )
-target_link_libraries(glPlugin impgears-scenegraph )
-target_link_libraries(glPlugin impgears-renderer )
-target_link_libraries(glPlugin impgears-plugins )
-target_link_libraries(glPlugin impgears-descriptors )
+target_link_libraries(OGLPlugin impgears-core )
+target_link_libraries(OGLPlugin impgears-geometry )
+target_link_libraries(OGLPlugin impgears-graphics )
+target_link_libraries(OGLPlugin impgears-scenegraph )
+target_link_libraries(OGLPlugin impgears-renderer )
+target_link_libraries(OGLPlugin impgears-plugins )
+target_link_libraries(OGLPlugin impgears-descriptors )
 
 #link to ogl extension wrangler
 find_package( GLEW REQUIRED )
 include_directories( ${GLEW_INCLUDE_DIRS} )
-target_link_libraries( glPlugin ${GLEW_LIBRARIES} )
+target_link_libraries( OGLPlugin ${GLEW_LIBRARIES} )
 
 # link to openGL
 find_package( OpenGL REQUIRED )
 include_directories( ${OPENGL_INCLUDE_DIR} )
-target_link_libraries( glPlugin ${OPENGL_LIBRARIES} )
+target_link_libraries( OGLPlugin ${OPENGL_LIBRARIES} )
 
 
 

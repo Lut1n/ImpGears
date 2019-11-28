@@ -1,10 +1,10 @@
-#include "GlRenderer.h"
-#include "CubeMap.h"
+#include <OGLPlugin/GlRenderer.h>
+#include <OGLPlugin/CubeMap.h>
 
 #include <cstdlib>
 
-#include "BloomFX.h"
-#include "EnvironmentFX.h"
+#include <OGLPlugin/BloomFX.h>
+#include <OGLPlugin/EnvironmentFX.h>
 
 IMPGEARS_BEGIN
 

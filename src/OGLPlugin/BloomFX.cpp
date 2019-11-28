@@ -1,5 +1,5 @@
-#include "BloomFX.h"
-#include "GlRenderer.h"
+#include <OGLPlugin/BloomFX.h>
+#include <OGLPlugin/GlRenderer.h>
 
 #include <SceneGraph/QuadNode.h>
 

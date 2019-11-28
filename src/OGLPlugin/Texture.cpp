@@ -1,5 +1,5 @@
-#include "Texture.h"
-#include "GlError.h"
+#include <OGLPlugin/Texture.h>
+#include <OGLPlugin/GlError.h>
 
 #include <iostream>
 

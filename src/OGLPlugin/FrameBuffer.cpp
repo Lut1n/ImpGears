@@ -1,8 +1,8 @@
 
 #include <SceneGraph/Camera.h>
 
-#include "FrameBuffer.h"
-#include "GlError.h"
+#include <OGLPlugin/FrameBuffer.h>
+#include <OGLPlugin/GlError.h>
 
 #include <cstdio>
 #include <iostream>

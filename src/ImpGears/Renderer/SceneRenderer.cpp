@@ -7,6 +7,7 @@ SceneRenderer::SceneRenderer()
 {
     _visitor = RenderVisitor::create();
     _direct = true;
+    _renderFrame = RenderFrame_Default;
 
     for(auto& f : _enabledFeatures) f=false;
 }

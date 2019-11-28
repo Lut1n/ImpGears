@@ -33,6 +33,7 @@ public:
         RenderFrame_Lighting,
         RenderFrame_Depth,
         RenderFrame_Emissive,
+        RenderFrame_Bloom,
         RenderFrame_Normals,
         RenderFrame_Metalness,
     };

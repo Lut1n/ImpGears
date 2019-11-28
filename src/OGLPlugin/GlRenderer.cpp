@@ -56,22 +56,8 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene_input, bool disableFX)
+void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, bool disableFX)
 {
-    Graph::Ptr scene = scene_input;
-
-    if(!disableFX && isFeatureEnabled(Feature_Shadow))
-    {
-        if(_envFX == nullptr)
-        {
-            _envFX = new EnvironmentFX();
-            _envFX->setup();
-        }
-
-        scene = _envFX->begin(this, scene_input);
-    }
-
-
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
     scene->accept(visitor);
@@ -131,11 +117,6 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene_input, bool disableF
     }
 
     _renderPlugin->unbind();
-
-    if(!disableFX && isFeatureEnabled(Feature_Shadow))
-    {
-        _envFX->end(this, scene_input);
-    }
 }
 
 //---------------------------------------------------------------
@@ -195,6 +176,41 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
             // toScreen->setup(_renderTargets->getList(), empty);
         }
+
+        switch(getOutputFrame())
+        {
+        case RenderFrame_Default:
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        case RenderFrame_ShadowMap:
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        case RenderFrame_Environment:
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        case RenderFrame_Lighting:
+            toScreen->setInput( _renderTargets->get(0) ) ;
+            break;
+        case RenderFrame_Depth:
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        case RenderFrame_Emissive:
+            toScreen->setInput( _renderTargets->get(1) ) ;
+            break;
+        case RenderFrame_Bloom:
+            toScreen->setInput( output_bloom[0] ) ;
+            break;
+        case RenderFrame_Normals:
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        case RenderFrame_Metalness:
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        default: // assume RenderFrame_Default
+            toScreen->setInput( output_blend[0] ) ;
+            break;
+        }
+
 
         _bloomFX->apply(this);
         blendAll->apply(this);

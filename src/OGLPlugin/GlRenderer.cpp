@@ -56,7 +56,7 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, bool disableFX)
+void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrideCamera)
 {
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
@@ -64,7 +64,8 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, bool disableFX)
 
     RenderQueue::Ptr queue = _visitor->getQueue();
     Matrix4 view;
-    if(queue->_camera) view = queue->_camera->getViewMatrix();
+    if(overrideCamera) view = overrideCamera->getViewMatrix();
+    else if(queue->_camera) view = queue->_camera->getViewMatrix();
 
     Vec3 lightPos(0.0);
     Vec3 lightCol(1.0);
@@ -134,6 +135,21 @@ void GlRenderer::render(const Graph::Ptr& scene)
         _renderTargets->build(samplers, true);
     }
 
+
+    static EnvironmentFX::Ptr environment;
+    Graph::Ptr cloned = scene;
+    if(isFeatureEnabled(Feature_Shadow))
+    {
+        if(!environment)
+        {
+            environment = EnvironmentFX::create();
+            environment->setup();
+        }
+        cloned = environment->begin(this, scene);
+
+    }
+
+
     if(!_direct && _renderTargets)
     {
         _renderPlugin->init(_renderTargets);
@@ -145,7 +161,13 @@ void GlRenderer::render(const Graph::Ptr& scene)
         _renderPlugin->unbind();
     }
 
-    applyRenderVisitor(scene);
+    applyRenderVisitor(cloned);
+
+    if(isFeatureEnabled(Feature_Shadow))
+    {
+        environment->end(this, scene);
+    }
+
 
     if(!_direct && isFeatureEnabled(Feature_Bloom))
     {
@@ -156,6 +178,8 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static std::vector<ImageSampler::Ptr> empty;
         static BlendAll::Ptr blendAll;
         static FrameToScreen::Ptr toScreen;
+
+
         if(_bloomFX == nullptr)
         {
             _bloomFX = new BloomFX();
@@ -172,7 +196,6 @@ void GlRenderer::render(const Graph::Ptr& scene)
             _bloomFX->setup( input_bloom, output_bloom );
             blendAll->setup(input_blend, output_blend);
             toScreen->setup(output_blend, empty);
-
 
             // toScreen->setup(_renderTargets->getList(), empty);
         }

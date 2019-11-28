@@ -87,7 +87,7 @@ void BloomFX::process(GlRenderer* renderer, int subpassID)
     _graph->getInitState()->setUniform("u_input_sampler", sampler, 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", h);
 
-    renderer->applyRenderVisitor(_graph, true);
+    renderer->applyRenderVisitor(_graph);
 }
 
 //--------------------------------------------------------------
@@ -96,7 +96,7 @@ void BloomFX::apply(GlRenderer* renderer)
     bind(renderer, 0);
     _graph->getInitState()->setUniform("u_input_sampler", _input[1], 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
-    renderer->applyRenderVisitor(_graph, true);
+    renderer->applyRenderVisitor(_graph);
 
     for(int i=1;i<_subpassCount;++i)
     {

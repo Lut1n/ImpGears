@@ -65,7 +65,7 @@ void FrameToScreen::apply(GlRenderer* renderer)
         renderer->_renderPlugin->unbind();
     }
     _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
-    renderer->applyRenderVisitor(_graph, true);
+    renderer->applyRenderVisitor(_graph);
 }
 
 

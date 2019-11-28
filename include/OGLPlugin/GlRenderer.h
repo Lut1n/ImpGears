@@ -22,7 +22,7 @@ public:
     GlRenderer();
     virtual ~GlRenderer();
 
-    void applyRenderVisitor(const Graph::Ptr& scene, bool disableFX = false);
+    void applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrideCamera = nullptr);
 
     virtual void render(const Graph::Ptr& scene);
 

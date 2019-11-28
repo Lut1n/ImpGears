@@ -8,7 +8,8 @@
 #include <Renderer/RenderTarget.h>
 #include <Graphics/Sampler.h>
 #include <SceneGraph/GeoNode.h>
-// #include <Renderer/RenderQueue.h>
+
+#include <OGLPlugin/RenderToCubeMap.h>
 
 
 IMPGEARS_BEGIN
@@ -32,6 +33,7 @@ public:
 
 protected:
 
+    RenderToCubeMap::Ptr cubemapRenderer;
     Image::Ptr source;
     CubeMapSampler::Ptr sampler;
     ReflexionModel::Ptr _shader;

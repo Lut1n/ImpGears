@@ -19,7 +19,7 @@ vec4 i_col(vec3 uvw){return texture(u_input_cube, uvw).xyzw;}
 
 void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
 {
-    out_emissive = vec4(0.0,0.0,0.0,1.0);
+    out_emissive = i_col(-v_m);
     out_lighting = i_col(-v_m);
 }
 
@@ -43,18 +43,18 @@ EnvironmentFX::~EnvironmentFX()
 //--------------------------------------------------------------
 void EnvironmentFX::setup()
 {
-    std::vector<Image::Ptr> sources(6);
-    sources[0] = ImageIO::load("./arrakisday/arrakisday_rt.tga");
-    sources[1] = ImageIO::load("./arrakisday/arrakisday_lf.tga");
-    sources[2] = ImageIO::load("./arrakisday/arrakisday_dn.tga");
-    sources[3] = ImageIO::load("./arrakisday/arrakisday_up.tga");
-    sources[4] = ImageIO::load("./arrakisday/arrakisday_bk.tga");
-    sources[5] = ImageIO::load("./arrakisday/arrakisday_ft.tga");
+    // std::vector<Image::Ptr> sources(6);
+    // sources[0] = ImageIO::load("./arrakisday/arrakisday_rt.tga");
+    // sources[1] = ImageIO::load("./arrakisday/arrakisday_lf.tga");
+    // sources[2] = ImageIO::load("./arrakisday/arrakisday_dn.tga");
+    // sources[3] = ImageIO::load("./arrakisday/arrakisday_up.tga");
+    // sources[4] = ImageIO::load("./arrakisday/arrakisday_bk.tga");
+    // sources[5] = ImageIO::load("./arrakisday/arrakisday_ft.tga");
 
-    sampler = CubeMapSampler::create(sources);
+    sampler = CubeMapSampler::create(512.0,512.0,4,Vec4(1.0));
 
     Geometry cube = Geometry::cube();
-    Geometry::intoCCW(cube);
+    Geometry::intoCCW(cube, false);
     cube.scale(Vec3(50.0));
     cube.generateNormals(Geometry::NormalGenMode_PerFace);
     cube.generateColors(Vec3(1.0));
@@ -76,6 +76,14 @@ void EnvironmentFX::setup()
 //--------------------------------------------------------------
 Graph::Ptr EnvironmentFX::begin(GlRenderer* renderer, const Graph::Ptr& scene)
 {
+    if(cubemapRenderer == nullptr)
+    {
+        cubemapRenderer = RenderToCubeMap::create(renderer);
+    }
+
+    cubemapRenderer->setCubeMap(sampler);
+    cubemapRenderer->render(scene, Vec3(1.0));
+
     Graph::Ptr cloned = Graph::create();
     cloned->getInitState()->clone(scene->getInitState());
     Node::Ptr root = node;

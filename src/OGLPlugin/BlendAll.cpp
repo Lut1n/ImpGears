@@ -66,7 +66,7 @@ void BlendAll::apply(GlRenderer* renderer)
     }
     _graph->getInitState()->setUniform("u_input_sampler_lighting", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_bloom", _input[1], 1);
-    renderer->applyRenderVisitor(_graph, true);
+    renderer->applyRenderVisitor(_graph);
 }
 
 

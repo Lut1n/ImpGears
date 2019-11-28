@@ -377,22 +377,41 @@ void GlPlugin::init(RenderTarget::Ptr& target)
     {
         d = FboData::create();
 
-        std::vector<Texture::Ptr> textures;
-        for(int i=0;i<target->count();++i)
+        if(target->useFaceSampler())
         {
-            ImageSampler::Ptr s = target->get(i);
-            TexData::Ptr dtex = s_internalState->getTex(s);
+            RenderTarget::FaceSampler faceSampler = target->getFace();
+            CubeMapSampler::Ptr sampler = faceSampler.first;
+            int faceID = faceSampler.second;
+            TexData::Ptr dtex = s_internalState->getTex(sampler);
             if(dtex == nullptr)
             {
-                load(s);
-                dtex = s_internalState->getTex(s);
-                dtex->info = "loaded from renderTarget";
+                load(sampler);
+                dtex = s_internalState->getTex(sampler);
+                if(dtex == nullptr) std::cout << "error loading cubemap" << std::endl;
+                else dtex->info = "loaded from renderTarget (cubemap)";
             }
-            Texture::Ptr t = dtex->tex;
-            textures.push_back(t);
+            CubeMap::Ptr cm = dtex->cubetex;
+            d->frames.build(cm, faceID, target->hasDepth());
+        }
+        else
+        {
+            std::vector<Texture::Ptr> textures;
+            for(int i=0;i<target->count();++i)
+            {
+                ImageSampler::Ptr s = target->get(i);
+                TexData::Ptr dtex = s_internalState->getTex(s);
+                if(dtex == nullptr)
+                {
+                    load(s);
+                    dtex = s_internalState->getTex(s);
+                    dtex->info = "loaded from renderTarget";
+                }
+                Texture::Ptr t = dtex->tex;
+                textures.push_back(t);
+            }
+            d->frames.build(textures, target->hasDepth());
         }
 
-        d->frames.build(textures, target->hasDepth());
         s_internalState->renderTargets[target] = d;
     }
 }

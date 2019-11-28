@@ -9,6 +9,7 @@ RenderTarget::RenderTarget()
 {
     _hasChanged = false;
     _hasDepthBuffer = false;
+    _useFaceSampler = false;
 }
 
 //--------------------------------------------------------------
@@ -20,6 +21,7 @@ RenderTarget::~RenderTarget()
 //--------------------------------------------------------------
 void RenderTarget::build(int w, int h, int count, bool hasDepth)
 {
+    _useFaceSampler = false;
     _targets.resize(count);
     for(int i=0;i<count;++i)
     {
@@ -33,7 +35,16 @@ void RenderTarget::build(int w, int h, int count, bool hasDepth)
 //--------------------------------------------------------------
 void RenderTarget::build(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth)
 {
+    _useFaceSampler = false;
     _targets = textures;
+    _hasDepthBuffer = hasDepth;
+}
+
+//--------------------------------------------------------------
+void RenderTarget::build(const FaceSampler& face, bool hasDepth)
+{
+    _faceTarget = face;
+    _useFaceSampler = true;
     _hasDepthBuffer = hasDepth;
 }
 
@@ -49,6 +60,12 @@ ImageSampler::Ptr RenderTarget::get(int n)
 {
     update();
     return _targets[n];
+}
+
+//--------------------------------------------------------------
+RenderTarget::FaceSampler RenderTarget::getFace()
+{
+    return _faceTarget;
 }
 
 //--------------------------------------------------------------
@@ -77,6 +94,12 @@ int RenderTarget::count() const
 bool RenderTarget::hasDepth() const
 {
     return _hasDepthBuffer;
+}
+
+//--------------------------------------------------------------
+bool RenderTarget::useFaceSampler() const
+{
+    return _useFaceSampler;
 }
 
 //--------------------------------------------------------------

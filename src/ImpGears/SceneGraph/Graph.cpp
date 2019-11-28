@@ -36,7 +36,7 @@ void Graph::accept(Visitor::Ptr& visitor)
 }
 
 //---------------------------------------------------------------
-void Graph::setRoot(Node::Ptr& node)
+void Graph::setRoot(const Node::Ptr& node)
 {
     _root = node;
 }

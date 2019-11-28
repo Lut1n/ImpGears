@@ -33,14 +33,14 @@ uniform vec3 u_color;
 
 varying vec2 v_texCoord;
 
-void lighting(out vec4 outColor, out vec4 outEmi)
+void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
 {
     vec4 color = vec4(u_color,1.0) * gl_Color;
     color *= textureColor(v_texCoord);
     vec4 emi = textureEmissive(v_texCoord);
 
-    outColor = max(emi,color);
-    outEmi = emi;
+    out_lighting = max(emi,color);
+    out_emissive = emi;
 }
 
 );
@@ -137,7 +137,7 @@ varying vec2 v_texCoord;
 varying vec3 v_m;
 varying vec3 v_n;
 
-void lighting(out vec4 outColor, out vec4 outEmi)
+void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
 {
     float lightPower = u_lightAtt[0];
     float shininess = u_lightAtt[1];
@@ -195,8 +195,8 @@ void lighting(out vec4 outColor, out vec4 outEmi)
     vec4 emi = textureEmissive(v_texCoord);
     // colModelRes = max(emi,colModelRes);
 
-    outColor = vec4(clamp( colModelRes,0.0,1.0 ), 1.0);
-    outEmi = clamp(emi,0.0,1.0);
+    out_lighting = vec4(clamp( colModelRes,0.0,1.0 ), 1.0);
+    out_emissive = clamp(emi,0.0,1.0);
 }
 
 );
@@ -205,12 +205,15 @@ static std::string glsl_mrt1 = GLSL_CODE(
 
 void main()
 {
-    vec4 outColor;
-    vec4 outEmi;
+    vec4 out_lighting;
+    vec4 out_emissive;
+    vec3 out_normal;
+    float out_metalness;
+    float out_depth;
 
-    lighting(outColor,outEmi);
+    lighting(out_lighting,out_emissive,out_normal,out_metalness,out_depth);
 
-    gl_FragData[0] = outColor;
+    gl_FragData[0] = out_lighting;
 }
 
 );
@@ -219,13 +222,37 @@ static std::string glsl_mrt2 = GLSL_CODE(
 
 void main()
 {
-    vec4 outColor;
-    vec4 outEmi;
+    vec4 out_lighting;
+    vec4 out_emissive;
+    vec3 out_normal;
+    float out_metalness;
+    float out_depth;
 
-    lighting(outColor,outEmi);
+    lighting(out_lighting,out_emissive,out_normal,out_metalness,out_depth);
 
-    gl_FragData[0] = outColor;
-    gl_FragData[1] = outEmi;
+    gl_FragData[0] = out_lighting;
+    gl_FragData[1] = out_emissive;
+}
+
+);
+
+static std::string glsl_mrt_default = GLSL_CODE(
+
+void main()
+{
+    vec4 out_lighting;
+    vec4 out_emissive;
+    vec3 out_normal;
+    float out_metalness;
+    float out_depth;
+
+    lighting(out_lighting,out_emissive,out_normal,out_metalness,out_depth);
+
+    gl_FragData[0] = out_lighting;
+    gl_FragData[1] = out_emissive;
+    gl_FragData[2] = out_normal;
+    gl_FragData[3] = out_metalness;
+    gl_FragData[4] = out_depth;
 }
 
 );

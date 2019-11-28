@@ -3,16 +3,13 @@
 
 #include <Core/Object.h>
 
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/ReflexionModel.h>
-#include <Renderer/RenderTarget.h>
-
+#include <OGLPlugin/FxRenderPass.h>
 
 IMPGEARS_BEGIN
 
 struct GlRenderer;
 
-class IMP_API BloomFX : public Object
+class IMP_API BloomFX : public FxRenderPass
 {
 public:
 
@@ -21,20 +18,21 @@ public:
     BloomFX();
     virtual ~BloomFX();
 
-    void setup(int subpassCount, Vec4 viewport);
+    void setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output);
+
+    // void setup(int subpassCount, Vec4 viewport);
 
     void bind(GlRenderer* renderer, int subpassID = 0);
 
     void process(GlRenderer* renderer, int subpassID);
 
-    void apply(GlRenderer* renderer, const Graph::Ptr& g);
+    void apply(GlRenderer* renderer);
 
 protected:
 
     int _subpassCount;
     Graph::Ptr _graph;
     RenderTarget::Ptr _frames[2];
-    ReflexionModel::Ptr _shader;
 };
 
 IMPGEARS_END

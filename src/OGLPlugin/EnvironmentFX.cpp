@@ -17,10 +17,10 @@ varying vec3 v_m;
 
 vec4 i_col(vec3 uvw){return texture(u_input_cube, uvw).xyzw;}
 
-void lighting(out vec4 outColor, out vec4 outEmi)
+void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
 {
-    outEmi = vec4(0.0,0.0,0.0,1.0);
-    outColor = i_col(-v_m);
+    out_emissive = vec4(0.0,0.0,0.0,1.0);
+    out_lighting = i_col(-v_m);
 }
 
 );

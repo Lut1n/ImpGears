@@ -9,14 +9,12 @@
 static std::string glsl_blur = GLSL_CODE(
 
 uniform float u_horizontal_blur;
-uniform sampler2D u_input_sampler1;
-uniform sampler2D u_input_sampler2;
+uniform sampler2D u_input_sampler;
 varying vec2 v_texCoord;
 
-vec4 i_col(vec2 uv){return texture2D(u_input_sampler1, uv).rgbw;}
-vec4 i_emi(vec2 uv){return texture2D(u_input_sampler2, uv).rgbw;}
+vec4 i_emi(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
 
-void lighting(out vec4 outColor, out vec4 outEmi)
+void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
 {
     const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
@@ -34,8 +32,7 @@ void lighting(out vec4 outColor, out vec4 outEmi)
     }
 
     result = clamp(result,0.0,1.0);
-    outEmi = result;
-    outColor = max(i_col(v_texCoord), vec4(result.xyz * result.w,1.0));
+    out_lighting = result;
 }
 
 );
@@ -56,36 +53,19 @@ BloomFX::~BloomFX()
 }
 
 //--------------------------------------------------------------
-void BloomFX::setup(int subpassCount, Vec4 viewport)
+void BloomFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
 {
-    _subpassCount = subpassCount;
+    _input = input;
+    _output = output;
 
-    _shader = ReflexionModel::create(
-                ReflexionModel::Lighting_Customized,
-                ReflexionModel::Texturing_Samplers_CNE,
-                ReflexionModel::MRT_2_Col_Emi);
-    _shader->_fragCode_lighting = glsl_blur;
+    _subpassCount = 10;
+    Vec4 viewport = Vec4(0.0,0.0,512.0,512);
+    _graph = buildQuadGraph(glsl_blur, viewport);
 
-    QuadNode::Ptr quad = QuadNode::create();
-    quad->setReflexion(_shader);
-    Node::Ptr root = quad;
-
-    _graph = Graph::create();
-    _graph->setRoot(root);
-    _graph->getInitState()->setViewport( viewport );
-    _graph->getInitState()->setOrthographicProjection(-1.0,1.0,-1.0,1.0,0.0,1.0);
-
-    Image::Ptr rgb = Image::create(viewport[2],viewport[3],4);
-    Image::Ptr rgb2 = Image::create(viewport[2],viewport[3],4);
-    ImageSampler::Ptr sampler = ImageSampler::create(rgb);
-    ImageSampler::Ptr sampler2 = ImageSampler::create(rgb2);
     _frames[0] = RenderTarget::create();
-    _frames[0]->build({ sampler,sampler2 }, true);
-    rgb = Image::create(viewport[2],viewport[3],4);
-    sampler = ImageSampler::create(rgb);
-    sampler2 = ImageSampler::create(rgb2);
+    _frames[0]->build(viewport[2],viewport[3],1, true);
     _frames[1] = RenderTarget::create();
-    _frames[1]->build({ sampler,sampler2 }, true);
+    _frames[1]->build(_output, true);
 }
 
 //--------------------------------------------------------------
@@ -101,30 +81,29 @@ void BloomFX::bind(GlRenderer* renderer, int subpassID)
 void BloomFX::process(GlRenderer* renderer, int subpassID)
 {
     int prevFrame =(subpassID-1)%2;
-    RenderTarget::Ptr src = _frames[prevFrame];
+    ImageSampler::Ptr sampler = _frames[prevFrame]->get(0);
     float h = subpassID%2==0?0.0:1.0;
 
-    _graph->getInitState()->setUniform("u_input_sampler1", src->get(0), 0);
-    _graph->getInitState()->setUniform("u_input_sampler2", src->get(1), 1);
+    _graph->getInitState()->setUniform("u_input_sampler", sampler, 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", h);
 
     renderer->applyRenderVisitor(_graph, true);
 }
 
 //--------------------------------------------------------------
-void BloomFX::apply(GlRenderer* renderer, const Graph::Ptr& g)
+void BloomFX::apply(GlRenderer* renderer)
 {
     bind(renderer, 0);
-    renderer->applyRenderVisitor(g, false);
+    _graph->getInitState()->setUniform("u_input_sampler", _input[1], 0);
+    _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
+    renderer->applyRenderVisitor(_graph, true);
 
     for(int i=1;i<_subpassCount;++i)
     {
         bind(renderer, i);
         process(renderer, i);
     }
-
-    renderer->_renderPlugin->unbind();
-    process(renderer, _subpassCount);
 }
+
 
 IMPGEARS_END

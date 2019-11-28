@@ -5,6 +5,8 @@
 
 #include <OGLPlugin/BloomFX.h>
 #include <OGLPlugin/EnvironmentFX.h>
+#include <OGLPlugin/FrameToScreen.h>
+#include <OGLPlugin/BlendAll.h>
 
 IMPGEARS_BEGIN
 
@@ -109,6 +111,8 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene_input, bool disableF
                     queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
 
             queue->_states[i]->setUniform("u_view", view);
+
+            // ---- if we want a normal matrix for view space instead of model space ----
             // Matrix4 model = queue->_states[i]->getUniforms()["u_model"]->getMat4();
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
             // queue->_states[i]->setUniform("u_normal", normalMat );
@@ -149,18 +153,6 @@ void GlRenderer::render(const Graph::Ptr& scene)
         _renderTargets->build(samplers, true);
     }
 
-    if(isFeatureEnabled(Feature_Bloom))
-    {
-        if(_bloomFX == nullptr)
-        {
-            _bloomFX = new BloomFX();
-            _bloomFX->setup( 10, Vec4(0.0,0.0,512.0,512.0) );
-        }
-
-        _bloomFX->apply(this, scene);
-        return;
-    }
-
     if(!_direct && _renderTargets)
     {
         _renderPlugin->init(_renderTargets);
@@ -173,6 +165,44 @@ void GlRenderer::render(const Graph::Ptr& scene)
     }
 
     applyRenderVisitor(scene);
+
+    if(!_direct && isFeatureEnabled(Feature_Bloom))
+    {
+        static std::vector<ImageSampler::Ptr> input_bloom;
+        static std::vector<ImageSampler::Ptr> output_bloom;
+        static std::vector<ImageSampler::Ptr> input_blend;
+        static std::vector<ImageSampler::Ptr> output_blend;
+        static std::vector<ImageSampler::Ptr> empty;
+        static BlendAll::Ptr blendAll;
+        static FrameToScreen::Ptr toScreen;
+        if(_bloomFX == nullptr)
+        {
+            _bloomFX = new BloomFX();
+            blendAll = BlendAll::create();
+            toScreen = FrameToScreen::create();
+
+            input_bloom = { _renderTargets->get(0), _renderTargets->get(1) };
+            ImageSampler::Ptr sample = ImageSampler::create(512,512,4,Vec4(0.0));
+            output_bloom.push_back(sample);
+            input_blend.push_back(_renderTargets->get(0));
+            input_blend.push_back(sample);
+            output_blend.push_back(ImageSampler::create(512,512,4,Vec4(0.0)));
+
+            _bloomFX->setup( input_bloom, output_bloom );
+            blendAll->setup(input_blend, output_blend);
+            toScreen->setup(output_blend, empty);
+
+
+            // toScreen->setup(_renderTargets->getList(), empty);
+        }
+
+        _bloomFX->apply(this);
+        blendAll->apply(this);
+        toScreen->apply(this);
+
+
+        return;
+    }
 }
 
 

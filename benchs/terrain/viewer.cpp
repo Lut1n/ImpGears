@@ -138,7 +138,7 @@ renderModeMngr.setArgs(argc, argv);
     root->addNode(coordsNode);
     root->addNode(light);
     root->addNode(pointNode);
-    root->addNode(sky);
+    // root->addNode(sky);
     graph->setRoot(root);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();

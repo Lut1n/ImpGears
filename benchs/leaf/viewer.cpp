@@ -91,14 +91,14 @@ int main(int argc, char* argv[])
     root->addNode(vegetal);
     root->addNode(coordNode);
     root->addNode(light);
-    root->addNode(sky);
+    // root->addNode(sky);
     graph->setRoot(root);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     // graph->getInitState()->setPerspectiveProjection(90.0, 1.0, 0.1, 1024.0);
 
-    renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    // renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     renderer->setDirect(false);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);

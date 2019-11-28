@@ -142,7 +142,7 @@ public:
 
     void interpolateNormals();
 
-    static void intoCCW( Geometry& buf );
+    static void intoCCW( Geometry& buf, bool toExterior = true );
 
     static Geometry intoLineBuf(const Geometry& buf);
 

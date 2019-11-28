@@ -319,7 +319,7 @@ void Geometry::addTexCoords(const TexCoordBuf& buf)
     for(auto v:buf)_texCoords.push_back(v);
 }
 
-void Geometry::intoCCW( Geometry& buf )
+void Geometry::intoCCW( Geometry& buf, bool toExterior )
 {
     for(int i=0;i<(int)buf.size();i+=3)
     {
@@ -328,7 +328,8 @@ void Geometry::intoCCW( Geometry& buf )
         Vec3 p3 = buf[i+2];
 
         Vec3 t12=p2-p1, t13=p3-p1;
-        bool ccw = t13.angleFrom(t12,p1) > 0; // ok for convex shape
+        Vec3 dir = p1 * (toExterior?1.0:-1.0);
+        bool ccw = t13.angleFrom(t12,dir) > 0; // ok for convex shape
         if(!ccw)
         {
             buf[i+1]=p3;

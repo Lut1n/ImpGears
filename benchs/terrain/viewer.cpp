@@ -20,6 +20,7 @@ using namespace imp;
 #include "../common/RenderModeManager.h"
 #define IMPLEMENT_BASIC_GEOMETRIES
 #include "../common/basic_geometries.h"
+#include "../common/basic_skybox.h"
 
 Geometry generateTerrain(const ImageSampler::Ptr& hm)
 {
@@ -130,15 +131,19 @@ renderModeMngr.setArgs(argc, argv);
     pointNode->setReflexion(r);
     pointNode->setMaterial(light_material);
 
+    SkyBox::Ptr sky = SkyBox::create();
+
     root->addNode(camera);
     root->addNode(terrainNode);
     root->addNode(coordsNode);
     root->addNode(light);
     root->addNode(pointNode);
+    root->addNode(sky);
     graph->setRoot(root);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    renderer->setDirect(false);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));

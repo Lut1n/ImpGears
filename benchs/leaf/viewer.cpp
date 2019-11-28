@@ -16,9 +16,12 @@ using namespace imp;
 #include "../common/RenderModeManager.h"
 #define IMPLEMENT_BASIC_GEOMETRIES
 #include "../common/basic_geometries.h"
+#include "../common/basic_skybox.h"
 
 #define IMPLEMENT_LEAF_N_COORDS
 #include "mGeometry.h"
+
+
 
 
 int main(int argc, char* argv[])
@@ -47,12 +50,13 @@ int main(int argc, char* argv[])
         imp::ReflexionModel::MRT_2_Col_Emi);
 
     Material::Ptr material = Material::create(Vec3(1.0), 1.0);
+    // material->_emissive = ImageSampler::create(8,8,3, Vec4(0.0,1.0,0.0,1.0));
     ImageSampler::Ptr emi_sampler = ImageSampler::create(8,8,3,Vec4(1.0));
     Material::Ptr light_material = Material::create(Vec3(1.0), 1.0);
     light_material->_emissive = emi_sampler;
 
     Geometry::Ptr pointGeo = Geometry::create();
-    *pointGeo = Geometry::sphere(8, 0.1);
+    *pointGeo = Geometry::sphere(4, 0.1);
     pointGeo->setPrimitive(Geometry::Primitive_Triangles);
     pointGeo->generateColors(Vec3(0.5,0.5,1.0));
     pointGeo->generateNormals();
@@ -80,11 +84,14 @@ int main(int argc, char* argv[])
     vegetal->addNode(pointNode);
     vegetal->setPosition(Vec3(0.0,0.3,0.0));
 
+    SkyBox::Ptr sky = SkyBox::create();
+
     // setup scene
     root->addNode(camera);
     root->addNode(vegetal);
     root->addNode(coordNode);
     root->addNode(light);
+    root->addNode(sky);
     graph->setRoot(root);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
@@ -92,7 +99,11 @@ int main(int argc, char* argv[])
     // graph->getInitState()->setPerspectiveProjection(90.0, 1.0, 0.1, 1024.0);
 
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    renderer->setDirect(false);
+    // renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
+
+    int frame_index = 0;
 
     while (window.isOpen())
     {
@@ -104,6 +115,17 @@ int main(int argc, char* argv[])
         }
 
         double t = clock.getElapsedTime().asSeconds();
+
+        frame_index = int(t/3) % 4;
+        if(frame_index == 0)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
+        else if(frame_index == 1)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
+        else if(frame_index == 2)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+        else if(frame_index == 3)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
+
         
         camera->setPosition(Vec3(cos(t*0.2)*1.0,0.75,sin(t*.2)*1.0));
         camera->setTarget(Vec3(0.0));

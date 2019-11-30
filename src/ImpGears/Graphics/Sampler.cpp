@@ -71,7 +71,13 @@ void ImageSampler::setSource(Image::Ptr src)
 }
 
 //--------------------------------------------------------------
-Image::Ptr ImageSampler::getSource() const
+const Image::Ptr& ImageSampler::getSource() const
+{
+    return _src;
+}
+
+//--------------------------------------------------------------
+Image::Ptr& ImageSampler::getSource()
 {
     return _src;
 }

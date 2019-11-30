@@ -14,6 +14,8 @@ GeoNode::GeoNode(const Polyhedron& buf, bool wireframe)
 
     ReflexionModel::Ptr reflexion = ReflexionModel::create();
     getState()->setReflexion(reflexion);
+    RenderPass::Ptr pass_info = RenderPass::create();
+    getState()->setRenderPass(pass_info);
 
     _material = Material::create();
 }
@@ -28,6 +30,8 @@ GeoNode::GeoNode(const Geometry::Ptr& geo, bool wireframe)
 
     ReflexionModel::Ptr reflexion = ReflexionModel::create();
     getState()->setReflexion(reflexion);
+    RenderPass::Ptr pass_info = RenderPass::create();
+    getState()->setRenderPass(pass_info);
 
     _material = Material::create();
 }

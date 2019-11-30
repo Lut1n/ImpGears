@@ -99,7 +99,7 @@ IMPGEARS_BEGIN
 void bmp_save(const std::string& filename, const Image::Ptr img);
 void tga_save(const std::string& filename, const Image::Ptr img);
 Image::Ptr bmp_load(std::string& filename);
-Image::Ptr tga_load(std::string& filename);
+Image::Ptr tga_load(std::string& filename, bool flipY);
 
 //--------------------------------------------------------------
 ImageIO::ImageIO()
@@ -147,7 +147,7 @@ Image::Ptr ImageIO::load(std::string filename, const Options& opts)
     }
     else if(opts.fileType == FileType_TGA)
     {
-        res = tga_load(filename);
+        res = tga_load(filename, opts._flipY);
     }
     return res;
 }
@@ -205,7 +205,7 @@ void readU8_rle(std::ifstream& is, unsigned char* dst, int size, int chnl)
     }
 }
 
-Image::Ptr tga_load(std::string& filename)
+Image::Ptr tga_load(std::string& filename, bool flipY)
 {
     unsigned short w, h;
     unsigned char pixel_depth;
@@ -251,8 +251,16 @@ Image::Ptr tga_load(std::string& filename)
     int chnl = pixel_depth / 8;	// 24 for RGB; 32 for RGBA
 
 
-    char id_info; // description (ignored)
+    // Image description
+    // bits 0,1,2,3 : alpha channel depth (ignored)
+    // bits 4,5 : flip X and Y
+    // bits 6,7 : unused (ignored)
+    char id_info;
     istrm.read(&id_info, sizeof(char));
+    char flip_y_bit = 0b0010'0000;
+    bool need_flipY = (id_info & flip_y_bit) == flip_y_bit;
+    if(need_flipY) std::cout << "need flip Y" << std::endl;
+    flipY ^= need_flipY;
 
     Image::Ptr result = Image::create(w,h,chnl);
     Image::Ptr tmp_img = Image::create(w,h,chnl);
@@ -260,63 +268,19 @@ Image::Ptr tga_load(std::string& filename)
 
     if(rle) // compression run-length encoding
     {
-        /*bool to_repeat; int run_len;
-        unsigned char packet_header;
-
-        int line = 0;
-        int col = 0;
-        int progress = 0;
-
-        std::vector<unsigned char> buf;
-
-        while(progress < totalSize)
-        {
-            istrm.read(reinterpret_cast<char*>(&packet_header),sizeof(unsigned char));
-            decode_packet_header(packet_header, to_repeat, run_len);
-
-            if(to_repeat)
-            {
-                readU8(istrm, buf, chnl);
-
-                Vec4 color(0.0,0.0,0.0,255.0);
-                for(int c=0;c<chnl;++c) color[c]= buf[c];
-
-                for(int l=0;l<run_len;++l)
-                {
-                    tmp_img->setPixel(col, line, color);
-                    if(++col >= w) { col=0; line++; }
-                }
-            }
-            else
-            {
-                readU8(istrm, buf, run_len*chnl);
-
-                for(int l=0;l<run_len;++l)
-                {
-                    Vec4 color(0.0,0.0,0.0,255.0);
-                    for(int c=0;c<chnl;++c) color[c]= buf[l*chnl+c];
-
-                    tmp_img->setPixel(col, line, color);
-                    if(++col >= w) { col=0; line++; }
-                }
-            }
-
-            progress += run_len*chnl;
-        }*/
-
         readU8_rle(istrm, tmp_img->data(), totalSize, chnl);
 
     }
     else // no compression - just read
     {
         readU8(istrm, tmp_img->data(), totalSize);
-        // istrm.read(reinterpret_cast<char*>(tmp_img->data()),totalSize); // image data
     }
 
-    if(chnl == 1) result = tmp_img;
-    else if(chnl == 2) result->copy(tmp_img, {1,0});
-    else if(chnl == 3) result->copy(tmp_img, {2,1,0});
-    else if(chnl == 4) result->copy(tmp_img, {2,1,0,3});
+    bool effective_flip_y = !flipY; // imp::Image seems to be flipped on screen (has to be confirmed)
+    if(chnl == 1) result->copy(tmp_img, {0,1,2,3}, effective_flip_y);
+    else if(chnl == 2) result->copy(tmp_img, {1,0}, effective_flip_y);
+    else if(chnl == 3) result->copy(tmp_img, {2,1,0}, effective_flip_y);
+    else if(chnl == 4) result->copy(tmp_img, {2,1,0,3}, effective_flip_y);
 
     return result;
 }

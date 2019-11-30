@@ -40,19 +40,23 @@ void Image::copy(const Image::Ptr& other)
 {
     std::vector<int> mask(channels());
     for(int i=0;i<channels();++i) mask[i]=i;
-    copy(other,mask);
+    copy(other,mask,false);
 }
 
-void Image::copy(const Image::Ptr& other, const std::vector<int>& mask)
+//--------------------------------------------------------------
+void Image::copy(const Image::Ptr& other, const std::vector<int>& mask, bool flipY)
 {
     int c = mask.size();
     resize(other->width(), other->height(), c);
     for(int i=0;i<width();++i) for(int j=0;j<height();++j)
     {
-        Vec4 res;
-        Vec4 pixel = other->getPixel(i,j);
-        for(int k=0;k<c;++k) res[k] = pixel[ mask[k] ];
-        setPixel(i,j,res);
+        Vec2 uv(i,j);
+        Vec4 pixel = other->getPixel(uv);
+        Vec4 swizzled;
+        for(int k=0;k<c;++k) swizzled[k] = pixel[ mask[k] ];
+
+        if(flipY) uv[1] = height()-uv[1];
+        setPixel(uv,swizzled);
     }
 }
 

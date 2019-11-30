@@ -21,7 +21,8 @@ public:
     struct Options
     {
         FileType fileType;
-        Options() : fileType(FileType_TGA) {}
+        bool _flipY;
+        Options() : fileType(FileType_TGA), _flipY(false) {}
     };
     
     ImageIO();

@@ -21,7 +21,7 @@ public:
     ~Image();
     
     void copy(const Image::Ptr& other);
-    void copy(const Image::Ptr& other, const std::vector<int>& mask);
+    void copy(const Image::Ptr& other, const std::vector<int>& mask, bool flipY = false);
 
     void setPixel(int x, int y, const Vec4& col);
     Vec4 getPixel(int x, int y) const;

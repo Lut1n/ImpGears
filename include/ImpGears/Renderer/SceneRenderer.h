@@ -28,6 +28,7 @@ public:
     enum RenderFrame
     {
         RenderFrame_Default,
+        RenderFrame_Color,
         RenderFrame_ShadowMap,
         RenderFrame_Environment,
         RenderFrame_Lighting,

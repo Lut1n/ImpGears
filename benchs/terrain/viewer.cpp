@@ -185,21 +185,23 @@ renderModeMngr.setArgs(argc, argv);
         double t = clock.getElapsedTime().asSeconds();
 
         double duration = 3.0;
-        int frame_count = 7;
+        int frame_count = 8;
         int frame_index = int(t/duration) % frame_count;
         if(frame_index == 0)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
         else if(frame_index == 1)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
         else if(frame_index == 2)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
         else if(frame_index == 3)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
         else if(frame_index == 4)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
         else if(frame_index == 5)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
         else if(frame_index == 6)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+        else if(frame_index == 7)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
 

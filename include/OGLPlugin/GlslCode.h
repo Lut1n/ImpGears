@@ -42,7 +42,7 @@ varying vec3 v_m;
 varying vec3 v_mv;
 varying vec3 v_vertex;
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
               out vec3 out_position,
               out vec3 out_normal,
@@ -53,7 +53,7 @@ void lighting(out vec4 out_lighting,
     color *= textureColor(v_texCoord);
     vec4 emi = textureEmissive(v_texCoord);
 
-    out_lighting = max(emi,color);
+    out_color = max(emi,color);
     out_emissive = emi;
     out_position = normalize(v_vertex) * 0.5 + 0.5;
     out_normal = vec3(0.0,0.0,1.0);
@@ -175,81 +175,30 @@ mat3 build_tbn(vec3 n_ref)
     return tbn;
 }
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
               out vec3 out_position,
               out vec3 out_normal,
               out float out_metalness,
               out float out_depth)
 {
-    float lightPower = u_lightAtt[0];
     float shininess = u_lightAtt[1];
 
     vec3 color = u_color.xyz * gl_Color.xyz;
-
-    // model space
-    vec3 light_dir = u_lightPos - v_m;
-    float dist = length(light_dir);
-    dist = dist * dist;
-    light_dir = normalize(light_dir);
-
-    // inverted TBN Matrix for computation in tangent space
-    // vec3 n_z = normalize(v_n);
-    // vec3 n_x = vec3(1.0,0.0,0.0);
-    // vec3 n_y = cross(n_z,n_x);
-    // vec3 n_x2 = vec3(0.0,1.0,0.0);
-    // vec3 n_y_2 = cross(n_z,n_x2);
-    // if(length(n_y) < length(n_y_2)) n_y = n_y_2;
-    //
-    // n_y = normalize(n_y);
-    // n_x = cross(n_y,n_z); n_x=normalize(n_x);
-    // mat3 tbn = mat3(n_x,n_y,n_z);
-    mat3 tbn = build_tbn( normalize(v_n) );
-    mat3 inv_tbn = inverse( tbn );
-
-    vec3 normal = textureNormal(v_texCoord);
-
-    light_dir = inv_tbn * light_dir;
-    float lambertian = max(dot(light_dir,normal),0.0);
-    float specular = 0.0;
-
-    if(lambertian > 0.0)
-    {
-        // view dir
-        vec3 view_pos = -u_view[3].xyz;
-        vec3 view_dir = inv_tbn * (view_pos - v_m);
-        view_dir=normalize(view_dir);
-
-        // blinn phong
-        vec3 halfDir = light_dir + view_dir;
-        float specAngle = max( dot(halfDir,normal), 0.0 );
-        specular = pow(specAngle, shininess);
-    }
-
-    // Color model :
-    // ambiantColor
-    // + diffColor * lambertian * lightColor * lightPower / distance
-    // + specColor * specular * lightColor * lightPower / distance
-
     color *= textureColor(v_texCoord).xyz;
-
-    vec3 colModelRes = color*0.01
-            + color*0.7 * lambertian * u_lightCol * lightPower / dist
-            + color*0.3 * specular * u_lightCol * lightPower / dist;
-
     vec4 emi = textureEmissive(v_texCoord);
-    // colModelRes = max(emi,colModelRes);
 
-    out_lighting = vec4(clamp( colModelRes,0.0,1.0 ), 1.0);
+    out_color = vec4(clamp( color,0.0,1.0 ), 1.0);
     out_emissive = clamp(emi,0.0,1.0);
     out_position = normalize(v_vertex) * 0.5 + 0.5;
 
+    vec3 normal = textureNormal(v_texCoord);
     mat3 normal_mat = transpose( inverse( mat3(u_view*u_model) ) );
 
+    mat3 tbn = build_tbn( normalize(v_n) );
     mat3 tbn_a = build_tbn( normalize(a_n) );
     out_normal = (normal_mat * tbn_a * normal) * 0.5 + 0.5;
-    // out_normal = (normal_mat * a_n) * 0.5 + 0.5;
-    out_metalness = 0.0;
+    out_metalness = shininess;
     float near = 0.1; float far = 128.0;
     out_depth = (length(v_mv.xyz) - near) / far;
 }
@@ -260,16 +209,16 @@ static std::string glsl_mrt1 = GLSL_CODE(
 
 void main()
 {
-    vec4 out_lighting;
+    vec4 out_color;
     vec4 out_emissive;
     vec3 out_position;
     vec3 out_normal;
     float out_metalness;
     float out_depth;
 
-    lighting(out_lighting,out_emissive,out_position,out_normal,out_metalness,out_depth);
+    lighting(out_color,out_emissive,out_position,out_normal,out_metalness,out_depth);
 
-    gl_FragData[0] = out_lighting;
+    gl_FragData[0] = out_color;
 }
 
 );
@@ -278,16 +227,16 @@ static std::string glsl_mrt2 = GLSL_CODE(
 
 void main()
 {
-    vec4 out_lighting;
+    vec4 out_color;
     vec4 out_emissive;
     vec3 out_position;
     vec3 out_normal;
     float out_metalness;
     float out_depth;
 
-    lighting(out_lighting,out_emissive,out_position,out_normal,out_metalness,out_depth);
+    lighting(out_color,out_emissive,out_position,out_normal,out_metalness,out_depth);
 
-    gl_FragData[0] = out_lighting;
+    gl_FragData[0] = out_color;
     gl_FragData[1] = out_emissive;
 }
 
@@ -297,16 +246,16 @@ static std::string glsl_mrt_default = GLSL_CODE(
 
 void main()
 {
-    vec4 out_lighting;
+    vec4 out_color;
     vec4 out_emissive;
     vec3 out_position;
     vec3 out_normal;
     float out_metalness;
     float out_depth;
 
-    lighting(out_lighting,out_emissive,out_position,out_normal,out_metalness,out_depth);
+    lighting(out_color,out_emissive,out_position,out_normal,out_metalness,out_depth);
 
-    gl_FragData[0] = out_lighting;
+    gl_FragData[0] = out_color;
     gl_FragData[1] = out_emissive;
     gl_FragData[2] = vec4(out_position,1.0);
     gl_FragData[3] = vec4(out_normal,1.0);

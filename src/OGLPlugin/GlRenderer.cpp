@@ -5,6 +5,7 @@
 
 #include <OGLPlugin/BloomFX.h>
 #include <OGLPlugin/EnvironmentFX.h>
+#include <OGLPlugin/LightingModel.h>
 #include <OGLPlugin/CopyFrame.h>
 #include <OGLPlugin/BlendAll.h>
 #include <OGLPlugin/RenderToCubeMap.h>
@@ -208,11 +209,14 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static std::vector<ImageSampler::Ptr> output_bloom;
         static std::vector<ImageSampler::Ptr> input_blend;
         static std::vector<ImageSampler::Ptr> output_blend;
+        static std::vector<ImageSampler::Ptr> input_lighting;
+        static std::vector<ImageSampler::Ptr> output_lighting;
         static std::vector<ImageSampler::Ptr> input_shadow_cast;
         static std::vector<ImageSampler::Ptr> output_shadow_cast;
         static std::vector<ImageSampler::Ptr> empty;
         static BlendAll::Ptr blendAll;
         static EnvironmentFX::Ptr environFX;
+        static LightingModel::Ptr lighting;
         static CopyFrame::Ptr toScreen;
 
 
@@ -222,10 +226,15 @@ void GlRenderer::render(const Graph::Ptr& scene)
             blendAll = BlendAll::create();
             toScreen = CopyFrame::create();
             environFX = EnvironmentFX::create();
+            lighting = LightingModel::create();
 
             input_bloom = { _internalFrames->get(0), _internalFrames->get(1) };
             ImageSampler::Ptr sample = ImageSampler::create(512,512,4,Vec4(0.0));
             output_bloom.push_back(sample);
+
+            input_lighting = { _internalFrames->get(0), _internalFrames->get(3), _internalFrames->get(5) };
+            output_lighting.push_back( ImageSampler::create(512,512,4,Vec4(0.0)) );
+
             input_blend.push_back(_internalFrames->get(0));
             input_blend.push_back(sample);
             output_blend.push_back(ImageSampler::create(512,512,4,Vec4(0.0)));
@@ -240,6 +249,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             toScreen->setup(output_blend, empty);
             environFX->setup(input_shadow_cast, output_shadow_cast);
             environFX->setCubeMap(environment);
+            lighting->setup(input_lighting, output_lighting);
         }
 
 
@@ -249,6 +259,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
         case RenderFrame_Default:
             toScreen->setInput( output_blend[0] ) ;
             break;
+        case RenderFrame_Color:
+            toScreen->setInput( _internalFrames->get(0) ) ;
+            break;
         case RenderFrame_ShadowMap:
             toScreen->setInput( output_shadow_cast[0] ) ;
             break;
@@ -256,7 +269,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             toScreen->setInput( output_blend[0] ) ;
             break;
         case RenderFrame_Lighting:
-            toScreen->setInput( _internalFrames->get(0) ) ;
+            toScreen->setInput( output_lighting[0] ) ;
             break;
         case RenderFrame_Depth:
             toScreen->setInput( _internalFrames->get(5) ) ;
@@ -281,10 +294,23 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
         _bloomFX->apply(this);
         if(camera)
+        {
             environFX->setCameraPos(camera->getAbsolutePosition());
+            lighting->setCameraPos(camera->getAbsolutePosition());
+        }
         else
+        {
             environFX->setCameraPos(Vec3(0.0));
+            lighting->setCameraPos(Vec3(0.0));
+        }
+        if(queue->_lights.size() > 0)
+        {
+            Vec3 wPos = queue->_lights[0]->_worldPosition;
+            Vec3 vPos = Vec3(Vec4(wPos,1.0) * camera->getViewMatrix());
+            lighting->setLightPos( vPos );
+        }
         environFX->apply(this);
+        lighting->apply(this);
         blendAll->apply(this);
         toScreen->apply(this);
 

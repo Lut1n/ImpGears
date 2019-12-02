@@ -1,4 +1,4 @@
-#include <OGLPlugin/EnvironmentFX.h>
+#include <OGLPlugin/ShadowCasting.h>
 #include <OGLPlugin/GlRenderer.h>
 
 #include <SceneGraph/QuadNode.h>
@@ -78,19 +78,19 @@ void lighting(out vec4 out_lighting,
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-EnvironmentFX::EnvironmentFX()
+ShadowCasting::ShadowCasting()
 {
 
 }
 
 //--------------------------------------------------------------
-EnvironmentFX::~EnvironmentFX()
+ShadowCasting::~ShadowCasting()
 {
 
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
+void ShadowCasting::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
 {
     _input = input;
     _output = output;
@@ -106,19 +106,19 @@ void EnvironmentFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::setCubeMap(CubeMapSampler::Ptr cubemap)
+void ShadowCasting::setCubeMap(CubeMapSampler::Ptr cubemap)
 {
     _cubemap = cubemap;
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::setCameraPos(const Vec3& cameraPos)
+void ShadowCasting::setCameraPos(const Vec3& cameraPos)
 {
     _camera = cameraPos;
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::apply(GlRenderer* renderer)
+void ShadowCasting::apply(GlRenderer* renderer)
 {
     if(_output.size() > 0)
     {

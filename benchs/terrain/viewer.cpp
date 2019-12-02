@@ -2,6 +2,7 @@
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/GeoNode.h>
 #include <SceneGraph/QuadNode.h>
+#include <SceneGraph/RenderPass.h>
 #include <Descriptors/ImageIO.h>
 #include <Descriptors/FileInfo.h>
 #include <Descriptors/JsonImageOp.h>
@@ -9,6 +10,8 @@
 #include <Renderer/CpuRenderer.h>
 
 #include <Plugins/RenderPlugin.h>
+
+#include <Graphics/ImageOperation.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -28,7 +31,7 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
     geometry = geometry.subdivise(10);
     Geometry::intoCCW(geometry);
     geometry.generateColors(Vec3(1.0));
-    geometry.generateTexCoords(Geometry::TexGenMode_Cubic,10.0);
+    geometry.generateTexCoords(Geometry::TexGenMode_Cubic,1.0);
     geometry.scale(Vec3(1.0,1.0,1.0));
 
     for(int k=0;k<geometry.size();++k)
@@ -40,7 +43,7 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
         if(v[1]>0.0) v[1] = hm->get(uv)[0] * 5.0;
         geometry._vertices[k] = v;
     }
-    geometry.scale(Vec3(10.0,1.0,10.0));
+    geometry.scale(Vec3(4.0,1.0,4.0));
     geometry.generateNormals(Geometry::NormalGenMode_PerFace);
     // geometry.interpolateNormals();
 
@@ -72,9 +75,16 @@ int main(int argc, char* argv[])
 RenderModeManager renderModeMngr;
 renderModeMngr.setArgs(argc, argv);
 
-    ImageSampler::Ptr sampler, color, emi;
+    ImageSampler::Ptr sampler, color, emi, normals;
     loadSamplers(sampler,color);
     emi = ImageSampler::create(8, 8, 4, Vec4(1.0));
+
+    normals = ImageSampler::create(128.0,128.0,4,Vec4(0.0,0.0,1.0,1.0));
+    normals->setWrapping(ImageSampler::Wrapping_Repeat);
+    normals->setFiltering(ImageSampler::Filtering_Linear);
+    BumpToNormalOperation op;
+    op.setTarget(sampler->getSource());
+    op.execute(normals->getSource());
 
     sf::Clock clock;
 
@@ -101,6 +111,7 @@ renderModeMngr.setArgs(argc, argv);
     Material::Ptr material = Material::create(Vec3(0.3,1.0,0.4), 1.0);
     material->_baseColor = color;
     // material->_emissive = color;
+    material->_normalmap = normals;
 
     Material::Ptr light_material = Material::create(Vec3(1.0), 1.0);
     light_material->_emissive = emi;
@@ -110,6 +121,7 @@ renderModeMngr.setArgs(argc, argv);
     GeoNode::Ptr terrainNode = GeoNode::create(terrain, false);
     terrainNode->setReflexion(r);
     terrainNode->setMaterial(material);
+    //terrainNode->setPosition(Vec3(0.0,10.0,0.0));
 
     Geometry::Ptr coords = buildCoord();
     coords->scale(Vec3(30.0));
@@ -138,8 +150,14 @@ renderModeMngr.setArgs(argc, argv);
     root->addNode(coordsNode);
     root->addNode(light);
     root->addNode(pointNode);
-    // root->addNode(sky);
+    root->addNode(sky);
     graph->setRoot(root);
+
+    RenderPass::Ptr rp_info = RenderPass::create();
+    rp_info->enablePass(RenderPass::Pass_EnvironmentMapping);
+    coordsNode->setRenderPass(rp_info);
+    sky->setRenderPass(rp_info);
+    pointNode->setRenderPass(rp_info);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
@@ -147,6 +165,8 @@ renderModeMngr.setArgs(argc, argv);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));
+
+    renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
 
     bool generate_cubemap = false;
 
@@ -160,15 +180,36 @@ renderModeMngr.setArgs(argc, argv);
             if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
                 window.close();
         }
+        if(!window.isOpen()) break;
+
         double t = clock.getElapsedTime().asSeconds();
 
-        Vec3 lp(cos(t)*5.0,10.0,sin(t)*4.0);
+        double duration = 3.0;
+        int frame_count = 7;
+        int frame_index = int(t/duration) % frame_count;
+        if(frame_index == 0)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
+        else if(frame_index == 1)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
+        else if(frame_index == 2)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
+        else if(frame_index == 3)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
+        else if(frame_index == 4)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
+        else if(frame_index == 5)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+        else if(frame_index == 6)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
+
+
+        Vec3 lp(cos(t)*5.0,5.0,sin(t)*4.0);
         light->setPosition(lp);
         pointNode->setPosition(lp);
 
         Vec3 lp2(cos(-t * 0.2),1.0,sin(-t * 0.2));
-        camera->setPosition(lp2*15.0);
-        camera->setTarget(Vec3(0.0f, 10.f, 0.0f));
+        camera->setPosition(lp2*Vec3(10.0,5.0,10.0));
+        camera->setTarget(Vec3(0.0f, 0.f, 0.0f));
 
 
         if(generate_cubemap)

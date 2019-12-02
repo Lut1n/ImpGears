@@ -22,7 +22,9 @@ public:
     GlRenderer();
     virtual ~GlRenderer();
 
-    void applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrideCamera = nullptr);
+    RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene,
+                                        Camera::Ptr overrideCamera = nullptr,
+                                        SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default);
 
     virtual void render(const Graph::Ptr& scene);
 
@@ -42,7 +44,7 @@ protected:
     BloomFX* _bloomFX;
     EnvironmentFX* _envFX;
 
-
+    RenderTarget::Ptr _internalFrames;
     RenderTarget::Ptr _renderTargets;
 };
 

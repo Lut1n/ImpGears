@@ -1,5 +1,5 @@
-#ifndef IMP_ENVIRONMENT_FX_H
-#define IMP_ENVIRONMENT_FX_H
+#ifndef IMP_SHADOW_CASTING_FX_H
+#define IMP_SHADOW_CASTING_FX_H
 
 #include <Core/Object.h>
 #include <Graphics/Sampler.h>
@@ -11,14 +11,14 @@ IMPGEARS_BEGIN
 
 struct GlRenderer;
 
-class IMP_API EnvironmentFX : public FxRenderPass
+class IMP_API ShadowCasting : public FxRenderPass
 {
 public:
 
-    Meta_Class(EnvironmentFX)
+    Meta_Class(ShadowCasting)
 
-    EnvironmentFX();
-    virtual ~EnvironmentFX();
+    ShadowCasting();
+    virtual ~ShadowCasting();
 
     virtual void setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output);
 
@@ -37,4 +37,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_ENVIRONMENT_FX_H
+#endif // IMP_SHADOW_CASTING_FX_H

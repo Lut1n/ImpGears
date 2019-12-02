@@ -1,5 +1,5 @@
-#ifndef IMP_FRAME_TO_SCREEN_H
-#define IMP_FRAME_TO_SCREEN_H
+#ifndef IMP_COPY_FRAME_H
+#define IMP_COPY_FRAME_H
 
 #include <Core/Object.h>
 
@@ -9,14 +9,14 @@ IMPGEARS_BEGIN
 
 struct GlRenderer;
 
-class IMP_API FrameToScreen : public FxRenderPass
+class IMP_API CopyFrame : public FxRenderPass
 {
 public:
 
-    Meta_Class(FrameToScreen)
+    Meta_Class(CopyFrame)
 
-    FrameToScreen();
-    virtual ~FrameToScreen();
+    CopyFrame();
+    virtual ~CopyFrame();
 
     virtual void setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output);
 
@@ -31,4 +31,4 @@ protected:
 
 IMPGEARS_END
 
-#endif // IMP_FRAME_TO_SCREEN_H
+#endif // IMP_COPY_FRAME_H

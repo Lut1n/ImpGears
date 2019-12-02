@@ -4,6 +4,7 @@
 #include <Core/Object.h>
 #include <Graphics/Sampler.h>
 #include <Renderer/RenderTarget.h>
+#include <Renderer/SceneRenderer.h>
 #include <SceneGraph/Graph.h>
 #include <SceneGraph/Camera.h>
 
@@ -25,7 +26,7 @@ public:
     void setCubeMap(CubeMapSampler::Ptr cubemap);
     CubeMapSampler::Ptr getCubeMap();
 
-    void render(const Graph::Ptr& scene, const Vec3& center);
+    void render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType = SceneRenderer::RenderFrame_Default);
 
 protected:
 private:

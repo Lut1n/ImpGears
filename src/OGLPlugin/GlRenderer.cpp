@@ -5,8 +5,9 @@
 
 #include <OGLPlugin/BloomFX.h>
 #include <OGLPlugin/EnvironmentFX.h>
-#include <OGLPlugin/FrameToScreen.h>
+#include <OGLPlugin/CopyFrame.h>
 #include <OGLPlugin/BlendAll.h>
+#include <OGLPlugin/RenderToCubeMap.h>
 
 IMPGEARS_BEGIN
 
@@ -56,7 +57,9 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrideCamera)
+RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene,
+                                                Camera::Ptr overrideCamera,
+                                                SceneRenderer::RenderFrame renderPass)
 {
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
@@ -90,12 +93,15 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrid
             latt[1] = mat->_shininess;
             color = mat->_color;
 
-            if(mat->_baseColor)
-                    queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
-            if(mat->_normalmap)
-                    queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
-            if(mat->_emissive)
-                    queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+            if(renderPass==SceneRenderer::RenderFrame_Default)
+            {
+                if(mat->_baseColor)
+                        queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
+                if(mat->_normalmap)
+                        queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
+                if(mat->_emissive)
+                        queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+            }
 
             queue->_states[i]->setUniform("u_view", view);
 
@@ -104,12 +110,18 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrid
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
             // queue->_states[i]->setUniform("u_normal", normalMat );
 
-            queue->_states[i]->setUniform("u_lightPos", lightPos);
-            queue->_states[i]->setUniform("u_lightCol", lightCol);
-            queue->_states[i]->setUniform("u_lightAtt", latt);
-            queue->_states[i]->setUniform("u_color", color);
+            if(renderPass==SceneRenderer::RenderFrame_Default)
+            {
+                queue->_states[i]->setUniform("u_lightPos", lightPos);
+                queue->_states[i]->setUniform("u_lightCol", lightCol);
+                queue->_states[i]->setUniform("u_lightAtt", latt);
+                queue->_states[i]->setUniform("u_color", color);
+            }
             applyState(queue->_states[i]);
-            drawGeometry(geode);
+
+            RenderPass::Ptr renderPass_info = geode->getState()->getRenderPass();
+            if(renderPass!=SceneRenderer::RenderFrame_Environment || renderPass_info->isPassEnabled(RenderPass::Pass_EnvironmentMapping))
+                drawGeometry(geode);
         }
         else if(clear)
         {
@@ -118,12 +130,21 @@ void GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, Camera::Ptr overrid
     }
 
     _renderPlugin->unbind();
+
+    return queue;
 }
 
 //---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
 {
     if(_renderPlugin == nullptr) return;
+
+    if(_internalFrames == nullptr)
+    {
+        int mrt_size = 6;
+        _internalFrames = RenderTarget::create();
+        _internalFrames->build(512.0,512.0,mrt_size,true);
+    }
 
     if(_renderTargets == nullptr && _targets.size() > 0)
     {
@@ -136,37 +157,49 @@ void GlRenderer::render(const Graph::Ptr& scene)
     }
 
 
-    static EnvironmentFX::Ptr environment;
-    Graph::Ptr cloned = scene;
+    static RenderToCubeMap::Ptr environment_renderer;
+    static CubeMapSampler::Ptr environment;
+
     if(isFeatureEnabled(Feature_Shadow))
     {
-        if(!environment)
+        if(environment_renderer == nullptr)
         {
-            environment = EnvironmentFX::create();
-            environment->setup();
+            // environment = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
+            environment = CubeMapSampler::create(512.0,512.0,4,Vec4(1.0));
+            environment_renderer = RenderToCubeMap::create(this);
+            environment_renderer->setCubeMap(environment);
         }
-        cloned = environment->begin(this, scene);
 
+        environment_renderer->render(scene, Vec3(1.0), SceneRenderer::RenderFrame_Environment);
     }
 
 
-    if(!_direct && _renderTargets)
-    {
-        _renderPlugin->init(_renderTargets);
-        _renderPlugin->bind(_renderTargets);
-        _renderTargets->change();
-    }
-    else
-    {
-        _renderPlugin->unbind();
-    }
+    Graph::Ptr cloned = scene;
+    // if(isFeatureEnabled(Feature_Shadow))
+    // {
+    //     if(!environment)
+    //     {
+    //         environment = EnvironmentFX::create();
+    //         environment->setup();
+    //     }
+    //     cloned = environment->begin(this, scene);
+    //
+    // }
 
-    applyRenderVisitor(cloned);
 
-    if(isFeatureEnabled(Feature_Shadow))
-    {
-        environment->end(this, scene);
-    }
+    _renderPlugin->init(_internalFrames);
+    _renderPlugin->bind(_internalFrames);
+    _internalFrames->change();
+
+
+    RenderQueue::Ptr queue = applyRenderVisitor(cloned);
+    const Camera* camera = queue->_camera;
+
+
+    // if(isFeatureEnabled(Feature_Shadow))
+    // {
+    //     environment->end(this, scene);
+    // }
 
 
     if(!_direct && isFeatureEnabled(Feature_Bloom))
@@ -175,30 +208,41 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static std::vector<ImageSampler::Ptr> output_bloom;
         static std::vector<ImageSampler::Ptr> input_blend;
         static std::vector<ImageSampler::Ptr> output_blend;
+        static std::vector<ImageSampler::Ptr> input_shadow_cast;
+        static std::vector<ImageSampler::Ptr> output_shadow_cast;
         static std::vector<ImageSampler::Ptr> empty;
         static BlendAll::Ptr blendAll;
-        static FrameToScreen::Ptr toScreen;
+        static EnvironmentFX::Ptr environFX;
+        static CopyFrame::Ptr toScreen;
 
 
         if(_bloomFX == nullptr)
         {
             _bloomFX = new BloomFX();
             blendAll = BlendAll::create();
-            toScreen = FrameToScreen::create();
+            toScreen = CopyFrame::create();
+            environFX = EnvironmentFX::create();
 
-            input_bloom = { _renderTargets->get(0), _renderTargets->get(1) };
+            input_bloom = { _internalFrames->get(0), _internalFrames->get(1) };
             ImageSampler::Ptr sample = ImageSampler::create(512,512,4,Vec4(0.0));
             output_bloom.push_back(sample);
-            input_blend.push_back(_renderTargets->get(0));
+            input_blend.push_back(_internalFrames->get(0));
             input_blend.push_back(sample);
             output_blend.push_back(ImageSampler::create(512,512,4,Vec4(0.0)));
+
+            input_shadow_cast.push_back( _internalFrames->get(3) );
+            input_shadow_cast.push_back( _internalFrames->get(5) );
+            input_shadow_cast.push_back( _internalFrames->get(0) );
+            output_shadow_cast.push_back(ImageSampler::create(512,512,4,Vec4(1.0)));
 
             _bloomFX->setup( input_bloom, output_bloom );
             blendAll->setup(input_blend, output_blend);
             toScreen->setup(output_blend, empty);
-
-            // toScreen->setup(_renderTargets->getList(), empty);
+            environFX->setup(input_shadow_cast, output_shadow_cast);
+            environFX->setCubeMap(environment);
         }
+
+
 
         switch(getOutputFrame())
         {
@@ -206,28 +250,28 @@ void GlRenderer::render(const Graph::Ptr& scene)
             toScreen->setInput( output_blend[0] ) ;
             break;
         case RenderFrame_ShadowMap:
-            toScreen->setInput( output_blend[0] ) ;
+            toScreen->setInput( output_shadow_cast[0] ) ;
             break;
         case RenderFrame_Environment:
             toScreen->setInput( output_blend[0] ) ;
             break;
         case RenderFrame_Lighting:
-            toScreen->setInput( _renderTargets->get(0) ) ;
+            toScreen->setInput( _internalFrames->get(0) ) ;
             break;
         case RenderFrame_Depth:
-            toScreen->setInput( output_blend[0] ) ;
+            toScreen->setInput( _internalFrames->get(5) ) ;
             break;
         case RenderFrame_Emissive:
-            toScreen->setInput( _renderTargets->get(1) ) ;
+            toScreen->setInput( _internalFrames->get(1) ) ;
             break;
         case RenderFrame_Bloom:
             toScreen->setInput( output_bloom[0] ) ;
             break;
         case RenderFrame_Normals:
-            toScreen->setInput( output_blend[0] ) ;
+            toScreen->setInput( _internalFrames->get(3) ) ;
             break;
         case RenderFrame_Metalness:
-            toScreen->setInput( output_blend[0] ) ;
+            toScreen->setInput( _internalFrames->get(2) ) ;
             break;
         default: // assume RenderFrame_Default
             toScreen->setInput( output_blend[0] ) ;
@@ -236,12 +280,30 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
 
         _bloomFX->apply(this);
+        if(camera)
+            environFX->setCameraPos(camera->getAbsolutePosition());
+        else
+            environFX->setCameraPos(Vec3(0.0));
+        environFX->apply(this);
         blendAll->apply(this);
         toScreen->apply(this);
 
 
         return;
     }
+
+
+
+    // if(!_direct && _renderTargets)
+    // {
+    //     _renderPlugin->init(_renderTargets);
+    //     _renderPlugin->bind(_renderTargets);
+    //     _renderTargets->change();
+    // }
+    // else
+    // {
+    //     _renderPlugin->unbind();
+    // }
 }
 
 

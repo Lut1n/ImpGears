@@ -1,4 +1,4 @@
-#include <OGLPlugin/FrameToScreen.h>
+#include <OGLPlugin/CopyFrame.h>
 #include <OGLPlugin/GlRenderer.h>
 
 #include <SceneGraph/QuadNode.h>
@@ -13,7 +13,12 @@ varying vec2 v_texCoord;
 
 vec4 i_col(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
+void lighting(out vec4 out_lighting,
+              out vec4 out_emissive,
+              out vec3 out_position,
+              out vec3 out_normal,
+              out float out_metalness,
+              out float out_depth)
 {
     out_lighting = i_col(v_texCoord);
 }
@@ -24,19 +29,19 @@ void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,ou
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-FrameToScreen::FrameToScreen()
+CopyFrame::CopyFrame()
 {
 
 }
 
 //--------------------------------------------------------------
-FrameToScreen::~FrameToScreen()
+CopyFrame::~CopyFrame()
 {
 
 }
 
 //--------------------------------------------------------------
-void FrameToScreen::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
+void CopyFrame::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
 {
     _input = input;
     _output = output;
@@ -52,7 +57,7 @@ void FrameToScreen::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
 }
 
 //--------------------------------------------------------------
-void FrameToScreen::apply(GlRenderer* renderer)
+void CopyFrame::apply(GlRenderer* renderer)
 {
     if(_output.size() > 0)
     {
@@ -65,7 +70,7 @@ void FrameToScreen::apply(GlRenderer* renderer)
         renderer->_renderPlugin->unbind();
     }
     _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
-    renderer->applyRenderVisitor(_graph);
+    renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);
 }
 
 

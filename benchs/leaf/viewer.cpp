@@ -84,24 +84,40 @@ int main(int argc, char* argv[])
     vegetal->addNode(pointNode);
     vegetal->setPosition(Vec3(0.0,0.3,0.0));
 
-    SkyBox::Ptr sky = SkyBox::create();
+    std::vector<std::string> box_filenames =
+    {
+        "./testbox/testbox_right.tga",
+        "./testbox/testbox_left.tga",
+        "./testbox/testbox_top.tga",
+        "./testbox/testbox_bottom.tga",
+        "./testbox/testbox_front.tga",
+        "./testbox/testbox_back.tga",
+    };
+    SkyBox::Ptr sky = SkyBox::create(  );
 
     // setup scene
     root->addNode(camera);
     root->addNode(vegetal);
     root->addNode(coordNode);
     root->addNode(light);
-    // root->addNode(sky);
+    root->addNode(sky);
     graph->setRoot(root);
+
+    RenderPass::Ptr rp_info = RenderPass::create();
+    rp_info->enablePass(RenderPass::Pass_EnvironmentMapping);
+    coordNode->setRenderPass(rp_info);
+    sky->setRenderPass(rp_info);
+    pointNode->setRenderPass(rp_info);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     // graph->getInitState()->setPerspectiveProjection(90.0, 1.0, 0.1, 1024.0);
 
-    // renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-    renderer->setDirect(false);
+    renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    // renderer->setDirect(false);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
+    // renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
 
     int frame_index = 0;
 
@@ -114,16 +130,26 @@ int main(int argc, char* argv[])
                 window.close();
         }
 
+        if( !window.isOpen() ) break;
+
         double t = clock.getElapsedTime().asSeconds();
 
-        frame_index = int(t/3) % 4;
+        double duration = 3.0;
+        int frame_count = 7;
+        frame_index = int(t/duration) % frame_count;
         if(frame_index == 0)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
         else if(frame_index == 1)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
         else if(frame_index == 2)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
         else if(frame_index == 3)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
+        else if(frame_index == 4)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
+        else if(frame_index == 5)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+        else if(frame_index == 6)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
         

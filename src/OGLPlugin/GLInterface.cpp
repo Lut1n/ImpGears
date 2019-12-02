@@ -306,19 +306,20 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
         fullFragCode = fullFragCode + program->_fragCode_lighting;
     }
 
-    ReflexionModel::MRT mrt = program->getMRT();
-    if(mrt == ReflexionModel::MRT_1_Col)
-    {
-        fullFragCode = fullFragCode + glsl_mrt1;
-    }
-    else if(mrt == ReflexionModel::MRT_2_Col_Emi)
-    {
-        fullFragCode = fullFragCode + glsl_mrt2;
-    }
-    else
-    {
-        fullFragCode = fullFragCode + program->_fragCode_mrt;
-    }
+    // ReflexionModel::MRT mrt = program->getMRT();
+    // if(mrt == ReflexionModel::MRT_1_Col)
+    // {
+    //     fullFragCode = fullFragCode + glsl_mrt1;
+    // }
+    // else if(mrt == ReflexionModel::MRT_2_Col_Emi)
+    // {
+    //     fullFragCode = fullFragCode + glsl_mrt2;
+    // }
+    // else
+    // {
+    //     fullFragCode = fullFragCode + program->_fragCode_mrt;
+    // }
+    fullFragCode = fullFragCode + glsl_mrt_default;
 
     d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
         s_internalState->callbacks[program] = d;

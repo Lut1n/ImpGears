@@ -62,10 +62,11 @@ CubeMapSampler::Ptr RenderToCubeMap::getCubeMap()
 }
 
 //--------------------------------------------------------------
-void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center)
+void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType)
 {
     _clone->getInitState()->clone(scene->getInitState());
     _clone->getInitState()->setUniform("u_projection", _proj);
+    // _clone->getInitState()->setViewport( Vec4(0.0,0.0,1024.0,1024.0) );
     _clone->setRoot(scene->getRoot());
 
     for(int i=0;i<6;++i)
@@ -73,13 +74,14 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center)
         _camera->setPosition(center);
         _camera->setAbsolutePosition(center);
         _camera->setTarget( center + _directions[i] );
-        _camera->setUpDir( _upDirections[i] );
+        _camera->setUpDir( _upDirections[i] * -1.0 );
+        _camera->lookAt();
 
         _renderer->_renderPlugin->init(_targets[i]);
         _renderer->_renderPlugin->bind(_targets[i]);
         _targets[i]->change();
 
-        _renderer->applyRenderVisitor( _clone, _camera );
+        _renderer->applyRenderVisitor( _clone, _camera, frameType );
 
         _renderer->_renderPlugin->unbind();
     }

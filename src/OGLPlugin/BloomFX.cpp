@@ -14,7 +14,12 @@ varying vec2 v_texCoord;
 
 vec4 i_emi(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,out vec4 out_emissive,out vec3 out_normal,out float out_metalness,out float out_depth)
+void lighting(out vec4 out_lighting,
+              out vec4 out_emissive,
+              out vec3 out_position,
+              out vec3 out_normal,
+              out float out_metalness,
+              out float out_depth)
 {
     const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
@@ -87,7 +92,7 @@ void BloomFX::process(GlRenderer* renderer, int subpassID)
     _graph->getInitState()->setUniform("u_input_sampler", sampler, 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", h);
 
-    renderer->applyRenderVisitor(_graph);
+    renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Bloom);
 }
 
 //--------------------------------------------------------------
@@ -96,7 +101,7 @@ void BloomFX::apply(GlRenderer* renderer)
     bind(renderer, 0);
     _graph->getInitState()->setUniform("u_input_sampler", _input[1], 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
-    renderer->applyRenderVisitor(_graph);
+    renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Bloom);
 
     for(int i=1;i<_subpassCount;++i)
     {

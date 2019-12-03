@@ -155,18 +155,23 @@ renderModeMngr.setArgs(argc, argv);
 
     RenderPass::Ptr rp_info = RenderPass::create();
     rp_info->enablePass(RenderPass::Pass_EnvironmentMapping);
+    RenderPass::Ptr rp_info2 = RenderPass::create();
+    rp_info2->enablePass(RenderPass::Pass_ShadowMapping);
     coordsNode->setRenderPass(rp_info);
     sky->setRenderPass(rp_info);
     pointNode->setRenderPass(rp_info);
 
+    terrainNode->setRenderPass(rp_info2);
+
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-    renderer->setDirect(false);
+    renderer->enableFeature(SceneRenderer::Feature_Environment, true);
+    renderer->setDirect(true);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));
 
-    renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
+    renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
     bool generate_cubemap = false;
 
@@ -184,11 +189,11 @@ renderModeMngr.setArgs(argc, argv);
 
         double t = clock.getElapsedTime().asSeconds();
 
-        double duration = 3.0;
-        int frame_count = 8;
-        int frame_index = int(t/duration) % frame_count;
+        // double duration = 5.0;
+        // int frame_count = 2;
+        int frame_index = 5; // int(t/duration) % frame_count;
         if(frame_index == 0)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
         else if(frame_index == 1)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
         else if(frame_index == 2)
@@ -198,11 +203,13 @@ renderModeMngr.setArgs(argc, argv);
         else if(frame_index == 4)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
         else if(frame_index == 5)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Environment);
         else if(frame_index == 6)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
         else if(frame_index == 7)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
+        else if(frame_index == 8)
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Metalness);
 
 
         Vec3 lp(cos(t)*5.0,5.0,sin(t)*4.0);

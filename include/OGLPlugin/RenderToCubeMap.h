@@ -26,7 +26,7 @@ public:
     void setCubeMap(CubeMapSampler::Ptr cubemap);
     CubeMapSampler::Ptr getCubeMap();
 
-    void render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType = SceneRenderer::RenderFrame_Default);
+    void render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType = SceneRenderer::RenderFrame_Default, ReflexionModel::Ptr overrideShader = nullptr);
 
 protected:
 private:

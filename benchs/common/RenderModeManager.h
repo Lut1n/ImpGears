@@ -53,10 +53,10 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
         {
             renderer = plugin->getRenderer();
             renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-            viewport.set(0.0,0.0,512,512);
-            target = Image::create(512,512,4);
+            viewport.set(0.0,0.0,1024,1024);
+            target = Image::create(1024,1024,4);
             renderer->setTarget(target, 0);
-            target2 = Image::create(512,512,4);
+            target2 = Image::create(1024,1024,4);
             renderer->setTarget(target2, 1);
         }
         else
@@ -77,22 +77,25 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
 
         viewport.set(0.0,0.0,RES,RES);
         renderer->setDirect(false);
-
-        texture.create(512, 512);
-        // texture.setSmooth(true);
-        sprite.setTexture(texture);
     }
+
+    texture.create(1024, 1024);
+    // texture.setSmooth(true);
+    sprite.setTexture(texture);
 
     return renderer;
 }
 
 void RenderModeManager::draw(sf::RenderTarget& renderTarget)
 {
-    if(offscreen)
+    if(!renderer->isDirect()) // offscreen
     {
+        if(plugin) target = renderer->getTarget(true);
+
         texture.update(target->data(),target->width(),target->height(),0,0);
-        sprite.setScale( 512.0 / target->width(), -512.0 / target->height() );
-        sprite.setPosition( 0, 512 );
+        sprite.setScale( renderTarget.getSize().x / target->width(),
+                         -renderTarget.getSize().y / target->height() );
+        sprite.setPosition( 0, renderTarget.getSize().y );
         renderTarget.draw(sprite);
     }
 }

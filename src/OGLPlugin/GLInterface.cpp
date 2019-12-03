@@ -132,8 +132,11 @@ void GlPlugin::init()
 }
 
 //--------------------------------------------------------------
-void GlPlugin::apply(ClearNode::Ptr& clear)
+void GlPlugin::apply(ClearNode::Ptr& clear, int bufferIndex)
 {
+    if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0+bufferIndex);
+
+
     GLbitfield bitfield = 0;
 
     if(clear->isColorEnable())
@@ -150,6 +153,9 @@ void GlPlugin::apply(ClearNode::Ptr& clear)
     }
 
     glClear(bitfield);
+
+    // unbind
+    if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0);
 }
 
 //--------------------------------------------------------------

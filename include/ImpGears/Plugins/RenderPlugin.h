@@ -30,7 +30,7 @@ public:
 
     virtual void init() = 0;
 
-    virtual void apply(ClearNode::Ptr& clear) = 0;
+    virtual void apply(ClearNode::Ptr& clear, int bufferIndex = -1) = 0;
 
     virtual int load(Geometry::Ptr& geo) = 0;
 

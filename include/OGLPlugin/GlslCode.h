@@ -188,7 +188,7 @@ void lighting(out vec4 out_color,
     color *= textureColor(v_texCoord).xyz;
     vec4 emi = textureEmissive(v_texCoord);
 
-    out_color = vec4(clamp( color,0.0,1.0 ), 1.0);
+    out_color = vec4(clamp( max(color,emi.xyz),0.0,1.0 ), 1.0);
     out_emissive = clamp(emi,0.0,1.0);
     out_position = normalize(v_vertex) * 0.5 + 0.5;
 
@@ -198,7 +198,7 @@ void lighting(out vec4 out_color,
     mat3 tbn = build_tbn( normalize(v_n) );
     mat3 tbn_a = build_tbn( normalize(a_n) );
     out_normal = (normal_mat * tbn_a * normal) * 0.5 + 0.5;
-    out_metalness = shininess;
+    out_metalness = shininess * 0.1;
     float near = 0.1; float far = 128.0;
     out_depth = (length(v_mv.xyz) - near) / far;
 }

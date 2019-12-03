@@ -62,7 +62,7 @@ CubeMapSampler::Ptr RenderToCubeMap::getCubeMap()
 }
 
 //--------------------------------------------------------------
-void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType)
+void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType, ReflexionModel::Ptr overrideShader)
 {
     _clone->getInitState()->clone(scene->getInitState());
     _clone->getInitState()->setUniform("u_projection", _proj);
@@ -81,7 +81,7 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
         _renderer->_renderPlugin->bind(_targets[i]);
         _targets[i]->change();
 
-        _renderer->applyRenderVisitor( _clone, _camera, frameType );
+        _renderer->applyRenderVisitor( _clone, _camera, frameType, overrideShader );
 
         _renderer->_renderPlugin->unbind();
     }

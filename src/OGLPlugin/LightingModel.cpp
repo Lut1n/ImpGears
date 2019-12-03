@@ -8,17 +8,19 @@
 
 //--------------------------------------------------------------
 static std::string glsl_lightingModel = GLSL_CODE(
-uniform sampler2D u_input_sampler_color;
+// uniform sampler2D u_input_sampler_color;
 uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
+uniform sampler2D u_input_sampler_shininess;
 uniform vec3 u_camera_pos;
 uniform vec3 u_light_pos;
 
 varying vec2 v_texCoord;
 
-vec3 i_color(vec2 uv){return texture2D(u_input_sampler_color, uv).xyz;}
+// vec3 i_color(vec2 uv){return texture2D(u_input_sampler_color, uv).xyz;}
 vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
+float i_shininess(vec2 uv){return texture2D(u_input_sampler_shininess, uv).x;}
 
 vec4 unproject(vec2 txCoord, float depth)
 {
@@ -46,7 +48,7 @@ void lighting(out vec4 out_lighting,
               out float out_metalness,
               out float out_depth)
 {
-    vec3 color = i_color(v_texCoord);
+    // vec3 color = i_color(v_texCoord);
     vec3 normal = i_normal(v_texCoord);
     float depth = i_depth(v_texCoord);
 
@@ -56,9 +58,9 @@ void lighting(out vec4 out_lighting,
     vec3 view_pos = unproject(v_texCoord, depth);
 
 
-    vec3 lightColor = vec3(1.0);
-    float lightPower = 30.0; // u_lightAtt[0];
-    float shininess = 8.0; // u_lightAtt[1];
+    // vec3 lightColor = vec3(1.0);
+    float lightPower = 100.0; // u_lightAtt[0];
+    float shininess = i_shininess(v_texCoord) * 10.0; // u_lightAtt[1];
 
     // view space
     vec3 light_dir = u_light_pos - view_pos;
@@ -69,7 +71,7 @@ void lighting(out vec4 out_lighting,
     // mat3 tbn = build_tbn( normalize(v_n) );
     // mat3 inv_tbn = inverse( tbn );
 
-    float lambertian = max(dot(light_dir,normal),0.0);
+    float lambertian = max(dot(light_dir,n),0.0);
     float specular = 0.0;
 
     // blinn phong
@@ -80,7 +82,7 @@ void lighting(out vec4 out_lighting,
 
         // blinn phong
         vec3 halfDir = light_dir + view_dir;
-        float specAngle = max( dot(halfDir,normal), 0.0 );
+        float specAngle = max( dot(halfDir,n), 0.0 );
         specular = pow(specAngle, shininess);
     }
 
@@ -89,11 +91,12 @@ void lighting(out vec4 out_lighting,
     // + diffColor * lambertian * lightColor * lightPower / distance
     // + specColor * specular * lightColor * lightPower / distance
 
-    vec3 colorModel = color*0.01
-            + color*0.7 * lambertian * lightColor * lightPower / dist
-            + color*0.3 * specular * lightColor * lightPower / dist;
+    float ambient = 0.01;
+    float colorModel = ambient
+            + 0.7 * lambertian * /*lightColor **/ lightPower / dist
+            + 0.3 * specular * /*lightColor **/ lightPower / dist;
 
-    out_lighting = vec4(colorModel,1.0);
+    out_lighting = vec4(vec3(colorModel),1.0);
 }
 
 );
@@ -119,7 +122,7 @@ void LightingModel::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
     _input = input;
     _output = output;
 
-    Vec4 viewport = Vec4(0.0,0.0,512.0,512);
+    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph(glsl_lightingModel, viewport);
 
     if(_output.size() > 0)
@@ -154,9 +157,9 @@ void LightingModel::apply(GlRenderer* renderer)
     {
         renderer->_renderPlugin->unbind();
     }
-    _graph->getInitState()->setUniform("u_input_sampler_color", _input[0], 0);
-    _graph->getInitState()->setUniform("u_input_sampler_normal", _input[1], 1);
-    _graph->getInitState()->setUniform("u_input_sampler_depth", _input[2], 2);
+    _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
+    _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
+    _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
     _graph->getInitState()->setUniform("u_camera_pos", _camera);
     _graph->getInitState()->setUniform("u_light_pos", _lightPos);
     renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);

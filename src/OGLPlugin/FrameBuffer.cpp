@@ -131,8 +131,8 @@ void FrameBuffer::build(const CubeMap::Ptr& cubemap, int faceID, bool depthBuffe
 
     if(_hasDepthBuffer)
     {
-            int width = 512.0; // _colorTextures[0]->width();
-            int height = 512.0; // _colorTextures[0]->height();
+            int width = 1024.0; // _colorTextures[0]->width();
+            int height = 1024.0; // _colorTextures[0]->height();
 
             // render buffer
             GLuint rbo = _rbo;

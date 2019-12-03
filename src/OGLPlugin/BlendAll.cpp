@@ -4,7 +4,7 @@
 #define GLSL_CODE( code ) #code
 
 //--------------------------------------------------------------
-static std::string glsl_blend = GLSL_CODE(
+static std::string glsl_mult = GLSL_CODE(
 
 uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
@@ -20,16 +20,82 @@ void lighting(out vec4 out_lighting,
               out float out_metalness,
               out float out_depth)
 {
-    out_lighting = max(i_lighting(v_texCoord), i_bloom(v_texCoord));
+    out_lighting = vec4(i_lighting(v_texCoord).xyz * i_bloom(v_texCoord).xyz, 1.0);
 }
 
 );
 
+//--------------------------------------------------------------
+static std::string glsl_min = GLSL_CODE(
+
+uniform sampler2D u_input_sampler_lighting;
+uniform sampler2D u_input_sampler_bloom;
+varying vec2 v_texCoord;
+
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+
+void lighting(out vec4 out_lighting,
+              out vec4 out_emissive,
+              out vec3 out_position,
+              out vec3 out_normal,
+              out float out_metalness,
+              out float out_depth)
+{
+    out_lighting = vec4(min(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz),1.0);
+}
+
+);
+
+//--------------------------------------------------------------
+static std::string glsl_max = GLSL_CODE(
+
+uniform sampler2D u_input_sampler_lighting;
+uniform sampler2D u_input_sampler_bloom;
+varying vec2 v_texCoord;
+
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+
+void lighting(out vec4 out_lighting,
+              out vec4 out_emissive,
+              out vec3 out_position,
+              out vec3 out_normal,
+              out float out_metalness,
+              out float out_depth)
+{
+    out_lighting = vec4(max(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord)).xyz,1.0);
+}
+
+);
+
+//--------------------------------------------------------------
+static std::string glsl_mix = GLSL_CODE(
+
+uniform sampler2D u_input_sampler_lighting;
+uniform sampler2D u_input_sampler_bloom;
+varying vec2 v_texCoord;
+
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+
+void lighting(out vec4 out_lighting,
+              out vec4 out_emissive,
+              out vec3 out_position,
+              out vec3 out_normal,
+              out float out_metalness,
+              out float out_depth)
+{
+    out_lighting = vec4(mix(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz, 0.5), 1.0);
+}
+
+);
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-BlendAll::BlendAll()
+BlendAll::BlendAll(Type t)
+    : _type(t)
 {
 
 }
@@ -46,8 +112,15 @@ void BlendAll::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSam
     _input = input;
     _output = output;
 
-    Vec4 viewport = Vec4(0.0,0.0,512.0,512);
-    _graph = buildQuadGraph(glsl_blend, viewport);
+    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
+    if(_type == Max)
+        _graph = buildQuadGraph(glsl_max, viewport);
+    else if(_type == Mix)
+        _graph = buildQuadGraph(glsl_mix, viewport);
+    else if(_type == Min)
+        _graph = buildQuadGraph(glsl_min, viewport);
+    else if(_type == Mult)
+        _graph = buildQuadGraph(glsl_mult, viewport);
 
     if(_output.size() > 0)
     {

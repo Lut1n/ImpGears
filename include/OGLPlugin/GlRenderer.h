@@ -24,7 +24,8 @@ public:
 
     RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene,
                                         Camera::Ptr overrideCamera = nullptr,
-                                        SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default);
+                                        SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default,
+                                        ReflexionModel::Ptr overrideShader = nullptr);
 
     virtual void render(const Graph::Ptr& scene);
 
@@ -33,8 +34,10 @@ public:
     void loadRenderPlugin(const std::string& renderPlugin);
     void setRenderPlugin(RenderPlugin* plugin);
 
-    void applyState(const State::Ptr& state);
-    void applyClear(ClearNode* clearNode);
+    void applyState(const State::Ptr& state,
+                    SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default,
+                    ReflexionModel::Ptr overrideShader = nullptr);
+    void applyClear(ClearNode* clearNode, SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default);
     void drawGeometry(GeoNode* geoNode);
 
     RenderPlugin* _renderPlugin;

@@ -10,14 +10,14 @@
 static std::string glsl_env = GLSL_CODE(
 uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
-uniform sampler2D u_input_sampler_color;
+uniform sampler2D u_input_sampler_shininess;
 uniform samplerCube u_input_cubemap_shadow;
 uniform vec3 u_light_pos;
 uniform vec3 u_camera_pos;
 
 varying vec2 v_texCoord;
 
-vec3 i_color(vec2 uv){return texture2D(u_input_sampler_color, uv).xyz;}
+vec3 i_shininess(vec2 uv){return texture2D(u_input_sampler_shininess, uv).xyz;}
 vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
@@ -54,22 +54,15 @@ void lighting(out vec4 out_lighting,
     //
     vec3 view_pos = unproject(v_texCoord, depth);
     //
-    // float EPSILON = 0.001;
-    // float distance_light = distance(u_light_pos,world_pos);
-    // float distance_occlusion = i_shadow(world_pos);
-    //
-    // float received_light = distance_light < distance_occlusion+EPSILON ? 1.0 : 0.0;
-
-    // out_lighting = vec4(vec3(received_light),1.0);
-    // out_lighting = vec4(i_env(world_pos),1.0);
+    float metalness = 1.0;
 
     vec3 n = normal *2.0 - 1.0;
     vec3 view_cam_pos = vec3(0.0);
     vec3 incident = normalize(view_pos-view_cam_pos);
 
     vec3 r = reflect(incident,n);
-    out_lighting = vec4(i_env(r),1.0);
-    if(length(normal) < 0.01) out_lighting = vec4(i_color(v_texCoord),1.0);
+    out_lighting = vec4(i_env(r)*metalness,1.0);
+    if(length(normal) < 0.01) out_lighting = vec4(vec3(0.0),1.0);
 }
 
 );
@@ -95,7 +88,7 @@ void EnvironmentFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
     _input = input;
     _output = output;
 
-    Vec4 viewport = Vec4(0.0,0.0,512.0,512);
+    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph(glsl_env, viewport);
 
     if(_output.size() > 0)
@@ -132,7 +125,7 @@ void EnvironmentFX::apply(GlRenderer* renderer)
     }
     _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
-    _graph->getInitState()->setUniform("u_input_sampler_color", _input[2], 2);
+    _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
     _graph->getInitState()->setUniform("u_input_cubemap_shadow", _cubemap, 3);
     _graph->getInitState()->setUniform("u_camera_pos", _camera);
     renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);

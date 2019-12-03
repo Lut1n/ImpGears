@@ -24,6 +24,8 @@ public:
 
     void setCubeMap(CubeMapSampler::Ptr cubemap);
     void setCameraPos(const Vec3& cameraPos);
+    void setLightPos(const Vec3& lightPos);
+    void setView(const Matrix4& view) {_view = view;}
 
     virtual void apply(GlRenderer* renderer);
 
@@ -33,6 +35,8 @@ protected:
     RenderTarget::Ptr _frame;
     CubeMapSampler::Ptr _cubemap;
     Vec3 _camera;
+    Vec3 _lightPos;
+    Matrix4 _view;
 };
 
 IMPGEARS_END

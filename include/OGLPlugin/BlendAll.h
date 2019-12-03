@@ -13,9 +13,17 @@ class IMP_API BlendAll : public FxRenderPass
 {
 public:
 
+    enum Type
+    {
+      Max = 0,
+      Mix,
+      Min,
+      Mult
+    };
+
     Meta_Class(BlendAll)
 
-    BlendAll();
+    BlendAll(Type t = Max);
     virtual ~BlendAll();
 
     virtual void setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output);
@@ -24,6 +32,7 @@ public:
 
 protected:
 
+    Type _type;
     int _subpassCount;
     Graph::Ptr _graph;
     RenderTarget::Ptr _frame;

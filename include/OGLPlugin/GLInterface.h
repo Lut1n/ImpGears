@@ -13,7 +13,7 @@ public:
 
     virtual void init();
 
-    virtual void apply(ClearNode::Ptr& clear);
+    virtual void apply(ClearNode::Ptr& clear, int bufferIndex = -1);
 
     virtual void setCulling(int mode);
     virtual void setBlend(int mode);

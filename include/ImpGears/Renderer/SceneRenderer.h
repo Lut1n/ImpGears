@@ -20,6 +20,7 @@ public:
     {
         Feature_Bloom = 0,
         Feature_Shadow,
+        Feature_Environment,
         Feature_SSAO,
 
         Feature_Count

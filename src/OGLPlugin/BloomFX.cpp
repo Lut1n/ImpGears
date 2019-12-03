@@ -23,7 +23,7 @@ void lighting(out vec4 out_lighting,
 {
     const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
-    vec2 tex_offset = 1.0 / 512.0;
+    vec2 tex_offset = 1.0 / 1024.0;
     vec4 result = i_emi(v_texCoord) * weight[0];
 
     vec2 dir;
@@ -64,7 +64,7 @@ void BloomFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSamp
     _output = output;
 
     _subpassCount = 10;
-    Vec4 viewport = Vec4(0.0,0.0,512.0,512);
+    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph(glsl_blur, viewport);
 
     _frames[0] = RenderTarget::create();
@@ -99,7 +99,7 @@ void BloomFX::process(GlRenderer* renderer, int subpassID)
 void BloomFX::apply(GlRenderer* renderer)
 {
     bind(renderer, 0);
-    _graph->getInitState()->setUniform("u_input_sampler", _input[1], 0);
+    _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
     renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Bloom);
 

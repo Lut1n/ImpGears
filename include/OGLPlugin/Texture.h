@@ -11,62 +11,62 @@ IMPGEARS_BEGIN
 /// \brief Defines a texture.
 class IMP_API Texture : public Object
 {
-    public:
+public:
 
-        enum MemorySyncMode
-        {
-            MemorySyncMode_None = 0,
-            MemorySyncMode_VideoOnLocal,
-            MemorySyncMode_LocalOnVideo,
-            MemorySyncMode_Bidirectional
-        };
-		
-		Meta_Class(Texture)
+    enum MemorySyncMode
+    {
+        MemorySyncMode_None = 0,
+        MemorySyncMode_VideoOnLocal,
+        MemorySyncMode_LocalOnVideo,
+        MemorySyncMode_Bidirectional
+    };
 
-        Texture(const std::string& name = "");
+    Meta_Class(Texture)
 
-        virtual ~Texture();
-		
-        void loadFromMemory(std::uint8_t* data, std::uint32_t width, std::uint32_t height, int chnls = 3);
-        
-        void loadFromImage(const Image::Ptr data);
-		
-		void saveToImage(Image::Ptr& data);
+    Texture(const std::string& name = "");
 
-        void bind() const;
-        void unbind() const;
+    virtual ~Texture();
 
-		std::uint32_t getVideoID() const{return _videoID;}
+    void loadFromMemory(std::uint8_t* data, std::uint32_t width, std::uint32_t height, int chnls = 3);
 
-        bool isSmooth() const{return _isSmooth;}
-        void setSmooth(bool smooth){_isSmooth = smooth; update();}
+    void loadFromImage(const Image::Ptr data);
 
-        bool isRepeated() const{return _isRepeated;}
-        void setRepeated(bool repeated){_isRepeated = repeated; update();}
+    void saveToImage(Image::Ptr& data);
 
-        bool hasMimap() const{return _hasMipmap;}
-        void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){_hasMipmap = mipmap; _mipmapMaxLevel = maxLevel; update();}
+    void bind() const;
+    void unbind() const;
 
-        void update();
-		
-		int width() const {return _width;}
-		int height() const {return _height;}
+    std::uint32_t getVideoID() const{return _videoID;}
 
-    protected:
-    private:
+    bool isSmooth() const{return _isSmooth;}
+    void setSmooth(bool smooth){_isSmooth = smooth; update();}
 
-        std::uint32_t _videoID;
-		
-		int _width;
-		int _height;
+    bool isRepeated() const{return _isRepeated;}
+    void setRepeated(bool repeated){_isRepeated = repeated; update();}
 
-		bool _isSmooth;
-		bool _isRepeated;
-		bool _hasMipmap;
+    bool hasMimap() const{return _hasMipmap;}
+    void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){_hasMipmap = mipmap; _mipmapMaxLevel = maxLevel; update();}
 
-		std::uint32_t _mipmapMaxLevel;
-		
-		std::string _name;
+    void update();
+
+    int width() const {return _width;}
+    int height() const {return _height;}
+
+protected:
+private:
+
+    std::uint32_t _videoID;
+
+    int _width;
+    int _height;
+
+    bool _isSmooth;
+    bool _isRepeated;
+    bool _hasMipmap;
+
+    std::uint32_t _mipmapMaxLevel;
+
+    std::string _name;
 };
 
 

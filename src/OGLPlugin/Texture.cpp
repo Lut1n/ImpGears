@@ -39,7 +39,7 @@ void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
 
     if(chnls == 1)
     {
-    // case PixelFormat_R16 :
+        // case PixelFormat_R16 :
         glDataFormat = GL_RED;
         glInternalFormat = GL_DEPTH_COMPONENT16;
     }
@@ -105,10 +105,10 @@ void Texture::saveToImage(Image::Ptr& img)
     }
 
     GLvoid* pixels = (GLvoid*)img->data();
-        glActiveTexture(GL_TEXTURE0);
-        bind();
+    glActiveTexture(GL_TEXTURE0);
+    bind();
     glGetTexImage(GL_TEXTURE_2D, 0, glDataFormat, glDataType, pixels);
-        unbind();
+    unbind();
 
     GL_CHECKERROR("Texture::saveToImage");
 }

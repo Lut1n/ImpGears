@@ -7,9 +7,9 @@ IMPGEARS_BEGIN
 
 struct IMP_API CpuBlinnPhong : public FragCallback
 {
-	
-	Meta_Class(CpuBlinnPhong)
-	virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings);
+
+    Meta_Class(CpuBlinnPhong)
+    virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings);
 };
 
 IMPGEARS_END

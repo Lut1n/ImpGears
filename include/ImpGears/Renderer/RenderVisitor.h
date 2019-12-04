@@ -18,37 +18,37 @@ class IMP_API RenderVisitor : public Visitor
 {
 public:
 
-	Meta_Class(RenderVisitor)
-	
-	using MatrixStack = std::vector<Matrix4>;
-	using StateStack = std::vector<State::Ptr>;
+    Meta_Class(RenderVisitor)
 
-	RenderVisitor();
-	virtual ~RenderVisitor();
-	
-	virtual void reset();
+    using MatrixStack = std::vector<Matrix4>;
+    using StateStack = std::vector<State::Ptr>;
 
-	virtual void apply( Node* node );
-	virtual void push( Node* node );
-	virtual void pop();
-	
-	RenderQueue::Ptr getQueue() { return _queue; }
+    RenderVisitor();
+    virtual ~RenderVisitor();
+
+    virtual void reset();
+
+    virtual void apply( Node* node );
+    virtual void push( Node* node );
+    virtual void pop();
+
+    RenderQueue::Ptr getQueue() { return _queue; }
 
 protected:
-	
-	virtual void applyDefault( Node* node );
-	virtual void applyCamera( Camera* node );
-	virtual void applyLightNode( LightNode* node );
-	virtual void applyClearNode( ClearNode* node );
-	
-	MatrixStack _matrices;
-	StateStack _states;
-	Uniform::Ptr u_proj;
-	// Uniform::Ptr u_view;
-	Uniform::Ptr u_model;
-	Uniform::Ptr u_normal;
-	
-	RenderQueue::Ptr _queue;
+
+    virtual void applyDefault( Node* node );
+    virtual void applyCamera( Camera* node );
+    virtual void applyLightNode( LightNode* node );
+    virtual void applyClearNode( ClearNode* node );
+
+    MatrixStack _matrices;
+    StateStack _states;
+    Uniform::Ptr u_proj;
+    // Uniform::Ptr u_view;
+    Uniform::Ptr u_model;
+    Uniform::Ptr u_normal;
+
+    RenderQueue::Ptr _queue;
 };
 
 IMPGEARS_END

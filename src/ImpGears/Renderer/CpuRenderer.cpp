@@ -101,7 +101,7 @@ int prepareReflexion(GeometryRenderer& _geoRenderer, ReflexionModel::Ptr& progra
 
     ReflexionModel::MRT mrt = program->getMRT();
     if(mrt == ReflexionModel::MRT_1_Col) frag->_mrt = Mrt1ColorCb::create();
-        else if(mrt == ReflexionModel::MRT_2_Col_Emi) frag->_mrt = Mrt2ColorEmiCb::create();
+    else if(mrt == ReflexionModel::MRT_2_Col_Emi) frag->_mrt = Mrt2ColorEmiCb::create();
     else frag->_mrt = program->_mrtCb;
 
     if(vertCb == nullptr) _geoRenderer.setDefaultVertCallback();

@@ -53,10 +53,10 @@ struct PhongLighting : public ReflexionModel::LightingCallback
         n_x = n_y.cross(n_z); n_x.normalize();
         Matrix3 inv_tbn(n_x,n_y,n_z); inv_tbn = inv_tbn.inverse();
 
-                Vec3 texnormal = texturing->textureNormal(tex,uniforms,varyings);
+        Vec3 texnormal = texturing->textureNormal(tex,uniforms,varyings);
 
-                light_dir = light_dir * inv_tbn;
-                float lambertian = std::max(light_dir.dot(texnormal),0.f);
+        light_dir = light_dir * inv_tbn;
+        float lambertian = std::max(light_dir.dot(texnormal),0.f);
         float specular = 0.0;
 
         if(lambertian > 0.0)
@@ -67,7 +67,7 @@ struct PhongLighting : public ReflexionModel::LightingCallback
             view_dir.normalize();
 
             // blinn phong
-                        Vec3 halfDir = light_dir + view_dir;
+            Vec3 halfDir = light_dir + view_dir;
             float specAngle = std::max( halfDir.dot(texnormal), 0.f );
             specular = std::pow(specAngle, shininess);
         }
@@ -78,8 +78,8 @@ struct PhongLighting : public ReflexionModel::LightingCallback
         // + specColor * specular * lightColor * lightPower / distance
 
         Vec3 colModelRes = color*0.01
-        + color*0.7 * lambertian * lightCol * lightPower / distance
-        + color*0.3 * specular * lightCol * lightPower / distance;
+                + color*0.7 * lambertian * lightCol * lightPower / distance
+                + color*0.3 * specular * lightCol * lightPower / distance;
 
         Vec3 texemi = texturing->textureEmissive(tex,uniforms,varyings);
         colModelRes = dotMax(texemi,colModelRes);

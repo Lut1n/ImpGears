@@ -14,17 +14,17 @@ class IMP_API RenderQueue : public Object
 {
 public:
 
-	Meta_Class(RenderQueue)
+    Meta_Class(RenderQueue)
 
-	RenderQueue();
-	virtual ~RenderQueue();
-	
-	const Camera* _camera;
-	std::vector<LightNode*> _lights;
-	
-	std::vector<State::Ptr> _states;
-	std::vector<Node*> _nodes;
-	// std::vector<Matrix4> _modelMats;
+    RenderQueue();
+    virtual ~RenderQueue();
+
+    const Camera* _camera;
+    std::vector<LightNode*> _lights;
+
+    std::vector<State::Ptr> _states;
+    std::vector<Node*> _nodes;
+    // std::vector<Matrix4> _modelMats;
 };
 
 IMPGEARS_END

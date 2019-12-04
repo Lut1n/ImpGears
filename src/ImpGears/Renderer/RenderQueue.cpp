@@ -4,7 +4,7 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 RenderQueue::RenderQueue()
-	: _camera(nullptr)
+    : _camera(nullptr)
 {
 }
 

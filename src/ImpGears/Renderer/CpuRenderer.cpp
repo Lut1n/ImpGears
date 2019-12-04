@@ -143,8 +143,8 @@ void CpuRenderer::applyState(const State::Ptr& state)
 
     if(!_direct)
     {
-        for(int i=0;i<(int)_targets.size();++i)
-            _geoRenderer.setTarget(i,_targets[i],Vec4(0.0));
+        for(int i=0;i<(int)_targets->count();++i)
+            _geoRenderer.setTarget(i,_targets->get(i)->getSource(),Vec4(0.0));
     }
 
     ReflexionModel::Ptr reflexion = state->getReflexion();
@@ -157,12 +157,13 @@ void CpuRenderer::applyState(const State::Ptr& state)
 //---------------------------------------------------------------
 void CpuRenderer::applyClear(ClearNode* clearNode)
 {
-    int count = _geoRenderer.getTargetCount();
-    for(int i=0;i<count;++i)
-        _geoRenderer.setClearColor( i, clearNode->getColor()*255.0 );
+    // int count = _geoRenderer.getTargetCount();
+    // for(int i=0;i<count;++i)
+    //     _geoRenderer.setClearColor( i, clearNode->getColor()*255.0 );
 
     _geoRenderer.init();
-    _geoRenderer.clearTargets();
+    _geoRenderer.clearTargets(); // todo : remove color clearing
+    _targets->clearTargets();
 }
 
 //---------------------------------------------------------------

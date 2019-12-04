@@ -70,9 +70,9 @@ void GlRenderer::setRenderPlugin(RenderPlugin* plugin)
 //---------------------------------------------------------------
 Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 {
-    if(id <0 || id>=(int)_targets.size()) return nullptr;
+    if(id <0 || id>=(int)_targets->count()) return nullptr;
 
-    ImageSampler::Ptr sampler = _renderTargets->get(id);
+    ImageSampler::Ptr sampler = _targets->get(id);
     if(dlFromGPU)
     {
         _renderPlugin->bringBack( sampler );
@@ -183,15 +183,15 @@ void GlRenderer::render(const Graph::Ptr& scene)
         _internalFrames->build(1024.0,1024.0,mrt_size,true);
     }
 
-    if(_renderTargets == nullptr && _targets.size() > 0)
-    {
-        std::vector<ImageSampler::Ptr> samplers(_targets.size());
-        for(int i=0;i<(int)_targets.size();++i)
-            samplers[i] = ImageSampler::create(_targets[i]);
-
-        _renderTargets = RenderTarget::create();
-        _renderTargets->build(samplers, true);
-    }
+    // if(_renderTargets == nullptr && _targets.size() > 0)
+    // {
+    //     std::vector<ImageSampler::Ptr> samplers(_targets.size());
+    //     for(int i=0;i<(int)_targets.size();++i)
+    //         samplers[i] = ImageSampler::create(_targets[i]);
+    //
+    //     _renderTargets = RenderTarget::create();
+    //     _renderTargets->build(samplers, true);
+    // }
 
 
     _renderPlugin->init(_internalFrames);
@@ -304,7 +304,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             blendAll->setup(input_blend, output_blend);
             blendTmp->setup(input_blendTmp, output_blendTmp);
 
-            if(!_direct) final_output.push_back( _renderTargets->get(0) );
+            if(!_direct && _targets->count() > 0) final_output.push_back( _targets->get(0) );
             toScreen->setup(output_blend, final_output);
             environFX->setup(input_env, output_env);
             environFX->setCubeMap(environment);

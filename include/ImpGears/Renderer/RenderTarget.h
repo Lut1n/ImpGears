@@ -21,12 +21,19 @@ public:
     void build(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth = false);
     void build(const FaceSampler& face, bool hasDepth = false);
 
+    void setClearColors(const std::vector<Vec4>& clearColors);
+    void setClearColor(int index, const Vec4& clearColor);
+    const std::vector<Vec4>& getClearColors() const;
+    const Vec4& getClearColor(int index) const;
+
+    void clearTargets();
+
     void destroy();
 
     bool hasDepth() const;
     bool useFaceSampler() const;
 
-    ImageSampler::Ptr get(int n);
+    ImageSampler::Ptr get(int index);
     FaceSampler getFace();
 
     int width() const;
@@ -39,6 +46,7 @@ public:
 protected:
 
     std::vector<ImageSampler::Ptr> _targets;
+    std::vector<Vec4> _clearColors;
     FaceSampler _faceTarget;
     bool _useFaceSampler;
     bool _hasDepthBuffer;

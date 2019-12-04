@@ -36,18 +36,24 @@ LightNode* SceneRenderer::closest(Node* node, const std::vector<LightNode*>& ls)
 }
 
 //---------------------------------------------------------------
-void SceneRenderer::setTarget(Image::Ptr& target, int id)
+void SceneRenderer::setTargets(RenderTarget::Ptr targets)
 {
-    if(id >= (int)_targets.size()) _targets.resize(id+1);
-    _targets[id] = target;
+    _targets = targets;
 }
+
+//---------------------------------------------------------------
+// void SceneRenderer::setTarget(Image::Ptr& target, int id)
+// {
+//     if(id >= (int)_targets.size()) _targets.resize(id+1);
+//     _targets[id] = target;
+// }
 
 //---------------------------------------------------------------
 Image::Ptr SceneRenderer::getTarget(bool dlFromGPU, int id)
 {
-    if(id <0 || id>=(int)_targets.size()) return nullptr;
+    if(id <0 || id>=(int)_targets->count()) return nullptr;
 
-    Image::Ptr target = _targets[id];
+    Image::Ptr target = _targets->get(id)->getSource();
     if(dlFromGPU) { /* dl image here */ }
 
     return target;

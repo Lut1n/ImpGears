@@ -23,6 +23,7 @@ void RenderTarget::build(int w, int h, int count, bool hasDepth)
 {
     _useFaceSampler = false;
     _targets.resize(count);
+    _clearColors.resize( count, Vec4(0.0) );
     for(int i=0;i<count;++i)
     {
         _targets[i] = ImageSampler::create();
@@ -37,6 +38,7 @@ void RenderTarget::build(const std::vector<ImageSampler::Ptr>& textures, bool ha
 {
     _useFaceSampler = false;
     _targets = textures;
+    _clearColors.resize( textures.size(), Vec4(0.0) );
     _hasDepthBuffer = hasDepth;
 }
 
@@ -44,8 +46,49 @@ void RenderTarget::build(const std::vector<ImageSampler::Ptr>& textures, bool ha
 void RenderTarget::build(const FaceSampler& face, bool hasDepth)
 {
     _faceTarget = face;
+    _clearColors.resize( 1, Vec4(0.0) );
     _useFaceSampler = true;
     _hasDepthBuffer = hasDepth;
+}
+
+//--------------------------------------------------------------
+void RenderTarget::setClearColors(const std::vector<Vec4>& clearColors)
+{
+    _clearColors = clearColors;
+}
+
+//--------------------------------------------------------------
+void RenderTarget::setClearColor(int index, const Vec4& clearColor)
+{
+    _clearColors[index] = clearColor;
+}
+
+//--------------------------------------------------------------
+const std::vector<Vec4>& RenderTarget::getClearColors() const
+{
+    return _clearColors;
+}
+
+//--------------------------------------------------------------
+const Vec4& RenderTarget::getClearColor(int index) const
+{
+    return _clearColors[index];
+}
+
+//--------------------------------------------------------------
+void RenderTarget::clearTargets()
+{
+    if(_useFaceSampler)
+    {
+        CubeMapSampler::Ptr sampler = _faceTarget.first;
+        int faceID = _faceTarget.second;
+        sampler->getSource()[faceID]->fill(_clearColors[0]*255.0);
+    }
+    else
+    {
+        for(int i=0;i<count();++i)
+            _targets[i]->getSource()->fill(_clearColors[i]*255.0);
+    }
 }
 
 //--------------------------------------------------------------
@@ -56,10 +99,10 @@ void RenderTarget::destroy()
 }
 
 //--------------------------------------------------------------
-ImageSampler::Ptr RenderTarget::get(int n)
+ImageSampler::Ptr RenderTarget::get(int index)
 {
     update();
-    return _targets[n];
+    return _targets[index];
 }
 
 //--------------------------------------------------------------

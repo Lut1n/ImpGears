@@ -91,9 +91,9 @@ static std::string glsl_texturing = GLSL_CODE(
 
 uniform sampler2D u_sampler_color;
 
-vec3 textureColor(vec2 uv)
+vec4 textureColor(vec2 uv)
 {
-    return vec3(0.2,0.2,1.0);
+    return vec4(0.2,0.2,1.0,1.0);
 }
 
 vec3 textureNormal(vec2 uv)
@@ -101,10 +101,10 @@ vec3 textureNormal(vec2 uv)
     return vec3(0.0,0.0,1.0);
 }
 
-vec3 textureEmissive(vec2 uv)
+vec4 textureEmissive(vec2 uv)
 {
     // return vec3(0.0);
-    return texture2D(u_sampler_color,uv).xyz  * vec3(1.0,0.0,0.0);
+    return texture2D(u_sampler_color,uv).xyzw  * vec4(1.0,0.0,0.0,1.0);
 }
 
 );
@@ -133,15 +133,20 @@ struct IGStuff
             renderer = CpuRenderer::create();
         else
         {
-            std::string pluginName = "glPlugin";
+            std::string pluginName = "OGLPlugin";
             pluginName = "lib" + pluginName + "." + LIB_EXT;
             RenderPlugin::Ptr rp = PluginManager::open( pluginName ) ;
             renderer = rp->getRenderer();
             
         }
-        
+
         target = Image::create(RES,RES,4);
-        renderer->setTarget(target);
+        ImageSampler::Ptr sampler = ImageSampler::create(target);
+
+        std::vector<ImageSampler::Ptr> samplers = {sampler};
+        RenderTarget::Ptr rt = RenderTarget::create();
+        rt->build(samplers, true);
+        renderer->setTargets(rt);
         
         Vec4 viewport(0.0,0.0,512,512);
         graph = Graph::create();

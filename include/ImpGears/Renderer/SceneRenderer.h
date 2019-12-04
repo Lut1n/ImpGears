@@ -4,6 +4,7 @@
 #include <Core/Object.h>
 
 #include <Renderer/RenderVisitor.h>
+#include <Renderer/RenderTarget.h>
 #include <Graphics/Image.h>
 
 #include <SceneGraph/Graph.h>
@@ -48,7 +49,8 @@ public:
     void setDirect(bool direct) {_direct = direct;}
     bool isDirect() const {return _direct;}
 
-    void setTarget(Image::Ptr& target, int id = 0);
+    void setTargets(RenderTarget::Ptr targets);
+    // void setTarget(Image::Ptr& target, int id = 0);
     virtual Image::Ptr getTarget(bool dlFromGPU = false, int id = 0);
 
     LightNode* closest(Node* node, const std::vector<LightNode*>& ls);
@@ -63,7 +65,8 @@ protected:
 
     bool _direct;
     bool _enabledFeatures[Feature_Count];
-    std::vector<Image::Ptr> _targets;
+    // std::vector<Image::Ptr> _targets;
+    RenderTarget::Ptr _targets;
     RenderVisitor::Ptr _visitor;
 
     RenderFrame _renderFrame;

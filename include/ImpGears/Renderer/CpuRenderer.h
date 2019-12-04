@@ -23,7 +23,7 @@ public:
 
 protected:
 
-    RenderTarget::Ptr _renderTargets;
+    // RenderTarget::Ptr _renderTargets;
     GeometryRenderer _geoRenderer;
 
     void applyState(const State::Ptr& state);

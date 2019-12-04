@@ -48,7 +48,7 @@ protected:
     EnvironmentFX* _envFX;
 
     RenderTarget::Ptr _internalFrames;
-    RenderTarget::Ptr _renderTargets;
+    // RenderTarget::Ptr _renderTargets;
 };
 
 IMPGEARS_END

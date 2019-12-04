@@ -11,7 +11,7 @@ struct RenderModeManager
     RenderPlugin::Ptr plugin;
     SceneRenderer::Ptr renderer;
     Vec4 viewport;
-    Image::Ptr target, target2;
+    Image::Ptr target; //, target2;
     sf::Texture texture;
     sf::Sprite sprite;
 
@@ -55,9 +55,12 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
             renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
             viewport.set(0.0,0.0,1024,1024);
             target = Image::create(1024,1024,4);
-            renderer->setTarget(target, 0);
-            target2 = Image::create(1024,1024,4);
-            renderer->setTarget(target2, 1);
+
+            ImageSampler::Ptr sampler = ImageSampler::create(target);
+            std::vector<ImageSampler::Ptr> samplers = {sampler};
+            RenderTarget::Ptr rt = RenderTarget::create();
+            rt->build(samplers, true);
+            renderer->setTargets(rt);
         }
         else
         {
@@ -71,9 +74,12 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
 
         int RES = 128;
         target = Image::create(RES,RES,4);
-        renderer->setTarget(target, 0);
-        target2 = Image::create(RES,RES,4);
-        renderer->setTarget(target2, 1);
+
+        ImageSampler::Ptr sampler = ImageSampler::create(target);
+        std::vector<ImageSampler::Ptr> samplers = {sampler};
+        RenderTarget::Ptr rt = RenderTarget::create();
+        rt->build(samplers, true);
+        renderer->setTargets(rt);
 
         viewport.set(0.0,0.0,RES,RES);
         renderer->setDirect(false);

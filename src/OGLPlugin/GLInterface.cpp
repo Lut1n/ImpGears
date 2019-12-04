@@ -134,16 +134,24 @@ void GlPlugin::init()
 //--------------------------------------------------------------
 void GlPlugin::apply(ClearNode::Ptr& clear, int bufferIndex)
 {
-    if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0+bufferIndex);
+    // if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0+bufferIndex);
 
 
     GLbitfield bitfield = 0;
 
     if(clear->isColorEnable())
     {
-        Vec4 color = clear->getColor();
-        glClearColor(color.x(), color.y(), color.z(), color.w());
-        bitfield = bitfield | GL_COLOR_BUFFER_BIT;
+        if( FrameBuffer::s_bound == nullptr )
+        {
+            Vec4 color = clear->getColor();
+            glClearColor(color.x(), color.y(), color.z(), color.w());
+            bitfield = bitfield | GL_COLOR_BUFFER_BIT;
+        }
+        else
+        {
+            FrameBuffer::s_clearBuffers();
+        }
+
     }
 
     if(clear->isDepthEnable())
@@ -155,7 +163,7 @@ void GlPlugin::apply(ClearNode::Ptr& clear, int bufferIndex)
     glClear(bitfield);
 
     // unbind
-    if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    // if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0);
 }
 
 //--------------------------------------------------------------
@@ -383,6 +391,7 @@ void GlPlugin::init(RenderTarget::Ptr& target)
     if(d == nullptr)
     {
         d = FboData::create();
+        std::vector<Vec4> clearColors;
 
         if(target->useFaceSampler())
         {
@@ -399,6 +408,7 @@ void GlPlugin::init(RenderTarget::Ptr& target)
             }
             CubeMap::Ptr cm = dtex->cubetex;
             d->frames.build(cm, faceID, target->hasDepth());
+            clearColors.push_back(Vec4(1.0));
         }
         else
         {
@@ -417,8 +427,10 @@ void GlPlugin::init(RenderTarget::Ptr& target)
                 textures.push_back(t);
             }
             d->frames.build(textures, target->hasDepth());
+            clearColors = target->getClearColors();
         }
 
+        d->frames.setClearColors( clearColors );
         s_internalState->renderTargets[target] = d;
     }
 }
@@ -426,7 +438,8 @@ void GlPlugin::init(RenderTarget::Ptr& target)
 //--------------------------------------------------------------
 void GlPlugin::unbind()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if(FrameBuffer::s_bound != nullptr) FrameBuffer::s_bound->unbind();
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //--------------------------------------------------------------

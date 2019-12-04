@@ -181,6 +181,8 @@ void GlRenderer::render(const Graph::Ptr& scene)
         int mrt_size = 6;
         _internalFrames = RenderTarget::create();
         _internalFrames->build(1024.0,1024.0,mrt_size,true);
+        _internalFrames->setClearColor(3, Vec4(0.0));
+        _internalFrames->setClearColor(5, Vec4(1.0));
     }
 
     // if(_renderTargets == nullptr && _targets.size() > 0)
@@ -250,6 +252,8 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static std::vector<ImageSampler::Ptr> output_blend;
         static std::vector<ImageSampler::Ptr> input_blendTmp;
         static std::vector<ImageSampler::Ptr> output_blendTmp;
+        static std::vector<ImageSampler::Ptr> input_blendSha;
+        static std::vector<ImageSampler::Ptr> output_blendSha;
         static std::vector<ImageSampler::Ptr> input_lighting;
         static std::vector<ImageSampler::Ptr> output_lighting;
         static std::vector<ImageSampler::Ptr> input_shadow_cast;
@@ -259,6 +263,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static std::vector<ImageSampler::Ptr> final_output;
         static BlendAll::Ptr blendAll;
         static BlendAll::Ptr blendTmp;
+        static BlendAll::Ptr blendSha;
         static EnvironmentFX::Ptr environFX;
         static ShadowCasting::Ptr shadowFX;
         static LightingModel::Ptr lighting;
@@ -269,7 +274,8 @@ void GlRenderer::render(const Graph::Ptr& scene)
         {
             _bloomFX = new BloomFX();
             blendAll = BlendAll::create(BlendAll::Max);
-            blendTmp = BlendAll::create(BlendAll::Mix);
+            blendTmp = BlendAll::create(BlendAll::Mult);
+            blendSha = BlendAll::create(BlendAll::Mult);
             toScreen = CopyFrame::create();
             environFX = EnvironmentFX::create();
             lighting = LightingModel::create();
@@ -292,8 +298,12 @@ void GlRenderer::render(const Graph::Ptr& scene)
             output_shadow_cast.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
 
 
+            input_blendSha.push_back(output_lighting[0]);
+            input_blendSha.push_back(output_shadow_cast[0]);
+            output_blendSha.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
+
             input_blendTmp.push_back(_internalFrames->get(0));
-            input_blendTmp.push_back(output_lighting[0]);
+            input_blendTmp.push_back(output_blendSha[0]);
             output_blendTmp.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
 
             input_blend.push_back(output_blendTmp[0]);
@@ -303,6 +313,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             _bloomFX->setup( input_bloom, output_bloom );
             blendAll->setup(input_blend, output_blend);
             blendTmp->setup(input_blendTmp, output_blendTmp);
+            blendSha->setup(input_blendSha, output_blendSha);
 
             if(!_direct && _targets->count() > 0) final_output.push_back( _targets->get(0) );
             toScreen->setup(output_blend, final_output);
@@ -379,8 +390,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
         environFX->apply(this);
         shadowFX->apply(this);
         lighting->apply(this);
-        blendAll->apply(this);
+        blendSha->apply(this);
         blendTmp->apply(this);
+        blendAll->apply(this);
         toScreen->apply(this);
 
 

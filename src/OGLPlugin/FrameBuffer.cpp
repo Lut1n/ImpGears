@@ -9,6 +9,9 @@
 
 IMPGEARS_BEGIN
 
+
+FrameBuffer* FrameBuffer::s_bound = nullptr;
+
 //--------------------------------------------------------------
 FrameBuffer::FrameBuffer()
     : _id(0)
@@ -40,15 +43,17 @@ void FrameBuffer::build(const std::vector<Texture::Ptr>& textures, bool depthBuf
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     GL_CHECKERROR("bind FBO");
 
-    GLenum drawBuffers[_textureCount];
+    _drawBuffers.clear();
+    // GLenum drawBuffers[_textureCount];
     for(int i=0; i<_textureCount; ++i)
     {
         _colorTextures[i]->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, _colorTextures[i]->getVideoID(), 0);
-        drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
+        // drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
+        _drawBuffers.push_back( (unsigned int)(GL_COLOR_ATTACHMENT0+i) );
         GL_CHECKERROR("set color buffer");
     }
-    glDrawBuffers(_textureCount, drawBuffers);
+    glDrawBuffers(_drawBuffers.size(), static_cast<GLenum*>(_drawBuffers.data()) );
     GL_CHECKERROR("set draw buffers");
 
     if(_hasDepthBuffer)
@@ -118,15 +123,18 @@ void FrameBuffer::build(const CubeMap::Ptr& cubemap, int faceID, bool depthBuffe
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     GL_CHECKERROR("bind FBO");
 
-    GLenum drawBuffers[_textureCount];
+    _drawBuffers.clear();
+    // GLenum drawBuffers[_textureCount];
     for(int i=0; i<_textureCount; ++i)
     {
         _cubemap->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_CUBE_MAP_POSITIVE_X+faceID, _cubemap->getVideoID(), 0);
-        drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
+        // drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
+        _drawBuffers.push_back( (unsigned int)(GL_COLOR_ATTACHMENT0+i) );
         GL_CHECKERROR("set color buffer");
     }
-    glDrawBuffers(_textureCount, drawBuffers);
+    // glDrawBuffers(_textureCount, drawBuffers);
+    glDrawBuffers(_drawBuffers.size(), static_cast<GLenum*>(_drawBuffers.data()) );
     GL_CHECKERROR("set draw buffers");
 
     if(_hasDepthBuffer)
@@ -194,12 +202,50 @@ int FrameBuffer::getFaceID()
 void FrameBuffer::bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
+    s_bound = this;
 }
 
 //--------------------------------------------------------------
 void FrameBuffer::unbind()
 {
+    s_bound = nullptr;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+//--------------------------------------------------------------
+void FrameBuffer::setClearColors(const std::vector<Vec4>& clearColors)
+{
+    _clearColors = clearColors;
+}
+
+//--------------------------------------------------------------
+void FrameBuffer::s_clearBuffers()
+{
+    if(s_bound == nullptr) return;
+
+    std::vector<unsigned int>& drawBuffers = s_bound->_drawBuffers;
+    std::vector<Vec4>& clearColors = s_bound->_clearColors;
+
+    unsigned int size = drawBuffers.size();
+    if(clearColors.size() < size)
+    {
+        std::cout << "FrameBuffer : warning clearColor buffer size is smaller than drawBuffers size" << std::endl;
+        return;
+    }
+
+    for(unsigned int i=0; i<size; ++i)
+    {
+        glDrawBuffer( static_cast<GLenum>(drawBuffers[i]) );
+        GL_CHECKERROR("FrameBuffer : select buffer for clear color");
+        Vec4 color = clearColors[i];
+        glClearColor( color[0], color[1], color[2], color[3] );
+        GL_CHECKERROR("FrameBuffer : set clear color");
+        glClear( GL_COLOR_BUFFER_BIT );
+        GL_CHECKERROR("FrameBuffer : apply clear color");
+    }
+
+    glDrawBuffers(drawBuffers.size(), static_cast<GLenum*>(drawBuffers.data()) );
+    GL_CHECKERROR("FrameBuffer : reset draw buffers selection");
 }
 
 IMPGEARS_END

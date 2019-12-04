@@ -33,6 +33,11 @@ public:
     void bind();
     void unbind();
 
+    void setClearColors(const std::vector<Vec4>& clearColors);
+
+    static void s_clearBuffers();
+    static FrameBuffer* s_bound;
+
 protected:
 
     int _id;
@@ -43,6 +48,8 @@ protected:
     bool _useCubeMap;
 
     std::vector<Texture::Ptr> _colorTextures;
+    std::vector<unsigned int> _drawBuffers;
+    std::vector<Vec4> _clearColors;
     CubeMap::Ptr _cubemap;
 };
 

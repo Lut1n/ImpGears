@@ -96,6 +96,9 @@ void lighting(out vec4 out_lighting,
             + 0.7 * lambertian * /*lightColor **/ lightPower / dist
             + 0.3 * specular * /*lightColor **/ lightPower / dist;
 
+    const float EPSILON = 0.001;
+    if( length(normal) < EPSILON ) colorModel = 0.0;
+
     out_lighting = vec4(vec3(colorModel),1.0);
 }
 

@@ -14,11 +14,11 @@ varying vec2 v_texCoord;
 
 vec4 i_emi(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
@@ -37,7 +37,7 @@ void lighting(out vec4 out_lighting,
     }
 
     result = clamp(result,0.0,1.0);
-    out_lighting = result;
+    out_color = result;
 }
 
 );

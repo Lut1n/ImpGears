@@ -43,11 +43,11 @@ vec4 unproject(vec2 txCoord, float depth)
     return view_pos;
 }
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     float depth = i_depth(v_texCoord);
@@ -69,7 +69,7 @@ void lighting(out vec4 out_lighting,
     float received_light = 1.0;
     if(distance_light > distance_occlusion+EPSILON) received_light = 0.1;
 
-    out_lighting = vec4(vec3(received_light),1.0);
+    out_color = vec4(vec3(received_light),1.0);
     // if(depth > 1.0-EPSILON) out_lighting = vec4(vec3(1.0),1.0);
     // out_lighting = vec4(vec3(i_shadow(pos_from_light)),1.0);
 }

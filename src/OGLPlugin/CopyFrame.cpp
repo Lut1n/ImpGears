@@ -13,14 +13,14 @@ varying vec2 v_texCoord;
 
 vec4 i_col(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
-    out_lighting = i_col(v_texCoord);
+    out_color = i_col(v_texCoord);
 }
 
 );

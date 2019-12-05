@@ -13,14 +13,14 @@ varying vec2 v_texCoord;
 vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
 vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
-    out_lighting = vec4(i_lighting(v_texCoord).xyz * i_bloom(v_texCoord).xyz, 1.0);
+    out_color = vec4(i_lighting(v_texCoord).xyz * i_bloom(v_texCoord).xyz, 1.0);
 }
 
 );
@@ -35,14 +35,14 @@ varying vec2 v_texCoord;
 vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
 vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
-    out_lighting = vec4(min(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz),1.0);
+    out_color = vec4(min(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz),1.0);
 }
 
 );
@@ -56,15 +56,14 @@ varying vec2 v_texCoord;
 
 vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
 vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
-
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
-    out_lighting = vec4(max(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord)).xyz,1.0);
+    out_color = vec4(max(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord)).xyz,1.0);
 }
 
 );
@@ -79,14 +78,14 @@ varying vec2 v_texCoord;
 vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
 vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
-    out_lighting = vec4(mix(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz, 0.5), 1.0);
+    out_color = vec4(mix(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz, 0.5), 1.0);
 }
 
 );

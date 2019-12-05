@@ -41,11 +41,11 @@ vec4 unproject(vec2 txCoord, float depth)
     return view_pos;
 }
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     // vec3 color = i_color(v_texCoord);
@@ -99,7 +99,7 @@ void lighting(out vec4 out_lighting,
     const float EPSILON = 0.001;
     if( length(normal) < EPSILON ) colorModel = 0.0;
 
-    out_lighting = vec4(vec3(colorModel),1.0);
+    out_color = vec4(vec3(colorModel),1.0);
 }
 
 );

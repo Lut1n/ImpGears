@@ -19,16 +19,16 @@
 static std::string glsl_shadow_depth = GLSL_CODE(
 varying vec3 v_mv;
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     float near = 0.1; float far = 128.0;
     float depth = (length(v_mv.xyz) - near) / far;
-    out_lighting = vec4(vec3(depth),1.0);
+    out_color = vec4(vec3(depth),1.0);
 }
 
 );
@@ -119,7 +119,7 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene,
             latt[1] = mat->_shininess;
             color = mat->_color;
 
-            if(renderPass==SceneRenderer::RenderFrame_Default)
+            if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
                 if(mat->_baseColor)
                         queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
@@ -127,6 +127,8 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene,
                         queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
                 if(mat->_emissive)
                         queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+                if(mat->_reflectivity)
+                        queue->_states[i]->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
             }
 
             queue->_states[i]->setUniform("u_view", view);
@@ -136,7 +138,7 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene,
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
             // queue->_states[i]->setUniform("u_normal", normalMat );
 
-            if(renderPass==SceneRenderer::RenderFrame_Default)
+            if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
                 queue->_states[i]->setUniform("u_lightPos", lightPos);
                 queue->_states[i]->setUniform("u_lightCol", lightCol);
@@ -181,8 +183,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
         int mrt_size = 6;
         _internalFrames = RenderTarget::create();
         _internalFrames->build(1024.0,1024.0,mrt_size,true);
-        _internalFrames->setClearColor(3, Vec4(0.0));
-        _internalFrames->setClearColor(5, Vec4(1.0));
+        _internalFrames->setClearColor(2, Vec4(0.0));   // normals
+        _internalFrames->setClearColor(3, Vec4(0.0));   // reflectivity
+        _internalFrames->setClearColor(5, Vec4(1.0));   // depth
     }
 
     // if(_renderTargets == nullptr && _targets.size() > 0)
@@ -221,7 +224,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             environment_renderer->setCubeMap(environment);
         }
 
-        environment_renderer->render(scene, Vec3(0.0), SceneRenderer::RenderFrame_Environment);
+        environment_renderer->render(scene, Vec3(0.0), SceneRenderer::RenderFrame_Environment); // todo : position as parameter
     }
 
     if(isFeatureEnabled(Feature_Shadow))
@@ -255,6 +258,8 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static std::vector<ImageSampler::Ptr> output_blendTmp;
         static std::vector<ImageSampler::Ptr> input_blendSha;
         static std::vector<ImageSampler::Ptr> output_blendSha;
+        static std::vector<ImageSampler::Ptr> input_blendRefl;
+        static std::vector<ImageSampler::Ptr> output_blendRefl;
         static std::vector<ImageSampler::Ptr> input_lighting;
         static std::vector<ImageSampler::Ptr> output_lighting;
         static std::vector<ImageSampler::Ptr> input_shadow_cast;
@@ -265,6 +270,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
         static BlendAll::Ptr blendAll;
         static BlendAll::Ptr blendTmp;
         static BlendAll::Ptr blendSha;
+        static BlendAll::Ptr blendRefl;
         static EnvironmentFX::Ptr environFX;
         static ShadowCasting::Ptr shadowFX;
         static LightingModel::Ptr lighting;
@@ -277,23 +283,24 @@ void GlRenderer::render(const Graph::Ptr& scene)
             blendAll = BlendAll::create(BlendAll::Max);
             blendTmp = BlendAll::create(BlendAll::Mult);
             blendSha = BlendAll::create(BlendAll::Mult);
+            blendRefl = BlendAll::create(BlendAll::Mult);
             toScreen = CopyFrame::create();
             environFX = EnvironmentFX::create();
             lighting = LightingModel::create();
             shadowFX = ShadowCasting::create();
 
-            input_lighting = { _internalFrames->get(3), _internalFrames->get(5), _internalFrames->get(4) };
+            input_lighting = { _internalFrames->get(2), _internalFrames->get(5), _internalFrames->get(4) };
             output_lighting.push_back( ImageSampler::create(1024,1024,4,Vec4(0.0)) );
 
             input_bloom = { _internalFrames->get(1) };
             output_bloom.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
 
-            input_env.push_back( _internalFrames->get(3) );
+            input_env.push_back( _internalFrames->get(2) );
             input_env.push_back( _internalFrames->get(5) );
-            input_env.push_back( _internalFrames->get(4) );
+            input_env.push_back( _internalFrames->get(3) );
             output_env.push_back(ImageSampler::create(1024,1024,4,Vec4(1.0)));
 
-            // input_shadow_cast.push_back( _internalFrames->get(3) );
+            // input_shadow_cast.push_back( _internalFrames->get(2) );
             input_shadow_cast.push_back( _internalFrames->get(5) );
             // input_shadow_cast.push_back( _internalFrames->get(0) );
             output_shadow_cast.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
@@ -307,7 +314,11 @@ void GlRenderer::render(const Graph::Ptr& scene)
             input_blendTmp.push_back(output_blendSha[0]);
             output_blendTmp.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
 
-            input_blend.push_back(output_blendTmp[0]);
+            input_blendRefl.push_back(output_blendTmp[0]);
+            input_blendRefl.push_back(output_env[0]);
+            output_blendRefl.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
+
+            input_blend.push_back(output_blendRefl[0]);
             input_blend.push_back(output_bloom[0]);
             output_blend.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
 
@@ -315,6 +326,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             blendAll->setup(input_blend, output_blend);
             blendTmp->setup(input_blendTmp, output_blendTmp);
             blendSha->setup(input_blendSha, output_blendSha);
+            blendRefl->setup(input_blendRefl, output_blendRefl);
 
             if(!_direct && _targets->count() > 0) final_output.push_back( _targets->get(0) );
             toScreen->setup(output_blend, final_output);
@@ -354,10 +366,10 @@ void GlRenderer::render(const Graph::Ptr& scene)
             toScreen->setInput( output_bloom[0] ) ;
             break;
         case RenderFrame_Normals:
-            toScreen->setInput( _internalFrames->get(3) ) ;
+            toScreen->setInput( _internalFrames->get(2) ) ;
             break;
-        case RenderFrame_Metalness:
-            toScreen->setInput( _internalFrames->get(4) ) ;
+        case RenderFrame_Reflectivity:
+            toScreen->setInput( _internalFrames->get(3) ) ;
             break;
         default: // assume RenderFrame_Default
             toScreen->setInput( output_blend[0] ) ;
@@ -393,6 +405,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
         lighting->apply(this);
         blendSha->apply(this);
         blendTmp->apply(this);
+        blendRefl->apply(this);
         blendAll->apply(this);
         toScreen->apply(this);
 

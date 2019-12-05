@@ -10,18 +10,17 @@
 static std::string glsl_env = GLSL_CODE(
 uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
-uniform sampler2D u_input_sampler_shininess;
-uniform samplerCube u_input_cubemap_shadow;
+uniform sampler2D u_input_sampler_reflectivity;
+uniform samplerCube u_input_cubemap_environment;
 uniform vec3 u_light_pos;
 uniform vec3 u_camera_pos;
 
 varying vec2 v_texCoord;
 
-vec3 i_shininess(vec2 uv){return texture2D(u_input_sampler_shininess, uv).xyz;}
+float i_reflectivity(vec2 uv){return texture2D(u_input_sampler_reflectivity, uv).x;}
 vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
-float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
-vec3 i_env(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).xyz;}
+vec3 i_env(vec3 uvw){return texture(u_input_cubemap_environment, uvw).xyz;}
 
 vec4 unproject(vec2 txCoord, float depth)
 {
@@ -42,27 +41,26 @@ vec4 unproject(vec2 txCoord, float depth)
     return view_pos;
 }
 
-void lighting(out vec4 out_lighting,
+void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     vec3 normal = i_normal(v_texCoord);
     float depth = i_depth(v_texCoord);
     //
     vec3 view_pos = unproject(v_texCoord, depth);
-    //
-    float metalness = 1.0;
 
     vec3 n = normal *2.0 - 1.0;
     vec3 view_cam_pos = vec3(0.0);
     vec3 incident = normalize(view_pos-view_cam_pos);
 
     vec3 r = reflect(incident,n);
-    out_lighting = vec4(i_env(r)*metalness,1.0);
-    if(length(normal) < 0.01) out_lighting = vec4(vec3(0.0),1.0);
+    out_color = vec4(i_env(r),1.0);
+    // if(length(normal) < 0.01) out_lighting = vec4(vec3(0.0),1.0);
+    if(i_reflectivity(v_texCoord) < 0.5) out_color = vec4(vec3(1.0),1.0);
 }
 
 );
@@ -125,8 +123,8 @@ void EnvironmentFX::apply(GlRenderer* renderer)
     }
     _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
-    _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
-    _graph->getInitState()->setUniform("u_input_cubemap_shadow", _cubemap, 3);
+    _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
+    _graph->getInitState()->setUniform("u_input_cubemap_environment", _cubemap, 3);
     _graph->getInitState()->setUniform("u_camera_pos", _camera);
     renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);
 }

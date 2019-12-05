@@ -44,9 +44,9 @@ varying vec3 v_vertex;
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     vec4 color = vec4(u_color,1.0) * gl_Color;
@@ -55,9 +55,10 @@ void lighting(out vec4 out_color,
 
     out_color = max(emi,color);
     out_emissive = emi;
-    out_position = normalize(v_vertex) * 0.5 + 0.5;
     out_normal = vec3(0.0,0.0,1.0);
-    out_metalness = 0.0;
+
+    out_reflectivity = textureReflectivity(v_texCoord);
+    out_shininess = 0.0;
     float near = 0.1; float far = 128.0;
     out_depth = (length(v_mv.xyz) - near) / far;
 }
@@ -107,6 +108,8 @@ vec3 textureNormal(vec2 uv)
 
 vec4 textureEmissive(vec2 uv){ return vec4(0.0,0.0,0.0,0.0); }
 
+float textureReflectivity(vec2 uv){ return 0.0; }
+
 );
 
 static std::string glsl_samplerNone = GLSL_CODE(
@@ -114,6 +117,7 @@ static std::string glsl_samplerNone = GLSL_CODE(
 vec4 textureColor(vec2 uv){ return vec4(1.0); }
 vec3 textureNormal(vec2 uv){ return vec3(0.0,0.0,1.0); }
 vec4 textureEmissive(vec2 uv){ return vec4(0.0,0.0,0.0,0.0); }
+float textureReflectivity(vec2 uv){ return 0.0; }
 
 );
 
@@ -124,6 +128,7 @@ static std::string glsl_samplerCNE = GLSL_CODE(
 uniform sampler2D u_sampler_color;
 uniform sampler2D u_sampler_normal;
 uniform sampler2D u_sampler_emissive;
+uniform sampler2D u_sampler_reflectivity;
 
 vec4 textureColor(vec2 uv)
 {
@@ -139,6 +144,11 @@ vec3 textureNormal(vec2 uv)
 vec4 textureEmissive(vec2 uv)
 {
     return texture2D(u_sampler_emissive,uv).xyzw;
+}
+
+float textureReflectivity(vec2 uv)
+{
+    return texture2D(u_sampler_reflectivity,uv).x;
 }
 
 );
@@ -177,9 +187,9 @@ mat3 build_tbn(vec3 n_ref)
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
-              out vec3 out_position,
               out vec3 out_normal,
-              out float out_metalness,
+              out float out_reflectivity,
+              out float out_shininess,
               out float out_depth)
 {
     float shininess = u_lightAtt[1];
@@ -190,7 +200,6 @@ void lighting(out vec4 out_color,
 
     out_color = vec4(clamp( max(color,emi.xyz),0.0,1.0 ), 1.0);
     out_emissive = clamp(emi,0.0,1.0);
-    out_position = normalize(v_vertex) * 0.5 + 0.5;
 
     vec3 normal = textureNormal(v_texCoord);
     mat3 normal_mat = transpose( inverse( mat3(u_view*u_model) ) );
@@ -198,7 +207,9 @@ void lighting(out vec4 out_color,
     mat3 tbn = build_tbn( normalize(v_n) );
     mat3 tbn_a = build_tbn( normalize(a_n) );
     out_normal = (normal_mat * tbn_a * normal) * 0.5 + 0.5;
-    out_metalness = shininess * 0.1;
+
+    out_reflectivity = textureReflectivity(v_texCoord);
+    out_shininess = shininess * 0.1;
     float near = 0.1; float far = 128.0;
     out_depth = (length(v_mv.xyz) - near) / far;
 }
@@ -211,12 +222,12 @@ void main()
 {
     vec4 out_color;
     vec4 out_emissive;
-    vec3 out_position;
     vec3 out_normal;
-    float out_metalness;
+    float out_reflectivity;
+    float out_shininess;
     float out_depth;
 
-    lighting(out_color,out_emissive,out_position,out_normal,out_metalness,out_depth);
+    lighting(out_color,out_emissive,out_normal,out_reflectivity,out_shininess,out_depth);
 
     gl_FragData[0] = out_color;
 }
@@ -229,12 +240,12 @@ void main()
 {
     vec4 out_color;
     vec4 out_emissive;
-    vec3 out_position;
     vec3 out_normal;
-    float out_metalness;
+    float out_reflectivity;
+    float out_shininess;
     float out_depth;
 
-    lighting(out_color,out_emissive,out_position,out_normal,out_metalness,out_depth);
+    lighting(out_color,out_emissive,out_normal,out_reflectivity,out_shininess,out_depth);
 
     gl_FragData[0] = out_color;
     gl_FragData[1] = out_emissive;
@@ -248,18 +259,18 @@ void main()
 {
     vec4 out_color;
     vec4 out_emissive;
-    vec3 out_position;
     vec3 out_normal;
-    float out_metalness;
+    float out_reflectivity;
+    float out_shininess;
     float out_depth;
 
-    lighting(out_color,out_emissive,out_position,out_normal,out_metalness,out_depth);
+    lighting(out_color,out_emissive,out_normal,out_reflectivity,out_shininess,out_depth);
 
     gl_FragData[0] = out_color;
     gl_FragData[1] = out_emissive;
-    gl_FragData[2] = vec4(out_position,1.0);
-    gl_FragData[3] = vec4(out_normal,1.0);
-    gl_FragData[4] = vec4(vec3(out_metalness),1.0);
+    gl_FragData[2] = vec4(out_normal,1.0);
+    gl_FragData[3] = vec4(vec3(out_reflectivity),1.0);
+    gl_FragData[4] = vec4(vec3(out_shininess),1.0);
     gl_FragData[5] = vec4(vec3(out_depth),1.0);
 }
 

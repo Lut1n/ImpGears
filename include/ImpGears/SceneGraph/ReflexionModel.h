@@ -6,6 +6,8 @@
 
 IMPGEARS_BEGIN
 
+#define REFLEXION_DEFAULT_NAME "unnamed ReflexionModel"
+
 struct IMP_API ReflexionModel : public Object
 {
 	Meta_Class(ReflexionModel);
@@ -65,7 +67,10 @@ struct IMP_API ReflexionModel : public Object
 		MRT_2_Col_Emi,
 	};
 	
-	ReflexionModel(Lighting l = Lighting_None, Texturing t = Texturing_PlainColor, MRT mrt = MRT_1_Col);
+        ReflexionModel(Lighting l = Lighting_None,
+                       Texturing t = Texturing_PlainColor,
+                       MRT mrt = MRT_1_Col,
+                       const std::string& name = REFLEXION_DEFAULT_NAME);
 	virtual ~ReflexionModel();
 	
 	void setTexturing(Texturing t);
@@ -76,6 +81,8 @@ struct IMP_API ReflexionModel : public Object
 	
 	void setMRT(MRT mrt);
 	MRT getMRT() const;
+
+        const std::string& getName() const;
 		
 	Lighting _lighting;
 	Texturing _texturing;
@@ -86,6 +93,7 @@ struct IMP_API ReflexionModel : public Object
 	LightingCallback::Ptr _lightingCb;
 	MRTCallback::Ptr _mrtCb;
 	
+        std::string _name;
 	std::string _vertCode;
 	std::string _fragCode_texturing;
 	std::string _fragCode_lighting;

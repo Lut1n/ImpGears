@@ -11,10 +11,11 @@ void ReflexionModel::AbstractFrag::exec(ImageBuf& targets, const Vec3& pt, const
 }
 
 //--------------------------------------------------------------
-ReflexionModel::ReflexionModel(Lighting l, Texturing t, MRT mrt)
+ReflexionModel::ReflexionModel(Lighting l, Texturing t, MRT mrt, const std::string& name)
 	: _lighting(l)
 	, _texturing(t)
 	, _mrt(mrt)
+        , _name(name)
 {
 	_d = -1;
 }
@@ -58,6 +59,12 @@ void ReflexionModel::setMRT(MRT mrt)
 ReflexionModel::MRT ReflexionModel::getMRT() const
 {
 	return _mrt;
+}
+
+//--------------------------------------------------------------
+const std::string& ReflexionModel::getName() const
+{
+    return _name;
 }
 
 IMPGEARS_END

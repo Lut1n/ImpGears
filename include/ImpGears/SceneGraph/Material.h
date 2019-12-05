@@ -14,12 +14,17 @@ public:
 
     Material();
     Material(const Vec3& color, float shininess);
-    Material(ImageSampler::Ptr& baseColor, ImageSampler::Ptr& emissive, ImageSampler::Ptr& normalmap, float shininess = 4.0);
+    Material(ImageSampler::Ptr& baseColor,
+             ImageSampler::Ptr& emissive,
+             ImageSampler::Ptr& normalmap,
+             ImageSampler::Ptr& reflectivity,
+             float shininess = 4.0);
     virtual ~Material();
 
     ImageSampler::Ptr _baseColor;
-    ImageSampler::Ptr _normalmap;
     ImageSampler::Ptr _emissive;
+    ImageSampler::Ptr _normalmap;
+    ImageSampler::Ptr _reflectivity;
 
     float _shininess;
     Vec3 _color;
@@ -27,6 +32,7 @@ public:
     static ImageSampler::Ptr s_default_baseColor;
     static ImageSampler::Ptr s_default_emissive;
     static ImageSampler::Ptr s_default_normalmap;
+    static ImageSampler::Ptr s_default_reflectivity;
 };
 
 IMPGEARS_END

@@ -38,7 +38,7 @@ public:
         RenderFrame_Emissive,
         RenderFrame_Bloom,
         RenderFrame_Normals,
-        RenderFrame_Metalness,
+        RenderFrame_Reflectivity,
     };
 
     SceneRenderer();

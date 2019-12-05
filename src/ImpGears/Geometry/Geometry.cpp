@@ -566,26 +566,47 @@ void Geometry::generateColors(const Vec3& color)
     _hasColors = true;
 }
 
-void getUV(Vec3& tc, Vec3& d, float& u, float& v)
+void getUV_spheric(Vec3& triDir, Vec3& d, float& u, float& v)
 {
-    Vec3 fs[6] = {-Vec3::X,-Vec3::Y,-Vec3::Z,Vec3::X,Vec3::Y,Vec3::Z};
-    float p[6]; int j=0;
-    for(int i=0;i<6;++i) { p[i] = fs[i].dot(tc); if(p[j]<p[i])j=i; }
+    // const float EPSILON = 0.01;
+    const float PI = 3.141592;
 
-    Vec3 x, y;
-    if(j==0) { x=-Vec3::Y; y=-Vec3::Z; }
-    if(j==1) { x=-Vec3::Z; y=-Vec3::X; }
-    if(j==2) { x=-Vec3::X; -y=Vec3::Y; }
-    if(j==3) { x=Vec3::Y; y=Vec3::Z; }
-    if(j==4) { x=Vec3::Z; y=Vec3::X; }
-    if(j==5) { x=Vec3::X; y=Vec3::Y; }
+    u = std::atan2( d.z(), d.x() ) / PI;
+    float eq = std::sqrt(d.x()*d.x() + d.z()*d.z());
+    v = std::atan2( d.y(), eq ) / (PI*0.5);
 
-    // 45 deg = 0.785398 rad
-    u = d.angleFrom(fs[j], y) / 0.785398;
-    v = d.angleFrom(fs[j], x) / 0.785398;
+    u = u * 0.5 + 0.5;
+    v = v * 0.5 + 0.5;
+}
 
-    u = u*0.5 + 0.5;
-    v = v*0.5 + 0.5;
+
+void getUV_cubemap(Vec3& triDir, Vec3& d, float& u, float& v)
+{
+    enum TargetFace { POSITIVE_X = 0, NEGATIVE_X, POSITIVE_Y, NEGATIVE_Y, POSITIVE_Z, NEGATIVE_Z };
+    Vec3 majorAxisDirection[6] = {Vec3::X,-Vec3::X,Vec3::Y,-Vec3::Y,Vec3::Z,-Vec3::Z};
+
+    // selection of cube face based on major axis direction
+    TargetFace face = POSITIVE_X;
+    float ma_rel = 0.0;
+    for(int i=0;i<6;++i)
+    {
+        float curr = majorAxisDirection[i].dot(triDir);
+        if(curr > ma_rel) { face=(TargetFace)i; ma_rel=curr; }
+    }
+
+    // selection of 2d coordinates and magnitude
+    float sc, tc, ma;
+    if(face == POSITIVE_X) { sc=-d.z(); tc=-d.y(); ma=d.x(); }
+    if(face == NEGATIVE_X) { sc=+d.z(); tc=-d.y(); ma=d.x(); }
+    if(face == POSITIVE_Y) { sc=+d.x(); tc=+d.z(); ma=d.y(); }
+    if(face == NEGATIVE_Y) { sc=+d.x(); tc=-d.z(); ma=d.y(); }
+    if(face == POSITIVE_Z) { sc=+d.x(); tc=-d.y(); ma=d.z(); }
+    if(face == NEGATIVE_Z) { sc=-d.x(); tc=-d.y(); ma=d.z(); }
+
+    // using sc, tc and ma for computing u and v
+    ma = std::abs(ma);
+    u = 0.5 * ( sc/ma + 1.0 );
+    v = 0.5 * ( tc/ma + 1.0 );
 }
 
 void Geometry::generateTexCoords( TexGenMode genMode, float resFactor)
@@ -606,7 +627,8 @@ void Geometry::generateTexCoords( TexGenMode genMode, float resFactor)
         {
             float u,v;
             Vec3 dir = at(i+j) - grav_cent; dir.normalize();
-            getUV(triDir, dir, u, v);
+            if(genMode == TexGenMode_Spheric) getUV_spheric(triDir, dir, u, v);
+            else if(genMode == TexGenMode_Cubic) getUV_cubemap(triDir, dir, u, v);
             _texCoords[i+j] = Geometry::TexCoord(u*resFactor,v*resFactor);
         }
     }

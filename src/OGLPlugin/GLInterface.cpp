@@ -335,6 +335,9 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
     // }
     fullFragCode = fullFragCode + glsl_mrt_default;
 
+    const std::string& name = program->getName();
+    if(name != REFLEXION_DEFAULT_NAME) d->sha.rename(name);
+
     d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
         s_internalState->callbacks[program] = d;
     return 0;

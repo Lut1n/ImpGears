@@ -26,12 +26,15 @@ void FxRenderPass::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Imag
 }
 
 //--------------------------------------------------------------
-Graph::Ptr FxRenderPass::buildQuadGraph(const std::string& glsl_lighting, Vec4 viewport) const
+Graph::Ptr FxRenderPass::buildQuadGraph(const std::string& debug_name,
+                                        const std::string& glsl_lighting,
+                                        Vec4 viewport) const
 {
     ReflexionModel::Ptr shader = ReflexionModel::create(
                 ReflexionModel::Lighting_Customized,
                 ReflexionModel::Texturing_Samplers_CNE,
-                ReflexionModel::MRT_2_Col_Emi);
+                ReflexionModel::MRT_2_Col_Emi,
+                debug_name);
     shader->_fragCode_lighting = glsl_lighting;
 
     QuadNode::Ptr quad = QuadNode::create();

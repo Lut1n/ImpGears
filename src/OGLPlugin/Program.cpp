@@ -10,12 +10,14 @@ IMPGEARS_BEGIN
 std::string Program::s_compilation_log;
 
 //--------------------------------------------------------------
-Program::Program()
+Program::Program(const std::string& name)
+    : _name(name)
 {
 }
 
 //--------------------------------------------------------------
-Program::Program(const std::string& vertCode, const std::string& fragCode)
+Program::Program(const std::string& vertCode, const std::string& fragCode, const std::string& name)
+    : _name(name)
 {
     load(vertCode,fragCode);
 }
@@ -24,29 +26,29 @@ Program::Program(const std::string& vertCode, const std::string& fragCode)
 void Program::load(const std::string& vertCode, const std::string& fragCode)
 {
     _programID = glCreateProgram () ;
-    GL_CHECKERROR("create program");
+    GL_CHECKERROR(_name + " - create program");
     _vertID = glCreateShader (GL_VERTEX_SHADER);
-    GL_CHECKERROR("create vert shader");
+    GL_CHECKERROR(_name + " - create vert shader");
     _fragID = glCreateShader (GL_FRAGMENT_SHADER);
-    GL_CHECKERROR("create frag shader");
+    GL_CHECKERROR(_name + " - create frag shader");
 
     const char* src = vertCode.c_str();
     glShaderSource (_vertID, 1, &src, NULL) ;
-    GL_CHECKERROR("load vert source");
+    GL_CHECKERROR(_name + " - load vert source");
     src = fragCode.c_str();
     glShaderSource (_fragID, 1, &src, NULL) ;
-    GL_CHECKERROR("load frag source");
+    GL_CHECKERROR(_name + " - load frag source");
 
     compile(_vertID);
     compile(_fragID);
 
     glAttachShader (_programID, _vertID);
-    GL_CHECKERROR("attach vertex shader");
+    GL_CHECKERROR(_name + " - attach vertex shader");
     glAttachShader (_programID, _fragID);
-    GL_CHECKERROR("attach fragment shader");
+    GL_CHECKERROR(_name + " - attach fragment shader");
 
     glLinkProgram (_programID);
-    GL_CHECKERROR("link shader program");
+    GL_CHECKERROR(_name + " - link shader program");
 }
 
 void Program::compile(std::uint32_t srcId)
@@ -58,11 +60,11 @@ void Program::compile(std::uint32_t srcId)
     {
         GLint len;
         glGetShaderiv(srcId, GL_INFO_LOG_LENGTH, &len);
-        GL_CHECKERROR("shader compilation");
+        GL_CHECKERROR(_name + " - shader compilation");
         s_compilation_log.resize(len);
         glGetShaderInfoLog(srcId, len, &result, &s_compilation_log[0] );
-        GL_CHECKERROR("shader compilation info log");
-        std::cout << "[impError] shader compilation failed." << std::endl;
+        GL_CHECKERROR(_name + " - shader compilation info log");
+        std::cout << "[impError] " + _name + " - shader compilation failed." << std::endl;
         std::cout << s_compilation_log << std::endl;
     }
 }
@@ -79,7 +81,7 @@ Program::~Program()
 void Program::use()
 {
     glUseProgram (_programID) ;
-    GL_CHECKERROR("use program");
+    GL_CHECKERROR(_name + " - use program");
 }
 
 //--------------------------------------------------------------
@@ -93,13 +95,19 @@ std::int32_t Program::locate(const std::string& id) const
     else
     {
         std::int32_t location = glGetUniformLocation(_programID, id.c_str());
-        GL_CHECKERROR("parameter location");
+        GL_CHECKERROR(_name + " - parameter location");
 
         if(location == -1)
-            std::cout << "impError : location of uniform (" << id << ") failed" << std::endl;
+            std::cout << "impError :" + _name + " - location of uniform (" << id << ") failed" << std::endl;
         _locationCache[id] = location;
         return location;
     }
+}
+
+//--------------------------------------------------------------
+void Program::rename(const std::string& name)
+{
+    _name = name;
 }
 
 IMPGEARS_END

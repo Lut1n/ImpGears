@@ -114,13 +114,13 @@ void BlendAll::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSam
 
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     if(_type == Max)
-        _graph = buildQuadGraph(glsl_max, viewport);
+        _graph = buildQuadGraph("glsl_max", glsl_max, viewport);
     else if(_type == Mix)
-        _graph = buildQuadGraph(glsl_mix, viewport);
+        _graph = buildQuadGraph("glsl_mix", glsl_mix, viewport);
     else if(_type == Min)
-        _graph = buildQuadGraph(glsl_min, viewport);
+        _graph = buildQuadGraph("glsl_min", glsl_min, viewport);
     else if(_type == Mult)
-        _graph = buildQuadGraph(glsl_mult, viewport);
+        _graph = buildQuadGraph("glsl_mult", glsl_mult, viewport);
 
     if(_output.size() > 0)
     {

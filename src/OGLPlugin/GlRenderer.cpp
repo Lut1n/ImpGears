@@ -235,7 +235,8 @@ void GlRenderer::render(const Graph::Ptr& scene)
             shadows_shader = ReflexionModel::create(
                         ReflexionModel::Lighting_Customized,
                         ReflexionModel::Texturing_Samplers_CNE,
-                        ReflexionModel::MRT_2_Col_Emi);
+                        ReflexionModel::MRT_2_Col_Emi,
+                        "glsl_shadow_depth");
             shadows_shader->_fragCode_lighting = glsl_shadow_depth;
         }
 

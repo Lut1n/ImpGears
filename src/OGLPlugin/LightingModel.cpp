@@ -126,7 +126,7 @@ void LightingModel::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
     _output = output;
 
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
-    _graph = buildQuadGraph(glsl_lightingModel, viewport);
+    _graph = buildQuadGraph("glsl_lightingModel", glsl_lightingModel, viewport);
 
     if(_output.size() > 0)
     {

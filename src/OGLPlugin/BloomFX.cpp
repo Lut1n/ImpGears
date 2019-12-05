@@ -65,7 +65,7 @@ void BloomFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSamp
 
     _subpassCount = 10;
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
-    _graph = buildQuadGraph(glsl_blur, viewport);
+    _graph = buildQuadGraph("glsl_blur", glsl_blur, viewport);
 
     _frames[0] = RenderTarget::create();
     _frames[0]->build(viewport[2],viewport[3],1, true);

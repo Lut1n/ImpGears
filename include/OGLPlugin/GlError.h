@@ -25,7 +25,7 @@ inline void glErrToString(GLenum error, std::string& string)
 }
 
 
-inline bool GLcheckError(const char* debugMsg, const char* file, int line)
+inline bool GLcheckError(const std::string& debugMsg, const char* file, int line)
 {
     bool res = true;
     GLenum error = glGetError();

@@ -7,6 +7,7 @@
 
 IMPGEARS_BEGIN
 
+#define PROGRAM_DEFAULT_NAME "unnamed_program"
 #define IMP_GLSL_SRC( src ) #src
 
 class IMP_API Program : public Object
@@ -15,8 +16,8 @@ public:
 
     Meta_Class(Program)
 
-    Program();
-    Program(const std::string& vertCode, const std::string& fragCode);
+    Program(const std::string& name = PROGRAM_DEFAULT_NAME);
+    Program(const std::string& vertCode, const std::string& fragCode, const std::string& name = PROGRAM_DEFAULT_NAME);
     virtual ~Program();
 
     void load(const std::string& vertCode, const std::string& fragCode);
@@ -26,8 +27,11 @@ public:
     std::int32_t locate(const std::string& id) const;
     std::uint32_t id() const {return _programID;}
 
+    void rename(const std::string& name);
+
 protected:
 
+    std::string _name;
     std::uint32_t _vertID;
     std::uint32_t _fragID;
     std::uint32_t _programID;

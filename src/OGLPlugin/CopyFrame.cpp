@@ -47,7 +47,7 @@ void CopyFrame::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSa
     _output = output;
 
     Vec4 viewport = Vec4(0.0,0.0,512.0,512);
-    _graph = buildQuadGraph(glsl_copy, viewport);
+    _graph = buildQuadGraph("glsl_copy", glsl_copy, viewport);
 
     if(_output.size() > 0)
     {

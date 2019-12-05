@@ -24,7 +24,9 @@ public:
 
     virtual void setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output);
 
-    Graph::Ptr buildQuadGraph(const std::string& glsl_lighting, Vec4 viewport = Vec4(0.0,0.0,1024.0,1024.0)) const;
+    Graph::Ptr buildQuadGraph(const std::string& debug_name,
+                              const std::string& glsl_lighting,
+                              Vec4 viewport = Vec4(0.0,0.0,1024.0,1024.0)) const;
 
     virtual void apply(GlRenderer* renderer) = 0;
 

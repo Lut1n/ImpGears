@@ -9,12 +9,12 @@ class IMP_API QuadNode : public GeoNode
 {
 public:
 
-	Meta_Class(QuadNode)
+    Meta_Class(QuadNode)
 
-	QuadNode();
-	virtual ~QuadNode();
+    QuadNode();
+    virtual ~QuadNode();
 
-	virtual void update();
+    virtual void update();
 };
 
 IMPGEARS_END

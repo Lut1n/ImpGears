@@ -12,15 +12,15 @@ class IMP_API Visitor : public Object
 {
 public:
 
-	Meta_Class(Visitor)
+    Meta_Class(Visitor)
 
-	Visitor();
-	virtual ~Visitor();
+    Visitor();
+    virtual ~Visitor();
 
-	virtual void apply( Node* ) = 0;
-	
-	virtual void push( Node* ) = 0;
-	virtual void pop() = 0;
+    virtual void apply( Node* ) = 0;
+
+    virtual void push( Node* ) = 0;
+    virtual void pop() = 0;
 };
 
 IMPGEARS_END

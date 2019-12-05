@@ -4,12 +4,12 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 Node::Node()
-	: _state(nullptr)
-	, _position(0.0)
+    : _state(nullptr)
+    , _position(0.0)
     , _rotation(0.0)
-	, _scale(1.0)
+    , _scale(1.0)
 {
-	_state = State::create();
+    _state = State::create();
 }
 
 //--------------------------------------------------------------
@@ -33,23 +33,23 @@ void Node::remNode(const Node::Ptr& node)
 void Node::accept( Visitor::Ptr& visitor )
 {
     update();
-	computeMatrices();
-	
-	visitor->push(this);
-	visitor->apply(this);
+    computeMatrices();
+
+    visitor->push(this);
+    visitor->apply(this);
     for(auto node:_children) node->accept(visitor);
-	visitor->pop();
+    visitor->pop();
 }
 
 //--------------------------------------------------------------
 void Node::computeMatrices()
 {
-	_modelMatrix =
-		Matrix4::scale(_scale.x(), _scale.y(), _scale.z())
-		* Matrix4::rotationX(_rotation.x())
-		* Matrix4::rotationY(_rotation.y())
-		* Matrix4::rotationZ(_rotation.z())
-		* Matrix4::translation(_position.x(), _position.y(), _position.z());
+    _modelMatrix =
+            Matrix4::scale(_scale.x(), _scale.y(), _scale.z())
+            * Matrix4::rotationX(_rotation.x())
+            * Matrix4::rotationY(_rotation.y())
+            * Matrix4::rotationZ(_rotation.z())
+            * Matrix4::translation(_position.x(), _position.y(), _position.z());
 }
 
 IMPGEARS_END

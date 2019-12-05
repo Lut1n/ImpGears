@@ -47,7 +47,7 @@ Geometry::Ptr generateRoom()
     Geometry::Ptr geometry = Geometry::create();
     *geometry = imp::Geometry::cube();
     Geometry::intoCCW(*geometry,false);
-    geometry->generateColors(Vec3(0.3,0.3,0.8));
+    geometry->generateColors(Vec3(0.5,0.5,1.0));
     geometry->generateTexCoords(Geometry::TexGenMode_Cubic,10.0);
     geometry->scale(Vec3(50.0));
     geometry->generateNormals(Geometry::NormalGenMode_PerFace);
@@ -145,12 +145,14 @@ int main(int argc, char* argv[])
     imp::ReflexionModel::Ptr r = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_Phong,
             imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi);
+            imp::ReflexionModel::MRT_2_Col_Emi,
+            "glsl for scene object");
 
     imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_None,
             imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi);
+            imp::ReflexionModel::MRT_2_Col_Emi,
+            "glsl for coords");
 
     Material::Ptr material = Material::create(Vec3(1.0), 1.0);
     // material->_baseColor = color;

@@ -189,9 +189,9 @@ renderModeMngr.setArgs(argc, argv);
 
         double t = clock.getElapsedTime().asSeconds();
 
-        // double duration = 5.0;
-        // int frame_count = 2;
-        int frame_index = 5; // int(t/duration) % frame_count;
+        double duration = 3.0;
+        int frame_count = 9;
+        int frame_index = int(t/duration) % frame_count;
         if(frame_index == 0)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
         else if(frame_index == 1)

@@ -32,7 +32,6 @@ Geometry generateTerrain(const ImageSampler::Ptr& hm)
     Geometry::intoCCW(geometry);
     geometry.generateColors(Vec3(1.0));
     geometry.generateTexCoords(Geometry::TexGenMode_Cubic,1.0);
-    geometry.scale(Vec3(1.0,1.0,1.0));
 
     for(int k=0;k<geometry.size();++k)
     {
@@ -79,6 +78,8 @@ renderModeMngr.setArgs(argc, argv);
     loadSamplers(sampler,color);
     emi = ImageSampler::create(8, 8, 4, Vec4(1.0));
 
+    ImageSampler::Ptr reflectivityMap = ImageSampler::create(8,8,3,Vec4(1.0));
+
     normals = ImageSampler::create(128.0,128.0,4,Vec4(0.0,0.0,1.0,1.0));
     normals->setWrapping(ImageSampler::Wrapping_Repeat);
     normals->setFiltering(ImageSampler::Filtering_Linear);
@@ -101,17 +102,18 @@ renderModeMngr.setArgs(argc, argv);
     imp::ReflexionModel::Ptr r = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_Phong,
             imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi);
+            imp::ReflexionModel::MRT_2_Col_Emi, "shader 1");
 
     imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_None,
             imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi);
+            imp::ReflexionModel::MRT_2_Col_Emi, "shader 2");
 
     Material::Ptr material = Material::create(Vec3(0.3,1.0,0.4), 1.0);
     material->_baseColor = color;
     // material->_emissive = color;
     material->_normalmap = normals;
+    material->_reflectivity = reflectivityMap;
 
     Material::Ptr light_material = Material::create(Vec3(1.0), 1.0);
     light_material->_emissive = emi;
@@ -191,7 +193,7 @@ renderModeMngr.setArgs(argc, argv);
 
         double duration = 3.0;
         int frame_count = 9;
-        int frame_index = int(t/duration) % frame_count;
+        int frame_index = 0;//int(t/duration) % frame_count;
         if(frame_index == 0)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
         else if(frame_index == 1)
@@ -209,10 +211,10 @@ renderModeMngr.setArgs(argc, argv);
         else if(frame_index == 7)
             renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
         else if(frame_index == 8)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Metalness);
+            renderer->setOutputFrame(SceneRenderer::RenderFrame_Reflectivity);
 
 
-        Vec3 lp(cos(t)*5.0,5.0,sin(t)*4.0);
+        Vec3 lp(cos(t)*10.0,7.0,sin(t)*10.0);
         light->setPosition(lp);
         pointNode->setPosition(lp);
 

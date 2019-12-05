@@ -42,12 +42,21 @@ Geometry::Ptr generateCase()
 }
 
 
+Geometry::Ptr generateCase2()
+{
+    Geometry::Ptr geometry = generateCase();
+    *geometry += Vec3(0.0, 1.0, 0.0);
+    // geometry->interpolateNormals();
+
+    return geometry;
+}
+
 Geometry::Ptr generateRoom()
 {
     Geometry::Ptr geometry = Geometry::create();
     *geometry = imp::Geometry::cube();
     Geometry::intoCCW(*geometry,false);
-    geometry->generateColors(Vec3(0.5,0.5,1.0));
+    geometry->generateColors(Vec3(0.3,0.5,1.0));
     geometry->generateTexCoords(Geometry::TexGenMode_Cubic,10.0);
     geometry->scale(Vec3(50.0));
     geometry->generateNormals(Geometry::NormalGenMode_PerFace);
@@ -89,7 +98,8 @@ Geometry::Ptr generateRoom2()
     *geometry += *woof;
 
     *geometry += Vec3(0.0, 50.0, 0.0);
-    geometry->generateColors(Vec3(0.3,0.7,0.5));
+    // geometry->generateColors(Vec3(0.3,0.7,0.5));
+    geometry->generateColors(Vec3(0.5,0.0,1.0));
 
     return geometry;
 }
@@ -130,6 +140,13 @@ int main(int argc, char* argv[])
     op.setTarget(sampler->getSource());
     op.execute(normals->getSource());
 
+
+    ImageSampler::Ptr reflectivityMap = ImageSampler::create(8,8,3,Vec4(1.0));
+    for(float u=0.2;u<0.8;u+=0.125) for(float v=0.2;v<0.8;v+=0.125) reflectivityMap->set(u,v,Vec4(0.0));
+
+    ImageSampler::Ptr emissiveMap = ImageSampler::create(8,8,3,Vec4(0.0));
+    for(float u=0.4;u<0.6;u+=0.125) for(float v=0.4;v<0.6;v+=0.125) emissiveMap->set(u,v,Vec4(1.0,1.0,1.0,1.0));
+
     sf::Clock clock;
 
     sf::RenderWindow window(sf::VideoMode(512, 512), "Warehouse scene", sf::Style::Default, sf::ContextSettings(24));
@@ -154,8 +171,13 @@ int main(int argc, char* argv[])
             imp::ReflexionModel::MRT_2_Col_Emi,
             "glsl for coords");
 
+    Material::Ptr case_material = Material::create(Vec3(1.0), 1.0);
+    case_material->_emissive = emissiveMap;
+    case_material->_normalmap = normals;
+    case_material->_reflectivity = reflectivityMap;
+
     Material::Ptr material = Material::create(Vec3(1.0), 1.0);
-    // material->_baseColor = color;
+    material->_baseColor = color;
     // material->_emissive = color;
     material->_normalmap = normals;
 
@@ -165,9 +187,10 @@ int main(int argc, char* argv[])
     GeoNode::Ptr roomNode = GeoNode::create(generateRoom(), false);
     roomNode->setReflexion(r);
     roomNode->setMaterial(material);
+    roomNode->setPosition(Vec3(0.0,-50.0,0.0));
 
     Geometry::Ptr coords = buildCoord();
-    coords->scale(Vec3(10.0));
+    coords->scale(Vec3(100.0));
     GeoNode::Ptr coordsNode = GeoNode::create(coords, false);
     coordsNode->setReflexion(r2);
     coordsNode->setMaterial(material);
@@ -182,25 +205,25 @@ int main(int argc, char* argv[])
     pointGeo->generateNormals();
     pointGeo->generateTexCoords(Geometry::TexGenMode_Spheric);
     GeoNode::Ptr pointNode = GeoNode::create(pointGeo, false);
-    pointNode->setPosition(Vec3(0.0,2,0.0));
+    pointNode->setPosition(Vec3(0.0,-50.0+10.0,0.0));
     pointNode->setReflexion(r);
     pointNode->setMaterial(light_material);
 
-    GeoNode::Ptr case01_node = GeoNode::create(generateCase(), false);
+    GeoNode::Ptr case01_node = GeoNode::create(generateCase2(), false);
     case01_node->setReflexion(r);
-    case01_node->setMaterial(material);
+    case01_node->setMaterial(case_material);
     case01_node->setScale(Vec3(10.0));
-    case01_node->setPosition(Vec3(20.0, 10.0, 20.0));
-    GeoNode::Ptr case02_node = GeoNode::create(generateCase(), false);
+    case01_node->setPosition(Vec3(20.0, -50.0, 20.0));
+    GeoNode::Ptr case02_node = GeoNode::create(generateCase2(), false);
     case02_node->setReflexion(r);
-    case02_node->setMaterial(material);
+    case02_node->setMaterial(case_material);
     case02_node->setScale(Vec3(5.0));
-    case02_node->setPosition(Vec3(-10.0, 5.0, 10.0));
-    GeoNode::Ptr case03_node = GeoNode::create(generateCase(), false);
+    case02_node->setPosition(Vec3(-10.0, -50.0, 10.0));
+    GeoNode::Ptr case03_node = GeoNode::create(generateCase2(), false);
     case03_node->setReflexion(r);
-    case03_node->setMaterial(material);
+    case03_node->setMaterial(case_material);
     case03_node->setScale(Vec3(2.0));
-    case03_node->setPosition(Vec3(0.0, 2.0, 0.0));
+    case03_node->setPosition(Vec3(0.0, -50.0, 0.0));
 
     root->addNode(camera);
     root->addNode(roomNode);
@@ -217,10 +240,11 @@ int main(int argc, char* argv[])
     case02_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
     case03_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
 
-    coordsNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
+    // coordsNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
     roomNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
+    case01_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
     case02_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
-    case03_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
+    // case03_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
@@ -240,7 +264,7 @@ int main(int argc, char* argv[])
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
-    // renderer->setOutputFrame(SceneRenderer::RenderFrame_Metalness);
+    // renderer->setOutputFrame(SceneRenderer::RenderFrame_Reflectivity);
 
     Image::Ptr target;
 
@@ -256,13 +280,13 @@ int main(int argc, char* argv[])
 
         double t = clock.getElapsedTime().asSeconds();
 
-        Vec3 lp(cos(t)*20.0,20.0+cos(t)*10.0,sin(t)*20.0);
+        Vec3 lp(cos(t)*20.0,20.0+cos(t)*10.0-50.0,sin(t)*20.0);
         light->setPosition(lp);
         pointNode->setPosition(lp);
 
         Vec3 lp2(cos(-t * 0.2),1.0,sin(-t * 0.2));
-        camera->setPosition(lp2*Vec3(40.0,20.0,40.0));
-        camera->setTarget(Vec3(0.0f, 10.f, 0.0f));
+        camera->setPosition(lp2*Vec3(40.0,25.0-50.0,40.0));
+        camera->setTarget(Vec3(0.0f, 10.f-50.0, 0.0f));
 
 
         renderer->render( graph );

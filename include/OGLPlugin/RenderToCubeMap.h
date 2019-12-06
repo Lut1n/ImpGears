@@ -36,6 +36,7 @@ private:
     CubeMapSampler::Ptr _cubemap;
     Matrix4 _proj;
     Camera::Ptr _camera;
+    State::Ptr _state;
 
     Vec3 _directions[6];
     Vec3 _upDirections[6];

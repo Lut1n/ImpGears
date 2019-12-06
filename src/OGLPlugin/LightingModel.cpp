@@ -59,7 +59,7 @@ void lighting(out vec4 out_color,
 
 
     // vec3 lightColor = vec3(1.0);
-    float lightPower = 100.0; // u_lightAtt[0];
+    float lightPower = 200.0; // u_lightAtt[0];
     float shininess = i_shininess(v_texCoord) * 10.0; // u_lightAtt[1];
 
     // view space
@@ -165,7 +165,8 @@ void LightingModel::apply(GlRenderer* renderer)
     _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
     _graph->getInitState()->setUniform("u_camera_pos", _camera);
     _graph->getInitState()->setUniform("u_light_pos", _lightPos);
-    renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);
+    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }
 
 

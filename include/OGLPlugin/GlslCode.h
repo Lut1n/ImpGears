@@ -158,10 +158,8 @@ static std::string glsl_phong = GLSL_CODE(
 
 uniform mat4 u_model;
 uniform mat4 u_view;
-uniform vec3 u_lightPos;
-uniform vec3 u_lightCol;
-uniform vec3 u_lightAtt;
 uniform vec3 u_color;
+uniform float u_shininess;
 
 varying vec2 v_texCoord;
 varying vec3 v_m;
@@ -192,8 +190,6 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    float shininess = u_lightAtt[1];
-
     vec3 color = u_color.xyz * gl_Color.xyz;
     color *= textureColor(v_texCoord).xyz;
     vec4 emi = textureEmissive(v_texCoord);
@@ -209,7 +205,7 @@ void lighting(out vec4 out_color,
     out_normal = (normal_mat * tbn_a * normal) * 0.5 + 0.5;
 
     out_reflectivity = textureReflectivity(v_texCoord);
-    out_shininess = shininess * 0.1;
+    out_shininess = u_shininess * 0.1;
     float near = 0.1; float far = 128.0;
     out_depth = (length(v_mv.xyz) - near) / far;
 }

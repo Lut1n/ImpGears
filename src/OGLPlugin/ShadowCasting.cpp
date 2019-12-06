@@ -144,7 +144,8 @@ void ShadowCasting::apply(GlRenderer* renderer)
     _graph->getInitState()->setUniform("u_camera_pos", _camera);
     _graph->getInitState()->setUniform("u_light_pos", _lightPos);
     _graph->getInitState()->setUniform("u_view_cam", _view);
-    renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);
+    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }
 
 

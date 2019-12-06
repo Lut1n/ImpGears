@@ -126,7 +126,8 @@ void EnvironmentFX::apply(GlRenderer* renderer)
     _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
     _graph->getInitState()->setUniform("u_input_cubemap_environment", _cubemap, 3);
     _graph->getInitState()->setUniform("u_camera_pos", _camera);
-    renderer->applyRenderVisitor(_graph, nullptr, SceneRenderer::RenderFrame_Lighting);
+    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }
 
 

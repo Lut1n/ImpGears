@@ -82,75 +82,66 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene,
-                                                Camera::Ptr overrideCamera,
-                                                SceneRenderer::RenderFrame renderPass,
-                                                ReflexionModel::Ptr overrideShader)
+RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene)
 {
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
     scene->accept(visitor);
 
     RenderQueue::Ptr queue = _visitor->getQueue();
+    return queue;
+}
+
+
+//---------------------------------------------------------------
+void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
+                            SceneRenderer::RenderFrame renderPass )
+{
+    State::Ptr local_state = State::create();
     Matrix4 view;
     if(queue->_camera) view = queue->_camera->getViewMatrix();
-    if(overrideCamera) view = overrideCamera->getViewMatrix();
-
-    Vec3 lightPos(0.0);
-    Vec3 lightCol(1.0);
-    Vec3 color(1.0);
-    Vec3 latt(0.0);
+    // if(overrideCamera) view = overrideCamera->getViewMatrix();
 
     for(int i=0;i<(int)queue->_nodes.size();++i)
     {
-        LightNode* light = closest(queue->_nodes[i], queue->_lights);
-        if(light)
-        {
-            lightPos = light->_worldPosition;
-            lightCol = light->_color;
-            latt[0] = light->_power;
-        }
+        State::Ptr state = queue->_states[i];
+        local_state->clone(state, State::CloneOpt_All);
+        if( overrideState ) local_state->clone( overrideState, State::CloneOpt_IfChanged );
 
         GeoNode* geode = dynamic_cast<GeoNode*>( queue->_nodes[i] );
         ClearNode* clear = dynamic_cast<ClearNode*>( queue->_nodes[i] );
+
         if(geode)
         {
             Material::Ptr mat = geode->_material;
-            latt[1] = mat->_shininess;
-            color = mat->_color;
+            float shininess = mat->_shininess;
+            Vec3 color = mat->_color;
 
             if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
                 if(mat->_baseColor)
-                        queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
+                        state->setUniform("u_sampler_color", mat->_baseColor, 0);
                 if(mat->_normalmap)
-                        queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
+                        state->setUniform("u_sampler_normal", mat->_normalmap, 1);
                 if(mat->_emissive)
-                        queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+                        state->setUniform("u_sampler_emissive", mat->_emissive, 2);
                 if(mat->_reflectivity)
-                        queue->_states[i]->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
+                        state->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
+
+                queue->_states[i]->setUniform("u_color", color);
+                queue->_states[i]->setUniform("u_shininess", shininess);
             }
 
-            queue->_states[i]->setUniform("u_view", view);
 
             // ---- if we want a normal matrix for view space instead of model space ----
-            // Matrix4 model = queue->_states[i]->getUniforms()["u_model"]->getMat4();
+            // Matrix4 model = state->getUniforms()["u_model"]->getMat4();
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
-            // queue->_states[i]->setUniform("u_normal", normalMat );
+            // state->setUniform("u_normal", normalMat );
+            state->setUniform("u_view", view);
 
-            if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
-            {
-                queue->_states[i]->setUniform("u_lightPos", lightPos);
-                queue->_states[i]->setUniform("u_lightCol", lightCol);
-                queue->_states[i]->setUniform("u_lightAtt", latt);
-                queue->_states[i]->setUniform("u_color", color);
-            }
-            applyState(queue->_states[i], renderPass, overrideShader);
-            if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
-            {
-                _renderPlugin->setCulling(2);
-            }
 
+            applyState(state, renderPass);
+            if( renderPass==SceneRenderer::RenderFrame_ShadowMap ) _renderPlugin->setCulling(2);
 
             RenderPass::Ptr renderPass_info = geode->getState()->getRenderPass();
 
@@ -168,9 +159,7 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene,
         }
     }
 
-    _renderPlugin->unbind();
-
-    return queue;
+    // _renderPlugin->unbind();
 }
 
 //---------------------------------------------------------------
@@ -205,6 +194,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
 
     RenderQueue::Ptr queue = applyRenderVisitor(scene);
+    drawQueue(queue);
     const Camera* camera = queue->_camera;
 
 
@@ -430,8 +420,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
 //---------------------------------------------------------------
 void GlRenderer::applyState(const State::Ptr& state,
-                            SceneRenderer::RenderFrame renderPass,
-                            ReflexionModel::Ptr overrideShader)
+                            SceneRenderer::RenderFrame renderPass)
 {
     if(_renderPlugin == nullptr) return;
 
@@ -445,7 +434,7 @@ void GlRenderer::applyState(const State::Ptr& state,
     _renderPlugin->setViewport(state->getViewport());
 
     ReflexionModel::Ptr reflexion = state->getReflexion();
-    if(overrideShader) reflexion = overrideShader;
+    // if(overrideShader) reflexion = overrideShader;
 
     _renderPlugin->load(reflexion);
     _renderPlugin->bind(reflexion);

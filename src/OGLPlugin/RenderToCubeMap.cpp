@@ -30,6 +30,7 @@ RenderToCubeMap::RenderToCubeMap(GlRenderer* renderer, CubeMapSampler::Ptr cubem
     _upDirections[5] = Vec3(0.0,1.0,0.0);
 
     setCubeMap(cubemap);
+    _state = State::create();
 }
 
 //--------------------------------------------------------------
@@ -77,11 +78,15 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
         _camera->setUpDir( _upDirections[i] * -1.0 );
         _camera->lookAt();
 
+        _state->setUniform( "u_view", _camera->getViewMatrix() );
+        _state->setReflexion( overrideShader );
+
         _renderer->_renderPlugin->init(_targets[i]);
         _renderer->_renderPlugin->bind(_targets[i]);
         _targets[i]->change();
 
-        _renderer->applyRenderVisitor( _clone, _camera, frameType, overrideShader );
+        RenderQueue::Ptr queue = _renderer->applyRenderVisitor(_clone);
+        _renderer->drawQueue(queue, _state, frameType);
 
         _renderer->_renderPlugin->unbind();
     }

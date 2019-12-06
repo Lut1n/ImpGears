@@ -21,6 +21,13 @@ RenderVisitor::~RenderVisitor()
 //--------------------------------------------------------------
 void RenderVisitor::reset()
 {
+    if( !_matrices.empty() || !_states.empty() )
+    {
+        std::cout << "Warning : matrices or states stacks are not consistent" << std::endl;
+        _matrices.clear();
+        _states.clear();
+    }
+
     _queue = RenderQueue::create();
     u_model->set( Matrix4() );
     u_proj->set( Matrix4() );

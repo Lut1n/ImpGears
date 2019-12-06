@@ -571,7 +571,7 @@ void getUV_spheric(Vec3& triDir, Vec3& d, float& u, float& v)
     // const float EPSILON = 0.01;
     const float PI = 3.141592;
 
-    u = std::atan2( d.z(), d.x() ) / PI;
+    u = std::atan2( d.x(), d.z() ) / PI;
     float eq = std::sqrt(d.x()*d.x() + d.z()*d.z());
     v = std::atan2( d.y(), eq ) / (PI*0.5);
 

@@ -553,6 +553,36 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
     GL_CHECKERROR("end of uniform setting");
 }
 
+//--------------------------------------------------------------
+void GlPlugin::unload(Geometry::Ptr& geo)
+{
+
+}
+
+//--------------------------------------------------------------
+void GlPlugin::unload(ImageSampler::Ptr& sampler)
+{
+
+}
+
+//--------------------------------------------------------------
+void GlPlugin::unload(CubeMapSampler::Ptr& sampler)
+{
+
+}
+
+//--------------------------------------------------------------
+void GlPlugin::unload(RenderTarget::Ptr& rt)
+{
+
+}
+
+//--------------------------------------------------------------
+void GlPlugin::unload(ReflexionModel::Ptr& shader)
+{
+
+}
+
 
 //--------------------------------------------------------------
 SceneRenderer::Ptr GlPlugin::getRenderer()

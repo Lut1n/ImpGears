@@ -81,11 +81,8 @@ EnvironmentFX::~EnvironmentFX()
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
+void EnvironmentFX::setup()
 {
-    _input = input;
-    _output = output;
-
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_env", glsl_env, viewport);
 
@@ -94,18 +91,6 @@ void EnvironmentFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
         _frame = RenderTarget::create();
         _frame->build(_output, true);
     }
-}
-
-//--------------------------------------------------------------
-void EnvironmentFX::setCubeMap(CubeMapSampler::Ptr cubemap)
-{
-    _cubemap = cubemap;
-}
-
-//--------------------------------------------------------------
-void EnvironmentFX::setCameraPos(const Vec3& cameraPos)
-{
-    _camera = cameraPos;
 }
 
 //--------------------------------------------------------------
@@ -121,11 +106,15 @@ void EnvironmentFX::apply(GlRenderer* renderer)
     {
         renderer->_renderPlugin->unbind();
     }
+
+    Vec3 camPos = Vec3(0.0);
+    if(_camera) camPos = _camera->getAbsolutePosition();
+
     _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
     _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
-    _graph->getInitState()->setUniform("u_input_cubemap_environment", _cubemap, 3);
-    _graph->getInitState()->setUniform("u_camera_pos", _camera);
+    _graph->getInitState()->setUniform("u_input_cubemap_environment", _environment, 3);
+    _graph->getInitState()->setUniform("u_camera_pos", camPos);
     RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
     renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }

@@ -71,6 +71,12 @@ public:
     virtual void setDepthTest(int mode) = 0;
 
     virtual SceneRenderer::Ptr getRenderer() = 0;
+
+    virtual void unload(Geometry::Ptr& geo) = 0;
+    virtual void unload(ImageSampler::Ptr& sampler) = 0;
+    virtual void unload(CubeMapSampler::Ptr& sampler) = 0;
+    virtual void unload(RenderTarget::Ptr& rt) = 0;
+    virtual void unload(ReflexionModel::Ptr& shader) = 0;
 };
 
 

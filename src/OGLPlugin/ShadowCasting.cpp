@@ -8,21 +8,15 @@
 
 //--------------------------------------------------------------
 static std::string glsl_shadowCasting = GLSL_CODE(
-// uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
-// uniform sampler2D u_input_sampler_color;
 uniform samplerCube u_input_cubemap_shadow;
 uniform vec3 u_light_pos;
-uniform vec3 u_camera_pos;
 uniform mat4 u_view_cam;
 
 varying vec2 v_texCoord;
 
-// vec3 i_color(vec2 uv){return texture2D(u_input_sampler_color, uv).xyz;}
-// vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
-// vec3 i_env(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).xyz;}
 
 vec4 unproject(vec2 txCoord, float depth)
 {
@@ -92,11 +86,8 @@ ShadowCasting::~ShadowCasting()
 }
 
 //--------------------------------------------------------------
-void ShadowCasting::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
+void ShadowCasting::setup()
 {
-    _input = input;
-    _output = output;
-
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_shadowCasting", glsl_shadowCasting, viewport);
 
@@ -105,24 +96,6 @@ void ShadowCasting::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
         _frame = RenderTarget::create();
         _frame->build(_output, true);
     }
-}
-
-//--------------------------------------------------------------
-void ShadowCasting::setCubeMap(CubeMapSampler::Ptr cubemap)
-{
-    _cubemap = cubemap;
-}
-
-//--------------------------------------------------------------
-void ShadowCasting::setCameraPos(const Vec3& cameraPos)
-{
-    _camera = cameraPos;
-}
-
-//--------------------------------------------------------------
-void ShadowCasting::setLightPos(const Vec3& lightPos)
-{
-    _lightPos = lightPos;
 }
 
 //--------------------------------------------------------------
@@ -138,12 +111,14 @@ void ShadowCasting::apply(GlRenderer* renderer)
     {
         renderer->_renderPlugin->unbind();
     }
-    // _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
+
+    Matrix4 view;
+    if(_camera) view = _camera->getViewMatrix();
+
     _graph->getInitState()->setUniform("u_input_sampler_depth", _input[0], 0);
-    _graph->getInitState()->setUniform("u_input_cubemap_shadow", _cubemap, 1);
-    _graph->getInitState()->setUniform("u_camera_pos", _camera);
-    _graph->getInitState()->setUniform("u_light_pos", _lightPos);
-    _graph->getInitState()->setUniform("u_view_cam", _view);
+    _graph->getInitState()->setUniform("u_input_cubemap_shadow", _shadows, 1);
+    _graph->getInitState()->setUniform("u_light_pos", _light->_worldPosition );
+    _graph->getInitState()->setUniform("u_view_cam", view );
     RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
     renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }

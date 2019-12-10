@@ -43,6 +43,12 @@ public:
 
     virtual void update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform);
 
+    virtual void unload(Geometry::Ptr& geo);
+    virtual void unload(ImageSampler::Ptr& sampler);
+    virtual void unload(CubeMapSampler::Ptr& sampler);
+    virtual void unload(RenderTarget::Ptr& rt);
+    virtual void unload(ReflexionModel::Ptr& shader);
+
     virtual SceneRenderer::Ptr getRenderer();
 
     struct Priv;

@@ -7,6 +7,7 @@
 
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/GeoNode.h>
+#include <OGLPlugin/Pipeline.h>
 
 IMPGEARS_BEGIN
 
@@ -43,8 +44,7 @@ public:
 
 protected:
 
-    BloomFX* _bloomFX;
-    EnvironmentFX* _envFX;
+    Pipeline::Ptr _pipeline;
 
     RenderTarget::Ptr _internalFrames;
     // RenderTarget::Ptr _renderTargets;

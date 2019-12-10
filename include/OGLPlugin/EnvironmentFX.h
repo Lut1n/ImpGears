@@ -1,38 +1,26 @@
 #ifndef IMP_ENVIRONMENT_FX_H
 #define IMP_ENVIRONMENT_FX_H
 
-#include <Core/Object.h>
-#include <Graphics/Sampler.h>
-
-#include <OGLPlugin/FxRenderPass.h>
-
+#include <OGLPlugin/Pipeline.h>
 
 IMPGEARS_BEGIN
 
 struct GlRenderer;
 
-class IMP_API EnvironmentFX : public FxRenderPass
+class IMP_API EnvironmentFX : public FrameOperation
 {
 public:
-
     Meta_Class(EnvironmentFX)
 
     EnvironmentFX();
     virtual ~EnvironmentFX();
 
-    virtual void setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output);
-
-    void setCubeMap(CubeMapSampler::Ptr cubemap);
-    void setCameraPos(const Vec3& cameraPos);
-
+    virtual void setup();
     virtual void apply(GlRenderer* renderer);
 
 protected:
-
     Graph::Ptr _graph;
     RenderTarget::Ptr _frame;
-    CubeMapSampler::Ptr _cubemap;
-    Vec3 _camera;
 };
 
 IMPGEARS_END

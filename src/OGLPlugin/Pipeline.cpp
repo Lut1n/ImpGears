@@ -8,29 +8,14 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-FrameOperation::FrameOperation(/*SceneRenderer::RenderFrame renderFrame*/)
+FrameOperation::FrameOperation()
 {
-    _needCamera = false;
-    _needLight = false;
-    _needCubeMap = false;
 }
 
 //--------------------------------------------------------------
 FrameOperation::~FrameOperation()
 {
 
-}
-
-//--------------------------------------------------------------
-void FrameOperation::setup(FrameOperation::FrameBuf& input,
-                           FrameOperation::FrameBuf& output,
-                           bool needCamera, bool needLight, bool needCubeMap)
-{
-    _input = input;
-    _output = output;
-    _needCamera = needCamera;
-    _needLight = needLight;
-    _needCubeMap = needCubeMap;
 }
 
 //--------------------------------------------------------------
@@ -45,6 +30,20 @@ void FrameOperation::setOutput(ImageSampler::Ptr sampler, int id)
 {
     if(id >= (int)_output.size()) _output.resize(id+1);
     _output[id] = sampler;
+}
+
+//--------------------------------------------------------------
+ImageSampler::Ptr FrameOperation::getInput(int id)
+{
+    if( id<0 || id>=(int)_input.size() ) return nullptr;
+    return _input[id];
+}
+
+//--------------------------------------------------------------
+ImageSampler::Ptr FrameOperation::getOutput(int id)
+{
+    if( id<0 || id>=(int)_output.size() ) return nullptr;
+    return _output[id];
 }
 
 //--------------------------------------------------------------
@@ -71,23 +70,29 @@ Graph::Ptr FrameOperation::buildQuadGraph(const std::string& debug_name,
     return graph;
 }
 
-// //--------------------------------------------------------------
-// void FrameOperation::setCubeMap(CubeMapSampler::Ptr cubemap)
-// {
-//
-// }
-//
-// //--------------------------------------------------------------
-// void FrameOperation::setCamera(const Vec3& cameraPos)
-// {
-//
-// }
-//
-// //--------------------------------------------------------------
-// void FrameOperation::setLight(const Vec3& lightPos)
-// {
-//
-// }
+//--------------------------------------------------------------
+void FrameOperation::setEnvCubeMap(CubeMapSampler::Ptr& cubemap)
+{
+    _environment = cubemap;
+}
+
+//--------------------------------------------------------------
+void FrameOperation::setShaCubeMap(CubeMapSampler::Ptr& cubemap)
+{
+    _shadows = cubemap;
+}
+
+//--------------------------------------------------------------
+void FrameOperation::setCamera(const Camera* camera)
+{
+    _camera = camera;
+}
+
+//--------------------------------------------------------------
+void FrameOperation::setLight(const LightNode* light)
+{
+    _light = light;
+}
 
 
 
@@ -108,12 +113,10 @@ Pipeline::Binding::Binding(int opA, int opB, int opA_output, int opB_input)
     _opB_input = opB_input;
 }
 
+//--------------------------------------------------------------
 bool Pipeline::Binding::operator==(const Binding& that) const
 {
-    return _opA == that._opA &&
-            _opB == that._opB &&
-            _opA_output == that._opA_output &&
-            _opB_input == that._opB_input;
+    return _opB==that._opB && _opB_input==that._opB_input;
 }
 
 
@@ -134,7 +137,7 @@ Pipeline::~Pipeline()
 }
 
 //--------------------------------------------------------------
-void Pipeline::setOperation(FrameOperation::Ptr& op, int index)
+void Pipeline::setOperation(const FrameOperation::Ptr& op, int index)
 {
     if(index < 0) return;
     if(index >= (int)_operations.size()) _operations.resize(index+1);
@@ -148,14 +151,27 @@ void Pipeline::setOperation(FrameOperation::Ptr& op, int index)
 }
 
 //--------------------------------------------------------------
-void Pipeline::setBinding(Binding& binding)
+void Pipeline::bind(int dstOpId, int srcOpId, int dstInputId, int srcOutputId)
 {
-    auto found = std::find(_bindings.begin(),_bindings.end(),binding);
+    Binding newBinding(srcOpId, dstOpId, srcOutputId, dstInputId);
+
+    auto found = std::find(_bindings.begin(),_bindings.end(),newBinding);
     if(found == _bindings.end())
-    {
-        _bindings.push_back(binding);
-    }
+        _bindings.push_back(newBinding);
+    else
+        *found = newBinding;
+
     _dirty = true;
+}
+
+//--------------------------------------------------------------
+ImageSampler::Ptr Pipeline::getOutputFrame( int opIndex, int outputIndex )
+{
+    if(opIndex < 0 || opIndex >= (int)_operations.size()) return nullptr;
+
+    FrameOperation::Ptr op = _operations[opIndex];
+    if(op) return op->getOutput( outputIndex );
+    return nullptr;
 }
 
 //--------------------------------------------------------------
@@ -185,8 +201,12 @@ void Pipeline::setupOperations()
             int output_index = key_bind.first;
             const std::vector<int>& binds = key_bind.second;
 
-            ImageSampler::Ptr frame = ImageSampler::create(1024,1024,4,Vec4(0.0));
-            _operations[k]->setOutput(frame, output_index);
+            ImageSampler::Ptr frame = _operations[k]->getOutput(output_index);
+            if(frame == nullptr)
+            {
+                frame = ImageSampler::create(1024,1024,4,Vec4(0.0));
+                _operations[k]->setOutput(frame, output_index);
+            }
 
             for(auto next : binds)
             {
@@ -264,7 +284,10 @@ void Pipeline::deduceOrder()
 }
 
 //--------------------------------------------------------------
-void Pipeline::prepare()
+void Pipeline::prepare(const Camera* camera,
+                       const LightNode* light,
+                       CubeMapSampler::Ptr& shadowCubemap,
+                       CubeMapSampler::Ptr& envCubemap)
 {
     if(_dirty)
     {
@@ -274,6 +297,14 @@ void Pipeline::prepare()
         setupOperations();
 
         _dirty = false;
+    }
+
+    for(auto& op : _operations)
+    {
+        op->setCamera(camera);
+        op->setLight(light);
+        op->setEnvCubeMap(envCubemap);
+        op->setShaCubeMap(shadowCubemap);
     }
 }
 

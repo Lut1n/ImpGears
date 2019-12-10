@@ -11,7 +11,15 @@
 #include <OGLPlugin/RenderToCubeMap.h>
 #include <OGLPlugin/ShadowCasting.h>
 
-
+#define FRAMEOP_ID_ENVFX 0
+#define FRAMEOP_ID_SHAMIX 1
+#define FRAMEOP_ID_COLORMIX 2
+#define FRAMEOP_ID_ENVMIX 3
+#define FRAMEOP_ID_BLOOMMIX 4
+#define FRAMEOP_ID_SHAFX 5
+#define FRAMEOP_ID_PHONG 6
+#define FRAMEOP_ID_COPY 7
+#define FRAMEOP_ID_BLOOM 8
 
 #define GLSL_CODE( code ) #code
 
@@ -39,8 +47,6 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 GlRenderer::GlRenderer()
     : SceneRenderer()
-    , _bloomFX(nullptr)
-    , _envFX(nullptr)
 {
 }
 
@@ -177,16 +183,6 @@ void GlRenderer::render(const Graph::Ptr& scene)
         _internalFrames->setClearColor(5, Vec4(1.0));   // depth
     }
 
-    // if(_renderTargets == nullptr && _targets.size() > 0)
-    // {
-    //     std::vector<ImageSampler::Ptr> samplers(_targets.size());
-    //     for(int i=0;i<(int)_targets.size();++i)
-    //         samplers[i] = ImageSampler::create(_targets[i]);
-    //
-    //     _renderTargets = RenderTarget::create();
-    //     _renderTargets->build(samplers, true);
-    // }
-
 
     _renderPlugin->init(_internalFrames);
     _renderPlugin->bind(_internalFrames);
@@ -208,7 +204,6 @@ void GlRenderer::render(const Graph::Ptr& scene)
     {
         if(environment_renderer == nullptr)
         {
-            // environment = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
             environment = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
             environment_renderer = RenderToCubeMap::create(this);
             environment_renderer->setCubeMap(environment);
@@ -237,184 +232,102 @@ void GlRenderer::render(const Graph::Ptr& scene)
     }
 
 
-
-    if(isFeatureEnabled(Feature_Bloom))
+    if(_pipeline == nullptr)
     {
-        static std::vector<ImageSampler::Ptr> input_bloom;
-        static std::vector<ImageSampler::Ptr> output_bloom;
-        static std::vector<ImageSampler::Ptr> input_blend;
-        static std::vector<ImageSampler::Ptr> output_blend;
-        static std::vector<ImageSampler::Ptr> input_blendTmp;
-        static std::vector<ImageSampler::Ptr> output_blendTmp;
-        static std::vector<ImageSampler::Ptr> input_blendSha;
-        static std::vector<ImageSampler::Ptr> output_blendSha;
-        static std::vector<ImageSampler::Ptr> input_blendRefl;
-        static std::vector<ImageSampler::Ptr> output_blendRefl;
-        static std::vector<ImageSampler::Ptr> input_lighting;
-        static std::vector<ImageSampler::Ptr> output_lighting;
-        static std::vector<ImageSampler::Ptr> input_shadow_cast;
-        static std::vector<ImageSampler::Ptr> output_shadow_cast;
-        static std::vector<ImageSampler::Ptr> input_env;
-        static std::vector<ImageSampler::Ptr> output_env;
-        static std::vector<ImageSampler::Ptr> final_output;
-        static BlendAll::Ptr blendAll;
-        static BlendAll::Ptr blendTmp;
-        static BlendAll::Ptr blendSha;
-        static BlendAll::Ptr blendRefl;
-        static EnvironmentFX::Ptr environFX;
-        static ShadowCasting::Ptr shadowFX;
-        static LightingModel::Ptr lighting;
-        static CopyFrame::Ptr toScreen;
+        _pipeline = Pipeline::create(this);
+        BloomFX::Ptr bloomFX = BloomFX::create();
+        BlendAll::Ptr blendAll = BlendAll::create(BlendAll::Max);
+        BlendAll::Ptr blendTmp = BlendAll::create(BlendAll::Mult);
+        BlendAll::Ptr blendSha = BlendAll::create(BlendAll::Mult);
+        BlendAll::Ptr blendRefl = BlendAll::create(BlendAll::Mult);
+        CopyFrame::Ptr toScreen = CopyFrame::create();
+        EnvironmentFX::Ptr environFX = EnvironmentFX::create();
+        LightingModel::Ptr lighting = LightingModel::create();
+        ShadowCasting::Ptr shadowFX = ShadowCasting::create();
 
 
-        if(_bloomFX == nullptr)
-        {
-            _bloomFX = new BloomFX();
-            blendAll = BlendAll::create(BlendAll::Max);
-            blendTmp = BlendAll::create(BlendAll::Mult);
-            blendSha = BlendAll::create(BlendAll::Mult);
-            blendRefl = BlendAll::create(BlendAll::Mult);
-            toScreen = CopyFrame::create();
-            environFX = EnvironmentFX::create();
-            lighting = LightingModel::create();
-            shadowFX = ShadowCasting::create();
+        bloomFX->setInput( _internalFrames->get(1), 0 );
+        lighting->setInput( _internalFrames->get(2), 0 );
+        lighting->setInput( _internalFrames->get(5), 1 );
+        lighting->setInput( _internalFrames->get(4), 2 );
+        environFX->setInput( _internalFrames->get(2), 0 );
+        environFX->setInput( _internalFrames->get(5), 1 );
+        environFX->setInput( _internalFrames->get(3), 2 );
+        shadowFX->setInput( _internalFrames->get(5), 0 );
+        blendTmp->setInput( _internalFrames->get(0), 0 );
 
-            input_lighting = { _internalFrames->get(2), _internalFrames->get(5), _internalFrames->get(4) };
-            output_lighting.push_back( ImageSampler::create(1024,1024,4,Vec4(0.0)) );
+        // build dependances
+        _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
+        _pipeline->setOperation( blendSha, FRAMEOP_ID_SHAMIX );
+        _pipeline->setOperation( blendTmp, FRAMEOP_ID_COLORMIX );
+        _pipeline->setOperation( blendRefl, FRAMEOP_ID_ENVMIX );
+        _pipeline->setOperation( blendAll, FRAMEOP_ID_BLOOMMIX );
+        _pipeline->setOperation( shadowFX, FRAMEOP_ID_SHAFX );
+        _pipeline->setOperation( lighting, FRAMEOP_ID_PHONG );
+        _pipeline->setOperation( toScreen, FRAMEOP_ID_COPY );
+        _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
+        _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_PHONG, 0);
+        _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SHAFX, 1);
+        _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_ENVFX, 0);
+        _pipeline->bind( FRAMEOP_ID_COLORMIX, FRAMEOP_ID_SHAMIX, 1);
+        _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_COLORMIX, 1);
+        _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_ENVMIX, 0);
+        _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_BLOOM, 1);
+        _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
 
-            input_bloom = { _internalFrames->get(1) };
-            output_bloom.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
-
-            input_env.push_back( _internalFrames->get(2) );
-            input_env.push_back( _internalFrames->get(5) );
-            input_env.push_back( _internalFrames->get(3) );
-            output_env.push_back(ImageSampler::create(1024,1024,4,Vec4(1.0)));
-
-            // input_shadow_cast.push_back( _internalFrames->get(2) );
-            input_shadow_cast.push_back( _internalFrames->get(5) );
-            // input_shadow_cast.push_back( _internalFrames->get(0) );
-            output_shadow_cast.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
-
-
-            input_blendSha.push_back(output_lighting[0]);
-            input_blendSha.push_back(output_shadow_cast[0]);
-            output_blendSha.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
-
-            input_blendTmp.push_back(_internalFrames->get(0));
-            input_blendTmp.push_back(output_blendSha[0]);
-            output_blendTmp.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
-
-            input_blendRefl.push_back(output_blendTmp[0]);
-            input_blendRefl.push_back(output_env[0]);
-            output_blendRefl.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
-
-            input_blend.push_back(output_blendRefl[0]);
-            input_blend.push_back(output_bloom[0]);
-            output_blend.push_back(ImageSampler::create(1024,1024,4,Vec4(0.0)));
-
-            _bloomFX->setup( input_bloom, output_bloom );
-            blendAll->setup(input_blend, output_blend);
-            blendTmp->setup(input_blendTmp, output_blendTmp);
-            blendSha->setup(input_blendSha, output_blendSha);
-            blendRefl->setup(input_blendRefl, output_blendRefl);
-
-            if(!_direct && _targets->count() > 0) final_output.push_back( _targets->get(0) );
-            toScreen->setup(output_blend, final_output);
-            environFX->setup(input_env, output_env);
-            environFX->setCubeMap(environment);
-            shadowFX->setup(input_shadow_cast, output_shadow_cast);
-            shadowFX->setCubeMap(shadows);
-            lighting->setup(input_lighting, output_lighting);
-        }
-
-
-
-        switch(getOutputFrame())
-        {
-        case RenderFrame_Default:
-            toScreen->setInput( output_blend[0] ) ;
-            break;
-        case RenderFrame_Color:
-            toScreen->setInput( _internalFrames->get(0) ) ;
-            break;
-        case RenderFrame_ShadowMap:
-            toScreen->setInput( output_shadow_cast[0] ) ;
-            break;
-        case RenderFrame_Environment:
-            toScreen->setInput( output_env[0] ) ;
-            break;
-        case RenderFrame_Lighting:
-            toScreen->setInput( output_lighting[0] ) ;
-            break;
-        case RenderFrame_Depth:
-            toScreen->setInput( _internalFrames->get(5) ) ;
-            break;
-        case RenderFrame_Emissive:
-            toScreen->setInput( _internalFrames->get(1) ) ;
-            break;
-        case RenderFrame_Bloom:
-            toScreen->setInput( output_bloom[0] ) ;
-            break;
-        case RenderFrame_Normals:
-            toScreen->setInput( _internalFrames->get(2) ) ;
-            break;
-        case RenderFrame_Reflectivity:
-            toScreen->setInput( _internalFrames->get(3) ) ;
-            break;
-        default: // assume RenderFrame_Default
-            toScreen->setInput( output_blend[0] ) ;
-            break;
-        }
-
-
-        _bloomFX->apply(this);
-
-        if(camera)
-        {
-            environFX->setCameraPos(camera->getAbsolutePosition());
-            shadowFX->setCameraPos(camera->getAbsolutePosition());
-            shadowFX->setView(camera->getViewMatrix());
-            lighting->setCameraPos(camera->getAbsolutePosition());
-        }
-        else
-        {
-            environFX->setCameraPos(Vec3(0.0));
-            shadowFX->setCameraPos(Vec3(0.0));
-            lighting->setCameraPos(Vec3(0.0));
-        }
-        if(queue->_lights.size() > 0)
-        {
-            Vec3 wPos = queue->_lights[0]->_worldPosition;
-            Vec3 vPos = Vec3(Vec4(wPos,1.0) * camera->getViewMatrix());
-            lighting->setLightPos( vPos );
-            shadowFX->setLightPos( wPos );
-            // shadowFX->setLightPos( vPos );
-        }
-        environFX->apply(this);
-        shadowFX->apply(this);
-        lighting->apply(this);
-        blendSha->apply(this);
-        blendTmp->apply(this);
-        blendRefl->apply(this);
-        blendAll->apply(this);
-        toScreen->apply(this);
-
-
-        return;
+        _pipeline->prepare(camera,queue->_lights[0],shadows,environment);
+        environFX->setup();
+        blendSha->setup();
+        blendTmp->setup();
+        blendRefl->setup();
+        blendAll->setup();
+        shadowFX->setup();
+        lighting->setup();
+        toScreen->setup();
+        bloomFX->setup();
     }
 
 
 
-    // if(!_direct && _renderTargets)
+    // switch(getOutputFrame())
     // {
-    //     _renderPlugin->init(_renderTargets);
-    //     _renderPlugin->bind(_renderTargets);
-    //     _renderTargets->change();
+    // case RenderFrame_Default:
+    //     toScreen->setInput( _pipeline->getOutputFrame(4,0) ) ;
+    //     break;
+    // case RenderFrame_Color:
+    //     toScreen->setInput( _internalFrames->get(0) ) ;
+    //     break;
+    // case RenderFrame_ShadowMap:
+    //     toScreen->setInput( _pipeline->getOutputFrame(5,0) ) ;
+    //     break;
+    // case RenderFrame_Environment:
+    //     toScreen->setInput( _pipeline->getOutputFrame(0,0) ) ;
+    //     break;
+    // case RenderFrame_Lighting:
+    //     toScreen->setInput( _pipeline->getOutputFrame(6,0) ) ;
+    //     break;
+    // case RenderFrame_Depth:
+    //     toScreen->setInput( _internalFrames->get(5) ) ;
+    //     break;
+    // case RenderFrame_Emissive:
+    //     toScreen->setInput( _internalFrames->get(1) ) ;
+    //     break;
+    // case RenderFrame_Bloom:
+    //     toScreen->setInput( output_bloom[0] ) ;
+    //     break;
+    // case RenderFrame_Normals:
+    //     toScreen->setInput( _internalFrames->get(2) ) ;
+    //     break;
+    // case RenderFrame_Reflectivity:
+    //     toScreen->setInput( _internalFrames->get(3) ) ;
+    //     break;
+    // default: // assume RenderFrame_Default
+    //     toScreen->setInput( _pipeline->getOutputFrame(4,0) ) ;
+    //     break;
     // }
-    // else
-    // {
-    //     _renderPlugin->unbind();
-    // }
+
+    _pipeline->prepare(camera,queue->_lights[0], shadows, environment);
+    _pipeline->run();
 }
 
 

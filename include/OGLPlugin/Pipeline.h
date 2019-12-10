@@ -20,31 +20,33 @@ public:
 
     using FrameBuf = std::vector<ImageSampler::Ptr>;
 
-    FrameOperation(/*SceneRenderer::RenderFrame renderFrame*/);
+    FrameOperation();
     virtual ~FrameOperation();
-
-    void setup(FrameBuf& input, FrameBuf& output, bool needCamera, bool needLight, bool needCubeMap);
-    virtual void setInput(ImageSampler::Ptr sampler, int id = 0);
-    virtual void setOutput(ImageSampler::Ptr sampler, int id = 0);
 
     Graph::Ptr buildQuadGraph(const std::string& debug_name,
                               const std::string& glsl_code,
                               Vec4 viewport = Vec4(0.0,0.0,1024.0,1024.0)) const;
 
-    virtual void setCubeMap(CubeMapSampler::Ptr cubemap) = 0;
-    virtual void setCamera(Camera::Ptr& cameraPos) = 0;
-    virtual void setLight(LightNode::Ptr& lightPos) = 0;
+    void setInput(ImageSampler::Ptr sampler, int id);
+    void setOutput(ImageSampler::Ptr sampler, int id);
+    ImageSampler::Ptr getInput(int id);
+    ImageSampler::Ptr getOutput(int id);
+    void setEnvCubeMap(CubeMapSampler::Ptr& cubemap);
+    void setShaCubeMap(CubeMapSampler::Ptr& cubemap);
+    void setCamera(const Camera* camera);
+    void setLight(const LightNode* light);
 
+    virtual void setup() = 0;
     virtual void apply(GlRenderer* renderer) = 0;
 
 protected:
-
-    bool _needCamera;
-    bool _needLight;
-    bool _needCubeMap;
-
     FrameBuf _input;
     FrameBuf _output;
+
+    CubeMapSampler::Ptr _shadows;
+    CubeMapSampler::Ptr _environment;
+    const Camera* _camera;
+    const LightNode* _light;
 };
 
 class IMP_API Pipeline
@@ -72,14 +74,19 @@ public:
     Pipeline(GlRenderer* renderer);
     virtual ~Pipeline();
 
-    void setOperation(FrameOperation::Ptr& op, int index);
-    void setBinding(Binding& binding);
+    void setOperation(const FrameOperation::Ptr& op, int index);
+    void bind(int dstOpId, int srcOpId, int dstInputId, int srcOuputId = 0);
+
+    ImageSampler::Ptr getOutputFrame( int opIndex, int outputIndex );
 
     void setupOperations();
     void buildDependencies();
     void deduceOrder();
 
-    void prepare();
+    void prepare(const Camera* camera,
+                 const LightNode* light,
+                 CubeMapSampler::Ptr& shadowCubemap,
+                 CubeMapSampler::Ptr& envCubemap);
     void run();
 
 protected:

@@ -3,7 +3,7 @@
 
 // #define GLEW_STATIC
 #include <GL/glew.h>
-#include <GL/gl.h>
+// #include <GL/gl.h>
 
 
 #define GL_CHECKERROR(msg) GLcheckError(msg, __FILE__, __LINE__);

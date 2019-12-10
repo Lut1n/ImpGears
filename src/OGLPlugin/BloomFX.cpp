@@ -58,10 +58,10 @@ BloomFX::~BloomFX()
 }
 
 //--------------------------------------------------------------
-void BloomFX::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
+void BloomFX::setup( /*std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output*/ )
 {
-    _input = input;
-    _output = output;
+    // _input = input;
+    // _output = output;
 
     _subpassCount = 10;
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);

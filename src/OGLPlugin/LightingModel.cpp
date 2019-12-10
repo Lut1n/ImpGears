@@ -12,7 +12,6 @@ static std::string glsl_lightingModel = GLSL_CODE(
 uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
 uniform sampler2D u_input_sampler_shininess;
-uniform vec3 u_camera_pos;
 uniform vec3 u_light_pos;
 
 varying vec2 v_texCoord;
@@ -120,11 +119,8 @@ LightingModel::~LightingModel()
 }
 
 //--------------------------------------------------------------
-void LightingModel::setup(std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output)
+void LightingModel::setup()
 {
-    _input = input;
-    _output = output;
-
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_lightingModel", glsl_lightingModel, viewport);
 
@@ -133,18 +129,6 @@ void LightingModel::setup(std::vector<ImageSampler::Ptr>& input, std::vector<Ima
         _frame = RenderTarget::create();
         _frame->build(_output, true);
     }
-}
-
-//--------------------------------------------------------------
-void LightingModel::setCameraPos(const Vec3& cameraPos)
-{
-    _camera = cameraPos;
-}
-
-//--------------------------------------------------------------
-void LightingModel::setLightPos(const Vec3& lightPos)
-{
-    _lightPos = lightPos;
 }
 
 //--------------------------------------------------------------
@@ -160,11 +144,14 @@ void LightingModel::apply(GlRenderer* renderer)
     {
         renderer->_renderPlugin->unbind();
     }
+
+    Vec4 light_pos = Vec4(_light->_worldPosition);
+    if(_camera) light_pos = light_pos * _camera->getViewMatrix();
+
     _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
     _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
-    _graph->getInitState()->setUniform("u_camera_pos", _camera);
-    _graph->getInitState()->setUniform("u_light_pos", _lightPos);
+    _graph->getInitState()->setUniform("u_light_pos", Vec3(light_pos) );
     RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
     renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }

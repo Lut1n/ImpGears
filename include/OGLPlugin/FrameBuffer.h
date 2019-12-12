@@ -38,6 +38,8 @@ public:
     static void s_clearBuffers();
     static FrameBuffer* s_bound;
 
+    static std::uint32_t s_count() { return _s_count; }
+
 protected:
 
     int _id;
@@ -46,6 +48,8 @@ protected:
     int _faceID;
     bool _hasDepthBuffer;
     bool _useCubeMap;
+
+    static std::uint32_t _s_count;
 
     std::vector<Texture::Ptr> _colorTextures;
     std::vector<unsigned int> _drawBuffers;

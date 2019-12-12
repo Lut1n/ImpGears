@@ -9,6 +9,7 @@
 
 IMPGEARS_BEGIN
 
+std::uint32_t FrameBuffer::_s_count = 0;
 
 FrameBuffer* FrameBuffer::s_bound = nullptr;
 
@@ -39,6 +40,7 @@ void FrameBuffer::build(const std::vector<Texture::Ptr>& textures, bool depthBuf
 
     GLuint id;
     glGenFramebuffers(1, &id);
+    _s_count++;
     _id = (int)id;
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     GL_CHECKERROR("bind FBO");
@@ -119,6 +121,7 @@ void FrameBuffer::build(const CubeMap::Ptr& cubemap, int faceID, bool depthBuffe
 
     GLuint id;
     glGenFramebuffers(1, &id);
+    _s_count++;
     _id = (int)id;
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     GL_CHECKERROR("bind FBO");
@@ -172,6 +175,7 @@ void FrameBuffer::destroy()
 {
     GLuint id = _id;
     glDeleteFramebuffers(1, &id);
+    if(_id > 0) _s_count--;
 
     _colorTextures.clear();
     if(_hasDepthBuffer) {GLuint rbo=_rbo; glDeleteRenderbuffers(1,&rbo);_rbo=rbo;}

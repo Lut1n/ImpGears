@@ -71,7 +71,7 @@ struct GlPlugin::Priv
     std::map<Geometry::Ptr,VboData::Ptr> vertexBuffers;
     std::map<ImageSampler::Ptr,TexData::Ptr> samplers;
     std::map<CubeMapSampler::Ptr,TexData::Ptr> cubesamplers;
-    std::map<ReflexionModel::Ptr,ProgData::Ptr> callbacks;
+    std::map<ReflexionModel::Ptr,ProgData::Ptr> programs;
     std::map<RenderTarget::Ptr,FboData::Ptr> renderTargets;
 
     VboData::Ptr getVbo(Geometry::Ptr& g)
@@ -94,8 +94,8 @@ struct GlPlugin::Priv
     }
     ProgData::Ptr getProg(ReflexionModel::Ptr& cb)
     {
-        auto it=callbacks.find(cb);
-        if(it==callbacks.end())return nullptr;
+        auto it=programs.find(cb);
+        if(it==programs.end())return nullptr;
         else return it->second;
     }
     FboData::Ptr getFbo(RenderTarget::Ptr& t)
@@ -134,9 +134,6 @@ void GlPlugin::init()
 //--------------------------------------------------------------
 void GlPlugin::apply(ClearNode::Ptr& clear, int bufferIndex)
 {
-    // if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0+bufferIndex);
-
-
     GLbitfield bitfield = 0;
 
     if(clear->isColorEnable())
@@ -161,9 +158,6 @@ void GlPlugin::apply(ClearNode::Ptr& clear, int bufferIndex)
     }
 
     glClear(bitfield);
-
-    // unbind
-    // if(bufferIndex >= 0) glDrawBuffer(GL_COLOR_ATTACHMENT0);
 }
 
 //--------------------------------------------------------------
@@ -339,7 +333,7 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
     if(name != REFLEXION_DEFAULT_NAME) d->sha.rename(name);
 
     d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
-        s_internalState->callbacks[program] = d;
+        s_internalState->programs[program] = d;
     return 0;
 }
 
@@ -441,8 +435,8 @@ void GlPlugin::init(RenderTarget::Ptr& target)
 //--------------------------------------------------------------
 void GlPlugin::unbind()
 {
-    if(FrameBuffer::s_bound != nullptr) FrameBuffer::s_bound->unbind();
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if(FrameBuffer::s_bound != nullptr)
+        FrameBuffer::s_bound->unbind();
 }
 
 //--------------------------------------------------------------
@@ -556,31 +550,98 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 //--------------------------------------------------------------
 void GlPlugin::unload(Geometry::Ptr& geo)
 {
-
+    s_internalState->vertexBuffers.erase(geo);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(ImageSampler::Ptr& sampler)
 {
-
+    s_internalState->samplers.erase(sampler);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(CubeMapSampler::Ptr& sampler)
 {
-
+    s_internalState->cubesamplers.erase(sampler);
 }
 
 //--------------------------------------------------------------
-void GlPlugin::unload(RenderTarget::Ptr& rt)
+void GlPlugin::unload(RenderTarget::Ptr& target)
 {
-
+    s_internalState->renderTargets.erase(target);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(ReflexionModel::Ptr& shader)
 {
+    s_internalState->programs.erase(shader);
+}
 
+//--------------------------------------------------------------
+void GlPlugin::unloadUnused()
+{
+    bool change = false;
+
+    for(auto it = s_internalState->vertexBuffers.begin(); it!=s_internalState->vertexBuffers.end(); it++)
+    {
+        // Warning : In multithreaded environment, use_count() is approximate.
+        if( it->first.use_count() == 1 )
+        {
+            it = s_internalState->vertexBuffers.erase( it );
+            change = true;
+        }
+    }
+
+    for(auto it = s_internalState->samplers.begin(); it!=s_internalState->samplers.end(); it++)
+    {
+        // Warning : In multithreaded environment, use_count() is approximate.
+        if( it->first.use_count() == 1 )
+        {
+            it = s_internalState->samplers.erase( it );
+            change = true;
+        }
+    }
+
+    for(auto it = s_internalState->cubesamplers.begin(); it!=s_internalState->cubesamplers.end(); it++)
+    {
+        // Warning : In multithreaded environment, use_count() is approximate.
+        if( it->first.use_count() == 1 )
+        {
+            it = s_internalState->cubesamplers.erase( it );
+            change = true;
+        }
+    }
+
+    for(auto it = s_internalState->programs.begin(); it!=s_internalState->programs.end(); it++)
+    {
+        // Warning : In multithreaded environment, use_count() is approximate.
+        if( it->first.use_count() == 1 )
+        {
+            it = s_internalState->programs.erase( it );
+            change = true;
+        }
+    }
+
+    for(auto it = s_internalState->renderTargets.begin(); it!=s_internalState->renderTargets.end(); it++)
+    {
+        // Warning : In multithreaded environment, use_count() is approximate.
+        if( it->first.use_count() == 1 )
+        {
+            it = s_internalState->renderTargets.erase( it );
+            change = true;
+        }
+    }
+
+
+    if(change)
+    {
+        std::cout << "Unload - Remaining gl objects :" << std::endl;
+        std::cout << "frames = " << FrameBuffer::s_count() << std::endl;
+        std::cout << "buffers = " << BufferObject::s_count() << std::endl;
+        std::cout << "textures = " << Texture::s_count() << std::endl;
+        std::cout << "programs = " << Program::s_count() << std::endl;
+        std::cout << "cubemaps = " << CubeMap::s_count() << std::endl;
+    }
 }
 
 

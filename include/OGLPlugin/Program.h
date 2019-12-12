@@ -29,6 +29,8 @@ public:
 
     void rename(const std::string& name);
 
+    static std::uint32_t s_count() { return _s_count; }
+
 protected:
 
     std::string _name;
@@ -37,6 +39,7 @@ protected:
     std::uint32_t _programID;
 
     static std::string s_compilation_log;
+    static std::uint32_t _s_count;
 
     mutable std::map<std::string,int> _locationCache;
 };

@@ -49,6 +49,8 @@ public:
     virtual void unload(RenderTarget::Ptr& rt);
     virtual void unload(ReflexionModel::Ptr& shader);
 
+    virtual void unloadUnused();
+
     virtual SceneRenderer::Ptr getRenderer();
 
     struct Priv;

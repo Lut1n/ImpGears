@@ -33,10 +33,13 @@ public:
 
     void update();
 
+    static std::uint32_t s_count() { return _s_count; }
+
 protected:
 private:
 
     std::uint32_t _videoID;
+    static std::uint32_t _s_count;
     std::vector<Image::Ptr> _sources;
 
     std::string _name;

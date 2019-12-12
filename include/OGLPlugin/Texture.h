@@ -52,10 +52,13 @@ public:
     int width() const {return _width;}
     int height() const {return _height;}
 
+    static std::uint32_t s_count() { return _s_count; }
+
 protected:
 private:
 
     std::uint32_t _videoID;
+    static std::uint32_t _s_count;
 
     int _width;
     int _height;

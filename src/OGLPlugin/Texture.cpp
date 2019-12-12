@@ -5,6 +5,9 @@
 
 IMPGEARS_BEGIN
 
+
+std::uint32_t Texture::_s_count = 0;
+
 //--------------------------------------------------------------
 Texture::Texture(const std::string& name)
     : _videoID(0)
@@ -18,6 +21,7 @@ Texture::Texture(const std::string& name)
 {
     glGenTextures(1, &_videoID);
     GL_CHECKERROR("gen texture");
+    _s_count++;
 }
 
 //--------------------------------------------------------------
@@ -26,6 +30,7 @@ Texture::~Texture()
     glDeleteTextures(1, &_videoID);
     GL_CHECKERROR("delete texture");
     _videoID = 0;
+    _s_count--;
 }
 
 //--------------------------------------------------------------

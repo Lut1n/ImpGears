@@ -56,7 +56,8 @@ public:
 	
 	void bind();
 	void unbind();
-	
+
+        static std::uint32_t s_count() { return _s_count; }
 
 private:
 
@@ -66,8 +67,9 @@ private:
 	Primitive _primitive;
 	int _verticesCount;
 	
-    static std::uint32_t s_memoryUsed;
-    static std::uint32_t s_vboCount;
+        static std::uint32_t s_memoryUsed;
+        static std::uint32_t s_vboCount;
+        static std::uint32_t _s_count;
 	
 	int _vertIndex;
 	int _texIndex;

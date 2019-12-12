@@ -5,6 +5,7 @@
 
 IMPGEARS_BEGIN
 
+std::uint32_t CubeMap::_s_count = 0;
 
 //--------------------------------------------------------------
 CubeMap::CubeMap(const std::string& name)
@@ -13,6 +14,7 @@ CubeMap::CubeMap(const std::string& name)
 {
     glGenTextures(1, &_videoID);
     GL_CHECKERROR("gen CubeMap");
+    _s_count++;
 }
 
 //--------------------------------------------------------------
@@ -21,6 +23,7 @@ CubeMap::~CubeMap()
     glDeleteTextures(1, &_videoID);
     GL_CHECKERROR("delete CubeMap");
     _videoID = 0;
+    _s_count--;
 }
 
 //--------------------------------------------------------------

@@ -10,6 +10,8 @@ IMPGEARS_BEGIN
 std::uint32_t BufferObject::s_memoryUsed = 0;
 std::uint32_t BufferObject::s_vboCount = 0;
 
+std::uint32_t BufferObject::_s_count = 0;
+
 //--------------------------------------------------------------
 BufferObject::BufferObject()
 {
@@ -26,7 +28,7 @@ BufferObject::BufferObject()
 //--------------------------------------------------------------
 BufferObject::~BufferObject()
 {
-	if(_id != 0) release();
+        if(_id != 0) release();
 }
 
 //--------------------------------------------------------------
@@ -88,6 +90,7 @@ void BufferObject::request(int size, UsageMode usage)
 void BufferObject::release()
 {;
 	glDeleteBuffers(1, (GLuint*)&_id  );
+        _s_count--;
 	GL_CHECKERROR("delete VBO");
 	_id = 0;
 	_size = 0;
@@ -161,6 +164,7 @@ void BufferObject::load(const Geometry& geometry)
 	
 	// gpu load
 	request(vertSize+texSize+norSize+colSize);
+        _s_count++;
 	if(vertSize > 0) setData(vertex.data(), vertSize, _vertIndex);
 	if(texSize > 0) setData(texcoords.data(), texSize, _texIndex);
 	if(norSize > 0) setData(normals.data(), norSize, _norIndex);

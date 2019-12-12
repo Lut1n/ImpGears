@@ -77,6 +77,8 @@ public:
     virtual void unload(CubeMapSampler::Ptr& sampler) = 0;
     virtual void unload(RenderTarget::Ptr& rt) = 0;
     virtual void unload(ReflexionModel::Ptr& shader) = 0;
+
+    virtual void unloadUnused() = 0;
 };
 
 

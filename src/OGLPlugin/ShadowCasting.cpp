@@ -30,7 +30,7 @@ vec4 unproject(vec2 txCoord, float depth)
     vec2 ndc = txCoord * 2.0 - 1.0;
 
     vec3 ray = vec3(ndc.x*th_fov, ndc.y*th_fov/*/ratio*/, -1.0);
-    float view_depth = near + depth * far;
+    float view_depth = near + depth * (far-near);
     vec4 view_pos = vec4(ray * view_depth, 1.0);
     // world_pos /= world_pos.w;
 
@@ -56,7 +56,7 @@ void lighting(out vec4 out_color,
 
     float near = 0.1;
     float far = 128.0;
-    float distance_light = (length(pos_from_light)-near) / far;
+    float distance_light = (length(pos_from_light)-near) / (far-near);
 
     float distance_occlusion = i_shadow(pos_from_light);
     //
@@ -64,8 +64,8 @@ void lighting(out vec4 out_color,
     if(distance_light > distance_occlusion+EPSILON) received_light = 0.1;
 
     out_color = vec4(vec3(received_light),1.0);
-    // if(depth > 1.0-EPSILON) out_lighting = vec4(vec3(1.0),1.0);
-    // out_lighting = vec4(vec3(i_shadow(pos_from_light)),1.0);
+    // if(depth > 1.0-EPSILON) out_color = vec4(vec3(1.0),1.0);
+    // out_color = vec4(vec3(i_shadow(pos_from_light)),1.0);
 }
 
 );
@@ -90,6 +90,7 @@ void ShadowCasting::setup()
 {
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_shadowCasting", glsl_shadowCasting, viewport);
+    _fillingGraph = buildQuadGraph("glsl_fill", s_glsl_fill, viewport);
 
     if(_output.size() > 0)
     {
@@ -99,7 +100,7 @@ void ShadowCasting::setup()
 }
 
 //--------------------------------------------------------------
-void ShadowCasting::apply(GlRenderer* renderer)
+void ShadowCasting::apply(GlRenderer* renderer, bool skip)
 {
     if(_output.size() > 0)
     {
@@ -112,15 +113,24 @@ void ShadowCasting::apply(GlRenderer* renderer)
         renderer->_renderPlugin->unbind();
     }
 
-    Matrix4 view;
-    if(_camera) view = _camera->getViewMatrix();
+    if(skip)
+    {
+        _fillingGraph->getInitState()->setUniform("u_fill_color", Vec4(1.0));
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_fillingGraph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
+    else
+    {
+        Matrix4 view;
+        if(_camera) view = _camera->getViewMatrix();
 
-    _graph->getInitState()->setUniform("u_input_sampler_depth", _input[0], 0);
-    _graph->getInitState()->setUniform("u_input_cubemap_shadow", _shadows, 1);
-    _graph->getInitState()->setUniform("u_light_pos", _light->_worldPosition );
-    _graph->getInitState()->setUniform("u_view_cam", view );
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+        _graph->getInitState()->setUniform("u_input_sampler_depth", _input[0], 0);
+        _graph->getInitState()->setUniform("u_input_cubemap_shadow", _shadows, 1);
+        _graph->getInitState()->setUniform("u_light_pos", _light->_worldPosition );
+        _graph->getInitState()->setUniform("u_view_cam", view );
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
 }
 
 

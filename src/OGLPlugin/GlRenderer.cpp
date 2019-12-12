@@ -35,7 +35,7 @@ void lighting(out vec4 out_color,
               out float out_depth)
 {
     float near = 0.1; float far = 128.0;
-    float depth = (length(v_mv.xyz) - near) / far;
+    float depth = (length(v_mv.xyz) - near) / (far-near);
     out_color = vec4(vec3(depth),1.0);
 }
 
@@ -48,22 +48,78 @@ IMPGEARS_BEGIN
 GlRenderer::GlRenderer()
     : SceneRenderer()
 {
+    // CubeMaps rendering setup
+    _environmentMap = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
+    _environmentRenderer = RenderToCubeMap::create(this);
+    _environmentRenderer->setCubeMap(_environmentMap);
+
+    _shadowsMap = CubeMapSampler::create(1024,1024.0,4,Vec4(1.0));
+    _shadowsRenderer = RenderToCubeMap::create(this);
+    _shadowsRenderer->setCubeMap(_shadowsMap);
+    _shadowsmapShader = ReflexionModel::create(
+                ReflexionModel::Lighting_Customized,
+                ReflexionModel::Texturing_Samplers_CNE,
+                ReflexionModel::MRT_2_Col_Emi,
+                "glsl_shadow_depth");
+    _shadowsmapShader->_fragCode_lighting = glsl_shadow_depth;
+
+
+
+    // mrt setup
+    int mrt_size = 6;
+    _internalFrames = RenderTarget::create();
+    _internalFrames->build(1024.0,1024.0,mrt_size,true);
+    _internalFrames->setClearColor(2, Vec4(0.0));   // normals
+    _internalFrames->setClearColor(3, Vec4(0.0));   // reflectivity
+    _internalFrames->setClearColor(5, Vec4(1.0));   // depth
+
+
+
+    // pipeline setup
+    _pipeline = Pipeline::create(this);
+    BloomFX::Ptr bloomFX = BloomFX::create();
+    BlendAll::Ptr blendAll = BlendAll::create(BlendAll::Max);
+    BlendAll::Ptr blendTmp = BlendAll::create(BlendAll::Mult);
+    BlendAll::Ptr blendSha = BlendAll::create(BlendAll::Mult);
+    BlendAll::Ptr blendRefl = BlendAll::create(BlendAll::Mult);
+    CopyFrame::Ptr toScreen = CopyFrame::create();
+    EnvironmentFX::Ptr environFX = EnvironmentFX::create();
+    LightingModel::Ptr lighting = LightingModel::create();
+    ShadowCasting::Ptr shadowFX = ShadowCasting::create();
+
+    bloomFX->setInput( _internalFrames->get(1), 0 );
+    lighting->setInput( _internalFrames->get(2), 0 );
+    lighting->setInput( _internalFrames->get(5), 1 );
+    lighting->setInput( _internalFrames->get(4), 2 );
+    environFX->setInput( _internalFrames->get(2), 0 );
+    environFX->setInput( _internalFrames->get(5), 1 );
+    environFX->setInput( _internalFrames->get(3), 2 );
+    shadowFX->setInput( _internalFrames->get(5), 0 );
+    blendTmp->setInput( _internalFrames->get(0), 0 );
+
+    // build dependances
+    _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
+    _pipeline->setOperation( blendSha, FRAMEOP_ID_SHAMIX );
+    _pipeline->setOperation( blendTmp, FRAMEOP_ID_COLORMIX );
+    _pipeline->setOperation( blendRefl, FRAMEOP_ID_ENVMIX );
+    _pipeline->setOperation( blendAll, FRAMEOP_ID_BLOOMMIX );
+    _pipeline->setOperation( shadowFX, FRAMEOP_ID_SHAFX );
+    _pipeline->setOperation( lighting, FRAMEOP_ID_PHONG );
+    _pipeline->setOperation( toScreen, FRAMEOP_ID_COPY );
+    _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
+    _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_PHONG, 0);
+    _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SHAFX, 1);
+    _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_ENVFX, 0);
+    _pipeline->bind( FRAMEOP_ID_COLORMIX, FRAMEOP_ID_SHAMIX, 1);
+    _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_COLORMIX, 1);
+    _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_ENVMIX, 0);
+    _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_BLOOM, 1);
+    _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
 }
 
 //--------------------------------------------------------------
 GlRenderer::~GlRenderer()
 {
-}
-
-//--------------------------------------------------------------
-void GlRenderer::loadRenderPlugin(const std::string& renderPlugin)
-{
-    /*_renderPlugin = PluginManager::open(renderPlugin);
-    if(_renderPlugin == nullptr)
-    {
-        return;
-    }
-    _renderPlugin->init();*/
 }
 
 //---------------------------------------------------------------
@@ -106,7 +162,6 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
     State::Ptr local_state = State::create();
     Matrix4 view;
     if(queue->_camera) view = queue->_camera->getViewMatrix();
-    // if(overrideCamera) view = overrideCamera->getViewMatrix();
 
     for(int i=0;i<(int)queue->_nodes.size();++i)
     {
@@ -173,160 +228,80 @@ void GlRenderer::render(const Graph::Ptr& scene)
 {
     if(_renderPlugin == nullptr) return;
 
-    if(_internalFrames == nullptr)
-    {
-        int mrt_size = 6;
-        _internalFrames = RenderTarget::create();
-        _internalFrames->build(1024.0,1024.0,mrt_size,true);
-        _internalFrames->setClearColor(2, Vec4(0.0));   // normals
-        _internalFrames->setClearColor(3, Vec4(0.0));   // reflectivity
-        _internalFrames->setClearColor(5, Vec4(1.0));   // depth
-    }
-
-
     _renderPlugin->init(_internalFrames);
     _renderPlugin->bind(_internalFrames);
     _internalFrames->change();
 
-
     RenderQueue::Ptr queue = applyRenderVisitor(scene);
     drawQueue(queue);
-    const Camera* camera = queue->_camera;
 
+    bool env_enabled = isFeatureEnabled(Feature_Environment);
+    bool shadows_enabled = isFeatureEnabled(Feature_Shadow);
+    bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
 
-
-    static RenderToCubeMap::Ptr environment_renderer;
-    static RenderToCubeMap::Ptr shadow_renderer;
-    static CubeMapSampler::Ptr environment, shadows;
-    static ReflexionModel::Ptr shadows_shader;
-
-    if(isFeatureEnabled(Feature_Environment))
+    if(env_enabled)
     {
-        if(environment_renderer == nullptr)
+        _environmentRenderer->render(
+                    scene, Vec3(0.0),
+                    SceneRenderer::RenderFrame_Environment); // todo : position as parameter
+    }
+
+    if(shadows_enabled)
+    {
+        _shadowsRenderer->render(
+                    scene, queue->_lights[0]->getPosition(),
+                    SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
+    }
+
+    _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
+    _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
+    _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
+
+    static RenderFrame s_lastOutput = RenderFrame_Default;
+
+    if( getOutputFrame() != s_lastOutput )
+    {
+        switch(getOutputFrame())
         {
-            environment = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
-            environment_renderer = RenderToCubeMap::create(this);
-            environment_renderer->setCubeMap(environment);
+        case RenderFrame_Default:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+            break;
+        case RenderFrame_Color:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_COLORMIX, 0);
+            break;
+        case RenderFrame_ShadowMap:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
+            break;
+        case RenderFrame_Environment:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+            break;
+        case RenderFrame_Lighting:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+            break;
+        case RenderFrame_Depth:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+            break;
+        case RenderFrame_Emissive:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+            break;
+        case RenderFrame_Bloom:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+            break;
+        case RenderFrame_Normals:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+            break;
+        case RenderFrame_Reflectivity:
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+            break;
+        default: // assume RenderFrame_Default
+             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+            break;
         }
 
-        environment_renderer->render(scene, Vec3(0.0), SceneRenderer::RenderFrame_Environment); // todo : position as parameter
+        s_lastOutput = getOutputFrame();
     }
 
-    if(isFeatureEnabled(Feature_Shadow))
-    {
-        if(shadow_renderer == nullptr)
-        {
-            // shadows = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
-            shadows = CubeMapSampler::create(1024,1024.0,4,Vec4(1.0));
-            shadow_renderer = RenderToCubeMap::create(this);
-            shadow_renderer->setCubeMap(shadows);
-            shadows_shader = ReflexionModel::create(
-                        ReflexionModel::Lighting_Customized,
-                        ReflexionModel::Texturing_Samplers_CNE,
-                        ReflexionModel::MRT_2_Col_Emi,
-                        "glsl_shadow_depth");
-            shadows_shader->_fragCode_lighting = glsl_shadow_depth;
-        }
-
-        shadow_renderer->render(scene, queue->_lights[0]->getPosition(), SceneRenderer::RenderFrame_ShadowMap, shadows_shader);
-    }
-
-
-    if(_pipeline == nullptr)
-    {
-        _pipeline = Pipeline::create(this);
-        BloomFX::Ptr bloomFX = BloomFX::create();
-        BlendAll::Ptr blendAll = BlendAll::create(BlendAll::Max);
-        BlendAll::Ptr blendTmp = BlendAll::create(BlendAll::Mult);
-        BlendAll::Ptr blendSha = BlendAll::create(BlendAll::Mult);
-        BlendAll::Ptr blendRefl = BlendAll::create(BlendAll::Mult);
-        CopyFrame::Ptr toScreen = CopyFrame::create();
-        EnvironmentFX::Ptr environFX = EnvironmentFX::create();
-        LightingModel::Ptr lighting = LightingModel::create();
-        ShadowCasting::Ptr shadowFX = ShadowCasting::create();
-
-
-        bloomFX->setInput( _internalFrames->get(1), 0 );
-        lighting->setInput( _internalFrames->get(2), 0 );
-        lighting->setInput( _internalFrames->get(5), 1 );
-        lighting->setInput( _internalFrames->get(4), 2 );
-        environFX->setInput( _internalFrames->get(2), 0 );
-        environFX->setInput( _internalFrames->get(5), 1 );
-        environFX->setInput( _internalFrames->get(3), 2 );
-        shadowFX->setInput( _internalFrames->get(5), 0 );
-        blendTmp->setInput( _internalFrames->get(0), 0 );
-
-        // build dependances
-        _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
-        _pipeline->setOperation( blendSha, FRAMEOP_ID_SHAMIX );
-        _pipeline->setOperation( blendTmp, FRAMEOP_ID_COLORMIX );
-        _pipeline->setOperation( blendRefl, FRAMEOP_ID_ENVMIX );
-        _pipeline->setOperation( blendAll, FRAMEOP_ID_BLOOMMIX );
-        _pipeline->setOperation( shadowFX, FRAMEOP_ID_SHAFX );
-        _pipeline->setOperation( lighting, FRAMEOP_ID_PHONG );
-        _pipeline->setOperation( toScreen, FRAMEOP_ID_COPY );
-        _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
-        _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_PHONG, 0);
-        _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SHAFX, 1);
-        _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_ENVFX, 0);
-        _pipeline->bind( FRAMEOP_ID_COLORMIX, FRAMEOP_ID_SHAMIX, 1);
-        _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_COLORMIX, 1);
-        _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_ENVMIX, 0);
-        _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_BLOOM, 1);
-        _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
-
-        _pipeline->prepare(camera,queue->_lights[0],shadows,environment);
-        environFX->setup();
-        blendSha->setup();
-        blendTmp->setup();
-        blendRefl->setup();
-        blendAll->setup();
-        shadowFX->setup();
-        lighting->setup();
-        toScreen->setup();
-        bloomFX->setup();
-    }
-
-
-
-    // switch(getOutputFrame())
-    // {
-    // case RenderFrame_Default:
-    //     toScreen->setInput( _pipeline->getOutputFrame(4,0) ) ;
-    //     break;
-    // case RenderFrame_Color:
-    //     toScreen->setInput( _internalFrames->get(0) ) ;
-    //     break;
-    // case RenderFrame_ShadowMap:
-    //     toScreen->setInput( _pipeline->getOutputFrame(5,0) ) ;
-    //     break;
-    // case RenderFrame_Environment:
-    //     toScreen->setInput( _pipeline->getOutputFrame(0,0) ) ;
-    //     break;
-    // case RenderFrame_Lighting:
-    //     toScreen->setInput( _pipeline->getOutputFrame(6,0) ) ;
-    //     break;
-    // case RenderFrame_Depth:
-    //     toScreen->setInput( _internalFrames->get(5) ) ;
-    //     break;
-    // case RenderFrame_Emissive:
-    //     toScreen->setInput( _internalFrames->get(1) ) ;
-    //     break;
-    // case RenderFrame_Bloom:
-    //     toScreen->setInput( output_bloom[0] ) ;
-    //     break;
-    // case RenderFrame_Normals:
-    //     toScreen->setInput( _internalFrames->get(2) ) ;
-    //     break;
-    // case RenderFrame_Reflectivity:
-    //     toScreen->setInput( _internalFrames->get(3) ) ;
-    //     break;
-    // default: // assume RenderFrame_Default
-    //     toScreen->setInput( _pipeline->getOutputFrame(4,0) ) ;
-    //     break;
-    // }
-
-    _pipeline->prepare(camera,queue->_lights[0], shadows, environment);
+    _pipeline->prepare(queue->_camera, queue->_lights[0], _shadowsMap, _environmentMap);
     _pipeline->run();
 }
 
@@ -347,7 +322,6 @@ void GlRenderer::applyState(const State::Ptr& state,
     _renderPlugin->setViewport(state->getViewport());
 
     ReflexionModel::Ptr reflexion = state->getReflexion();
-    // if(overrideShader) reflexion = overrideShader;
 
     _renderPlugin->load(reflexion);
     _renderPlugin->bind(reflexion);
@@ -367,16 +341,7 @@ void GlRenderer::applyClear(ClearNode* clearNode, SceneRenderer::RenderFrame ren
     clear->enableDepth( clearNode->isDepthEnable() );
     clear->enableColor( clearNode->isColorEnable() );
 
-    if(_renderPlugin != nullptr)
-    {
-        _renderPlugin->apply(clear);
-
-        // if(renderPass == SceneRenderer::RenderFrame_Default)
-        // {
-        //     clear->setColor( Vec4(1.0) );
-        //     _renderPlugin->apply(clear, 5);
-        // }
-    }
+    if(_renderPlugin != nullptr) _renderPlugin->apply(clear);
 }
 
 //---------------------------------------------------------------

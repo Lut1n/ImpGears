@@ -16,7 +16,7 @@ public:
     virtual ~CopyFrame();
 
     virtual void setup();
-    virtual void apply(GlRenderer* renderer);
+    virtual void apply(GlRenderer* renderer, bool skip = false);
 
 protected:
     Graph::Ptr _graph;

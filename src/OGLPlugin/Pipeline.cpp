@@ -3,13 +3,57 @@
 
 #include <SceneGraph/QuadNode.h>
 
+#define GLSL_CODE( code ) #code
+
+//--------------------------------------------------------------
+static std::string glsl_copy = GLSL_CODE(
+
+uniform sampler2D u_input_sampler;
+varying vec2 v_texCoord;
+
+vec4 i_col(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
+
+void lighting(out vec4 out_color,
+              out vec4 out_emissive,
+              out vec3 out_normal,
+              out float out_reflectivity,
+              out float out_shininess,
+              out float out_depth)
+{
+    out_color = i_col(v_texCoord);
+}
+
+);
+
+
+//--------------------------------------------------------------
+static std::string glsl_fill = GLSL_CODE(
+
+uniform vec4 u_fill_color;
+
+void lighting(out vec4 out_color,
+              out vec4 out_emissive,
+              out vec3 out_normal,
+              out float out_reflectivity,
+              out float out_shininess,
+              out float out_depth)
+{
+    out_color = u_fill_color;
+}
+
+);
 
 IMPGEARS_BEGIN
+
+std::string FrameOperation::s_glsl_copy;
+std::string FrameOperation::s_glsl_fill;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 FrameOperation::FrameOperation()
 {
+    if(s_glsl_copy.empty()) s_glsl_copy = glsl_copy;
+    if(s_glsl_fill.empty()) s_glsl_fill = glsl_fill;
 }
 
 //--------------------------------------------------------------
@@ -151,6 +195,14 @@ void Pipeline::setOperation(const FrameOperation::Ptr& op, int index)
 }
 
 //--------------------------------------------------------------
+void Pipeline::setActive(int opIndex, bool activate)
+{
+    if(opIndex < 0) return;
+    if(opIndex >= (int)_activated.size()) _activated.resize(opIndex+1, true);
+    _activated[opIndex] = activate;
+}
+
+//--------------------------------------------------------------
 void Pipeline::bind(int dstOpId, int srcOpId, int dstInputId, int srcOutputId)
 {
     Binding newBinding(srcOpId, dstOpId, srcOutputId, dstInputId);
@@ -160,6 +212,17 @@ void Pipeline::bind(int dstOpId, int srcOpId, int dstInputId, int srcOutputId)
         _bindings.push_back(newBinding);
     else
         *found = newBinding;
+
+    _dirty = true;
+}
+
+//--------------------------------------------------------------
+void Pipeline::unbind(int dstOpId, int dstInputId)
+{
+    Binding targetBinding(0, dstOpId, 0, dstInputId);
+
+    auto found = std::find(_bindings.begin(),_bindings.end(),targetBinding);
+    if(found != _bindings.end()) _bindings.erase(found);
 
     _dirty = true;
 }
@@ -295,6 +358,7 @@ void Pipeline::prepare(const Camera* camera,
         deduceOrder();
 
         setupOperations();
+        for(auto& op : _operations) op->setup();
 
         _dirty = false;
     }
@@ -314,7 +378,8 @@ void Pipeline::run()
     for(int i=0;i<(int)_operations.size();++i)
     {
         int op_index = _orderedOp[i];
-        _operations[op_index]->apply( _renderer );
+        bool skipOp = op_index<(int)_activated.size() && !_activated[op_index];
+        _operations[op_index]->apply( _renderer, skipOp );
     }
 }
 

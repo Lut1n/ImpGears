@@ -60,7 +60,7 @@ void lighting(out vec4 out_color,
     out_reflectivity = textureReflectivity(v_texCoord);
     out_shininess = 0.0;
     float near = 0.1; float far = 128.0;
-    out_depth = (length(v_mv.xyz) - near) / far;
+    out_depth = (length(v_mv.xyz) - near) / (far-near);
 }
 
 );
@@ -207,7 +207,7 @@ void lighting(out vec4 out_color,
     out_reflectivity = textureReflectivity(v_texCoord);
     out_shininess = u_shininess * 0.1;
     float near = 0.1; float far = 128.0;
-    out_depth = (length(v_mv.xyz) - near) / far;
+    out_depth = (length(v_mv.xyz) - near) / (far-near);
 }
 
 );

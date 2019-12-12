@@ -19,11 +19,12 @@ public:
     void process(GlRenderer* renderer, int subpassID);
 
     virtual void setup();
-    virtual void apply(GlRenderer* renderer);
+    virtual void apply(GlRenderer* renderer, bool skip = false);
 
 protected:
     int _subpassCount;
     Graph::Ptr _graph;
+    Graph::Ptr _copyGraph;
     RenderTarget::Ptr _frames[2];
 };
 

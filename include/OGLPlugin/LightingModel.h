@@ -16,10 +16,11 @@ public:
     virtual ~LightingModel();
 
     virtual void setup();
-    virtual void apply(GlRenderer* renderer);
+    virtual void apply(GlRenderer* renderer, bool skip = false);
 
 protected:
     Graph::Ptr _graph;
+    Graph::Ptr _fillingGraph;
     RenderTarget::Ptr _frame;
 };
 

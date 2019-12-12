@@ -126,7 +126,7 @@ void BlendAll::setup()
 }
 
 //--------------------------------------------------------------
-void BlendAll::apply(GlRenderer* renderer)
+void BlendAll::apply(GlRenderer* renderer, bool skip)
 {
     if(_output.size() > 0)
     {

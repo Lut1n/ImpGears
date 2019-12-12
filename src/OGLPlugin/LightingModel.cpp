@@ -123,6 +123,7 @@ void LightingModel::setup()
 {
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_lightingModel", glsl_lightingModel, viewport);
+    _fillingGraph = buildQuadGraph("glsl_fill", s_glsl_fill, viewport);
 
     if(_output.size() > 0)
     {
@@ -132,7 +133,7 @@ void LightingModel::setup()
 }
 
 //--------------------------------------------------------------
-void LightingModel::apply(GlRenderer* renderer)
+void LightingModel::apply(GlRenderer* renderer, bool skip)
 {
     if(_output.size() > 0)
     {
@@ -145,15 +146,24 @@ void LightingModel::apply(GlRenderer* renderer)
         renderer->_renderPlugin->unbind();
     }
 
-    Vec4 light_pos = Vec4(_light->_worldPosition);
-    if(_camera) light_pos = light_pos * _camera->getViewMatrix();
+    if(skip)
+    {
+        _fillingGraph->getInitState()->setUniform("u_fill_color", Vec4(1.0));
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_fillingGraph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
+    else
+    {
+        Vec4 light_pos = Vec4(_light->_worldPosition);
+        if(_camera) light_pos = light_pos * _camera->getViewMatrix();
 
-    _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
-    _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
-    _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
-    _graph->getInitState()->setUniform("u_light_pos", Vec3(light_pos) );
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+        _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
+        _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
+        _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
+        _graph->getInitState()->setUniform("u_light_pos", Vec3(light_pos) );
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
 }
 
 

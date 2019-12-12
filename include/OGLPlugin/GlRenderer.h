@@ -32,7 +32,6 @@ public:
 
     virtual Image::Ptr getTarget(bool dlFromGPU = false, int id = 0);
 
-    void loadRenderPlugin(const std::string& renderPlugin);
     void setRenderPlugin(RenderPlugin* plugin);
 
     void applyState(const State::Ptr& state,
@@ -45,6 +44,11 @@ public:
 protected:
 
     Pipeline::Ptr _pipeline;
+    CubeMapSampler::Ptr _shadowsMap;
+    CubeMapSampler::Ptr _environmentMap;
+    RenderToCubeMap::Ptr _shadowsRenderer;
+    RenderToCubeMap::Ptr _environmentRenderer;
+    ReflexionModel::Ptr _shadowsmapShader;
 
     RenderTarget::Ptr _internalFrames;
     // RenderTarget::Ptr _renderTargets;

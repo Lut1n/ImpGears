@@ -66,6 +66,7 @@ void BloomFX::setup( /*std::vector<ImageSampler::Ptr>& input, std::vector<ImageS
     _subpassCount = 10;
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_blur", glsl_blur, viewport);
+    _copyGraph = buildQuadGraph("glsl_copy", s_glsl_copy, viewport);
 
     _frames[0] = RenderTarget::create();
     _frames[0]->build(viewport[2],viewport[3],1, true);
@@ -97,18 +98,28 @@ void BloomFX::process(GlRenderer* renderer, int subpassID)
 }
 
 //--------------------------------------------------------------
-void BloomFX::apply(GlRenderer* renderer)
+void BloomFX::apply(GlRenderer* renderer, bool skip)
 {
-    bind(renderer, 0);
-    _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
-    _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Bloom);
-
-    for(int i=1;i<_subpassCount;++i)
+    if(skip)
     {
-        bind(renderer, i);
-        process(renderer, i);
+        bind(renderer, 1);
+        _copyGraph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_copyGraph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
+    else
+    {
+        bind(renderer, 0);
+        _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
+        _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Bloom);
+
+        for(int i=1;i<_subpassCount;++i)
+        {
+            bind(renderer, i);
+            process(renderer, i);
+        }
     }
 }
 

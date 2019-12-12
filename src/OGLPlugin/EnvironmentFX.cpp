@@ -85,6 +85,7 @@ void EnvironmentFX::setup()
 {
     Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
     _graph = buildQuadGraph("glsl_env", glsl_env, viewport);
+    _fillingGraph = buildQuadGraph("glsl_fill", s_glsl_fill, viewport);
 
     if(_output.size() > 0)
     {
@@ -94,7 +95,7 @@ void EnvironmentFX::setup()
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::apply(GlRenderer* renderer)
+void EnvironmentFX::apply(GlRenderer* renderer, bool skip)
 {
     if(_output.size() > 0)
     {
@@ -107,16 +108,26 @@ void EnvironmentFX::apply(GlRenderer* renderer)
         renderer->_renderPlugin->unbind();
     }
 
-    Vec3 camPos = Vec3(0.0);
-    if(_camera) camPos = _camera->getAbsolutePosition();
+    if(skip)
+    {
 
-    _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
-    _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
-    _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
-    _graph->getInitState()->setUniform("u_input_cubemap_environment", _environment, 3);
-    _graph->getInitState()->setUniform("u_camera_pos", camPos);
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+        _fillingGraph->getInitState()->setUniform("u_fill_color", Vec4(1.0));
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_fillingGraph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
+    else
+    {
+        Vec3 camPos = Vec3(0.0);
+        if(_camera) camPos = _camera->getAbsolutePosition();
+
+        _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
+        _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
+        _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
+        _graph->getInitState()->setUniform("u_input_cubemap_environment", _environment, 3);
+        _graph->getInitState()->setUniform("u_camera_pos", camPos);
+        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
+        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    }
 }
 
 

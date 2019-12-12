@@ -7,6 +7,7 @@
 #include <SceneGraph/GeoNode.h>
 #include <SceneGraph/Camera.h>
 #include <SceneGraph/LightNode.h>
+#include <OGLPlugin/RenderToCubeMap.h>
 
 IMPGEARS_BEGIN
 
@@ -37,7 +38,7 @@ public:
     void setLight(const LightNode* light);
 
     virtual void setup() = 0;
-    virtual void apply(GlRenderer* renderer) = 0;
+    virtual void apply(GlRenderer* renderer, bool skip = false) = 0;
 
 protected:
     FrameBuf _input;
@@ -47,6 +48,9 @@ protected:
     CubeMapSampler::Ptr _environment;
     const Camera* _camera;
     const LightNode* _light;
+
+    static std::string s_glsl_copy;
+    static std::string s_glsl_fill;
 };
 
 class IMP_API Pipeline
@@ -75,7 +79,11 @@ public:
     virtual ~Pipeline();
 
     void setOperation(const FrameOperation::Ptr& op, int index);
+
+    void setActive(int opIndex, bool activate);
+
     void bind(int dstOpId, int srcOpId, int dstInputId, int srcOuputId = 0);
+    void unbind(int dstOpId, int dstInputId);
 
     ImageSampler::Ptr getOutputFrame( int opIndex, int outputIndex );
 
@@ -94,6 +102,7 @@ protected:
     GlRenderer* _renderer;
     std::vector<FrameOperation::Ptr> _operations;
     std::vector< std::vector<bool> > _dependencies;
+    std::vector< bool > _activated;
     std::vector<int> _orderedOp;
     std::vector<Binding> _bindings;
     bool _dirty;

@@ -114,12 +114,15 @@ int main(int argc, char* argv[])
     // graph->getInitState()->setPerspectiveProjection(90.0, 1.0, 0.1, 1024.0);
 
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     // renderer->setDirect(false);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
 
-    int frame_index = 0;
+    renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
+
+    // int frame_index = 0;
 
     while (window.isOpen())
     {
@@ -134,23 +137,23 @@ int main(int argc, char* argv[])
 
         double t = clock.getElapsedTime().asSeconds();
 
-        double duration = 3.0;
-        int frame_count = 7;
-        frame_index = int(t/duration) % frame_count;
-        if(frame_index == 0)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
-        else if(frame_index == 1)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
-        else if(frame_index == 2)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
-        else if(frame_index == 3)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
-        else if(frame_index == 4)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
-        else if(frame_index == 5)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
-        else if(frame_index == 6)
-            renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
+        // double duration = 3.0;
+        // int frame_count = 7;
+        // frame_index = int(t/duration) % frame_count;
+        // if(frame_index == 0)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
+        // else if(frame_index == 1)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
+        // else if(frame_index == 2)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
+        // else if(frame_index == 3)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
+        // else if(frame_index == 4)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Depth);
+        // else if(frame_index == 5)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
+        // else if(frame_index == 6)
+        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
         
         camera->setPosition(Vec3(cos(t*0.2)*1.0,0.75,sin(t*.2)*1.0));

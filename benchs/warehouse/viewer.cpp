@@ -30,9 +30,9 @@ Geometry::Ptr generateCase()
 {
     Geometry::Ptr geometry = Geometry::create();
     *geometry = imp::Geometry::cube();
-    // *geometry = geometry->subdivise(10);
+    *geometry = geometry->subdivise(10);
     Geometry::intoCCW(*geometry,true);
-    geometry->generateColors(Vec3(1.0));
+    geometry->generateColors(Vec3(0.8, 0.5, 0.3));
     geometry->generateTexCoords(Geometry::TexGenMode_Cubic,1.0);
     // geometry->scale(Vec3(1.0,1.0,1.0));
     geometry->generateNormals(Geometry::NormalGenMode_PerFace);
@@ -41,10 +41,57 @@ Geometry::Ptr generateCase()
     return geometry;
 }
 
+#define GLSL_CODE( code ) #code
+
+static std::string glsl_phong_bis = GLSL_CODE(
+uniform mat4 u_model;
+uniform mat4 u_view;
+uniform vec3 u_color;
+uniform float u_shininess;
+
+varying vec2 v_texCoord;
+varying vec3 v_m;
+varying vec3 v_mv;
+varying vec3 v_n;
+varying vec3 a_n;
+varying vec3 v_vertex;
+
+mat3 build_tbn(vec3 n_ref)
+{
+    vec3 n_z = n_ref; // normalize();
+    vec3 n_x = vec3(1.0,0.0,0.0);
+    vec3 n_y = cross(n_z,n_x);
+    vec3 n_x2 = vec3(0.0,1.0,0.0);
+    vec3 n_y_2 = cross(n_z,n_x2);
+    if(length(n_y) < length(n_y_2)) n_y = n_y_2;
+
+    n_y = normalize(n_y);
+    n_x = cross(n_y,n_z); n_x=normalize(n_x);
+    mat3 tbn = mat3(n_x,n_y,n_z);
+    return tbn;
+}
+
+void lighting(out vec4 out_color,
+              out vec4 out_emissive,
+              out vec3 out_normal,
+              out float out_reflectivity,
+              out float out_shininess,
+              out float out_depth)
+{
+    out_color = vec4(1.0,0.0,1.0, 1.0);
+    out_emissive = vec4(1.0,0.0,1.0, 1.0);
+    out_normal = vec3(0.0);
+    out_reflectivity = 0.0;
+    out_shininess = 0.0;
+    out_depth = 1.0;
+}
+);
+
 
 Geometry::Ptr generateCase2()
 {
     Geometry::Ptr geometry = generateCase();
+    // geometry->sphericalNormalization(0.7);
     *geometry += Vec3(0.0, 1.0, 0.0);
     // geometry->interpolateNormals();
 
@@ -99,7 +146,7 @@ Geometry::Ptr generateRoom2()
 
     *geometry += Vec3(0.0, 50.0, 0.0);
     // geometry->generateColors(Vec3(0.3,0.7,0.5));
-    geometry->generateColors(Vec3(0.5,0.0,1.0));
+    geometry->generateColors(Vec3(0.5,0.5,1.0));
 
     return geometry;
 }
@@ -141,10 +188,10 @@ int main(int argc, char* argv[])
     op.execute(normals->getSource());
 
 
-    ImageSampler::Ptr reflectivityMap = ImageSampler::create(8,8,3,Vec4(1.0));
-    for(float u=0.2;u<0.8;u+=0.125) for(float v=0.2;v<0.8;v+=0.125) reflectivityMap->set(u,v,Vec4(0.0));
+    ImageSampler::Ptr reflectivityMap = ImageSampler::create(32,32,3,Vec4(1.0));
+    for(float u=0.1;u<0.9;u+=0.03125) for(float v=0.1;v<0.9;v+=0.03125) reflectivityMap->set(u,v,Vec4(0.0));
 
-    ImageSampler::Ptr emissiveMap = ImageSampler::create(8,8,3,Vec4(0.0));
+    ImageSampler::Ptr emissiveMap = ImageSampler::create(16,16,3,Vec4(0.0));
     for(float u=0.4;u<0.6;u+=0.125) for(float v=0.4;v<0.6;v+=0.125) emissiveMap->set(u,v,Vec4(1.0,1.0,1.0,1.0));
 
     sf::Clock clock;
@@ -164,6 +211,7 @@ int main(int argc, char* argv[])
             imp::ReflexionModel::Texturing_Samplers_CNE,
             imp::ReflexionModel::MRT_2_Col_Emi,
             "glsl for scene object");
+    // r->_fragCode_lighting = glsl_phong_bis;
 
     imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_None,
@@ -249,10 +297,10 @@ int main(int argc, char* argv[])
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
+    renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
     // renderer->setDirect(false);
-    // renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
-    graph->setClearColor(Vec4(0.0));
+    // graph->setClearColor(Vec4(0.0,1.0,0.0,1.0));
 
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 

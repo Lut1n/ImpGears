@@ -95,7 +95,7 @@ public:
                  const LightNode* light,
                  CubeMapSampler::Ptr& shadowCubemap,
                  CubeMapSampler::Ptr& envCubemap);
-    void run();
+    void run(int targetOpIndex);
 
 protected:
 

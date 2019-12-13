@@ -13,7 +13,6 @@ uniform sampler2D u_input_sampler_depth;
 uniform sampler2D u_input_sampler_reflectivity;
 uniform samplerCube u_input_cubemap_environment;
 uniform vec3 u_light_pos;
-uniform vec3 u_camera_pos;
 
 varying vec2 v_texCoord;
 
@@ -22,7 +21,7 @@ vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 vec3 i_env(vec3 uvw){return texture(u_input_cubemap_environment, uvw).xyz;}
 
-vec4 unproject(vec2 txCoord, float depth)
+vec3 unproject(vec2 txCoord, float depth)
 {
     float near = 0.1;
     float far = 128.0;
@@ -38,7 +37,7 @@ vec4 unproject(vec2 txCoord, float depth)
     vec4 view_pos = vec4(ray * view_depth, 1.0);
     // world_pos /= world_pos.w;
 
-    return view_pos;
+    return view_pos.xyz;
 }
 
 void lighting(out vec4 out_color,
@@ -61,6 +60,9 @@ void lighting(out vec4 out_color,
     out_color = vec4(i_env(r),1.0);
     // if(length(normal) < 0.01) out_lighting = vec4(vec3(0.0),1.0);
     if(i_reflectivity(v_texCoord) < 0.5) out_color = vec4(vec3(1.0),1.0);
+
+    // --- for debug ---
+    // out_color = texture(u_input_cubemap_environment, view_pos);
 }
 
 );
@@ -117,14 +119,10 @@ void EnvironmentFX::apply(GlRenderer* renderer, bool skip)
     }
     else
     {
-        Vec3 camPos = Vec3(0.0);
-        if(_camera) camPos = _camera->getAbsolutePosition();
-
         _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
         _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
         _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
         _graph->getInitState()->setUniform("u_input_cubemap_environment", _environment, 3);
-        _graph->getInitState()->setUniform("u_camera_pos", camPos);
         RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
         renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
     }

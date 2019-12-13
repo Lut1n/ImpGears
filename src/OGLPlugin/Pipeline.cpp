@@ -373,14 +373,20 @@ void Pipeline::prepare(const Camera* camera,
 }
 
 //--------------------------------------------------------------
-void Pipeline::run()
+void Pipeline::run(int targetOpIndex)
 {
+    if(targetOpIndex < 0 || targetOpIndex>=(int)_operations.size()) return;
+
     for(int i=0;i<(int)_operations.size();++i)
     {
         int op_index = _orderedOp[i];
+        if(op_index == targetOpIndex) continue;
         bool skipOp = op_index<(int)_activated.size() && !_activated[op_index];
         _operations[op_index]->apply( _renderer, skipOp );
     }
+
+    // be sure that the target operation is the last one
+    _operations[targetOpIndex]->apply( _renderer, false );
 }
 
 

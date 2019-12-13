@@ -52,6 +52,7 @@ void RenderToCubeMap::setCubeMap(CubeMapSampler::Ptr cubemap)
         {
             _targets[i] = RenderTarget::create();
             _targets[i]->build(faceSampler, true);
+            _targets[i]->setClearColor(0, Vec4(1.0));
         }
     }
 }
@@ -66,8 +67,9 @@ CubeMapSampler::Ptr RenderToCubeMap::getCubeMap()
 void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType, ReflexionModel::Ptr overrideShader)
 {
     _clone->getInitState()->clone(scene->getInitState());
-    _clone->getInitState()->setUniform("u_projection", _proj);
-    // _clone->getInitState()->setViewport( Vec4(0.0,0.0,1024.0,1024.0) );
+    _state->setUniform("u_proj", _proj);
+    _state->setViewport( Vec4(0.0,0.0,1024.0,1024.0) );
+    if(overrideShader) _state->setReflexion( overrideShader );
     _clone->setRoot(scene->getRoot());
 
     for(int i=0;i<6;++i)
@@ -78,14 +80,12 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
         _camera->setUpDir( _upDirections[i] * -1.0 );
         _camera->lookAt();
 
-        _state->setUniform( "u_view", _camera->getViewMatrix() );
-        _state->setReflexion( overrideShader );
-
         _renderer->_renderPlugin->init(_targets[i]);
         _renderer->_renderPlugin->bind(_targets[i]);
         _targets[i]->change();
 
         RenderQueue::Ptr queue = _renderer->applyRenderVisitor(_clone);
+        queue->_camera = _camera.get();
         _renderer->drawQueue(queue, _state, frameType);
 
         _renderer->_renderPlugin->unbind();

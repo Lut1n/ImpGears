@@ -75,6 +75,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _depthTestChanged = other->_depthTestChanged;
         _reflexionChanged = other->_reflexionChanged;
         _renderPassChanged = other->_renderPassChanged;
+        _uniformsChanged = other->_uniformsChanged;
     }
     else if(opt == CloneOpt_IfChanged)
     {
@@ -110,6 +111,7 @@ const State& State::operator=(const State& other)
     _depthTestChanged = other._depthTestChanged;
     _reflexionChanged = other._reflexionChanged;
     _renderPassChanged = other._renderPassChanged;
+    _uniformsChanged = other._uniformsChanged;
 
     return *this;
 }

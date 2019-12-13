@@ -2,8 +2,6 @@
 
 /// =========== VERTEX SHADER SOURCE =====================
 static std::string basicVert = GLSL_CODE(
-// #version 130
-
 uniform mat4 u_proj;
 uniform mat4 u_view;
 uniform mat4 u_model;
@@ -24,10 +22,10 @@ void main()
     a_n = gl_Normal;
     gl_FrontColor = gl_Color;
 
-    v_texCoord = vec2(gl_MultiTexCoord0);
+    v_texCoord = gl_MultiTexCoord0.xy;
     v_m = (u_model * gl_Vertex).xyz;
     v_mv = mv_pos.xyz;
-    v_vertex = gl_Vertex;
+    v_vertex = gl_Vertex.xyz;
 }
 
 );
@@ -201,8 +199,8 @@ void lighting(out vec4 out_color,
     mat3 normal_mat = transpose( inverse( mat3(u_view*u_model) ) );
 
     mat3 tbn = build_tbn( normalize(v_n) );
-    mat3 tbn_a = build_tbn( normalize(a_n) );
-    out_normal = (normal_mat * tbn_a * normal) * 0.5 + 0.5;
+    // mat3 tbn_a = build_tbn( normalize(a_n) );
+    out_normal = (normal_mat * tbn * normal) * 0.5 + 0.5;
 
     out_reflectivity = textureReflectivity(v_texCoord);
     out_shininess = u_shininess * 0.1;

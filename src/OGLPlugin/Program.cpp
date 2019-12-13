@@ -65,12 +65,14 @@ void Program::compile(std::uint32_t srcId)
 {
     GLint result = GL_TRUE;
     glCompileShader(srcId) ;
+    GL_CHECKERROR(_name + " - shader compilation");
     glGetShaderiv(srcId, GL_COMPILE_STATUS, &result);
+    GL_CHECKERROR(_name + " - shader get compile status");
     if(result == GL_FALSE)
     {
         GLint len;
         glGetShaderiv(srcId, GL_INFO_LOG_LENGTH, &len);
-        GL_CHECKERROR(_name + " - shader compilation");
+        GL_CHECKERROR(_name + " - shader get compile status");
         s_compilation_log.resize(len);
         glGetShaderInfoLog(srcId, len, &result, &s_compilation_log[0] );
         GL_CHECKERROR(_name + " - shader compilation info log");

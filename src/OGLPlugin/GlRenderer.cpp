@@ -21,6 +21,13 @@
 #define FRAMEOP_ID_COPY 7
 #define FRAMEOP_ID_BLOOM 8
 
+#define MRT_OUT_COLOR 0
+#define MRT_OUT_EMISSIVE 1
+#define MRT_OUT_NORMAL 2
+#define MRT_OUT_REFLECTIVITY 3
+#define MRT_OUT_SHININESS 4
+#define MRT_OUT_DEPTH 5
+
 #define GLSL_CODE( code ) #code
 
 //--------------------------------------------------------------
@@ -38,7 +45,6 @@ void lighting(out vec4 out_color,
     float depth = (length(v_mv.xyz) - near) / (far-near);
     out_color = vec4(vec3(depth),1.0);
 }
-
 );
 
 
@@ -64,14 +70,16 @@ GlRenderer::GlRenderer()
     _shadowsmapShader->_fragCode_lighting = glsl_shadow_depth;
 
 
-
     // mrt setup
     int mrt_size = 6;
     _internalFrames = RenderTarget::create();
     _internalFrames->build(1024.0,1024.0,mrt_size,true);
-    _internalFrames->setClearColor(2, Vec4(0.0));   // normals
-    _internalFrames->setClearColor(3, Vec4(0.0));   // reflectivity
-    _internalFrames->setClearColor(5, Vec4(1.0));   // depth
+    _internalFrames->setClearColor(MRT_OUT_COLOR, Vec4(1.0));
+    _internalFrames->setClearColor(MRT_OUT_EMISSIVE, Vec4(0.0));
+    _internalFrames->setClearColor(MRT_OUT_NORMAL, Vec4(0.0));
+    _internalFrames->setClearColor(MRT_OUT_REFLECTIVITY, Vec4(0.0));
+    _internalFrames->setClearColor(MRT_OUT_SHININESS, Vec4(0.0));
+    _internalFrames->setClearColor(MRT_OUT_DEPTH, Vec4(1.0));
 
 
 
@@ -87,15 +95,15 @@ GlRenderer::GlRenderer()
     LightingModel::Ptr lighting = LightingModel::create();
     ShadowCasting::Ptr shadowFX = ShadowCasting::create();
 
-    bloomFX->setInput( _internalFrames->get(1), 0 );
-    lighting->setInput( _internalFrames->get(2), 0 );
-    lighting->setInput( _internalFrames->get(5), 1 );
-    lighting->setInput( _internalFrames->get(4), 2 );
-    environFX->setInput( _internalFrames->get(2), 0 );
-    environFX->setInput( _internalFrames->get(5), 1 );
-    environFX->setInput( _internalFrames->get(3), 2 );
-    shadowFX->setInput( _internalFrames->get(5), 0 );
-    blendTmp->setInput( _internalFrames->get(0), 0 );
+    bloomFX->setInput( _internalFrames->get(MRT_OUT_EMISSIVE), 0 );
+    lighting->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
+    lighting->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
+    lighting->setInput( _internalFrames->get(MRT_OUT_SHININESS), 2 );
+    environFX->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
+    environFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
+    environFX->setInput( _internalFrames->get(MRT_OUT_REFLECTIVITY), 2 );
+    shadowFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 0 );
+    blendTmp->setInput( _internalFrames->get(MRT_OUT_COLOR), 0 );
 
     // build dependances
     _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
@@ -181,30 +189,30 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
                 if(mat->_baseColor)
-                        state->setUniform("u_sampler_color", mat->_baseColor, 0);
+                        local_state->setUniform("u_sampler_color", mat->_baseColor, 0);
                 if(mat->_normalmap)
-                        state->setUniform("u_sampler_normal", mat->_normalmap, 1);
+                        local_state->setUniform("u_sampler_normal", mat->_normalmap, 1);
                 if(mat->_emissive)
-                        state->setUniform("u_sampler_emissive", mat->_emissive, 2);
+                        local_state->setUniform("u_sampler_emissive", mat->_emissive, 2);
                 if(mat->_reflectivity)
-                        state->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
+                        local_state->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
 
-                queue->_states[i]->setUniform("u_color", color);
-                queue->_states[i]->setUniform("u_shininess", shininess);
+                local_state->setUniform("u_color", color);
+                local_state->setUniform("u_shininess", shininess);
             }
 
 
             // ---- if we want a normal matrix for view space instead of model space ----
-            // Matrix4 model = state->getUniforms()["u_model"]->getMat4();
+            // Matrix4 model = local_state->getUniforms()["u_model"]->getMat4();
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
             // state->setUniform("u_normal", normalMat );
-            state->setUniform("u_view", view);
+            local_state->setUniform("u_view", view);
 
 
-            applyState(state, renderPass);
+            applyState(local_state, renderPass);
             if( renderPass==SceneRenderer::RenderFrame_ShadowMap ) _renderPlugin->setCulling(2);
 
-            RenderPass::Ptr renderPass_info = geode->getState()->getRenderPass();
+            RenderPass::Ptr renderPass_info = local_state->getRenderPass();
 
             RenderPass::PassFlag expectedFlag = RenderPass::Pass_DefaultMRT;
             if( renderPass==SceneRenderer::RenderFrame_Environment )
@@ -249,7 +257,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
     if(shadows_enabled)
     {
         _shadowsRenderer->render(
-                    scene, queue->_lights[0]->getPosition(),
+                    scene, queue->_lights[0]->_worldPosition,
                     SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
     }
 
@@ -302,7 +310,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
     }
 
     _pipeline->prepare(queue->_camera, queue->_lights[0], _shadowsMap, _environmentMap);
-    _pipeline->run();
+    _pipeline->run( FRAMEOP_ID_COPY );
 }
 
 
@@ -316,6 +324,7 @@ void GlRenderer::applyState(const State::Ptr& state,
         _renderPlugin->setCulling(2); // front culling
     else
         _renderPlugin->setCulling(state->getFaceCullingMode());
+
     _renderPlugin->setBlend(state->getBlendMode());
     _renderPlugin->setLineW(state->getLineWidth());
     _renderPlugin->setDepthTest(state->getDepthTest());

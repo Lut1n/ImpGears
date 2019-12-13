@@ -307,11 +307,11 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
     }
     else if(li == ReflexionModel::Lighting_Phong)
     {
-        fullFragCode = fullFragCode + glsl_invMat3 + glsl_phong;
+        fullFragCode = fullFragCode + /*glsl_invMat3 +*/ glsl_phong;
     }
     else if(li == ReflexionModel::Lighting_Customized)
     {
-        fullFragCode = fullFragCode + program->_fragCode_lighting;
+        fullFragCode = fullFragCode + /*glsl_invMat3 +*/ program->_fragCode_lighting;
     }
 
     // ReflexionModel::MRT mrt = program->getMRT();
@@ -388,7 +388,6 @@ void GlPlugin::init(RenderTarget::Ptr& target)
     if(d == nullptr)
     {
         d = FboData::create();
-        std::vector<Vec4> clearColors;
 
         if(target->useFaceSampler())
         {
@@ -405,7 +404,6 @@ void GlPlugin::init(RenderTarget::Ptr& target)
             }
             CubeMap::Ptr cm = dtex->cubetex;
             d->frames.build(cm, faceID, target->hasDepth());
-            clearColors.push_back(Vec4(1.0));
         }
         else
         {
@@ -424,9 +422,9 @@ void GlPlugin::init(RenderTarget::Ptr& target)
                 textures.push_back(t);
             }
             d->frames.build(textures, target->hasDepth());
-            clearColors = target->getClearColors();
         }
 
+        std::vector<Vec4> clearColors = target->getClearColors();
         d->frames.setClearColors( clearColors );
         s_internalState->renderTargets[target] = d;
     }

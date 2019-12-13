@@ -18,7 +18,7 @@ varying vec2 v_texCoord;
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
 
-vec4 unproject(vec2 txCoord, float depth)
+vec3 unproject(vec2 txCoord, float depth)
 {
     float near = 0.1;
     float far = 128.0;
@@ -34,7 +34,7 @@ vec4 unproject(vec2 txCoord, float depth)
     vec4 view_pos = vec4(ray * view_depth, 1.0);
     // world_pos /= world_pos.w;
 
-    return view_pos;
+    return view_pos.xyz;
 }
 
 void lighting(out vec4 out_color,
@@ -64,8 +64,13 @@ void lighting(out vec4 out_color,
     if(distance_light > distance_occlusion+EPSILON) received_light = 0.1;
 
     out_color = vec4(vec3(received_light),1.0);
-    // if(depth > 1.0-EPSILON) out_color = vec4(vec3(1.0),1.0);
-    // out_color = vec4(vec3(i_shadow(pos_from_light)),1.0);
+
+    // --- for debug ---
+    // out_color = vec4(vec3(distance_light),1.0);
+    // out_color = vec4(vec3(distance_occlusion),1.0);
+    // out_color = texture(u_input_cubemap_shadow, view_pos);
+    // out_color = texture(u_input_cubemap_shadow, pos_from_light);
+    // out_color = vec4(1.0,0.0,0.0,1.0);
 }
 
 );

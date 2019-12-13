@@ -25,6 +25,7 @@ public:
     GeoNode(const Polyhedron& buf, bool wireframe = false);
     GeoNode(const Geometry::Ptr& geo, bool wireframe = false);
 
+    void setGeometry(Geometry::Ptr& geo, bool wireframe = false);
     void setReflexion(ReflexionModel::Ptr reflexion);
     void setRenderPass(RenderPass::Ptr renderPass);
     void setMaterial(const Material::Ptr material);

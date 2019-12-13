@@ -37,6 +37,14 @@ GeoNode::GeoNode(const Geometry::Ptr& geo, bool wireframe)
 }
 
 //--------------------------------------------------------------
+void GeoNode::setGeometry(Geometry::Ptr& geo, bool wireframe)
+{
+    _loaded = false;
+    _geo = geo;
+    _wireframe = wireframe;
+}
+
+//--------------------------------------------------------------
 void GeoNode::setReflexion(ReflexionModel::Ptr reflexion)
 {
     getState()->setReflexion(reflexion);

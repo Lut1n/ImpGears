@@ -72,7 +72,10 @@ public:
     void setReflexion(ReflexionModel::Ptr reflexion);
     void setRenderPass(RenderPass::Ptr renderPass);
 
-    void setUniforms(const std::map<std::string,Uniform::Ptr>& uniforms);
+    void cloneUniforms(const std::map<std::string,Uniform::Ptr>& uniforms,
+                       const std::map<std::string,bool>& changedFlags,
+                       CloneOpt opt = CloneOpt_All);
+
     void clearUniforms();
     void setUniform(const Uniform::Ptr& uniform);
 
@@ -107,6 +110,7 @@ private:
     RenderPass::Ptr _renderPass;
 
     std::map<std::string,Uniform::Ptr> _uniforms;
+    std::map<std::string,bool> _uniformChangedFlags;
 
     bool _projectionChanged;
     bool _viewportChanged;

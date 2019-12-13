@@ -96,7 +96,7 @@ GlRenderer::GlRenderer()
     EnvironmentFX::Ptr environFX = EnvironmentFX::create();
     LightingModel::Ptr lighting = LightingModel::create();
     ShadowCasting::Ptr shadowFX = ShadowCasting::create();
-    AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
+    // AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
 
     bloomFX->setInput( _internalFrames->get(MRT_OUT_EMISSIVE), 0 );
     lighting->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
@@ -107,8 +107,8 @@ GlRenderer::GlRenderer()
     environFX->setInput( _internalFrames->get(MRT_OUT_REFLECTIVITY), 2 );
     shadowFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 0 );
     blendTmp->setInput( _internalFrames->get(MRT_OUT_COLOR), 0 );
-    ssaoFX->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
-    ssaoFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
+    // ssaoFX->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
+    // ssaoFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
 
 
     // build dependances
@@ -122,6 +122,18 @@ GlRenderer::GlRenderer()
     _pipeline->setOperation( toScreen, FRAMEOP_ID_COPY );
     _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
     // _pipeline->setOperation( ssaoFX, FRAMEOP_ID_SSAO );
+
+    _pipeline->bindExternal( FRAMEOP_ID_BLOOM, _internalFrames, 0, MRT_OUT_EMISSIVE);
+    _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 0, MRT_OUT_NORMAL);
+    _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 1, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 2, MRT_OUT_SHININESS);
+    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 0, MRT_OUT_NORMAL);
+    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 1, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 2, MRT_OUT_REFLECTIVITY);
+    _pipeline->bindExternal( FRAMEOP_ID_SHAFX, _internalFrames, 0, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_COLORMIX, _internalFrames, 0, MRT_OUT_COLOR);
+    // _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 0, MRT_OUT_NORMAL);
+    // _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 1, MRT_OUT_DEPTH);
 
     _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_PHONG, 0);
     _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SHAFX, 1);
@@ -285,7 +297,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
            break;
        case RenderFrame_Color:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_COLORMIX, 0);
+            _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_COLOR);
            break;
        case RenderFrame_ShadowMap:
             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
@@ -297,19 +309,19 @@ void GlRenderer::render(const Graph::Ptr& scene)
             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
            break;
        case RenderFrame_Depth:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_DEPTH);
            break;
        case RenderFrame_Emissive:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_EMISSIVE);
            break;
        case RenderFrame_Bloom:
             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
            break;
        case RenderFrame_Normals:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_NORMAL);
            break;
        case RenderFrame_Reflectivity:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_REFLECTIVITY);
            break;
        default: // assume RenderFrame_Default
             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);

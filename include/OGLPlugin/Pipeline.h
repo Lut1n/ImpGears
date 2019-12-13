@@ -82,6 +82,7 @@ public:
 
     void setActive(int opIndex, bool activate);
 
+    void bindExternal(int dstOpId, const RenderTarget::Ptr& rt, int dstInputId, int srcOuputId = 0);
     void bind(int dstOpId, int srcOpId, int dstInputId, int srcOuputId = 0);
     void unbind(int dstOpId, int dstInputId);
 

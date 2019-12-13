@@ -202,6 +202,16 @@ void Pipeline::setActive(int opIndex, bool activate)
     _activated[opIndex] = activate;
 }
 
+
+//--------------------------------------------------------------
+void Pipeline::bindExternal(int dstOpId, const RenderTarget::Ptr& rt, int dstInputId, int srcOuputId)
+{
+    unbind(dstOpId, dstInputId);
+    _operations[dstOpId]->setInput(rt->get(srcOuputId), dstInputId);
+
+    _dirty = true;
+}
+
 //--------------------------------------------------------------
 void Pipeline::bind(int dstOpId, int srcOpId, int dstInputId, int srcOutputId)
 {

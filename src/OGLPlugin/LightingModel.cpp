@@ -21,7 +21,7 @@ vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shininess(vec2 uv){return texture2D(u_input_sampler_shininess, uv).x;}
 
-vec4 unproject(vec2 txCoord, float depth)
+vec3 unproject(vec2 txCoord, float depth)
 {
     float near = 0.1;
     float far = 128.0;
@@ -33,11 +33,11 @@ vec4 unproject(vec2 txCoord, float depth)
     vec2 ndc = txCoord * 2.0 - 1.0;
 
     vec3 ray = vec3(ndc.x*th_fov, ndc.y*th_fov/*/ratio*/, -1.0);
-    float view_depth = near + depth * far;
+    float view_depth = near + depth * (far-near);
     vec4 view_pos = vec4(ray * view_depth, 1.0);
     // world_pos /= world_pos.w;
 
-    return view_pos;
+    return view_pos.xyz;
 }
 
 void lighting(out vec4 out_color,

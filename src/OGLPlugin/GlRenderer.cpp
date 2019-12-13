@@ -10,6 +10,7 @@
 #include <OGLPlugin/BlendAll.h>
 #include <OGLPlugin/RenderToCubeMap.h>
 #include <OGLPlugin/ShadowCasting.h>
+#include <OGLPlugin/AmbientOcclusion.h>
 
 #define FRAMEOP_ID_ENVFX 0
 #define FRAMEOP_ID_SHAMIX 1
@@ -20,6 +21,7 @@
 #define FRAMEOP_ID_PHONG 6
 #define FRAMEOP_ID_COPY 7
 #define FRAMEOP_ID_BLOOM 8
+#define FRAMEOP_ID_SSAO 9
 
 #define MRT_OUT_COLOR 0
 #define MRT_OUT_EMISSIVE 1
@@ -94,6 +96,7 @@ GlRenderer::GlRenderer()
     EnvironmentFX::Ptr environFX = EnvironmentFX::create();
     LightingModel::Ptr lighting = LightingModel::create();
     ShadowCasting::Ptr shadowFX = ShadowCasting::create();
+    AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
 
     bloomFX->setInput( _internalFrames->get(MRT_OUT_EMISSIVE), 0 );
     lighting->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
@@ -104,6 +107,9 @@ GlRenderer::GlRenderer()
     environFX->setInput( _internalFrames->get(MRT_OUT_REFLECTIVITY), 2 );
     shadowFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 0 );
     blendTmp->setInput( _internalFrames->get(MRT_OUT_COLOR), 0 );
+    ssaoFX->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
+    ssaoFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
+
 
     // build dependances
     _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
@@ -115,6 +121,8 @@ GlRenderer::GlRenderer()
     _pipeline->setOperation( lighting, FRAMEOP_ID_PHONG );
     _pipeline->setOperation( toScreen, FRAMEOP_ID_COPY );
     _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
+    // _pipeline->setOperation( ssaoFX, FRAMEOP_ID_SSAO );
+
     _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_PHONG, 0);
     _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SHAFX, 1);
     _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_ENVFX, 0);
@@ -123,6 +131,8 @@ GlRenderer::GlRenderer()
     _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_ENVMIX, 0);
     _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_BLOOM, 1);
     _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+
+    // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SSAO, 0);
 }
 
 //--------------------------------------------------------------
@@ -243,71 +253,71 @@ void GlRenderer::render(const Graph::Ptr& scene)
     RenderQueue::Ptr queue = applyRenderVisitor(scene);
     drawQueue(queue);
 
-    bool env_enabled = isFeatureEnabled(Feature_Environment);
-    bool shadows_enabled = isFeatureEnabled(Feature_Shadow);
-    bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
+   bool env_enabled = isFeatureEnabled(Feature_Environment);
+   bool shadows_enabled = isFeatureEnabled(Feature_Shadow);
+   bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
 
-    if(env_enabled)
-    {
-        _environmentRenderer->render(
-                    scene, Vec3(0.0),
-                    SceneRenderer::RenderFrame_Environment); // todo : position as parameter
-    }
+   if(env_enabled)
+   {
+       _environmentRenderer->render(
+                   scene, Vec3(0.0),
+                   SceneRenderer::RenderFrame_Environment); // todo : position as parameter
+   }
 
-    if(shadows_enabled)
-    {
-        _shadowsRenderer->render(
-                    scene, queue->_lights[0]->_worldPosition,
-                    SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
-    }
+   if(shadows_enabled)
+   {
+       _shadowsRenderer->render(
+                   scene, queue->_lights[0]->_worldPosition,
+                   SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
+   }
 
-    _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
-    _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
-    _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
+   _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
+   _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
+   _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
 
-    static RenderFrame s_lastOutput = RenderFrame_Default;
+   static RenderFrame s_lastOutput = RenderFrame_Default;
 
-    if( getOutputFrame() != s_lastOutput )
-    {
-        switch(getOutputFrame())
-        {
-        case RenderFrame_Default:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
-            break;
-        case RenderFrame_Color:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_COLORMIX, 0);
-            break;
-        case RenderFrame_ShadowMap:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
-            break;
-        case RenderFrame_Environment:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
-            break;
-        case RenderFrame_Lighting:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
-            break;
-        case RenderFrame_Depth:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
-            break;
-        case RenderFrame_Emissive:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
-            break;
-        case RenderFrame_Bloom:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
-            break;
-        case RenderFrame_Normals:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
-            break;
-        case RenderFrame_Reflectivity:
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
-            break;
-        default: // assume RenderFrame_Default
-             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
-            break;
-        }
+   if( getOutputFrame() != s_lastOutput )
+   {
+       switch(getOutputFrame())
+       {
+       case RenderFrame_Default:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+           break;
+       case RenderFrame_Color:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_COLORMIX, 0);
+           break;
+       case RenderFrame_ShadowMap:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
+           break;
+       case RenderFrame_Environment:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+           break;
+       case RenderFrame_Lighting:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+           break;
+       case RenderFrame_Depth:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+           break;
+       case RenderFrame_Emissive:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+           break;
+       case RenderFrame_Bloom:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+           break;
+       case RenderFrame_Normals:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+           break;
+       case RenderFrame_Reflectivity:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+           break;
+       default: // assume RenderFrame_Default
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+           break;
+       }
 
-        s_lastOutput = getOutputFrame();
-    }
+       s_lastOutput = getOutputFrame();
+   }
 
     _pipeline->prepare(queue->_camera, queue->_lights[0], _shadowsMap, _environmentMap);
     _pipeline->run( FRAMEOP_ID_COPY );

@@ -84,9 +84,9 @@ EnvironmentFX::~EnvironmentFX()
 }
 
 //--------------------------------------------------------------
-void EnvironmentFX::setup()
+void EnvironmentFX::setup(const Vec4& vp)
 {
-    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
+    Vec4 viewport = Vec4(0.0,0.0,vp[2],vp[3]);
     _graph = buildQuadGraph("glsl_env", glsl_env, viewport);
     _fillingGraph = buildQuadGraph("glsl_fill", s_glsl_fill, viewport);
 

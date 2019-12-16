@@ -8,6 +8,7 @@ SceneRenderer::SceneRenderer()
     _visitor = RenderVisitor::create();
     _direct = true;
     _renderFrame = RenderFrame_Default;
+    _outputViewport = Vec4(0.0,0.0,512.0,512.0);
 
     for(auto& f : _enabledFeatures) f=false;
 }

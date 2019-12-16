@@ -58,18 +58,18 @@ BloomFX::~BloomFX()
 }
 
 //--------------------------------------------------------------
-void BloomFX::setup( /*std::vector<ImageSampler::Ptr>& input, std::vector<ImageSampler::Ptr>& output*/ )
+void BloomFX::setup(const Vec4& vp)
 {
     // _input = input;
     // _output = output;
 
     _subpassCount = 10;
-    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
+    Vec4 viewport = Vec4(0.0,0.0,vp[2],vp[3]);
     _graph = buildQuadGraph("glsl_blur", glsl_blur, viewport);
     _copyGraph = buildQuadGraph("glsl_copy", s_glsl_copy, viewport);
 
     _frames[0] = RenderTarget::create();
-    _frames[0]->build(viewport[2],viewport[3],1, true);
+    _frames[0]->build(vp[2],vp[3],1, true);
     _frames[1] = RenderTarget::create();
     _frames[1]->build(_output, true);
 }

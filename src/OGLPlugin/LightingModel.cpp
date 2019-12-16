@@ -120,9 +120,9 @@ LightingModel::~LightingModel()
 }
 
 //--------------------------------------------------------------
-void LightingModel::setup()
+void LightingModel::setup(const Vec4& vp)
 {
-    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
+    Vec4 viewport = Vec4(0.0,0.0,vp[2],vp[3]);
     _graph = buildQuadGraph("glsl_lightingModel", glsl_lightingModel, viewport);
     _fillingGraph = buildQuadGraph("glsl_fill", s_glsl_fill, viewport);
 

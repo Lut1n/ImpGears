@@ -18,10 +18,9 @@ CopyFrame::~CopyFrame()
 }
 
 //--------------------------------------------------------------
-void CopyFrame::setup()
+void CopyFrame::setup(const Vec4& vp)
 {
-    Vec4 viewport = Vec4(0.0,0.0,512.0,512);
-    _graph = buildQuadGraph("glsl_copy", s_glsl_copy, viewport);
+    _graph = buildQuadGraph("glsl_copy", s_glsl_copy, vp);
 
     if(_output.size() > 0)
     {

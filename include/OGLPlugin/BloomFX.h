@@ -18,7 +18,7 @@ public:
     void bind(GlRenderer* renderer, int subpassID = 0);
     void process(GlRenderer* renderer, int subpassID);
 
-    virtual void setup();
+    virtual void setup(const Vec4& vp);
     virtual void apply(GlRenderer* renderer, bool skip = false);
 
 protected:

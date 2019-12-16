@@ -61,6 +61,9 @@ public:
     void setOutputFrame(RenderFrame rf){ _renderFrame = rf; }
     RenderFrame getOutputFrame() const { return _renderFrame; }
 
+    virtual void setOuputViewport(const Vec4& vp) {_outputViewport = vp;}
+    const Vec4& getOuputViewport() const {return _outputViewport;}
+
 protected:
 
     bool _direct;
@@ -70,6 +73,7 @@ protected:
     RenderVisitor::Ptr _visitor;
 
     RenderFrame _renderFrame;
+    Vec4 _outputViewport;
 };
 
 IMPGEARS_END

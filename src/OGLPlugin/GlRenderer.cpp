@@ -88,6 +88,8 @@ GlRenderer::GlRenderer()
 
     // pipeline setup
     _pipeline = Pipeline::create(this);
+    _pipeline->setViewport(_outputViewport);
+
     BloomFX::Ptr bloomFX = BloomFX::create();
     BlendAll::Ptr blendAll = BlendAll::create(BlendAll::Max);
     BlendAll::Ptr blendTmp = BlendAll::create(BlendAll::Mult);
@@ -139,6 +141,13 @@ GlRenderer::GlRenderer()
 //--------------------------------------------------------------
 GlRenderer::~GlRenderer()
 {
+}
+
+//---------------------------------------------------------------
+void GlRenderer::setOuputViewport(const Vec4& vp)
+{
+    _outputViewport = vp;
+    _pipeline->setViewport(_outputViewport);
 }
 
 //---------------------------------------------------------------

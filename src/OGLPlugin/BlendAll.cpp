@@ -106,9 +106,9 @@ BlendAll::~BlendAll()
 }
 
 //--------------------------------------------------------------
-void BlendAll::setup()
+void BlendAll::setup(const Vec4& vp)
 {
-    Vec4 viewport = Vec4(0.0,0.0,1024.0,1024);
+    Vec4 viewport = Vec4(0.0,0.0,vp[2],vp[3]);
     if(_type == Max)
         _graph = buildQuadGraph("glsl_max", glsl_max, viewport);
     else if(_type == Mix)

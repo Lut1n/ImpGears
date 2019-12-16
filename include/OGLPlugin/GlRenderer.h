@@ -39,6 +39,8 @@ public:
     void applyClear(ClearNode* clearNode, SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default);
     void drawGeometry(GeoNode* geoNode);
 
+    virtual void setOuputViewport(const Vec4& vp);
+
     RenderPlugin* _renderPlugin;
 
 protected:

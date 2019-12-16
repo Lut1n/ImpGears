@@ -15,7 +15,7 @@ public:
     ShadowCasting();
     virtual ~ShadowCasting();
 
-    virtual void setup();
+    virtual void setup(const Vec4& vp);
     virtual void apply(GlRenderer* renderer, bool skip = false);
 
 protected:

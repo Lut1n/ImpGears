@@ -138,6 +138,12 @@ void FrameOperation::setLight(const LightNode* light)
     _light = light;
 }
 
+//--------------------------------------------------------------
+void FrameOperation::clearOutput()
+{
+    _output.clear();
+}
+
 
 
 //--------------------------------------------------------------
@@ -170,6 +176,7 @@ bool Pipeline::Binding::operator==(const Binding& that) const
 Pipeline::Pipeline(GlRenderer* renderer)
     : _renderer(renderer)
     , _dirty(true)
+    , _viewport(0.0,0.0,512.0,512.0)
 {
 
 }
@@ -248,13 +255,14 @@ ImageSampler::Ptr Pipeline::getOutputFrame( int opIndex, int outputIndex )
 }
 
 //--------------------------------------------------------------
-void Pipeline::setupOperations()
+void Pipeline::setupOperations(const Vec4& vp)
 {
     int opSize = (int)_operations.size();
     int bdSize = (int)_bindings.size();
 
     for(int k=0;k<opSize;++k)
     {
+        _operations[k]->clearOutput(); // force resize
         std::map< int, std::vector<int> > output_bindings;
 
         // map all output bindings for the current operation
@@ -277,7 +285,7 @@ void Pipeline::setupOperations()
             ImageSampler::Ptr frame = _operations[k]->getOutput(output_index);
             if(frame == nullptr)
             {
-                frame = ImageSampler::create(1024,1024,4,Vec4(0.0));
+                frame = ImageSampler::create(vp[2],vp[3],4,Vec4(0.0));
                 _operations[k]->setOutput(frame, output_index);
             }
 
@@ -367,8 +375,8 @@ void Pipeline::prepare(const Camera* camera,
         buildDependencies();
         deduceOrder();
 
-        setupOperations();
-        for(auto& op : _operations) op->setup();
+        setupOperations(_viewport);
+        for(auto& op : _operations) op->setup(_viewport);
 
         _dirty = false;
     }
@@ -397,6 +405,13 @@ void Pipeline::run(int targetOpIndex)
 
     // be sure that the target operation is the last one
     _operations[targetOpIndex]->apply( _renderer, false );
+}
+
+//--------------------------------------------------------------
+void Pipeline::setViewport(const Vec4& vp)
+{
+    _viewport = vp;
+    _dirty = true;
 }
 
 

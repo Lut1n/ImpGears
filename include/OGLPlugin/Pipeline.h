@@ -37,8 +37,10 @@ public:
     void setCamera(const Camera* camera);
     void setLight(const LightNode* light);
 
-    virtual void setup() = 0;
+    virtual void setup(const Vec4& vp) = 0;
     virtual void apply(GlRenderer* renderer, bool skip = false) = 0;
+
+    void clearOutput();
 
 protected:
     FrameBuf _input;
@@ -88,7 +90,7 @@ public:
 
     ImageSampler::Ptr getOutputFrame( int opIndex, int outputIndex );
 
-    void setupOperations();
+    void setupOperations(const Vec4& vp);
     void buildDependencies();
     void deduceOrder();
 
@@ -97,6 +99,8 @@ public:
                  CubeMapSampler::Ptr& shadowCubemap,
                  CubeMapSampler::Ptr& envCubemap);
     void run(int targetOpIndex);
+
+    void setViewport(const Vec4& vp);
 
 protected:
 
@@ -108,6 +112,7 @@ protected:
     std::vector<Binding> _bindings;
     bool _dirty;
     FrameBuf _frames;
+    Vec4 _viewport;
 };
 
 IMPGEARS_END

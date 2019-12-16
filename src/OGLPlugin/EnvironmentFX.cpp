@@ -33,6 +33,7 @@ vec3 unproject(vec2 txCoord, float depth)
     vec2 ndc = txCoord * 2.0 - 1.0;
 
     vec3 ray = vec3(ndc.x*th_fov, ndc.y*th_fov/*/ratio*/, -1.0);
+    ray = normalize(ray);
     float view_depth = near + depth * far;
     vec4 view_pos = vec4(ray * view_depth, 1.0);
     // world_pos /= world_pos.w;

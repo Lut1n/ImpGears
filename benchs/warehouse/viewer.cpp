@@ -133,8 +133,8 @@ Geometry::Ptr generateRoom2()
     *wall_02 += Vec3(0.0, 0.0, 50.0);
     *wall_03 += Vec3(-50.0, 0.0, 0.0);
     *wall_04 += Vec3(0.0, 0.0, -50.0);
-    *woof += Vec3(0.0, 50.0, 0.0);
-    *ground += Vec3(0.0, -50.0, 0.0);
+    *woof += Vec3(0.0, 49.0, 0.0);
+    *ground += Vec3(0.0, -51.0, 0.0);
 
     Geometry::Ptr geometry = Geometry::create();
     *geometry = *wall_01;
@@ -225,14 +225,14 @@ int main(int argc, char* argv[])
     case_material->_reflectivity = reflectivityMap;
 
     Material::Ptr material = Material::create(Vec3(1.0), 1.0);
-    material->_baseColor = color;
+    // material->_baseColor = color;
     // material->_emissive = color;
     material->_normalmap = normals;
 
     Material::Ptr light_material = Material::create(Vec3(1.0), 1.0);
     light_material->_emissive = emi;
 
-    GeoNode::Ptr roomNode = GeoNode::create(generateRoom(), false);
+    GeoNode::Ptr roomNode = GeoNode::create(generateRoom2(), false);
     roomNode->setReflexion(r);
     roomNode->setMaterial(material);
     roomNode->setPosition(Vec3(0.0,-50.0,0.0));
@@ -283,6 +283,7 @@ int main(int argc, char* argv[])
     root->addNode(case03_node);
     graph->setRoot(root);
 
+    roomNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
     coordsNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
     case01_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
     case02_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
@@ -332,9 +333,10 @@ int main(int argc, char* argv[])
         light->setPosition(lp);
         pointNode->setPosition(lp);
 
+        Vec3 oft(0.0,0.0,0.0);
         Vec3 lp2(cos(-t * 0.2),1.0,sin(-t * 0.2));
         camera->setPosition(lp2*Vec3(40.0,25.0-50.0,40.0));
-        camera->setTarget(Vec3(0.0f, 10.f-50.0, 0.0f));
+        camera->setTarget(oft+Vec3(0.0f, 10.f-50.0, 0.0f));
 
 
         renderer->render( graph );

@@ -45,6 +45,7 @@ void lighting(out vec4 out_color,
 {
     float near = 0.1; float far = 128.0;
     float depth = (length(v_mv.xyz) - near) / (far-near);
+    // float depth = (abs(v_mv.z) - near) / (far-near);
     out_color = vec4(vec3(depth),1.0);
 }
 );
@@ -97,18 +98,6 @@ GlRenderer::GlRenderer()
     LightingModel::Ptr lighting = LightingModel::create();
     ShadowCasting::Ptr shadowFX = ShadowCasting::create();
     // AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
-
-    bloomFX->setInput( _internalFrames->get(MRT_OUT_EMISSIVE), 0 );
-    lighting->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
-    lighting->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
-    lighting->setInput( _internalFrames->get(MRT_OUT_SHININESS), 2 );
-    environFX->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
-    environFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
-    environFX->setInput( _internalFrames->get(MRT_OUT_REFLECTIVITY), 2 );
-    shadowFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 0 );
-    blendTmp->setInput( _internalFrames->get(MRT_OUT_COLOR), 0 );
-    // ssaoFX->setInput( _internalFrames->get(MRT_OUT_NORMAL), 0 );
-    // ssaoFX->setInput( _internalFrames->get(MRT_OUT_DEPTH), 1 );
 
 
     // build dependances

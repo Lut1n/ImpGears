@@ -30,11 +30,34 @@ vec3 unproject(vec2 txCoord, float depth)
     vec2 ndc = txCoord * 2.0 - 1.0;
 
     vec3 ray = vec3(ndc.x*th_fov, ndc.y*th_fov/*/ratio*/, -1.0);
+    ray = normalize(ray);
     float view_depth = near + depth * (far-near);
     vec4 view_pos = vec4(ray * view_depth, 1.0);
     // world_pos /= world_pos.w;
 
     return view_pos.xyz;
+}
+
+mat3 build_tbn(vec3 n_ref)
+{
+    vec3 n_z = normalize(n_ref);
+    vec3 n_x = vec3(1.0,0.0,0.0);
+    vec3 n_y = cross(n_z,n_x);
+    vec3 n_x2 = vec3(0.0,1.0,0.0);
+    vec3 n_y_2 = cross(n_z,n_x2);
+    if(length(n_y) < length(n_y_2)) n_y = n_y_2;
+
+    n_y = normalize(n_y);
+    n_x = cross(n_y,n_z); n_x=normalize(n_x);
+    mat3 tbn = mat3(n_x,n_y,n_z);
+    return tbn;
+}
+
+float random(vec3 seed, int i)
+{
+    vec4 seed4 = vec4(seed,i);
+    float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
+    return fract(sin(dot_product) * 43758.5453);
 }
 
 void lighting(out vec4 out_color,
@@ -54,14 +77,50 @@ void lighting(out vec4 out_color,
     vec3 pos_from_light = world_pos - u_light_pos;
     // vec3 pos_from_light = view_pos - u_light_pos;
 
+
+    vec3 poissonDisk[16] = vec3[](
+       vec3( -0.94201624, -0.39906216, 0.0 ),
+       vec3( 0.94558609, -0.76890725, 0.0 ),
+       vec3( -0.094184101, -0.92938870, 0.0 ),
+       vec3( 0.34495938, 0.29387760, 0.0 ),
+       vec3( -0.91588581, 0.45771432, 0.0 ),
+       vec3( -0.81544232, -0.87912464, 0.0 ),
+       vec3( -0.38277543, 0.27676845, 0.0 ),
+       vec3( 0.97484398, 0.75648379, 0.0 ),
+       vec3( 0.44323325, -0.97511554, 0.0 ),
+       vec3( 0.53742981, -0.47373420, 0.0 ),
+       vec3( -0.26496911, -0.41893023, 0.0 ),
+       vec3( 0.79197514, 0.19090188, 0.0 ),
+       vec3( -0.24188840, 0.99706507, 0.0 ),
+       vec3( -0.81409955, 0.91437590, 0.0 ),
+       vec3( 0.19984126, 0.78641367, 0.0 ),
+       vec3( 0.14383161, -0.1410079, 0.00 )
+    );
+
+    mat3 tbn = build_tbn(pos_from_light);
+
+
     float near = 0.1;
     float far = 128.0;
     float distance_light = (length(pos_from_light)-near) / (far-near);
 
-    float distance_occlusion = i_shadow(pos_from_light);
     //
+    const float N = 16;
     float received_light = 1.0;
-    if(distance_light > distance_occlusion+EPSILON) received_light = 0.1;
+    for(int i=0;i<N;++i)
+    {
+        int index = i; // int(16.0*random(floor(world_pos.xyz*1000.0), i))%16;
+        float distance_occlusion = i_shadow(pos_from_light + tbn * poissonDisk[index]);
+        if(distance_light < 1.0-EPSILON && distance_light > distance_occlusion+EPSILON) received_light -= 0.8/N;
+    }
+
+
+    // without multi-sampling
+    // float distance_occlusion = i_shadow(pos_from_light);
+    // distance_light = (length(pos_from_light)-near) / (50.0-near);
+    // if(distance_light < 1.0-EPSILON && distance_light > distance_occlusion+EPSILON) received_light = 0.2;
+
+
 
     out_color = vec4(vec3(received_light),1.0);
 

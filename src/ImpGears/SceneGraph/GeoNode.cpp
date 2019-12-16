@@ -79,10 +79,6 @@ void GeoNode::update()
                 *_geo = Geometry::intoLineBuf( *_geo );
                 _geo->setPrimitive(Geometry::Primitive_Lines);
             }
-            else
-            {
-                Geometry::intoCCW(*_geo);
-            }
         }
         _loaded = true;
     }

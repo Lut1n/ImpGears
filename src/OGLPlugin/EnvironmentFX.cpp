@@ -36,7 +36,6 @@ vec3 unproject(vec2 txCoord, float depth)
     ray = normalize(ray);
     float view_depth = near + depth * far;
     vec4 view_pos = vec4(ray * view_depth, 1.0);
-    // world_pos /= world_pos.w;
 
     return view_pos.xyz;
 }
@@ -57,10 +56,9 @@ void lighting(out vec4 out_color,
     vec3 view_cam_pos = vec3(0.0);
     vec3 incident = normalize(view_pos-view_cam_pos);
 
+    float intensity = i_reflectivity(v_texCoord);
     vec3 r = reflect(incident,n);
-    out_color = vec4(i_env(r),1.0);
-    // if(length(normal) < 0.01) out_lighting = vec4(vec3(0.0),1.0);
-    if(i_reflectivity(v_texCoord) < 0.5) out_color = vec4(vec3(1.0),1.0);
+    out_color = mix( vec4(1.0), vec4(i_env(r),1.0), intensity);
 
     // --- for debug ---
     // out_color = texture(u_input_cubemap_environment, view_pos);

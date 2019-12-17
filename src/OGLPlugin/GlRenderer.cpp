@@ -22,6 +22,7 @@
 #define FRAMEOP_ID_COPY 7
 #define FRAMEOP_ID_BLOOM 8
 #define FRAMEOP_ID_SSAO 9
+#define FRAMEOP_ID_SSAOMIX 10
 
 #define MRT_OUT_COLOR 0
 #define MRT_OUT_EMISSIVE 1
@@ -91,28 +92,30 @@ GlRenderer::GlRenderer()
     _pipeline->setViewport(_outputViewport);
 
     BloomFX::Ptr bloomFX = BloomFX::create();
-    BlendAll::Ptr blendAll = BlendAll::create(BlendAll::Max);
-    BlendAll::Ptr blendTmp = BlendAll::create(BlendAll::Mult);
-    BlendAll::Ptr blendSha = BlendAll::create(BlendAll::Mult);
-    BlendAll::Ptr blendRefl = BlendAll::create(BlendAll::Mult);
+    BlendAll::Ptr bloom_mix = BlendAll::create(BlendAll::Max);
+    BlendAll::Ptr color_mix = BlendAll::create(BlendAll::Mult);
+    BlendAll::Ptr sha_mix = BlendAll::create(BlendAll::Mult);
+    BlendAll::Ptr ssao_mix = BlendAll::create(BlendAll::Mult);
+    BlendAll::Ptr env_mix = BlendAll::create(BlendAll::Mult);
     CopyFrame::Ptr toScreen = CopyFrame::create();
     EnvironmentFX::Ptr environFX = EnvironmentFX::create();
     LightingModel::Ptr lighting = LightingModel::create();
     ShadowCasting::Ptr shadowFX = ShadowCasting::create();
-    // AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
+    AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
 
 
     // build dependances
     _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
-    _pipeline->setOperation( blendSha, FRAMEOP_ID_SHAMIX );
-    _pipeline->setOperation( blendTmp, FRAMEOP_ID_COLORMIX );
-    _pipeline->setOperation( blendRefl, FRAMEOP_ID_ENVMIX );
-    _pipeline->setOperation( blendAll, FRAMEOP_ID_BLOOMMIX );
+    _pipeline->setOperation( sha_mix, FRAMEOP_ID_SHAMIX );
+    _pipeline->setOperation( color_mix, FRAMEOP_ID_COLORMIX );
+    _pipeline->setOperation( env_mix, FRAMEOP_ID_ENVMIX );
+    _pipeline->setOperation( bloom_mix, FRAMEOP_ID_BLOOMMIX );
     _pipeline->setOperation( shadowFX, FRAMEOP_ID_SHAFX );
     _pipeline->setOperation( lighting, FRAMEOP_ID_PHONG );
     _pipeline->setOperation( toScreen, FRAMEOP_ID_COPY );
     _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
-    // _pipeline->setOperation( ssaoFX, FRAMEOP_ID_SSAO );
+    _pipeline->setOperation( ssaoFX, FRAMEOP_ID_SSAO );
+    _pipeline->setOperation( ssao_mix, FRAMEOP_ID_SSAOMIX );
 
     _pipeline->bindExternal( FRAMEOP_ID_BLOOM, _internalFrames, 0, MRT_OUT_EMISSIVE);
     _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 0, MRT_OUT_NORMAL);
@@ -123,10 +126,12 @@ GlRenderer::GlRenderer()
     _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 2, MRT_OUT_REFLECTIVITY);
     _pipeline->bindExternal( FRAMEOP_ID_SHAFX, _internalFrames, 0, MRT_OUT_DEPTH);
     _pipeline->bindExternal( FRAMEOP_ID_COLORMIX, _internalFrames, 0, MRT_OUT_COLOR);
-    // _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 0, MRT_OUT_NORMAL);
-    // _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 1, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 0, MRT_OUT_NORMAL);
+    _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 1, MRT_OUT_DEPTH);
 
-    _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_PHONG, 0);
+    _pipeline->bind( FRAMEOP_ID_SSAOMIX, FRAMEOP_ID_SSAO, 0);
+    _pipeline->bind( FRAMEOP_ID_SSAOMIX, FRAMEOP_ID_PHONG, 1);
+    _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SSAOMIX, 0);
     _pipeline->bind( FRAMEOP_ID_SHAMIX, FRAMEOP_ID_SHAFX, 1);
     _pipeline->bind( FRAMEOP_ID_ENVMIX, FRAMEOP_ID_ENVFX, 0);
     _pipeline->bind( FRAMEOP_ID_COLORMIX, FRAMEOP_ID_SHAMIX, 1);
@@ -134,8 +139,6 @@ GlRenderer::GlRenderer()
     _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_ENVMIX, 0);
     _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_BLOOM, 1);
     _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
-
-    // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SSAO, 0);
 }
 
 //--------------------------------------------------------------
@@ -266,6 +269,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
    bool env_enabled = isFeatureEnabled(Feature_Environment);
    bool shadows_enabled = isFeatureEnabled(Feature_Shadow);
    bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
+   bool ssao_enabled = isFeatureEnabled(Feature_SSAO);
 
    if(env_enabled)
    {
@@ -284,6 +288,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
    _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
    _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
    _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
+   _pipeline->setActive(FRAMEOP_ID_SSAO, ssao_enabled);
 
    static RenderFrame s_lastOutput = RenderFrame_Default;
 
@@ -320,6 +325,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
            break;
        case RenderFrame_Reflectivity:
            _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_REFLECTIVITY);
+           break;
+       case RenderFrame_SSAO:
+            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SSAO, 0);
            break;
        default: // assume RenderFrame_Default
             _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);

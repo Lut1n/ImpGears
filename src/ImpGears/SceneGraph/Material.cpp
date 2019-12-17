@@ -10,7 +10,7 @@ ImageSampler::Ptr Material::s_default_reflectivity;
 
 //--------------------------------------------------------------
 Material::Material()
-    : _shininess(4.0)
+    : _shininess(32.0)
     , _color(1.0)
 {
     if(s_default_baseColor == nullptr)

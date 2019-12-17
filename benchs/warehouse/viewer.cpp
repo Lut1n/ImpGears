@@ -219,12 +219,12 @@ int main(int argc, char* argv[])
             imp::ReflexionModel::MRT_2_Col_Emi,
             "glsl for coords");
 
-    Material::Ptr case_material = Material::create(Vec3(1.0), 1.0);
+    Material::Ptr case_material = Material::create(Vec3(1.0), 32.0);
     case_material->_emissive = emissiveMap;
     case_material->_normalmap = normals;
     case_material->_reflectivity = reflectivityMap;
 
-    Material::Ptr material = Material::create(Vec3(1.0), 1.0);
+    Material::Ptr material = Material::create(Vec3(1.0), 32.0);
     // material->_baseColor = color;
     // material->_emissive = color;
     material->_normalmap = normals;
@@ -299,6 +299,7 @@ int main(int argc, char* argv[])
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
+    renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
     // renderer->setDirect(false);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     // graph->setClearColor(Vec4(0.0,1.0,0.0,1.0));

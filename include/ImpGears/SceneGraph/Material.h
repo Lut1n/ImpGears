@@ -18,7 +18,7 @@ public:
              ImageSampler::Ptr& emissive,
              ImageSampler::Ptr& normalmap,
              ImageSampler::Ptr& reflectivity,
-             float shininess = 4.0);
+             float shininess = 32.0);
     virtual ~Material();
 
     ImageSampler::Ptr _baseColor;

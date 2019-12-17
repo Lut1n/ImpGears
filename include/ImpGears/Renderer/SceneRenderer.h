@@ -32,6 +32,7 @@ public:
         RenderFrame_Default,
         RenderFrame_Color,
         RenderFrame_ShadowMap,
+        RenderFrame_SSAO,
         RenderFrame_Environment,
         RenderFrame_Lighting,
         RenderFrame_Depth,

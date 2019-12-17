@@ -8,7 +8,6 @@
 
 //--------------------------------------------------------------
 static std::string glsl_lightingModel = GLSL_CODE(
-// uniform sampler2D u_input_sampler_color;
 uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
 uniform sampler2D u_input_sampler_shininess;
@@ -16,7 +15,6 @@ uniform vec3 u_light_pos;
 
 varying vec2 v_texCoord;
 
-// vec3 i_color(vec2 uv){return texture2D(u_input_sampler_color, uv).xyz;}
 vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shininess(vec2 uv){return texture2D(u_input_sampler_shininess, uv).x;}
@@ -36,7 +34,6 @@ vec3 unproject(vec2 txCoord, float depth)
     ray = normalize(ray);
     float view_depth = near + depth * (far-near);
     vec4 view_pos = vec4(ray * view_depth, 1.0);
-    // world_pos /= world_pos.w;
 
     return view_pos.xyz;
 }
@@ -48,19 +45,13 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    // vec3 color = i_color(v_texCoord);
-    vec3 normal = i_normal(v_texCoord);
+    vec3 normal = i_normal(v_texCoord) *2.0 - 1.0;
     float depth = i_depth(v_texCoord);
-
-    vec3 n = normal *2.0 - 1.0;
-    vec3 view_cam_pos = vec3(0.0);
 
     vec3 view_pos = unproject(v_texCoord, depth);
 
-
-    // vec3 lightColor = vec3(1.0);
-    float lightPower = 200.0; // u_lightAtt[0];
-    float shininess = i_shininess(v_texCoord) * 10.0; // u_lightAtt[1];
+    float lightPower = 200.0;
+    float shininess = i_shininess(v_texCoord) * 100.0;
 
     // view space
     vec3 light_dir = u_light_pos - view_pos;
@@ -68,10 +59,7 @@ void lighting(out vec4 out_color,
     dist = dist * dist;
     light_dir = normalize(light_dir);
 
-    // mat3 tbn = build_tbn( normalize(v_n) );
-    // mat3 inv_tbn = inverse( tbn );
-
-    float lambertian = max(dot(light_dir,n),0.0);
+    float lambertian = max(dot(light_dir,normal),0.0);
     float specular = 0.0;
 
     // blinn phong
@@ -81,23 +69,17 @@ void lighting(out vec4 out_color,
         vec3 view_dir=normalize(-view_pos);
 
         // blinn phong
-        vec3 halfDir = light_dir + view_dir;
-        float specAngle = max( dot(halfDir,n), 0.0 );
+        vec3 halfDir = normalize(light_dir + view_dir);
+        float specAngle = max( dot(halfDir,normal), 0.0 );
         specular = pow(specAngle, shininess);
     }
 
-    // Color model :
-    // ambiantColor
-    // + diffColor * lambertian * lightColor * lightPower / distance
-    // + specColor * specular * lightColor * lightPower / distance
-
-    float ambient = 0.01;
-    float colorModel = ambient
-            + 0.7 * lambertian * /*lightColor **/ lightPower / dist
-            + 0.3 * specular * /*lightColor **/ lightPower / dist;
+    float intensity = lightPower/dist;
+    float ambient = 0.02;
+    float colorModel = ambient + (lambertian + specular) * intensity;
 
     const float EPSILON = 0.001;
-    if( length(normal) < EPSILON ) colorModel = 0.0;
+    if( length(i_normal(v_texCoord)) < EPSILON ) colorModel = 0.0;
 
     out_color = vec4(vec3(colorModel),1.0);
 }
@@ -155,7 +137,7 @@ void LightingModel::apply(GlRenderer* renderer, bool skip)
     }
     else
     {
-        Vec4 light_pos = Vec4(_light->_worldPosition);
+        Vec4 light_pos = Vec4(_light->_worldPosition,1.0);
         if(_camera) light_pos = light_pos * _camera->getViewMatrix();
 
         _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);

@@ -18,6 +18,14 @@ varying vec2 v_texCoord;
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
 
+float hash(vec3 xyz)
+{
+    vec3 v = vec3(2.19823371,3.27653,1.746541);
+    float n = 1545758.2653872;
+    float c = dot( xyz,v );
+    return fract( sin( c )* n );
+}
+
 vec3 unproject(vec2 txCoord, float depth)
 {
     float near = 0.1;
@@ -33,7 +41,6 @@ vec3 unproject(vec2 txCoord, float depth)
     ray = normalize(ray);
     float view_depth = near + depth * (far-near);
     vec4 view_pos = vec4(ray * view_depth, 1.0);
-    // world_pos /= world_pos.w;
 
     return view_pos.xyz;
 }
@@ -68,14 +75,11 @@ void lighting(out vec4 out_color,
               out float out_depth)
 {
     float depth = i_depth(v_texCoord);
-    //
     vec3 view_pos = unproject(v_texCoord, depth);
     vec3 world_pos = vec3(inverse(u_view_cam) * vec4(view_pos,1.0));
 
-    //
     float EPSILON = 0.001;
     vec3 pos_from_light = world_pos - u_light_pos;
-    // vec3 pos_from_light = view_pos - u_light_pos;
 
 
     vec3 poissonDisk[16] = vec3[](
@@ -97,39 +101,29 @@ void lighting(out vec4 out_color,
        vec3( 0.14383161, -0.1410079, 0.00 )
     );
 
-    mat3 tbn = build_tbn(pos_from_light);
-
-
     float near = 0.1;
     float far = 128.0;
     float distance_light = (length(pos_from_light)-near) / (far-near);
+    mat3 tbn = build_tbn(pos_from_light);
 
-    //
     const float N = 16;
     float received_light = 1.0;
     for(int i=0;i<N;++i)
     {
-        int index = i; // int(16.0*random(floor(world_pos.xyz*1000.0), i))%16;
+        int index = i;
+        // int index = // int(16.0*random(floor(world_pos.xyz*1000.0), i))%16;
+        // int index = int(16.0*hash(vec3(v_texCoord, i)))%16;
+
         float distance_occlusion = i_shadow(pos_from_light + tbn * poissonDisk[index]);
         if(distance_light < 1.0-EPSILON && distance_light > distance_occlusion+EPSILON) received_light -= 0.8/N;
     }
-
 
     // without multi-sampling
     // float distance_occlusion = i_shadow(pos_from_light);
     // distance_light = (length(pos_from_light)-near) / (50.0-near);
     // if(distance_light < 1.0-EPSILON && distance_light > distance_occlusion+EPSILON) received_light = 0.2;
 
-
-
     out_color = vec4(vec3(received_light),1.0);
-
-    // --- for debug ---
-    // out_color = vec4(vec3(distance_light),1.0);
-    // out_color = vec4(vec3(distance_occlusion),1.0);
-    // out_color = texture(u_input_cubemap_shadow, view_pos);
-    // out_color = texture(u_input_cubemap_shadow, pos_from_light);
-    // out_color = vec4(1.0,0.0,0.0,1.0);
 }
 
 );

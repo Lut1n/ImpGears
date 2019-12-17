@@ -20,38 +20,20 @@ float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 
 float hash(vec3 xyz)
 {
-        vec3 v = vec3(2.19823371,3.27653,1.746541);
-        float n = 1545758.2653872;
-        float c = dot( xyz,v );
-        return fract( sin( c )* n );
+    vec3 v = vec3(2.19823371,3.27653,1.746541);
+    float n = 1545758.2653872;
+    float c = dot( xyz,v );
+    return fract( sin( c )* n );
 }
 
-vec3 noise(vec2 txCoord)
+float random(vec3 seed, int i)
 {
-    vec3 x_seed = vec3(txCoord, 0.274523);
-    vec3 y_seed = vec3(txCoord, 0.336841);
-    vec3 z_seed = vec3(txCoord, 0.497234);
-
-    return vec3(hash(x_seed),hash(y_seed),hash(z_seed) * 0.5 + 0.5);
+    vec4 seed4 = vec4(seed,i);
+    float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
+    return fract(sin(dot_product) * 43758.5453);
 }
 
-vec3 kernel_simu(vec2 txCoord, int index)
-{
-    const float KERNEL_SIZE = 16.0;
-
-    // vec2 seed = vec2(0.27584, 0.384854) * vec2(index);
-    vec2 seed = txCoord * vec2(index);
-    vec3 sample = noise(seed);
-    sample = normalize(sample);
-
-    float scale = float(index)/KERNEL_SIZE;
-    scale = mix(0.1f, 1.0f, scale*scale);
-    sample *= scale;
-
-    return sample;
-}
-
-vec4 unproject(vec2 txCoord, float depth)
+vec3 unproject(vec2 txCoord, float depth)
 {
     float near = 0.1;
     float far = 128.0;
@@ -66,14 +48,13 @@ vec4 unproject(vec2 txCoord, float depth)
     ray = normalize(ray);
     float view_depth = near + depth * (far-near);
     vec4 view_pos = vec4(ray * view_depth, 1.0);
-    // world_pos /= world_pos.w;
 
-    return view_pos;
+    return view_pos.xyz;
 }
 
 mat3 build_tbn(vec3 n_ref)
 {
-    vec3 n_z = n_ref; // normalize();
+    vec3 n_z = normalize(n_ref);
     vec3 n_x = vec3(1.0,0.0,0.0);
     vec3 n_y = cross(n_z,n_x);
     vec3 n_x2 = vec3(0.0,1.0,0.0);
@@ -99,62 +80,63 @@ void lighting(out vec4 out_color,
     vec3 normal = i_normal(v_texCoord) * 2.0 - 1.0;
     float depth_origin = i_depth(v_texCoord);
     vec3 view_origin = unproject(v_texCoord, depth_origin);
+    depth_origin = near + depth_origin * (far-near);
 
-
-
-    // build tbn matrix (tangent space)
-    vec3 rotationVec = noise(v_texCoord); rotationVec.z = 0.0;
-    rotationVec = normalize(rotationVec);
-    rotationVec = rotationVec * 2.0 - 1.0;
-
-    // vec3 tangent = normalize(rotationVec - normal * dot(rotationVec, normal));
-    // vec3 bitangent = normalize(cross(normal, tangent));
-    // mat3 tbn = mat3(tangent, bitangent, normal);
 
     mat3 tbn = build_tbn(normal);
 
     float sampleRadius = 3.0;
 
+    vec3 poissonDisk[16] = vec3[](
+       vec3( -0.94201624, -0.39906216, 0.0 ),
+       vec3( 0.94558609, -0.76890725, 0.0 ),
+       vec3( -0.094184101, -0.92938870, 0.0 ),
+       vec3( 0.34495938, 0.29387760, 0.0 ),
+       vec3( -0.91588581, 0.45771432, 0.0 ),
+       vec3( -0.81544232, -0.87912464, 0.0 ),
+       vec3( -0.38277543, 0.27676845, 0.0 ),
+       vec3( 0.97484398, 0.75648379, 0.0 ),
+       vec3( 0.44323325, -0.97511554, 0.0 ),
+       vec3( 0.53742981, -0.47373420, 0.0 ),
+       vec3( -0.26496911, -0.41893023, 0.0 ),
+       vec3( 0.79197514, 0.19090188, 0.0 ),
+       vec3( -0.24188840, 0.99706507, 0.0 ),
+       vec3( -0.81409955, 0.91437590, 0.0 ),
+       vec3( 0.19984126, 0.78641367, 0.0 ),
+       vec3( 0.14383161, -0.1410079, 0.0 )
+    );
+
     float occlusion = 0.0f;
     const float KERNEL_SIZE = 16.0;
     for(int i=0; i<KERNEL_SIZE; ++i)
     {
+        int index = i;
+        // int index = int(16.0*random(view_origin, i))%16;
+        // int index = int(16.0*hash(vec3(v_texCoord, i)))%16;
+
         // get sample position
-        vec3 sample = tbn * kernel_simu(v_texCoord, i);
-        // vec4 sample4 = u_cam_view * vec4(sample, 0.0); //u_cam_view for only rotation
-        // sample = sample4.xyz * sampleRadius + view_origin.xyz;
-        sample = sample*sampleRadius + view_origin.xyz;
+        vec3 sample = poissonDisk[index];
+        sample = normal*2.0 + tbn * sample;
+        sample = sampleRadius * normalize(sample) + view_origin;
 
         // project sample position
         vec4 offset = vec4(sample, 1.0);
         offset = u_scene_proj * offset;
-        // offset /= -offset.z;
-        offset.xy /= offset.w;
+        offset /= offset.w;
         offset.xy = offset.xy * 0.5 + 0.5;
 
         // get sample depth
-        float depth_sample = i_depth(offset.xy).x;
+        float depth_sample = near + i_depth(offset.xy) * (far-near);
 
         // range check and acc
-        float rangeCheck = abs(depth_origin - depth_sample)*(far) < sampleRadius ? 1.0 : 0.0;
-        occlusion += (depth_sample*far <= -sample.z ? 1.0 : 0.0) * rangeCheck;
+        float rangeCheck = abs(depth_origin - depth_sample) < sampleRadius ? 1.0 : 0.0;
+        occlusion += (depth_sample <= length(sample) ? 1.0 : 0.0) * rangeCheck;
 
     }
 
-    occlusion = 1.0 - (occlusion/16.0);
+    occlusion = 1.0 - (occlusion/KERNEL_SIZE);
 
     out_color = vec4(occlusion, occlusion, occlusion, 1.0);
-
-    // --- for debug ---
-    // out_color = vec4(vec3(distance_light),1.0);
-    // out_color = vec4(vec3(distance_occlusion),1.0);
-    // out_color = texture(u_input_cubemap_shadow, view_pos);
-    // out_color = texture(u_input_cubemap_shadow, pos_from_light);
-    // out_color = vec4(1.0,0.0,0.0,1.0);
-
-    // out_color = vec4(noise(v_texCoord),1.0);
-    // out_color = vec4(kernel_simu(15),1.0);
-    // out_color = vec4(vec3(depth_origin),1.0);
 }
 
 );

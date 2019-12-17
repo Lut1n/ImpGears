@@ -105,13 +105,13 @@ struct MyContext
                 imp::ReflexionModel::Texturing_Samplers_CNE,
                 imp::ReflexionModel::MRT_2_Col_Emi, "shader 2");
 
-        Material::Ptr material = Material::create(Vec3(0.3,1.0,0.4), 1.0);
+        Material::Ptr material = Material::create(Vec3(0.3,1.0,0.4), 32.0);
         material->_baseColor = color;
         // material->_emissive = color;
         material->_normalmap = normals;
         material->_reflectivity = reflectivityMap;
 
-        Material::Ptr light_material = Material::create(Vec3(1.0), 1.0);
+        Material::Ptr light_material = Material::create(Vec3(1.0), 32.0);
         light_material->_emissive = emi;
 
         Geometry::Ptr terrain = Geometry::create();
@@ -210,6 +210,7 @@ int main(int argc, char* argv[])
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
+    renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
     renderer->setDirect(true);
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);

@@ -12,7 +12,7 @@ uniform float u_horizontal_blur;
 uniform sampler2D u_input_sampler;
 varying vec2 v_texCoord;
 
-vec4 i_emi(vec2 uv){return texture2D(u_input_sampler, uv).rgbw;}
+vec4 i_emi(vec2 uv){return texture2D(u_input_sampler, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -23,7 +23,7 @@ void lighting(out vec4 out_color,
 {
     const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
-    vec2 tex_offset = 1.0 / 1024.0;
+    vec2 tex_offset = vec2(1.0 / 1024.0);
     vec4 result = i_emi(v_texCoord) * weight[0];
 
     vec2 dir;

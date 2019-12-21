@@ -47,7 +47,7 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
     if(!offscreen)
     {
         std::string pluginName = "OGLPlugin";
-        pluginName = "lib" + pluginName + "." + LIB_EXT;
+        pluginName = "./lib" + pluginName + "." + LIB_EXT;
         plugin = PluginManager::open( pluginName );
         if(plugin)
         {

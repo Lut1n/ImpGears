@@ -10,8 +10,8 @@ uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
 varying vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -32,8 +32,8 @@ uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
 varying vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -54,8 +54,8 @@ uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
 varying vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
               out vec3 out_normal,
@@ -63,7 +63,7 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    out_color = vec4(max(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord)).xyz,1.0);
+    out_color = vec4(max(i_lighting(v_texCoord).xyz, i_bloom(v_texCoord).xyz),1.0);
 }
 
 );
@@ -75,8 +75,8 @@ uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
 varying vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).rgbw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).rgbw;}
+vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,

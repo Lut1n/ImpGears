@@ -73,6 +73,8 @@ struct GlPlugin::Priv
     std::map<CubeMapSampler::Ptr,TexData::Ptr> cubesamplers;
     std::map<ReflexionModel::Ptr,ProgData::Ptr> programs;
     std::map<RenderTarget::Ptr,FboData::Ptr> renderTargets;
+    
+    bool _needInverseMat;
 
     VboData::Ptr getVbo(Geometry::Ptr& g)
     {
@@ -128,6 +130,7 @@ void GlPlugin::init()
         glGetIntegerv(GL_MINOR_VERSION, &minor);
         std::cout << "OGL version " << major << "." << minor << std::endl;
         std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
+        s_internalState->_needInverseMat = (major<3) || (major==3 && minor==0); // inverse(mat) is available from gl version 3.1 .
     }
 }
 
@@ -271,7 +274,7 @@ int GlPlugin::load(CubeMapSampler::Ptr& sampler)
 //--------------------------------------------------------------
 int GlPlugin::load(ReflexionModel::Ptr& program)
 {
-    static const std::string glsl_version = ""; // "#version 330 core\n";
+    static const std::string glsl_version = "#version 130\n"; // "#version 330 core\n";
 
     ProgData::Ptr d = s_internalState->getProg(program);
     if(d != nullptr) return 0;
@@ -280,6 +283,11 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
 
     std::string fullVertCode = basicVert;
     std::string fullFragCode = glsl_version;
+    
+    if(s_internalState->_needInverseMat)
+    {
+        fullFragCode = fullFragCode + glsl_inverse_mat;
+    }
 
     ReflexionModel::Texturing te = program->getTexturing();
 
@@ -307,11 +315,11 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
     }
     else if(li == ReflexionModel::Lighting_Phong)
     {
-        fullFragCode = fullFragCode + /*glsl_invMat3 +*/ glsl_phong;
+        fullFragCode = fullFragCode + glsl_phong;
     }
     else if(li == ReflexionModel::Lighting_Customized)
     {
-        fullFragCode = fullFragCode + /*glsl_invMat3 +*/ program->_fragCode_lighting;
+        fullFragCode = fullFragCode + program->_fragCode_lighting;
     }
 
     // ReflexionModel::MRT mrt = program->getMRT();

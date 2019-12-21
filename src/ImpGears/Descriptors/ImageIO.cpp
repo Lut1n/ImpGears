@@ -242,7 +242,6 @@ Image::Ptr tga_load(std::string& filename, bool flipY)
     unsigned short y_minus_o = 0;
     istrm.read(reinterpret_cast<char*>(&x_minus_o), sizeof x_minus_o); // X-origin (2o)
     istrm.read(reinterpret_cast<char*>(&y_minus_o), sizeof y_minus_o); // Y-origin (2o)
-    std::cout << "(x,y) minus o : " << x_minus_o << "; " << y_minus_o << std::endl;
 
     istrm.read(reinterpret_cast<char*>(&w), sizeof w); // width (2o)
     istrm.read(reinterpret_cast<char*>(&h), sizeof h); // height (2o)

@@ -11,7 +11,7 @@ struct RenderModeManager
     RenderPlugin::Ptr plugin;
     SceneRenderer::Ptr renderer;
     Vec4 viewport;
-    Image::Ptr target; //, target2;
+    Image::Ptr target;
     sf::Texture texture;
     sf::Sprite sprite;
 
@@ -85,7 +85,7 @@ SceneRenderer::Ptr RenderModeManager::loadRenderer()
         renderer->setDirect(false);
     }
 
-    texture.create(1024, 1024);
+    texture.create(target->width(), target->height());
     // texture.setSmooth(true);
     sprite.setTexture(texture);
 
@@ -99,8 +99,7 @@ void RenderModeManager::draw(sf::RenderTarget& renderTarget)
         if(plugin) target = renderer->getTarget(true);
 
         texture.update(target->data(),target->width(),target->height(),0,0);
-        sprite.setScale( renderTarget.getSize().x / target->width(),
-                         -renderTarget.getSize().y / target->height() );
+        sprite.setScale( float(renderTarget.getSize().x)/target->width(), -float(renderTarget.getSize().y)/target->height() );
         sprite.setPosition( 0, renderTarget.getSize().y );
         renderTarget.draw(sprite);
     }

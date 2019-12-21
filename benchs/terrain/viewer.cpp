@@ -28,7 +28,7 @@ using namespace imp;
 Geometry generateTerrain(const ImageSampler::Ptr& hm)
 {
     imp::Geometry geometry = imp::Geometry::cube();
-    geometry = geometry.subdivise(20);
+    geometry = geometry.subdivise(10);
     Geometry::intoCCW(geometry);
     geometry.generateColors(Vec3(1.0));
     geometry.generateTexCoords(Geometry::TexGenMode_Cubic,1.0);
@@ -89,21 +89,21 @@ struct MyContext
         op.execute(normals->getSource());
 
         graph = Graph::create();
-        Node::Ptr root = Node::create();
+        ClearNode::Ptr root = ClearNode::create();
 
         camera = Camera::create(Vec3(0.0,1.0,0.0));
-        camera->setPosition(Vec3(10.0f, 10.0f, 10.0f));
-        camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
+        camera->setPosition(Vec3(10.0, 10.0, 10.0));
+        camera->setTarget(Vec3(0.0, 0.0, 0.0));
 
         imp::ReflexionModel::Ptr r = imp::ReflexionModel::create(
                 imp::ReflexionModel::Lighting_Phong,
                 imp::ReflexionModel::Texturing_Samplers_CNE,
-                imp::ReflexionModel::MRT_2_Col_Emi, "shader 1");
+                imp::ReflexionModel::MRT_1_Col, "shader 1");
 
         imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
-                imp::ReflexionModel::Lighting_None,
+                imp::ReflexionModel::Lighting_Phong,
                 imp::ReflexionModel::Texturing_Samplers_CNE,
-                imp::ReflexionModel::MRT_2_Col_Emi, "shader 2");
+                imp::ReflexionModel::MRT_1_Col, "shader 2");
 
         Material::Ptr material = Material::create(Vec3(0.3,1.0,0.4), 32.0);
         material->_baseColor = color;
@@ -135,13 +135,14 @@ struct MyContext
         coords->scale(Vec3(30.0));
         GeoNode::Ptr coordsNode = GeoNode::create(coords, false);
         coordsNode->setReflexion(r2);
-        coordsNode->setMaterial(material);
-        coordsNode->setPosition(Vec3(0.0,15.0,0.0));
+        coordsNode->setMaterial(light_material);
+        coordsNode->setPosition(Vec3(0.0,5.0,0.0));
+        coordsNode->setScale(Vec3(0.5));
 
-        LightNode::Ptr lightNode = LightNode::create(Vec3(1.0),10.f);
+        LightNode::Ptr lightNode = LightNode::create(Vec3(1.0),10.0);
 
         Geometry::Ptr pointGeo = Geometry::create();
-        *pointGeo = Geometry::sphere(8, 0.4);
+        *pointGeo = Geometry::sphere(2, 0.4);
         pointGeo->setPrimitive(Geometry::Primitive_Triangles);
         pointGeo->generateColors(Vec3(0.3,0.3,1.0));
         pointGeo->generateNormals();
@@ -161,7 +162,7 @@ struct MyContext
         root->addNode(baseNode);
         root->addNode(coordsNode);
         root->addNode(pointNode);
-        root->addNode(sky);
+        if(renderModeMngr.plugin) root->addNode(sky);
         graph->setRoot(root);
 
         RenderPass::Ptr rp_info = RenderPass::create();
@@ -207,41 +208,23 @@ int main(int argc, char* argv[])
 
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
-    renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-    renderer->enableFeature(SceneRenderer::Feature_Environment, true);
-    renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-    renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
-    renderer->setDirect(true);
+    // renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    // renderer->enableFeature(SceneRenderer::Feature_Environment, true);
+    // renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
+    // renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
+    
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
-    // renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
 
     MyContext* context = new MyContext(); context->init(renderModeMngr.viewport);
-
-    Graph::Ptr graphEmpty = Graph::create();
-    Camera::Ptr cameraUnused = Camera::create();
-    LightNode::Ptr lightUnused = LightNode::create(Vec3(1.0,0.0,0.0),0.f);
-    graphEmpty->setRoot(cameraUnused);
-    cameraUnused->addNode(lightUnused);
-
-    int space_count = 0;
 
     while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed/* || event.type == sf::Event::KeyPressed*/)
+            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
             {
-                delete context;
-                context = nullptr;
-                renderer->render( graphEmpty );
-                renderModeMngr.plugin->unloadUnused();
                 window.close();
-            }
-            else if(event.type == sf::Event::KeyPressed)
-            {
-                space_count++;
-                std::cout << "space count " << space_count << std::endl;
             }
         }
         if(!window.isOpen()) break;
@@ -249,85 +232,14 @@ int main(int argc, char* argv[])
         double t = clock.getElapsedTime().asSeconds();
         context->update(t);
 
-        // double duration = 3.0;
-        int frame_count = 8; //9;
-        // int frame_index = 0;//int(t/duration) % frame_count;
-        int frame_index = space_count % frame_count;
-        if(frame_index == 0)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, false);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
-        }
-        else if(frame_index == 1)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, false);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
-        }
-        else if(frame_index == 2)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, true);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
-        }
-        else if(frame_index == 3)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, true);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
-        }
-        else if(frame_index == 4)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, false);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-        }
-        else if(frame_index == 5)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, false);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-        }
-        else if(frame_index == 6)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, true);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-        }
-        else if(frame_index == 7)
-        {
-            renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
-            renderer->enableFeature(SceneRenderer::Feature_Environment, true);
-            renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-        }
-
-        // if(frame_index == 0)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
-        // else if(frame_index == 1)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Lighting);
-        // else if(frame_index == 2)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Emissive);
-        // else if(frame_index == 3)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Normals);
-        // else if(frame_index == 4)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
-        // else if(frame_index == 5)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Environment);
-        // else if(frame_index == 6)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Bloom);
-        // else if(frame_index == 7)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
-        // else if(frame_index == 8)
-        //     renderer->setOutputFrame(SceneRenderer::RenderFrame_Reflectivity);
-
+        window.clear();
+        
         renderer->render( context->graph );
-        renderModeMngr.plugin->unloadUnused();
+        if(renderModeMngr.plugin) renderModeMngr.plugin->unloadUnused();
 
         renderModeMngr.draw(window);
         window.display();
         // break;
-        // renderer->setOutputFrame(SceneRenderer::RenderFrame_ShadowMap);
     }
 
     exit(EXIT_SUCCESS);

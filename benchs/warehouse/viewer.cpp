@@ -209,14 +209,14 @@ int main(int argc, char* argv[])
     imp::ReflexionModel::Ptr r = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_Phong,
             imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi,
+            imp::ReflexionModel::MRT_1_Col,
             "glsl for scene object");
     // r->_fragCode_lighting = glsl_phong_bis;
 
     imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_None,
             imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi,
+            imp::ReflexionModel::MRT_1_Col,
             "glsl for coords");
 
     Material::Ptr case_material = Material::create(Vec3(1.0), 32.0);
@@ -340,6 +340,7 @@ int main(int argc, char* argv[])
         camera->setTarget(oft+Vec3(0.0f, 10.f-50.0, 0.0f));
 
 
+        window.clear();
         renderer->render( graph );
 
         renderModeMngr.draw(window);

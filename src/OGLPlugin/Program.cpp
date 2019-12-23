@@ -57,6 +57,22 @@ void Program::load(const std::string& vertCode, const std::string& fragCode)
     glAttachShader(_programID, _fragID);
     GL_CHECKERROR(_name + " - attach fragment shader");
 
+    // setup input attribute locations
+    GLuint glVertex = 0, glColor = 1, glNormal = 2, glTexCoord = 3;
+    glBindAttribLocation(_programID, glVertex, "a_vertex");
+    glBindAttribLocation(_programID, glColor, "a_color");
+    glBindAttribLocation(_programID, glNormal, "a_normal");
+    glBindAttribLocation(_programID, glTexCoord, "a_texcoord");
+
+    // setup output fragment data locations
+    GLuint dataColor = 0, dataEmi = 1, dataNormal = 2, dataReflect = 3, dataShininess = 4, dataDepth = 5;
+    glBindFragDataLocation(_programID, dataColor,"data_color");
+    glBindFragDataLocation(_programID, dataEmi,"data_emissive");
+    glBindFragDataLocation(_programID, dataNormal,"data_normal");
+    glBindFragDataLocation(_programID, dataReflect,"data_reflectivity");
+    glBindFragDataLocation(_programID, dataShininess,"data_shininess");
+    glBindFragDataLocation(_programID, dataDepth,"data_depth");
+
     glLinkProgram(_programID);
     GL_CHECKERROR(_name + " - link shader program");
 }

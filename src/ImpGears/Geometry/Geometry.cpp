@@ -22,6 +22,7 @@ inline Vec3 mix(const Vec3& v1, const Vec3& v2, double f)
 
 Geometry::Geometry()
     : _prim(Primitive_Lines)
+    , _hasIndices(false)
     , _hasTexCoords(false)
     , _hasColors(false)
     , _hasNormals(false)
@@ -29,11 +30,13 @@ Geometry::Geometry()
 
 Geometry::Geometry(const Geometry& other)
     : _prim(other._prim)
+    , _hasIndices(other._hasIndices)
     , _hasTexCoords(other._hasTexCoords)
     , _hasColors(other._hasColors)
     , _hasNormals(other._hasNormals)
 {
     _vertices = other._vertices;
+    _indices = other._indices;
     _texCoords = other._texCoords;
     _normals = other._normals;
     _colors = other._colors;
@@ -46,10 +49,12 @@ void Geometry::operator=(const Geometry& other)
     _prim = other._prim;
     _vertices = other._vertices;
 
+    _hasIndices = other._hasIndices;
     _hasTexCoords = other._hasTexCoords;
     _hasColors = other._hasColors;
     _hasNormals = other._hasNormals;
 
+    _indices = other._indices;
     _normals = other._normals;
     _colors = other._colors;
     _texCoords = other._texCoords;
@@ -60,6 +65,7 @@ void Geometry::operator=(const Geometry& other)
 void Geometry::operator+=(const Geometry& other)
 {
     add(other._vertices);
+    // add(other._indices); // indices will be not consistent
     addColors(other._colors);
     addTexCoords(other._texCoords);
     addNormals(other._normals);
@@ -367,6 +373,30 @@ void Geometry::intoCCW( Geometry& buf, bool toExterior )
 
 Geometry Geometry::intoLineBuf(const Geometry& buf)
 {
+    if(buf._hasIndices)
+    {
+        Geometry res = buf;
+        res.setPrimitive(Primitive_Lines);
+        res._indices.resize( buf._indices.size() * 2 );
+
+        int j=0;
+        for(int i=0;i<(int)buf._indices.size(); i+=3)
+        {
+            res._indices[j+0] = buf._indices[i+0];
+            res._indices[j+1] = buf._indices[i+1];
+
+            res._indices[j+2] = buf._indices[i+1];
+            res._indices[j+3] = buf._indices[i+2];
+
+            res._indices[j+4] = buf._indices[i+2];
+            res._indices[j+5] = buf._indices[i+0];
+            j += 6;
+        }
+
+        return res;
+    }
+
+
     BufType colors;
     BufType normals;
     TexCoordBuf coords;
@@ -536,6 +566,15 @@ void Geometry::generateNormals( NormalGenMode genMode )
         _normals[i+1] = n2;
         _normals[i+2] = n3;
     }
+}
+
+void Geometry::generateIndices()
+{
+    // naive method, not optimized
+    _indices.resize(_vertices.size());
+    for(std::uint32_t i=0;i<_indices.size();++i) _indices[i]=i;
+
+    _hasIndices = true;
 }
 
 void Geometry::interpolateNormals()

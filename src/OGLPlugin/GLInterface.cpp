@@ -8,7 +8,7 @@
 #include <OGLPlugin/GlError.h>
 #include <OGLPlugin/Texture.h>
 #include <OGLPlugin/GLInterface.h>
-#include <OGLPlugin/BufferObject.h>
+#include <OGLPlugin/VertexArray.h>
 #include <OGLPlugin/FrameBuffer.h>
 #include <OGLPlugin/CubeMap.h>
 #include <OGLPlugin/Program.h>
@@ -33,7 +33,7 @@ struct VboData : public RenderPlugin::Data
     Meta_Class(VboData)
     VboData() { ty=RenderPlugin::Ty_Vbo; }
 
-    BufferObject vbo;
+    VertexArray vbo;
 };
 
 //--------------------------------------------------------------
@@ -130,7 +130,10 @@ void GlPlugin::init()
         glGetIntegerv(GL_MINOR_VERSION, &minor);
         std::cout << "OGL version " << major << "." << minor << std::endl;
         std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
-        s_internalState->_needInverseMat = (major<3) || (major==3 && minor==0); // inverse(mat) is available from gl version 3.1 .
+
+        // inverse(mat) is available from gl version 3.1 .
+        // Here, glsl version is forced to 1.30 (needInverseMat has te be alway true)
+        s_internalState->_needInverseMat = true; // (major<3) || (major==3 && minor==0);
     }
 }
 
@@ -281,7 +284,7 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
 
     d = ProgData::create();
 
-    std::string fullVertCode = basicVert;
+    std::string fullVertCode = glsl_version + basicVert;
     std::string fullFragCode = glsl_version;
     
     if(s_internalState->_needInverseMat)
@@ -643,7 +646,7 @@ void GlPlugin::unloadUnused()
     {
         std::cout << "Unload - Remaining gl objects :" << std::endl;
         std::cout << "frames = " << FrameBuffer::s_count() << std::endl;
-        std::cout << "buffers = " << BufferObject::s_count() << std::endl;
+        std::cout << "buffers = " << VertexArray::s_count() << " (" << VertexArray::s_vboCount() << " vbo)" << std::endl;
         std::cout << "textures = " << Texture::s_count() << std::endl;
         std::cout << "programs = " << Program::s_count() << std::endl;
         std::cout << "cubemaps = " << CubeMap::s_count() << std::endl;

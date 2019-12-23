@@ -73,7 +73,7 @@ struct MyContext
     Camera::Ptr camera;
     Node::Ptr light;
 
-    void init(Vec4 viewport)
+    void init(RenderModeManager& renderModeMngr)
     {
         ImageSampler::Ptr sampler, color, emi, normals;
         loadSamplers(sampler,color);
@@ -176,7 +176,7 @@ struct MyContext
         terrainNode->setRenderPass(rp_info2);
         baseNode->setRenderPass(rp_info2);
 
-        graph->getInitState()->setViewport( viewport );
+        graph->getInitState()->setViewport( renderModeMngr.viewport );
         graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));
     }
 
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
     
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
-    MyContext* context = new MyContext(); context->init(renderModeMngr.viewport);
+    MyContext* context = new MyContext(); context->init(renderModeMngr);
 
     while (window.isOpen())
     {

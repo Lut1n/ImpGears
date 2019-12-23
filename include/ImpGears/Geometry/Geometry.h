@@ -41,13 +41,16 @@ class IMP_API Geometry : public Object
 public:
 
     using TexCoord = Vec<2,float>;
+    using IndexType = std::uint32_t;
     using BufType = std::vector<Vec3>;
     using TexCoordBuf = std::vector<TexCoord>;
+    using IndexBufType = std::vector<IndexType>;
 
     enum Primitive
     {
+        Primitive_Triangles,
         Primitive_Lines,
-        Primitive_Triangles
+        Primitive_Points
     };
 
     enum NormalGenMode
@@ -65,11 +68,13 @@ public:
     };
 
     Primitive _prim;
+    IndexBufType _indices;
     BufType _vertices;
     BufType _colors;
     BufType _normals;
     TexCoordBuf _texCoords;
 
+    bool _hasIndices;
     bool _hasTexCoords;
     bool _hasColors;
     bool _hasNormals;
@@ -136,6 +141,7 @@ public:
     void setColors(const BufType& colors);
     void setNormals(const BufType& normals);
 
+    void generateIndices();
     void generateColors(const Vec3& color);
     void generateNormals( NormalGenMode genMode = NormalGenMode_Spheric );
     void generateTexCoords( TexGenMode genMode = TexGenMode_Cubic, float resFactor = 1.0);

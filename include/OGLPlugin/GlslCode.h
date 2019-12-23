@@ -2,30 +2,38 @@
 
 /// =========== VERTEX SHADER SOURCE =====================
 static std::string basicVert = GLSL_CODE(
+
+// vertex attributes ( @see glBindAttribLocation )
+in vec3 a_vertex;   // location 0
+in vec3 a_color;    // location 1
+in vec3 a_normal;   // location 2
+in vec2 a_texcoord; // location 3
+
+// uniforms
 uniform mat4 u_proj;
 uniform mat4 u_view;
 uniform mat4 u_model;
 uniform mat3 u_normal;
 
-varying vec2 v_texCoord;
-varying vec3 v_m;
-varying vec3 v_mv;
-varying vec3 v_n;
-varying vec3 a_n;
-varying vec3 v_vertex;
+// fragment shader stage input
+out vec2 v_texCoord;
+out vec3 v_m;
+out vec3 v_mv;
+out vec3 v_n;
+out vec3 v_vertex;
+out vec3 v_color;
 
 void main()
 {
-    vec4 mv_pos = u_view * u_model * gl_Vertex;
+    vec4 mv_pos = u_view * u_model * vec4(a_vertex,1.0);
     gl_Position = u_proj * mv_pos;
-    v_n = normalize(u_normal * gl_Normal);
-    a_n = gl_Normal;
-    gl_FrontColor = gl_Color;
+    v_n = normalize(u_normal * a_normal);
+    v_color = a_color;
 
-    v_texCoord = gl_MultiTexCoord0.xy;
-    v_m = (u_model * gl_Vertex).xyz;
+    v_texCoord = a_texcoord;
+    v_m = (u_model * vec4(a_vertex,1.0)).xyz;
     v_mv = mv_pos.xyz;
-    v_vertex = gl_Vertex.xyz;
+    v_vertex = a_vertex;
 }
 
 );
@@ -33,12 +41,15 @@ void main()
 /// =========== FRAGMENT SHADER SOURCE =====================
 static std::string basicFrag = GLSL_CODE(
 
+// uniforms
 uniform vec3 u_color;
 
-varying vec2 v_texCoord;
-varying vec3 v_m;
-varying vec3 v_mv;
-varying vec3 v_vertex;
+// vertex shader stage output
+in vec2 v_texCoord;
+in vec3 v_m;
+in vec3 v_mv;
+in vec3 v_vertex;
+in vec3 v_color;
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -47,7 +58,7 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    vec4 color = vec4(u_color,1.0) * gl_Color;
+    vec4 color = vec4(u_color * v_color,1.0);
     color *= textureColor(v_texCoord);
     vec4 emi = textureEmissive(v_texCoord);
 
@@ -133,6 +144,7 @@ mat4 inverse(mat4 m)
 /// =========== FRAGMENT SHADER SOURCE =====================
 static std::string glsl_samplerCN = GLSL_CODE(
 
+// uniforms
 uniform sampler2D u_sampler_color;
 uniform sampler2D u_sampler_normal;
 
@@ -166,6 +178,7 @@ float textureReflectivity(vec2 uv){ return 0.0; }
 /// =========== FRAGMENT SHADER SOURCE =====================
 static std::string glsl_samplerCNE = GLSL_CODE(
 
+// uniforms
 uniform sampler2D u_sampler_color;
 uniform sampler2D u_sampler_normal;
 uniform sampler2D u_sampler_emissive;
@@ -197,17 +210,19 @@ float textureReflectivity(vec2 uv)
 
 static std::string glsl_phong = GLSL_CODE(
 
+// uniforms
 uniform mat4 u_model;
 uniform mat4 u_view;
 uniform vec3 u_color;
 uniform float u_shininess;
 
-varying vec2 v_texCoord;
-varying vec3 v_m;
-varying vec3 v_mv;
-varying vec3 v_n;
-varying vec3 a_n;
-varying vec3 v_vertex;
+// vertex shader stage output
+in vec2 v_texCoord;
+in vec3 v_m;
+in vec3 v_mv;
+in vec3 v_n;
+in vec3 v_vertex;
+in vec3 v_color;
 
 mat3 build_tbn(vec3 n_ref)
 {
@@ -231,7 +246,7 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    vec3 color = u_color.xyz * gl_Color.xyz;
+    vec3 color = u_color * v_color;
     color *= textureColor(v_texCoord).xyz;
     vec4 emi = textureEmissive(v_texCoord);
 
@@ -242,7 +257,6 @@ void lighting(out vec4 out_color,
     mat3 normal_mat = transpose( inverse( mat3(u_view*u_model) ) );
 
     mat3 tbn = build_tbn( normalize(v_n) );
-    // mat3 tbn_a = build_tbn( normalize(a_n) );
     out_normal = (normal_mat * tbn * normal) * 0.5 + 0.5;
 
     out_reflectivity = textureReflectivity(v_texCoord);
@@ -255,6 +269,14 @@ void lighting(out vec4 out_color,
 
 static std::string glsl_mrt1 = GLSL_CODE(
 
+// fragment data ( @see glBindAttribLocation )
+out vec4 data_color;        // location 0
+out vec4 data_emissive;     // location 1
+out vec4 data_normal;       // location 2
+out vec4 data_reflectivity; // location 3
+out vec4 data_shininess;    // location 4
+out vec4 data_depth;        // location 5
+
 void main()
 {
     vec4 out_color;
@@ -266,13 +288,26 @@ void main()
 
     lighting(out_color,out_emissive,out_normal,out_reflectivity,out_shininess,out_depth);
 
-    gl_FragData[0] = out_color;
+    data_color = out_color;
+    data_emissive = out_emissive;
+    data_normal = vec4(0.0);
+    data_reflectivity = vec4(0.0);
+    data_shininess = vec4(0.0);
+    data_depth = vec4(1.0);
 }
 
 );
 
 static std::string glsl_mrt2 = GLSL_CODE(
 
+// fragment data ( @see glBindAttribLocation )
+out vec4 data_color;        // location 0
+out vec4 data_emissive;     // location 1
+out vec4 data_normal;       // location 2
+out vec4 data_reflectivity; // location 3
+out vec4 data_shininess;    // location 4
+out vec4 data_depth;        // location 5
+
 void main()
 {
     vec4 out_color;
@@ -284,14 +319,26 @@ void main()
 
     lighting(out_color,out_emissive,out_normal,out_reflectivity,out_shininess,out_depth);
 
-    gl_FragData[0] = out_color;
-    gl_FragData[1] = out_emissive;
+    data_color = out_color;
+    data_emissive = out_emissive;
+    data_normal = vec4(0.0);
+    data_reflectivity = vec4(0.0);
+    data_shininess = vec4(0.0);
+    data_depth = vec4(1.0);
 }
 
 );
 
 static std::string glsl_mrt_default = GLSL_CODE(
 
+// fragment data ( @see glBindAttribLocation )
+out vec4 data_color;        // location 0
+out vec4 data_emissive;     // location 1
+out vec4 data_normal;       // location 2
+out vec4 data_reflectivity; // location 3
+out vec4 data_shininess;    // location 4
+out vec4 data_depth;        // location 5
+
 void main()
 {
     vec4 out_color;
@@ -303,12 +350,12 @@ void main()
 
     lighting(out_color,out_emissive,out_normal,out_reflectivity,out_shininess,out_depth);
 
-    gl_FragData[0] = out_color;
-    gl_FragData[1] = out_emissive;
-    gl_FragData[2] = vec4(out_normal,1.0);
-    gl_FragData[3] = vec4(vec3(out_reflectivity),1.0);
-    gl_FragData[4] = vec4(vec3(out_shininess),1.0);
-    gl_FragData[5] = vec4(vec3(out_depth),1.0);
+    data_color = out_color;
+    data_emissive = out_emissive;
+    data_normal = vec4(out_normal,1.0);
+    data_reflectivity = vec4(vec3(out_reflectivity),1.0);
+    data_shininess = vec4(vec3(out_shininess),1.0);
+    data_depth = vec4(vec3(out_depth),1.0);
 }
 
 );

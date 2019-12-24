@@ -284,8 +284,17 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
 
     d = ProgData::create();
 
-    std::string fullVertCode = glsl_version + basicVert;
+    std::string fullVertCode = glsl_version;
     std::string fullFragCode = glsl_version;
+
+    if( !program->_vertCode.empty() )
+    {
+        fullVertCode = fullVertCode + program->_vertCode;
+    }
+    else
+    {
+        fullVertCode = fullVertCode + basicVert;
+    }
     
     if(s_internalState->_needInverseMat)
     {

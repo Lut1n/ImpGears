@@ -6,6 +6,7 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 RenderVisitor::RenderVisitor()
+    : _toSkip(nullptr)
 {
     u_proj = Uniform::create("u_proj",Uniform::Type_Mat4);
     // u_view = Uniform::create("u_view",Uniform::Type_Mat4);
@@ -36,8 +37,10 @@ void RenderVisitor::reset()
 }
 
 //--------------------------------------------------------------
-void RenderVisitor::apply( Node* node )
+bool RenderVisitor::apply( Node* node )
 {
+    if(_toSkip == node) return false;
+
     Camera* asCamera = dynamic_cast<Camera*>( node );
     ClearNode* asClear = dynamic_cast<ClearNode*>( node );
     LightNode* asLight = dynamic_cast<LightNode*>( node );
@@ -46,6 +49,8 @@ void RenderVisitor::apply( Node* node )
     else if( asClear ) applyClearNode(asClear);
     else if( asLight ) applyLightNode(asLight);
     else applyDefault(node);
+
+    return true;
 }
 
 //--------------------------------------------------------------

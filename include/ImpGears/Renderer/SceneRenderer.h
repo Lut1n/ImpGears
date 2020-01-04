@@ -23,6 +23,7 @@ public:
         Feature_Shadow,
         Feature_Environment,
         Feature_SSAO,
+        Feature_Phong,
 
         Feature_Count
     };

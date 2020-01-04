@@ -28,11 +28,15 @@ public:
 
     virtual void reset();
 
-    virtual void apply( Node* node );
+    // return true if the node has to be traversal
+    virtual bool apply( Node* node );
     virtual void push( Node* node );
     virtual void pop();
 
     RenderQueue::Ptr getQueue() { return _queue; }
+
+    // initial config
+    Node* _toSkip;
 
 protected:
 

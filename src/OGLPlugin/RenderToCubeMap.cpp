@@ -10,9 +10,11 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 RenderToCubeMap::RenderToCubeMap(GlRenderer* renderer, CubeMapSampler::Ptr cubemap)
     : _renderer(renderer)
+    , _range(0.1,1024.0)
+    , _resolution(1024.0)
 {
     _clone = Graph::create();
-    _proj = Matrix4::perspectiveProj(90.0, 1.0, 0.1, 128.0);
+    _proj = Matrix4::perspectiveProj(90.0, 1.0, _range[0], _range[1]);
     _camera = Camera::create();
 
     _directions[0] = Vec3(1.0,0.0,0.0);
@@ -64,11 +66,24 @@ CubeMapSampler::Ptr RenderToCubeMap::getCubeMap()
 }
 
 //--------------------------------------------------------------
+void RenderToCubeMap::setRange(float near, float far)
+{
+    _range = Vec2(near,far);
+    _proj = Matrix4::perspectiveProj(90.0, 1.0, _range[0], _range[1]);
+}
+
+//--------------------------------------------------------------
+void RenderToCubeMap::setResolution(float resolution)
+{
+    _resolution = resolution;
+}
+
+//--------------------------------------------------------------
 void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType, ReflexionModel::Ptr overrideShader)
 {
     _clone->getInitState()->clone(scene->getInitState());
     _state->setUniform("u_proj", _proj);
-    _state->setViewport( Vec4(0.0,0.0,1024.0,1024.0) );
+    _state->setViewport( Vec4(0.0,0.0,_resolution,_resolution) );
     if(overrideShader) _state->setReflexion( overrideShader );
     _clone->setRoot(scene->getRoot());
 

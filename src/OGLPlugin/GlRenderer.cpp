@@ -59,13 +59,15 @@ GlRenderer::GlRenderer()
     : SceneRenderer()
 {
     // CubeMaps rendering setup
-    _environmentMap = CubeMapSampler::create(1024.0,1024.0,4,Vec4(1.0));
+    _environmentMap = CubeMapSampler::create(128.0,128.0,4,Vec4(1.0));
     _environmentRenderer = RenderToCubeMap::create(this);
     _environmentRenderer->setCubeMap(_environmentMap);
+    _environmentRenderer->setResolution(128);
 
-    _shadowsMap = CubeMapSampler::create(1024,1024.0,4,Vec4(1.0));
+    _shadowsMap = CubeMapSampler::create(256.0,256.0,4,Vec4(1.0));
     _shadowsRenderer = RenderToCubeMap::create(this);
     _shadowsRenderer->setCubeMap(_shadowsMap);
+    _shadowRenderer->setResolution(256.0);
     _shadowsmapShader = ReflexionModel::create(
                 ReflexionModel::Lighting_Customized,
                 ReflexionModel::Texturing_Samplers_CNE,
@@ -175,7 +177,7 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene)
+RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, const Node::Ptr& toskip)
 {
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
@@ -270,11 +272,17 @@ void GlRenderer::render(const Graph::Ptr& scene)
    bool shadows_enabled = isFeatureEnabled(Feature_Shadow);
    bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
    bool ssao_enabled = isFeatureEnabled(Feature_SSAO);
+   bool phong_enabled = isFeatureEnabled(Feature_Phong);
 
    if(env_enabled)
    {
+       Vec3 p(0.0);
+       if(queue->_camera)
+       {
+           p = queue->_camera->getAbsolutePosition();
+       }
        _environmentRenderer->render(
-                   scene, Vec3(0.0),
+                   scene, p,
                    SceneRenderer::RenderFrame_Environment); // todo : position as parameter
    }
 
@@ -289,6 +297,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
    _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
    _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
    _pipeline->setActive(FRAMEOP_ID_SSAO, ssao_enabled);
+   _pipeline->setActive(FRAMEOP_ID_PHONG, phong_enabled);
 
    static RenderFrame s_lastOutput = RenderFrame_Default;
 

@@ -12,7 +12,7 @@ uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
 uniform sampler2D u_input_sampler_reflectivity;
 uniform samplerCube u_input_cubemap_environment;
-uniform vec3 u_light_pos;
+uniform mat4 u_scene_view;
 
 varying vec2 v_texCoord;
 
@@ -47,21 +47,23 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    vec3 normal = i_normal(v_texCoord);
+    vec3 normal = i_normal(v_texCoord) *2.0 - 1.0;
     float depth = i_depth(v_texCoord);
     //
     vec3 view_pos = unproject(v_texCoord, depth);
+    mat4 inv_view_rot = inverse(u_scene_view); inv_view_rot[3].xyz = vec3(0.0);
+    vec3 world_pos_from_cam = (inv_view_rot * vec4(view_pos,1.0)).xyz;
 
-    vec3 n = normal *2.0 - 1.0;
-    vec3 view_cam_pos = vec3(0.0);
-    vec3 incident = normalize(view_pos-view_cam_pos);
+    normal = (inv_view_rot * vec4(normal,1.0)).xyz; normal = normalize(normal);
+    // vec3 world_cam_pos = u_scene_view[3].xyz;
+    vec3 incident = normalize(world_pos_from_cam);
 
     float intensity = i_reflectivity(v_texCoord);
-    vec3 r = reflect(incident,n);
+    vec3 r = reflect(incident,normal);
     out_color = mix( vec4(1.0), vec4(i_env(r),1.0), intensity);
 
     // --- for debug ---
-    // out_color = texture(u_input_cubemap_environment, view_pos);
+    // out_color = vec4(i_env(world_pos_from_cam),1.0);
 }
 
 );
@@ -118,10 +120,12 @@ void EnvironmentFX::apply(GlRenderer* renderer, bool skip)
     }
     else
     {
+        Matrix4 view; if(_camera) view = _camera->getViewMatrix();
         _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);
         _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
         _graph->getInitState()->setUniform("u_input_sampler_reflectivity", _input[2], 2);
         _graph->getInitState()->setUniform("u_input_cubemap_environment", _environment, 3);
+        _graph->getInitState()->setUniform("u_scene_view", view);
         RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
         renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
     }

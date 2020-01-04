@@ -26,6 +26,9 @@ public:
     void setCubeMap(CubeMapSampler::Ptr cubemap);
     CubeMapSampler::Ptr getCubeMap();
 
+    void setRange(float near, float far);
+    void setResolution(float resolution);
+
     void render(const Graph::Ptr& scene, const Vec3& center, SceneRenderer::RenderFrame frameType = SceneRenderer::RenderFrame_Default, ReflexionModel::Ptr overrideShader = nullptr);
 
 protected:
@@ -41,6 +44,9 @@ private:
     Vec3 _directions[6];
     Vec3 _upDirections[6];
     RenderTarget::Ptr _targets[6];
+    Vec2 _range;
+    float _resolution;
+
 
 };
 

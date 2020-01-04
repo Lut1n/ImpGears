@@ -17,7 +17,7 @@ public:
     Visitor();
     virtual ~Visitor();
 
-    virtual void apply( Node* ) = 0;
+    virtual bool apply( Node* ) = 0;
 
     virtual void push( Node* ) = 0;
     virtual void pop() = 0;

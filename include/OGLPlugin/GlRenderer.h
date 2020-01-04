@@ -23,7 +23,7 @@ public:
     GlRenderer();
     virtual ~GlRenderer();
 
-    RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene);
+    RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene, const Node::Ptr& toskip = nullptr);
 
     void drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState = nullptr,
                     SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default );

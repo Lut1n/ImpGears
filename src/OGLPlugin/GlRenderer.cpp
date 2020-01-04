@@ -67,7 +67,7 @@ GlRenderer::GlRenderer()
     _shadowsMap = CubeMapSampler::create(256.0,256.0,4,Vec4(1.0));
     _shadowsRenderer = RenderToCubeMap::create(this);
     _shadowsRenderer->setCubeMap(_shadowsMap);
-    _shadowRenderer->setResolution(256.0);
+    _shadowsRenderer->setResolution(256.0);
     _shadowsmapShader = ReflexionModel::create(
                 ReflexionModel::Lighting_Customized,
                 ReflexionModel::Texturing_Samplers_CNE,
@@ -268,41 +268,46 @@ void GlRenderer::render(const Graph::Ptr& scene)
     RenderQueue::Ptr queue = applyRenderVisitor(scene);
     drawQueue(queue);
 
-   bool env_enabled = isFeatureEnabled(Feature_Environment);
-   bool shadows_enabled = isFeatureEnabled(Feature_Shadow);
-   bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
-   bool ssao_enabled = isFeatureEnabled(Feature_SSAO);
-   bool phong_enabled = isFeatureEnabled(Feature_Phong);
+    LightNode* light0 = nullptr;
+    if( !queue->_lights.empty() ) light0 = queue->_lights[0];
 
-   if(env_enabled)
-   {
+    bool env_enabled = isFeatureEnabled(Feature_Environment);
+    bool shadows_enabled = isFeatureEnabled(Feature_Shadow) && light0;
+    bool bloom_enabled = isFeatureEnabled(Feature_Bloom);
+    bool ssao_enabled = isFeatureEnabled(Feature_SSAO);
+    bool phong_enabled = isFeatureEnabled(Feature_Phong) && light0;
+
+    if(env_enabled)
+    {
        Vec3 p(0.0);
        if(queue->_camera)
-       {
            p = queue->_camera->getAbsolutePosition();
-       }
+
        _environmentRenderer->render(
                    scene, p,
-                   SceneRenderer::RenderFrame_Environment); // todo : position as parameter
-   }
+                   SceneRenderer::RenderFrame_Environment);
+    }
 
-   if(shadows_enabled)
-   {
+    if(shadows_enabled)
+    {
+       Vec3 p(0.0);
+       if(light0) p = light0->_worldPosition;
+
        _shadowsRenderer->render(
-                   scene, queue->_lights[0]->_worldPosition,
+                   scene, p,
                    SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
-   }
+    }
 
-   _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
-   _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
-   _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
-   _pipeline->setActive(FRAMEOP_ID_SSAO, ssao_enabled);
-   _pipeline->setActive(FRAMEOP_ID_PHONG, phong_enabled);
+    _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
+    _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
+    _pipeline->setActive(FRAMEOP_ID_BLOOM, bloom_enabled);
+    _pipeline->setActive(FRAMEOP_ID_SSAO, ssao_enabled);
+    _pipeline->setActive(FRAMEOP_ID_PHONG, phong_enabled);
 
-   static RenderFrame s_lastOutput = RenderFrame_Default;
+    static RenderFrame s_lastOutput = RenderFrame_Default;
 
-   if( getOutputFrame() != s_lastOutput )
-   {
+    if( getOutputFrame() != s_lastOutput )
+    {
        switch(getOutputFrame())
        {
        case RenderFrame_Default:
@@ -344,9 +349,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
        }
 
        s_lastOutput = getOutputFrame();
-   }
+    }
 
-    _pipeline->prepare(queue->_camera, queue->_lights[0], _shadowsMap, _environmentMap);
+    _pipeline->prepare(queue->_camera, light0, _shadowsMap, _environmentMap);
     _pipeline->run( FRAMEOP_ID_COPY );
 }
 

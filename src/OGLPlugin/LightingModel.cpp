@@ -137,7 +137,7 @@ void LightingModel::apply(GlRenderer* renderer, bool skip)
     }
     else
     {
-        Vec4 light_pos = Vec4(_light->_worldPosition,1.0);
+        Vec4 light_pos; if(_light) light_pos = Vec4(_light->_worldPosition,1.0);
         if(_camera) light_pos = light_pos * _camera->getViewMatrix();
 
         _graph->getInitState()->setUniform("u_input_sampler_normal", _input[0], 0);

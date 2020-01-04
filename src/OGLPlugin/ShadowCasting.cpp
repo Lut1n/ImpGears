@@ -181,10 +181,11 @@ void ShadowCasting::apply(GlRenderer* renderer, bool skip)
     {
         Matrix4 view;
         if(_camera) view = _camera->getViewMatrix();
+        Vec3 light_pos; if(_light) light_pos = _light->_worldPosition;
 
         _graph->getInitState()->setUniform("u_input_sampler_depth", _input[0], 0);
         _graph->getInitState()->setUniform("u_input_cubemap_shadow", _shadows, 1);
-        _graph->getInitState()->setUniform("u_light_pos", _light->_worldPosition );
+        _graph->getInitState()->setUniform("u_light_pos", light_pos );
         _graph->getInitState()->setUniform("u_view_cam", view );
         RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
         renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);

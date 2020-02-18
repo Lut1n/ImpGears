@@ -40,6 +40,8 @@ public:
     void drawGeometry(GeoNode* geoNode);
 
     virtual void setOuputViewport(const Vec4& vp);
+    
+    void applyRenderToSampler(RenderQueue::Ptr queue);
 
     RenderPlugin* _renderPlugin;
 

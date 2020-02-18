@@ -11,6 +11,7 @@
 #include <OGLPlugin/RenderToCubeMap.h>
 #include <OGLPlugin/ShadowCasting.h>
 #include <OGLPlugin/AmbientOcclusion.h>
+#include <SceneGraph/RenderToSamplerNode.h>
 
 #define FRAMEOP_ID_ENVFX 0
 #define FRAMEOP_ID_SHAMIX 1
@@ -256,6 +257,40 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
     // _renderPlugin->unbind();
 }
 
+
+void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
+{
+    // State::Ptr local_state = State::create();
+    // Matrix4 view;
+    // if(queue->_camera) view = queue->_camera->getViewMatrix();
+
+    for(int i=0;i<(int)queue->_nodes.size();++i)
+    {
+        // State::Ptr state = queue->_states[i];
+        // local_state->clone(state, State::CloneOpt_All);
+        // if( overrideState ) local_state->clone( overrideState, State::CloneOpt_IfChanged );
+
+        RenderToSamplerNode* render2sampler = dynamic_cast<RenderToSamplerNode*>( queue->_nodes[i] );
+        if(render2sampler && render2sampler->ready()==false && render2sampler->cubemap() && render2sampler->scene())
+        {
+            std::cout << "detect render to sampler to apply" << std::endl;
+            Vec3 p(0.0);
+            // if(queue->_camera) p = queue->_camera->getAbsolutePosition();
+            
+            // FORCE reload
+            // render2sampler->setCubeMap( CubeMapSampler::create(128, 128, 4, Vec4(1.0) ) );
+            
+            RenderToCubeMap::Ptr render2cm = RenderToCubeMap::create(this);
+            render2cm->setCubeMap(render2sampler->cubemap());
+            render2cm->setResolution(128.0);
+            Graph::Ptr scene = render2sampler->scene();
+
+            render2cm->render(scene, p, SceneRenderer::RenderFrame_Default);
+            render2sampler->makeReady();
+        }
+    }
+}
+
 //---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
 {
@@ -266,6 +301,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
     _internalFrames->change();
 
     RenderQueue::Ptr queue = applyRenderVisitor(scene);
+    
+    applyRenderToSampler(queue);
+    
     drawQueue(queue);
 
     LightNode* light0 = nullptr;

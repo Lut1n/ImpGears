@@ -11,7 +11,8 @@ RenderPlugin::Ptr PluginManager::open(const std::string& name)
 {
     RenderPlugin::Ptr result;
 
-    void* handler = dlopen(name.c_str(),RTLD_LAZY);
+    // void* handler = dlopen(name.c_str(),RTLD_LAZY);
+    void* handler = dlopen(name.c_str(),RTLD_NOW);
     if(handler == nullptr)
     {
         std::cout << "error dlopen : " << dlerror() << std::endl;

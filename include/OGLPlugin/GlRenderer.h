@@ -23,7 +23,7 @@ public:
     GlRenderer();
     virtual ~GlRenderer();
 
-    RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene, const Node::Ptr& toskip = nullptr);
+    RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene, RenderQueue::Ptr queue = nullptr);
 
     void drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState = nullptr,
                     SceneRenderer::RenderFrame renderPass = SceneRenderer::RenderFrame_Default );
@@ -42,6 +42,8 @@ public:
     virtual void setOuputViewport(const Vec4& vp);
     
     void applyRenderToSampler(RenderQueue::Ptr queue);
+    
+    void clearRenderCache();
 
     RenderPlugin* _renderPlugin;
 
@@ -56,6 +58,9 @@ protected:
 
     RenderTarget::Ptr _internalFrames;
     // RenderTarget::Ptr _renderTargets;
+    std::map<Graph::Ptr, RenderQueue::Ptr> _renderCache;
+    
+    State::Ptr _localState;
 };
 
 IMPGEARS_END

@@ -21,6 +21,8 @@ public:
 protected:
     Graph::Ptr _graph;
     RenderTarget::Ptr _frame;
+    
+    RenderQueue::Ptr _queue;
 };
 
 IMPGEARS_END

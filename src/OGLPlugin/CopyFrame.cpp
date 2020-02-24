@@ -43,8 +43,9 @@ void CopyFrame::apply(GlRenderer* renderer, bool skip)
         renderer->_renderPlugin->unbind();
     }
     _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+    if(_queue == nullptr) _queue = RenderQueue::create();
+    _queue = renderer->applyRenderVisitor(_graph,_queue);
+    renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Lighting);
 }
 
 

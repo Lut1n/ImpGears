@@ -98,10 +98,12 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
         _renderer->_renderPlugin->init(_targets[i]);
         _renderer->_renderPlugin->bind(_targets[i]);
         _targets[i]->change();
+        
+        if(_queue == nullptr) _queue = RenderQueue::create();
+        _queue = _renderer->applyRenderVisitor(_clone, _queue);
 
-        RenderQueue::Ptr queue = _renderer->applyRenderVisitor(_clone);
-        queue->_camera = _camera.get();
-        _renderer->drawQueue(queue, _state, frameType);
+        _queue->_camera = _camera.get();
+        _renderer->drawQueue(_queue, _state, frameType);
 
         _renderer->_renderPlugin->unbind();
     }

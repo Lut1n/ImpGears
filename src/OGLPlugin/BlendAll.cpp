@@ -140,8 +140,10 @@ void BlendAll::apply(GlRenderer* renderer, bool skip)
     }
     _graph->getInitState()->setUniform("u_input_sampler_lighting", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_bloom", _input[1], 1);
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Bloom);
+    
+    if(_queue == nullptr) _queue = RenderQueue::create();
+    _queue = renderer->applyRenderVisitor(_graph,_queue);
+    renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Bloom);
 }
 
 

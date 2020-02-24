@@ -178,14 +178,14 @@ Image::Ptr GlRenderer::getTarget(bool dlFromGPU, int id)
 }
 
 //---------------------------------------------------------------
-RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, const Node::Ptr& toskip)
+RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, RenderQueue::Ptr queue)
 {
     Visitor::Ptr visitor = _visitor;
-    _visitor->reset();
+    _visitor->reset( queue );
     scene->accept(visitor);
 
-    RenderQueue::Ptr queue = _visitor->getQueue();
-    return queue;
+    RenderQueue::Ptr resQueue = _visitor->getQueue();
+    return resQueue;
 }
 
 
@@ -193,21 +193,24 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, const N
 void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
                             SceneRenderer::RenderFrame renderPass )
 {
-    State::Ptr local_state = State::create();
+    if(_localState==nullptr) _localState = State::create();
     Matrix4 view;
     if(queue->_camera) view = queue->_camera->getViewMatrix();
 
-    for(int i=0;i<(int)queue->_nodes.size();++i)
+    int geodeCount = 0;
+    for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
-        State::Ptr state = queue->_states[i];
-        local_state->clone(state, State::CloneOpt_All);
-        if( overrideState ) local_state->clone( overrideState, State::CloneOpt_IfChanged );
-
-        GeoNode* geode = dynamic_cast<GeoNode*>( queue->_nodes[i] );
-        ClearNode* clear = dynamic_cast<ClearNode*>( queue->_nodes[i] );
+        RenderState renderState = queue->_renderBin.at(i);
+        
+        _localState->clone(renderState.state, State::CloneOpt_All);
+        if( overrideState ) _localState->clone( overrideState, State::CloneOpt_IfChanged );
+        
+        GeoNode* geode = dynamic_cast<GeoNode*>( renderState.node );
+        ClearNode* clear = dynamic_cast<ClearNode*>( renderState.node );
 
         if(geode)
         {
+            geodeCount++;
             Material::Ptr mat = geode->_material;
             float shininess = mat->_shininess;
             Vec3 color = mat->_color;
@@ -215,16 +218,16 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
                 if(mat->_baseColor)
-                        local_state->setUniform("u_sampler_color", mat->_baseColor, 0);
+                        _localState->setUniform("u_sampler_color", mat->_baseColor, 0);
                 if(mat->_normalmap)
-                        local_state->setUniform("u_sampler_normal", mat->_normalmap, 1);
+                        _localState->setUniform("u_sampler_normal", mat->_normalmap, 1);
                 if(mat->_emissive)
-                        local_state->setUniform("u_sampler_emissive", mat->_emissive, 2);
+                        _localState->setUniform("u_sampler_emissive", mat->_emissive, 2);
                 if(mat->_reflectivity)
-                        local_state->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
+                        _localState->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
 
-                local_state->setUniform("u_color", color);
-                local_state->setUniform("u_shininess", shininess);
+                _localState->setUniform("u_color", color);
+                _localState->setUniform("u_shininess", shininess);
             }
 
 
@@ -232,13 +235,12 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             // Matrix4 model = local_state->getUniforms()["u_model"]->getMat4();
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
             // state->setUniform("u_normal", normalMat );
-            local_state->setUniform("u_view", view);
+            _localState->setUniform("u_view", view);
 
-
-            applyState(local_state, renderPass);
+            applyState(_localState, renderPass);
             if( renderPass==SceneRenderer::RenderFrame_ShadowMap ) _renderPlugin->setCulling(2);
 
-            RenderPass::Ptr renderPass_info = local_state->getRenderPass();
+            RenderPass::Ptr renderPass_info = _localState->getRenderPass();
 
             RenderPass::PassFlag expectedFlag = RenderPass::Pass_DefaultMRT;
             if( renderPass==SceneRenderer::RenderFrame_Environment )
@@ -246,13 +248,15 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
                 expectedFlag = RenderPass::Pass_ShadowMapping;
 
-            if(renderPass_info->isPassEnabled(expectedFlag)) drawGeometry(geode);
+            if(renderPass_info && renderPass_info->isPassEnabled(expectedFlag)) drawGeometry(geode);
         }
         else if(clear)
         {
             applyClear(clear, renderPass);
         }
     }
+    
+    std::cout << "geode count = " << geodeCount << std::endl;
 
     // _renderPlugin->unbind();
 }
@@ -260,25 +264,12 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
 
 void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
 {
-    // State::Ptr local_state = State::create();
-    // Matrix4 view;
-    // if(queue->_camera) view = queue->_camera->getViewMatrix();
-
-    for(int i=0;i<(int)queue->_nodes.size();++i)
+    for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
-        // State::Ptr state = queue->_states[i];
-        // local_state->clone(state, State::CloneOpt_All);
-        // if( overrideState ) local_state->clone( overrideState, State::CloneOpt_IfChanged );
-
-        RenderToSamplerNode* render2sampler = dynamic_cast<RenderToSamplerNode*>( queue->_nodes[i] );
+        RenderToSamplerNode* render2sampler = dynamic_cast<RenderToSamplerNode*>( queue->_renderBin.nodeAt(i) );
         if(render2sampler && render2sampler->ready()==false && render2sampler->cubemap() && render2sampler->scene())
         {
-            std::cout << "detect render to sampler to apply" << std::endl;
             Vec3 p(0.0);
-            // if(queue->_camera) p = queue->_camera->getAbsolutePosition();
-            
-            // FORCE reload
-            // render2sampler->setCubeMap( CubeMapSampler::create(128, 128, 4, Vec4(1.0) ) );
             
             RenderToCubeMap::Ptr render2cm = RenderToCubeMap::create(this);
             render2cm->setCubeMap(render2sampler->cubemap());
@@ -292,6 +283,13 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
 }
 
 //---------------------------------------------------------------
+void GlRenderer::clearRenderCache()
+{
+    _renderCache.clear();
+}
+
+
+//---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
 {
     if(_renderPlugin == nullptr) return;
@@ -300,10 +298,13 @@ void GlRenderer::render(const Graph::Ptr& scene)
     _renderPlugin->bind(_internalFrames);
     _internalFrames->change();
 
-    RenderQueue::Ptr queue = applyRenderVisitor(scene);
+    if(_renderCache.find( scene ) == _renderCache.end())
+        _renderCache[scene] = RenderQueue::create();
+    
+    RenderQueue::Ptr queue = _renderCache[scene];
+    queue = applyRenderVisitor(scene,queue);
     
     applyRenderToSampler(queue);
-    
     drawQueue(queue);
 
     LightNode* light0 = nullptr;

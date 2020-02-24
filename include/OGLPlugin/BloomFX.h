@@ -26,6 +26,9 @@ protected:
     Graph::Ptr _graph;
     Graph::Ptr _copyGraph;
     RenderTarget::Ptr _frames[2];
+    
+    RenderQueue::Ptr _queue;
+    RenderQueue::Ptr _copyQueue;
 };
 
 IMPGEARS_END

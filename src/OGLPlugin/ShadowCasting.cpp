@@ -174,8 +174,9 @@ void ShadowCasting::apply(GlRenderer* renderer, bool skip)
     if(skip)
     {
         _fillingGraph->getInitState()->setUniform("u_fill_color", Vec4(1.0));
-        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_fillingGraph);
-        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+        if(_fillingQueue == nullptr) _fillingQueue = RenderQueue::create();
+        _fillingQueue = renderer->applyRenderVisitor(_fillingGraph,_fillingQueue);
+        renderer->drawQueue(_fillingQueue, nullptr, SceneRenderer::RenderFrame_Lighting);
     }
     else
     {
@@ -187,8 +188,9 @@ void ShadowCasting::apply(GlRenderer* renderer, bool skip)
         _graph->getInitState()->setUniform("u_input_cubemap_shadow", _shadows, 1);
         _graph->getInitState()->setUniform("u_light_pos", light_pos );
         _graph->getInitState()->setUniform("u_view_cam", view );
-        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+        if(_queue == nullptr) _queue = RenderQueue::create();
+        _queue = renderer->applyRenderVisitor(_graph,_queue);
+        renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Lighting);
     }
 }
 

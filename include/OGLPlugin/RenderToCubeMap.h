@@ -46,6 +46,8 @@ private:
     RenderTarget::Ptr _targets[6];
     Vec2 _range;
     float _resolution;
+    
+    RenderQueue::Ptr _queue;
 
 
 };

@@ -93,8 +93,9 @@ void BloomFX::process(GlRenderer* renderer, int subpassID)
     _graph->getInitState()->setUniform("u_input_sampler", sampler, 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", h);
 
-    RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-    renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Bloom);
+    if(_queue == nullptr)
+        _queue = renderer->applyRenderVisitor(_graph);
+    renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Bloom);
 }
 
 //--------------------------------------------------------------
@@ -104,16 +105,18 @@ void BloomFX::apply(GlRenderer* renderer, bool skip)
     {
         bind(renderer, 1);
         _copyGraph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
-        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_copyGraph);
-        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Lighting);
+        if(_copyQueue == nullptr) _copyQueue = RenderQueue::create();
+        _copyQueue = renderer->applyRenderVisitor(_copyGraph,_copyQueue);
+        renderer->drawQueue(_copyQueue, nullptr, SceneRenderer::RenderFrame_Lighting);
     }
     else
     {
         bind(renderer, 0);
         _graph->getInitState()->setUniform("u_input_sampler", _input[0], 0);
         _graph->getInitState()->setUniform("u_horizontal_blur", float(0.0));
-        RenderQueue::Ptr queue = renderer->applyRenderVisitor(_graph);
-        renderer->drawQueue(queue, nullptr, SceneRenderer::RenderFrame_Bloom);
+        if(_queue == nullptr) _queue = RenderQueue::create();
+        _queue = renderer->applyRenderVisitor(_graph,_queue);
+        renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Bloom);
 
         for(int i=1;i<_subpassCount;++i)
         {

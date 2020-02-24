@@ -5,7 +5,7 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 State::State()
     : _projection()
-    , _viewport(0.0,0.0,1.0,1.0)
+    , _viewport(0.0,0.0,512.0,512.0)
     , _faceCullingMode(FaceCullingMode_None)
     , _blendMode(BlendMode_SrcAlphaBased)
     , _lineWidth(1.0)
@@ -68,8 +68,11 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _depthTest = other->_depthTest;
         _reflexion = other->_reflexion;
         _renderPass = other->_renderPass;
-        _uniforms = other->_uniforms;
-        _uniformChangedFlags = other->_uniformChangedFlags;
+        
+        cloneUniforms(other->_uniforms,
+                              other->_uniformChangedFlags,
+                              CloneOpt_All);
+                              
         _projectionChanged = other->_projectionChanged;
         _viewportChanged = other->_viewportChanged;
         _faceCullingChanged = other->_faceCullingChanged;
@@ -78,7 +81,6 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _depthTestChanged = other->_depthTestChanged;
         _reflexionChanged = other->_reflexionChanged;
         _renderPassChanged = other->_renderPassChanged;
-        _uniformsChanged = other->_uniformsChanged;
     }
     else if(opt == CloneOpt_IfChanged)
     {
@@ -90,6 +92,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         if(other->_depthTestChanged) setDepthTest(other->_depthTest);
         if(other->_reflexionChanged) setReflexion(other->_reflexion);
         if(other->_renderPassChanged) setRenderPass(other->_renderPass);
+        
         if(other->_uniformsChanged) cloneUniforms(other->_uniforms,
                                                   other->_uniformChangedFlags,
                                                   CloneOpt_IfChanged);
@@ -185,10 +188,11 @@ void State::cloneUniforms(const std::map<std::string,Uniform::Ptr>& uniforms,
 {
     if(opt == CloneOpt_All)
     {
-        clearUniforms();
+        // clearUniforms();
         for(auto kv : uniforms)
         {
-            _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
+            if( _uniforms.find(kv.first)==_uniforms.end() )
+                _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
             _uniforms[kv.first]->clone( *kv.second );
         }
         _uniformChangedFlags = changedFlags;
@@ -197,9 +201,11 @@ void State::cloneUniforms(const std::map<std::string,Uniform::Ptr>& uniforms,
     {
         for(auto kv : uniforms)
         {
-            if(changedFlags.at(kv.first))
+            bool hasChanged = changedFlags.find(kv.first)!=changedFlags.end();  // not very perfect (the two map need to be sync)
+            if(hasChanged  && changedFlags.at(kv.first) )
             {
-                _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
+                if( _uniforms.find(kv.first)==_uniforms.end() )
+                    _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
                 _uniforms[kv.first]->clone( *kv.second );
                 _uniformChangedFlags[kv.first] = true;
             }
@@ -217,10 +223,9 @@ void State::clearUniforms()
 }
 
 //--------------------------------------------------------------
-void State::setUniform(const Uniform::Ptr& uniform)
+void State::setUniform(Uniform::Ptr& uniform)
 {
-    _uniforms[ uniform->getID() ] =  Uniform::create("no id",Uniform::Type_Undefined);
-    _uniforms[ uniform->getID() ]->clone( *uniform );
+    _uniforms[ uniform->getID() ] =  uniform;
     _uniformChangedFlags[ uniform->getID() ] = true;
     _uniformsChanged = true;
 }
@@ -228,7 +233,8 @@ void State::setUniform(const Uniform::Ptr& uniform)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, int i1)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_1i);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_1i);
     _uniforms[ name ]->set(i1);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -237,7 +243,8 @@ void State::setUniform(const std::string& name, int i1)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, float f1)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_1f);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_1f);
     _uniforms[ name ]->set(f1);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -246,7 +253,8 @@ void State::setUniform(const std::string& name, float f1)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const Vec2& f2)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_2f);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_2f);
     _uniforms[ name ]->set(f2);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -255,7 +263,8 @@ void State::setUniform(const std::string& name, const Vec2& f2)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const Vec3& f3)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_3f);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_3f);
     _uniforms[ name ]->set(f3);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -264,7 +273,8 @@ void State::setUniform(const std::string& name, const Vec3& f3)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const Vec4& f4)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_4f);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_4f);
     _uniforms[ name ]->set(f4);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -273,7 +283,8 @@ void State::setUniform(const std::string& name, const Vec4& f4)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const Matrix3& mat3)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_Mat3);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_Mat3);
     _uniforms[ name ]->set(mat3);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -282,7 +293,8 @@ void State::setUniform(const std::string& name, const Matrix3& mat3)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const Matrix4& mat4)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_Mat4);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_Mat4);
     _uniforms[ name ]->set(mat4);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -291,7 +303,8 @@ void State::setUniform(const std::string& name, const Matrix4& mat4)
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const ImageSampler::Ptr& sampler, int index)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_Sampler);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_Sampler);
     _uniforms[ name ]->set(sampler, index);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;
@@ -300,7 +313,8 @@ void State::setUniform(const std::string& name, const ImageSampler::Ptr& sampler
 //--------------------------------------------------------------
 void State::setUniform(const std::string& name, const CubeMapSampler::Ptr& sampler, int index)
 {
-    _uniforms[ name ] =  Uniform::create(name,Uniform::Type_CubeMap);
+    if( _uniforms.find(name)==_uniforms.end() )
+        _uniforms[ name ] =  Uniform::create(name,Uniform::Type_CubeMap);
     _uniforms[ name ]->set(sampler, index);
     _uniformChangedFlags[ name ] = true;
     _uniformsChanged = true;

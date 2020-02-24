@@ -77,7 +77,7 @@ public:
                        CloneOpt opt = CloneOpt_All);
 
     void clearUniforms();
-    void setUniform(const Uniform::Ptr& uniform);
+    void setUniform(Uniform::Ptr& uniform);
 
     void setUniform(const std::string& name, int i1);
     void setUniform(const std::string& name, float f1);

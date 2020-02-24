@@ -13,10 +13,10 @@ Graph::Graph()
 
     // default parameters values
     _initState = _initNode->getState();
-    _initState->setPerspectiveProjection(90.0, 1.0, 0.1, 128.0);
+    _initState->setPerspectiveProjection(90.0, 1.0, 0.1, 1024.0);
     _initState->setBlendMode(State::BlendMode_SrcAlphaBased);
     _initState->setFaceCullingMode(State::FaceCullingMode_None);
-    _initState->setViewport(0.0,0.0,500.0,500.0);
+    _initState->setViewport(0.0,0.0,512.0,512.0);
     _initState->setLineWidth(1.0);
     _initState->setDepthTest( true );
 }

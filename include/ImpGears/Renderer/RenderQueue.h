@@ -10,6 +10,36 @@
 
 IMPGEARS_BEGIN
 
+struct IMP_API RenderState
+{
+    State::Ptr state;
+    Node* node;
+    
+    static State::Ptr s_defaultState;
+    
+    RenderState();
+    
+    void reset();
+};
+
+struct IMP_API StateBin
+{
+    std::vector<RenderState> items;
+    int position;
+    
+    StateBin();
+    
+    void push(const State::Ptr state, Node* node);
+    
+    int size();
+    void reset();
+    
+    State::Ptr stateAt(int index);
+    Node* nodeAt(int index);
+    
+    RenderState at(int index);
+};
+
 class IMP_API RenderQueue : public Object
 {
 public:
@@ -21,10 +51,7 @@ public:
 
     const Camera* _camera;
     std::vector<LightNode*> _lights;
-
-    std::vector<State::Ptr> _states;
-    std::vector<Node*> _nodes;
-    // std::vector<Matrix4> _modelMats;
+    StateBin _renderBin;
 };
 
 IMPGEARS_END

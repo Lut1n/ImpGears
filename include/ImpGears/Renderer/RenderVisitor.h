@@ -14,19 +14,46 @@
 
 IMPGEARS_BEGIN
 
+struct IMP_API StackItem
+{
+    State::Ptr state;
+    Matrix4 matrix;
+    
+    
+    static State::Ptr s_defaultState;
+    
+    StackItem();
+    
+    void reset();
+};
+
+struct IMP_API StateStack
+{
+    std::vector<StackItem> items;
+    int position;
+    
+    StateStack();
+    
+    void push(const State::Ptr state, const Matrix4& mat);
+    void pop();
+    
+    int size();
+    void reset();
+    
+    State::Ptr topState() const;
+    Matrix4 topMatrix() const;
+};
+
 class IMP_API RenderVisitor : public Visitor
 {
 public:
 
     Meta_Class(RenderVisitor)
 
-    using MatrixStack = std::vector<Matrix4>;
-    using StateStack = std::vector<State::Ptr>;
-
     RenderVisitor();
     virtual ~RenderVisitor();
 
-    virtual void reset();
+    virtual void reset(RenderQueue::Ptr initQueue = nullptr);
 
     // return true if the node has to be traversal
     virtual bool apply( Node* node );
@@ -35,7 +62,6 @@ public:
 
     RenderQueue::Ptr getQueue() { return _queue; }
 
-    // initial config
     Node* _toSkip;
 
 protected:
@@ -44,14 +70,8 @@ protected:
     virtual void applyCamera( Camera* node );
     virtual void applyLightNode( LightNode* node );
     virtual void applyClearNode( ClearNode* node );
-
-    MatrixStack _matrices;
-    StateStack _states;
-    Uniform::Ptr u_proj;
-    // Uniform::Ptr u_view;
-    Uniform::Ptr u_model;
-    Uniform::Ptr u_normal;
-
+    
+    StateStack stack;
     RenderQueue::Ptr _queue;
 };
 

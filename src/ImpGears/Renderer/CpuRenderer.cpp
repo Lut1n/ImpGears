@@ -39,9 +39,9 @@ void CpuRenderer::render(const Graph::Ptr& scene)
     Vec3 color(1.0);
     Vec3 latt(0.0);
 
-    for(int i=0;i<(int)queue->_nodes.size();++i)
+    for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
-        LightNode* light = closest(queue->_nodes[i], queue->_lights);
+        LightNode* light = closest(queue->_renderBin.nodeAt(i), queue->_lights);
         if(light)
         {
             lightPos = light->_worldPosition;
@@ -49,8 +49,8 @@ void CpuRenderer::render(const Graph::Ptr& scene)
             latt[0] = light->_power;
         }
 
-        GeoNode* geode = dynamic_cast<GeoNode*>( queue->_nodes[i] );
-        ClearNode* clear = dynamic_cast<ClearNode*>( queue->_nodes[i] );
+        GeoNode* geode = dynamic_cast<GeoNode*>( queue->_renderBin.nodeAt(i) );
+        ClearNode* clear = dynamic_cast<ClearNode*>( queue->_renderBin.nodeAt(i) );
         if(geode)
         {
             Material::Ptr mat = geode->_material;
@@ -58,18 +58,18 @@ void CpuRenderer::render(const Graph::Ptr& scene)
             color = mat->_color;
 
             if(mat->_baseColor)
-                queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
+                queue->_renderBin.stateAt(i)->setUniform("u_sampler_color", mat->_baseColor, 0);
             if(mat->_normalmap)
-                queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
+                queue->_renderBin.stateAt(i)->setUniform("u_sampler_normal", mat->_normalmap, 1);
             if(mat->_emissive)
-                queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+                queue->_renderBin.stateAt(i)->setUniform("u_sampler_emissive", mat->_emissive, 2);
 
-            queue->_states[i]->setUniform("u_view", view);
-            queue->_states[i]->setUniform("u_lightPos", lightPos);
-            queue->_states[i]->setUniform("u_lightCol", lightCol);
-            queue->_states[i]->setUniform("u_lightAtt", latt);
-            queue->_states[i]->setUniform("u_color", color);
-            applyState(queue->_states[i]);
+            queue->_renderBin.stateAt(i)->setUniform("u_view", view);
+            queue->_renderBin.stateAt(i)->setUniform("u_lightPos", lightPos);
+            queue->_renderBin.stateAt(i)->setUniform("u_lightCol", lightCol);
+            queue->_renderBin.stateAt(i)->setUniform("u_lightAtt", latt);
+            queue->_renderBin.stateAt(i)->setUniform("u_color", color);
+            applyState(queue->_renderBin.stateAt(i));
             drawGeometry(geode);
         }
         else if(clear)

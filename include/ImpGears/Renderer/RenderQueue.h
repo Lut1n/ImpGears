@@ -14,6 +14,9 @@ struct IMP_API RenderState
 {
     State::Ptr state;
     Node* node;
+    Matrix4 proj;
+    Matrix4 model;
+    Matrix3 normal;
     
     static State::Ptr s_defaultState;
     
@@ -29,7 +32,7 @@ struct IMP_API StateBin
     
     StateBin();
     
-    void push(const State::Ptr state, Node* node);
+    void push(const State::Ptr state, Node* node, const Matrix4& model);
     
     int size();
     void reset();

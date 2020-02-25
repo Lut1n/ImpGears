@@ -300,6 +300,7 @@ int main(int argc, char* argv[])
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
     renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
+    renderer->enableFeature(SceneRenderer::Feature_Phong, true);
     // renderer->setDirect(false);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     // graph->setClearColor(Vec4(0.0,1.0,0.0,1.0));

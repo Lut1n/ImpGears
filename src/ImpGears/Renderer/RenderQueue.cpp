@@ -18,7 +18,8 @@ RenderState::RenderState()
 //--------------------------------------------------------------
 void RenderState::reset()
 {
-    state->clone(s_defaultState,State::CloneOpt_All);
+    state->clone(s_defaultState,State::CloneOpt_OverrideRef);
+    // state = State::create();
     node = nullptr;
 }
 
@@ -31,13 +32,15 @@ StateBin::StateBin()
 }
 
 //--------------------------------------------------------------
-void StateBin::push(const State::Ptr state, Node* node)
+void StateBin::push(const State::Ptr state, Node* node, const Matrix4& model)
 {
     position++;
     if( size()>(int)items.size() ) items.resize( size() );
     
-    items[position].state->clone(state, State::CloneOpt_All);
+    // items[position].state = state;
+    items[position].state->clone(state, State::CloneOpt_OverrideRef);
     items[position].node = node;
+    items[position].model = model;
 }
 
 //--------------------------------------------------------------
@@ -72,7 +75,6 @@ RenderState StateBin::at(int index)
     if(index>=0 && index<=position) return items[index];
     return RenderState();
 }
-
 
 
 //--------------------------------------------------------------

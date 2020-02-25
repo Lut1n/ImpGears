@@ -47,7 +47,7 @@ public:
 
     const State& operator=(const State& other);
 
-    void clone(const State::Ptr& other, CloneOpt opt = CloneOpt_All);
+    void clone(const State::Ptr& other, CloneOpt opt = CloneOpt_Duplicate);
 
     void setFaceCullingMode(FaceCullingMode faceCullingMode){_faceCullingMode = faceCullingMode;_faceCullingChanged=true;}
     FaceCullingMode getFaceCullingMode() const{return _faceCullingMode;}
@@ -76,7 +76,7 @@ public:
 
     void cloneUniforms(const std::map<std::string,Uniform::Ptr>& uniforms,
                        const std::map<std::string,bool>& changedFlags,
-                       CloneOpt opt = CloneOpt_All);
+                       CloneOpt opt = CloneOpt_Duplicate);
 
     void clearUniforms();
     void setUniform(Uniform::Ptr& uniform);

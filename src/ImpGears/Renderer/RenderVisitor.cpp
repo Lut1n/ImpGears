@@ -21,7 +21,8 @@ StackItem::StackItem()
 //--------------------------------------------------------------
 void StackItem::reset()
 {
-    state->clone(s_defaultState,State::CloneOpt_All);
+    // state = State::create();
+    state->clone(s_defaultState,State::CloneOpt_OverrideRef);
     matrix = Matrix4();
 }
 
@@ -40,13 +41,13 @@ void StateStack::push(const State::Ptr src_state, const Matrix4& mat)
     Matrix4 prev_mat;
     if(position>0)
     {
-        items[position].state->clone(items[position-1].state, State::CloneOpt_All);
+        items[position].state->clone(items[position-1].state, State::CloneOpt_OverrideRef);
         prev_mat = items[position-1].matrix;
     }
     else
         items[position].reset();
     
-    items[position].state->clone(src_state, State::CloneOpt_IfChanged);
+    items[position].state->clone(src_state, State::CloneOpt_OverrideChangedRef);
     items[position].matrix = mat * prev_mat;
 }
 
@@ -101,7 +102,6 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
     if( stack.size()>0 )
     {
         std::cout << "Warning : matrices or states stacks are not consistent" << std::endl;
-        
     }
     // stack = StateStack();
     stack.reset();
@@ -128,7 +128,7 @@ bool RenderVisitor::apply( Node* node )
     else if( asClear ) applyClearNode(asClear);
     else if( asLight ) applyLightNode(asLight);
     else if(asGeode) applyDefault(node);
-    else if(r2s) _queue->_renderBin.push(node->getState(),node);
+    else if(r2s) _queue->_renderBin.push(node->getState(),node,Matrix4());
 
     return true;
 }
@@ -138,14 +138,8 @@ void RenderVisitor::applyDefault( Node* node )
 {
     Matrix4 topMat = stack.topMatrix();
     State::Ptr topState = stack.topState();
-
-    Matrix3 normalMat = Matrix3(topMat).inverse().transpose();
-
-    topState->setUniform("u_proj", topState->getProjectionMatrix());
-    topState->setUniform("u_model", topMat);
-    topState->setUniform("u_normal", normalMat);
     
-    _queue->_renderBin.push(topState,node);
+    _queue->_renderBin.push(topState,node,topMat);
 }
 
 //--------------------------------------------------------------
@@ -173,7 +167,7 @@ void RenderVisitor::applyClearNode( ClearNode* node )
 {
     State::Ptr topState = stack.topState();
     
-    _queue->_renderBin.push(topState,node);
+    _queue->_renderBin.push(topState,node, Matrix4() );
 }
 
 //--------------------------------------------------------------

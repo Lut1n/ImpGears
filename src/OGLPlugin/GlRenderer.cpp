@@ -183,7 +183,6 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, RenderQ
     Visitor::Ptr visitor = _visitor;
     _visitor->reset( queue );
     scene->accept(visitor);
-
     RenderQueue::Ptr resQueue = _visitor->getQueue();
     return resQueue;
 }
@@ -197,20 +196,18 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
     Matrix4 view;
     if(queue->_camera) view = queue->_camera->getViewMatrix();
 
-    int geodeCount = 0;
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
         RenderState renderState = queue->_renderBin.at(i);
         
-        _localState->clone(renderState.state, State::CloneOpt_All);
-        if( overrideState ) _localState->clone( overrideState, State::CloneOpt_IfChanged );
+        _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
+        if( overrideState ) _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
         
         GeoNode* geode = dynamic_cast<GeoNode*>( renderState.node );
         ClearNode* clear = dynamic_cast<ClearNode*>( renderState.node );
 
         if(geode)
         {
-            geodeCount++;
             Material::Ptr mat = geode->_material;
             float shininess = mat->_shininess;
             Vec3 color = mat->_color;
@@ -235,7 +232,13 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             // Matrix4 model = local_state->getUniforms()["u_model"]->getMat4();
             // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
             // state->setUniform("u_normal", normalMat );
+            renderState.normal = Matrix3(renderState.model).inverse().transpose();
+            renderState.proj = _localState->getProjectionMatrix();
+            
             _localState->setUniform("u_view", view);
+            _localState->setUniform("u_proj", renderState.proj);
+            _localState->setUniform("u_model", renderState.model);
+            _localState->setUniform("u_normal", renderState.normal);
 
             applyState(_localState, renderPass);
             if( renderPass==SceneRenderer::RenderFrame_ShadowMap ) _renderPlugin->setCulling(2);
@@ -286,6 +289,36 @@ void GlRenderer::clearRenderCache()
     _renderCache.clear();
 }
 
+void checkQueue(RenderQueue::Ptr queue)
+{
+    std::cout << "node in queue = " << queue->_renderBin.size() << std::endl;
+    int geodeCount = 0;
+    int clearCount = 0;
+    for(int i=0;i<(int)queue->_renderBin.size();++i)
+    {
+        RenderState renderState = queue->_renderBin.at(i);
+        
+        GeoNode* geode = dynamic_cast<GeoNode*>( renderState.node );
+        ClearNode* clear = dynamic_cast<ClearNode*>( renderState.node );
+
+        if(geode)
+        {
+            geodeCount++;
+            if( renderState.state->getRenderPass() == nullptr ) std::cout << "geode render state has no renderPassInfo" << std::endl;
+            if( renderState.state->getReflexion() == nullptr ) std::cout << "geode render state has no reflection model" << std::endl;
+        }
+        else if(clear)
+        {
+            clearCount++;
+        }
+        else
+        {
+            std::cout << "incorrect type node - " << renderState.node->getObjectID() << std::endl;
+        }
+    }
+    std::cout << "geode in queue = " << geodeCount << std::endl;
+    std::cout << "clear in queue = " << clearCount << std::endl;
+}
 
 //---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
@@ -301,6 +334,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
     
     RenderQueue::Ptr queue = _renderCache[scene];
     queue = applyRenderVisitor(scene,queue);
+    // checkQueue(queue);
     
     applyRenderToSampler(queue);
     drawQueue(queue);

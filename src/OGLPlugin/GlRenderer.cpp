@@ -255,8 +255,6 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             applyClear(clear, renderPass);
         }
     }
-    
-    std::cout << "geode count = " << geodeCount << std::endl;
 
     // _renderPlugin->unbind();
 }

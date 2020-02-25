@@ -20,8 +20,10 @@ public:
     enum CloneOpt
     {
         CloneOpt_None,
-        CloneOpt_All,
-        CloneOpt_IfChanged
+        CloneOpt_Duplicate,
+        CloneOpt_DuplicateChanged,
+        CloneOpt_OverrideRef,
+        CloneOpt_OverrideChangedRef
     };
 
     enum FaceCullingMode

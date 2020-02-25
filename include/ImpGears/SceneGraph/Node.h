@@ -26,7 +26,7 @@ public:
     virtual void render() {}
 
     void setPosition(const Vec3& position);
-    void setRotation(const Vec3& rotation) ;
+    void setRotation(const Vec3& rotation);
     void setScale(const Vec3& scale);
 
     const Vec3& getPosition() const {return _position;}

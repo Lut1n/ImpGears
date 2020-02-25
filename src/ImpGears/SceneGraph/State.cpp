@@ -58,7 +58,7 @@ State::~State()
 //--------------------------------------------------------------
 void State::clone(const State::Ptr& other, CloneOpt opt)
 {
-    if(opt == CloneOpt_All)
+    if(opt == CloneOpt_Duplicate)
     {
         _projection = other->_projection;
         _viewport = other->_viewport;
@@ -82,7 +82,47 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _reflexionChanged = other->_reflexionChanged;
         _renderPassChanged = other->_renderPassChanged;
     }
-    else if(opt == CloneOpt_IfChanged)
+    else if(opt == CloneOpt_CopyRef)
+    {
+        _projection = other->_projection;
+        _viewport = other->_viewport;
+        _faceCullingMode = other->_faceCullingMode;
+        _blendMode = other->_blendMode;
+        _lineWidth = other->_lineWidth;
+        _depthTest = other->_depthTest;
+        _reflexion = other->_reflexion;
+        _renderPass = other->_renderPass;
+        
+        if(other->_uniformsChanged) cloneUniforms(other->_uniforms,
+                                                  other->_uniformChangedFlags,
+                                                  CloneOpt_CopyRef);
+        _uniformsChanged = other->_uniformsChanged;
+                              
+        _projectionChanged = other->_projectionChanged;
+        _viewportChanged = other->_viewportChanged;
+        _faceCullingChanged = other->_faceCullingChanged;
+        _blendModeChanged = other->_blendModeChanged;
+        _lineWidthChanged = other->_lineWidthChanged;
+        _depthTestChanged = other->_depthTestChanged;
+        _reflexionChanged = other->_reflexionChanged;
+        _renderPassChanged = other->_renderPassChanged;
+    }
+    else if(opt == CloneOpt_CopyChangedRef)
+    {
+        if(other->_projectionChanged) setProjectionMatrix(other->_projection);
+        if(other->_viewportChanged) setViewport(other->_viewport);
+        if(other->_faceCullingChanged) setFaceCullingMode(other->_faceCullingMode);
+        if(other->_blendModeChanged) setBlendMode(other->_blendMode);
+        if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
+        if(other->_depthTestChanged) setDepthTest(other->_depthTest);
+        if(other->_reflexionChanged) setReflexion(other->_reflexion);
+        if(other->_renderPassChanged) setRenderPass(other->_renderPass);
+        
+        if(other->_uniformsChanged) cloneUniforms(other->_uniforms,
+                                                  other->_uniformChangedFlags,
+                                                  CloneOpt_CopyChangedRef);
+    }
+    else if(opt == CloneOpt_DuplicateChanged)
     {
         if(other->_projectionChanged) setProjectionMatrix(other->_projection);
         if(other->_viewportChanged) setViewport(other->_viewport);
@@ -186,32 +226,52 @@ void State::cloneUniforms(const std::map<std::string,Uniform::Ptr>& uniforms,
                           const std::map<std::string,bool>& changedFlags,
                           CloneOpt opt)
 {
-    if(opt == CloneOpt_All)
+    if(opt == CloneOpt_Duplicate)
     {
-        // clearUniforms();
+        _uniformsChanged = false;
+        clearUniforms();
         for(auto kv : uniforms)
         {
-            if( _uniforms.find(kv.first)==_uniforms.end() )
-                _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
+            _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
             _uniforms[kv.first]->clone( *kv.second );
+            _uniformsChanged = true;
         }
         _uniformChangedFlags = changedFlags;
     }
-    else
+    else if(opt == CloneOpt_CopyChangedRef)
     {
+        _uniformsChanged = false;
         for(auto kv : uniforms)
         {
-            bool hasChanged = changedFlags.find(kv.first)!=changedFlags.end();  // not very perfect (the two map need to be sync)
-            if(hasChanged  && changedFlags.at(kv.first) )
+            if( false == changedFlags.at(kv.first) ) continue;
+            _uniforms[kv.first] = kv.second;
+            _uniformChangedFlags[kv.first] = true;
+            _uniformsChanged = true;
+        }
+    }
+    else if(opt == CloneOpt_CopyRef)
+    {
+        _uniforms = uniforms;
+        _uniformChangedFlags = changedFlags;
+        _uniformsChanged = true;
+    }
+    else if(opt == CloneOpt_DuplicateChanged)
+    {
+        _uniformsChanged = false;
+        for(auto kc : changedFlags)
+        {
+            if(kc.second)
             {
-                if( _uniforms.find(kv.first)==_uniforms.end() )
-                    _uniforms[kv.first] = Uniform::create("no id",Uniform::Type_Undefined);
-                _uniforms[kv.first]->clone( *kv.second );
-                _uniformChangedFlags[kv.first] = true;
+                auto uniformIt = _uniforms.find(kc.first);
+                if(uniformIt == _uniforms.end() )
+                    _uniforms[kc.first] = Uniform::create("no id",Uniform::Type_Undefined);
+                Uniform::Ptr srcUniform = uniforms.at(kc.first);
+                _uniforms[kc.first]->clone( *srcUniform );
+                _uniformChangedFlags[kc.first] = true;
+                _uniformsChanged = true;
             }
         }
     }
-    _uniformsChanged = true;
 }
 
 //--------------------------------------------------------------

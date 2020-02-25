@@ -103,7 +103,8 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
         std::cout << "Warning : matrices or states stacks are not consistent" << std::endl;
         
     }
-    stack = StateStack();
+    // stack = StateStack();
+    stack.reset();
 
     _queue = initQueue;
     if( !_queue ) _queue = RenderQueue::create();

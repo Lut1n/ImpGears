@@ -45,11 +45,30 @@ void Node::accept( Visitor::Ptr& visitor )
 void Node::computeMatrices()
 {
     _modelMatrix =
-            Matrix4::scale(_scale.x(), _scale.y(), _scale.z())
-            * Matrix4::rotationX(_rotation.x())
-            * Matrix4::rotationY(_rotation.y())
-            * Matrix4::rotationZ(_rotation.z())
-            * Matrix4::translation(_position.x(), _position.y(), _position.z());
+            _scaleMat
+            * _rotationMat
+            * _positionMat;
 }
+
+
+
+void Node::setPosition(const Vec3& position)
+{
+    _position=position;
+    _positionMat = Matrix4::translation(_position.x(), _position.y(), _position.z());
+}
+void Node::setRotation(const Vec3& rotation)
+{
+    _rotation=rotation;
+    _rotationMat = Matrix4::rotationX(_rotation.x())
+            * Matrix4::rotationY(_rotation.y())
+            * Matrix4::rotationZ(_rotation.z());
+}
+void Node::setScale(const Vec3& scale)
+{
+    _scale=scale;
+    _scaleMat = Matrix4::scale(_scale.x(), _scale.y(), _scale.z());
+}
+
 
 IMPGEARS_END

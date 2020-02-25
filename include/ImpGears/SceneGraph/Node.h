@@ -23,11 +23,11 @@ public:
     virtual ~Node();
 
     virtual void update() {}
-    virtual void render() {};
+    virtual void render() {}
 
-    void setPosition(const Vec3& position) { _position=position; }
-    void setRotation(const Vec3& rotation) { _rotation=rotation; }
-    void setScale(const Vec3& scale) { _scale=scale; }
+    void setPosition(const Vec3& position);
+    void setRotation(const Vec3& rotation) ;
+    void setScale(const Vec3& scale);
 
     const Vec3& getPosition() const {return _position;}
     const Vec3& getRotation() const {return _rotation;}
@@ -51,6 +51,7 @@ protected:
     Vec3 _rotation;
     Vec3 _scale;
 
+    Matrix4 _positionMat, _rotationMat, _scaleMat;
     Matrix4 _modelMatrix;
 
     NodeList _children;

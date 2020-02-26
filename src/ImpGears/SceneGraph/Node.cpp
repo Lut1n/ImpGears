@@ -1,4 +1,5 @@
 #include <SceneGraph/Node.h>
+#include <SceneGraph/Visitor.h>
 
 IMPGEARS_BEGIN
 
@@ -36,15 +37,17 @@ void Node::clearNode()
 }
 
 //--------------------------------------------------------------
-void Node::accept( Visitor::Ptr& visitor )
+void Node::accept( Visitor& visitor )
 {
-    update();
-    computeMatrices();
-
-    visitor->push(this);
-    visitor->apply(this);
-    for(auto node:_children) node->accept(visitor);
-    visitor->pop();
+    for(auto node : _children)
+    {
+        node->update();
+        node->computeMatrices();
+        visitor.push(node);
+        visitor.apply(node);
+        node->accept(visitor);
+        visitor.pop();
+    }
 }
 
 //--------------------------------------------------------------

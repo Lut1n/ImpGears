@@ -1,4 +1,5 @@
 #include <SceneGraph/Graph.h>
+#include <SceneGraph/Visitor.h>
 
 IMPGEARS_BEGIN
 
@@ -27,12 +28,20 @@ Graph::~Graph()
 }
 
 //---------------------------------------------------------------
-void Graph::accept(Visitor::Ptr& visitor)
+void Graph::accept(Visitor& visitor)
 {
-    visitor->push(_initNode.get());
-    visitor->apply(_initNode.get());
+    visitor.push(_initNode);
+    visitor.apply(_initNode);
+
+    _root->update();
+    _root->computeMatrices();
+    visitor.push(_root);
+    visitor.apply(_root);
     if(_root) _root->accept(visitor);
-    visitor->pop();
+    visitor.pop();
+
+
+    visitor.pop();
 }
 
 //---------------------------------------------------------------

@@ -4,13 +4,13 @@
 #include <Core/Object.h>
 #include <Core/Vec3.h>
 #include <Core/Matrix4.h>
-#include <SceneGraph/Visitor.h>
 #include <SceneGraph/State.h>
 
 #include <list>
 
 IMPGEARS_BEGIN
 
+class Visitor;
 class IMP_API Node : public Object
 {
 public:
@@ -37,7 +37,7 @@ public:
     void remNode(const Node::Ptr& sceneNode);
     void clearNode();
 
-    void accept( Visitor::Ptr& visitor );
+    void accept( Visitor& visitor );
 
     void computeMatrices();
 

@@ -28,7 +28,7 @@ void CpuRenderer::render(const Graph::Ptr& scene)
 {
     Visitor::Ptr visitor = _visitor;
     _visitor->reset();
-    scene->accept(visitor);
+    scene->accept( *visitor );
 
     RenderQueue::Ptr queue = _visitor->getQueue();
     Matrix4 view;
@@ -41,7 +41,7 @@ void CpuRenderer::render(const Graph::Ptr& scene)
 
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
-        LightNode* light = closest(queue->_renderBin.nodeAt(i), queue->_lights);
+        LightNode* light = closest(queue->_renderBin.nodeAt(i).get(), queue->_lights);
         if(light)
         {
             lightPos = light->_worldPosition;
@@ -49,8 +49,8 @@ void CpuRenderer::render(const Graph::Ptr& scene)
             latt[0] = light->_power;
         }
 
-        GeoNode* geode = dynamic_cast<GeoNode*>( queue->_renderBin.nodeAt(i) );
-        ClearNode* clear = dynamic_cast<ClearNode*>( queue->_renderBin.nodeAt(i) );
+        GeoNode::Ptr geode = std::dynamic_pointer_cast<GeoNode>( queue->_renderBin.nodeAt(i) );
+        ClearNode::Ptr clear = std::dynamic_pointer_cast<ClearNode>( queue->_renderBin.nodeAt(i) );
         if(geode)
         {
             Material::Ptr mat = geode->_material;
@@ -70,11 +70,11 @@ void CpuRenderer::render(const Graph::Ptr& scene)
             queue->_renderBin.stateAt(i)->setUniform("u_lightAtt", latt);
             queue->_renderBin.stateAt(i)->setUniform("u_color", color);
             applyState(queue->_renderBin.stateAt(i));
-            drawGeometry(geode);
+            drawGeometry(geode.get());
         }
         else if(clear)
         {
-            applyClear(clear);
+            applyClear(clear.get());
         }
     }
 }

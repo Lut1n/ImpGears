@@ -13,7 +13,7 @@ IMPGEARS_BEGIN
 struct IMP_API RenderState
 {
     State::Ptr state;
-    Node* node;
+    Node::Ptr node;
     Matrix4 proj;
     Matrix4 model;
     Matrix3 normal;
@@ -32,13 +32,13 @@ struct IMP_API StateBin
     
     StateBin();
     
-    void push(const State::Ptr state, Node* node, const Matrix4& model);
+    void push(const State::Ptr state, Node::Ptr node, const Matrix4& model);
     
     int size();
     void reset();
     
     State::Ptr stateAt(int index);
-    Node* nodeAt(int index);
+    Node::Ptr nodeAt(int index);
     
     RenderState at(int index);
 };

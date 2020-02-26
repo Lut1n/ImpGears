@@ -187,7 +187,7 @@ RenderQueue::Ptr GlRenderer::applyRenderVisitor(const Graph::Ptr& scene, RenderQ
 {
     Visitor::Ptr visitor = _visitor;
     _visitor->reset( queue );
-    scene->accept(visitor);
+    scene->accept( *visitor );
     RenderQueue::Ptr resQueue = _visitor->getQueue();
     return resQueue;
 }
@@ -208,8 +208,8 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
         _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
         if( overrideState ) _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
         
-        GeoNode* geode = dynamic_cast<GeoNode*>( renderState.node );
-        ClearNode* clear = dynamic_cast<ClearNode*>( renderState.node );
+        GeoNode::Ptr geode = std::dynamic_pointer_cast<GeoNode>( renderState.node );
+        ClearNode::Ptr clear = std::dynamic_pointer_cast<ClearNode>( renderState.node );
 
         if(geode)
         {
@@ -256,11 +256,11 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
                 expectedFlag = RenderPass::Pass_ShadowMapping;
 
-            if(renderPass_info && renderPass_info->isPassEnabled(expectedFlag)) drawGeometry(geode);
+            if(renderPass_info && renderPass_info->isPassEnabled(expectedFlag)) drawGeometry(geode.get());
         }
         else if(clear)
         {
-            applyClear(clear, renderPass);
+            applyClear(clear.get(), renderPass);
         }
     }
 
@@ -272,7 +272,7 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
 {
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
-        RenderToSamplerNode* render2sampler = dynamic_cast<RenderToSamplerNode*>( queue->_renderBin.nodeAt(i) );
+        RenderToSamplerNode::Ptr render2sampler = std::dynamic_pointer_cast<RenderToSamplerNode>( queue->_renderBin.nodeAt(i) );
         if(render2sampler && render2sampler->ready()==false && render2sampler->cubemap() && render2sampler->scene())
         {
             Vec3 p(0.0);
@@ -303,8 +303,8 @@ void checkQueue(RenderQueue::Ptr queue)
     {
         RenderState renderState = queue->_renderBin.at(i);
         
-        GeoNode* geode = dynamic_cast<GeoNode*>( renderState.node );
-        ClearNode* clear = dynamic_cast<ClearNode*>( renderState.node );
+        GeoNode::Ptr geode = std::dynamic_pointer_cast<GeoNode>( renderState.node );
+        ClearNode::Ptr clear = std::dynamic_pointer_cast<ClearNode>( renderState.node );
 
         if(geode)
         {

@@ -114,15 +114,15 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
 }
 
 //--------------------------------------------------------------
-bool RenderVisitor::apply( Node* node )
+bool RenderVisitor::apply( Node::Ptr node )
 {
-    if(_toSkip == node) return false;
+    // if(_toSkip == node) return false;
 
-    Camera* asCamera = dynamic_cast<Camera*>( node );
-    ClearNode* asClear = dynamic_cast<ClearNode*>( node );
-    LightNode* asLight = dynamic_cast<LightNode*>( node );
-    GeoNode* asGeode = dynamic_cast<GeoNode*>( node );
-    RenderToSamplerNode* r2s = dynamic_cast<RenderToSamplerNode*>( node );
+    Camera::Ptr asCamera = std::dynamic_pointer_cast<Camera>( node );
+    ClearNode::Ptr asClear = std::dynamic_pointer_cast<ClearNode>( node );
+    LightNode::Ptr asLight = std::dynamic_pointer_cast<LightNode>( node );
+    GeoNode::Ptr asGeode = std::dynamic_pointer_cast<GeoNode>( node );
+    RenderToSamplerNode::Ptr r2s = std::dynamic_pointer_cast<RenderToSamplerNode>( node );
 
     if( asCamera ) applyCamera(asCamera);
     else if( asClear ) applyClearNode(asClear);
@@ -134,7 +134,7 @@ bool RenderVisitor::apply( Node* node )
 }
 
 //--------------------------------------------------------------
-void RenderVisitor::applyDefault( Node* node )
+void RenderVisitor::applyDefault( Node::Ptr node )
 {
     Matrix4 topMat = stack.topMatrix();
     State::Ptr topState = stack.topState();
@@ -143,27 +143,27 @@ void RenderVisitor::applyDefault( Node* node )
 }
 
 //--------------------------------------------------------------
-void RenderVisitor::applyCamera( Camera* node )
+void RenderVisitor::applyCamera( Camera::Ptr node )
 {
     Matrix4 m = stack.topMatrix();
     
     Vec3 translation = Vec3(m(3,0),m(3,1),m(3,2));
     node->setAbsolutePosition( translation );
     node->lookAt();
-    _queue->_camera = node;
+    _queue->_camera = node.get();
 }
 
 //--------------------------------------------------------------
-void RenderVisitor::applyLightNode( LightNode* node )
+void RenderVisitor::applyLightNode( LightNode::Ptr node )
 {
     Matrix4 m = stack.topMatrix();
     
     node->_worldPosition = Vec3(m(3,0),m(3,1),m(3,2));
-    _queue->_lights.push_back(node);
+    _queue->_lights.push_back(node.get());
 }
 
 //--------------------------------------------------------------
-void RenderVisitor::applyClearNode( ClearNode* node )
+void RenderVisitor::applyClearNode( ClearNode::Ptr node )
 {
     State::Ptr topState = stack.topState();
     
@@ -171,7 +171,7 @@ void RenderVisitor::applyClearNode( ClearNode* node )
 }
 
 //--------------------------------------------------------------
-void RenderVisitor::push( Node* node )
+void RenderVisitor::push( Node::Ptr node )
 {
     stack.push(node->getState(), node->getModelMatrix() );
     

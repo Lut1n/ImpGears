@@ -32,7 +32,7 @@ StateBin::StateBin()
 }
 
 //--------------------------------------------------------------
-void StateBin::push(const State::Ptr state, Node* node, const Matrix4& model)
+void StateBin::push(const State::Ptr state, Node::Ptr node, const Matrix4& model)
 {
     position++;
     if( size()>(int)items.size() ) items.resize( size() );
@@ -63,7 +63,7 @@ State::Ptr StateBin::stateAt(int index)
 }
 
 //--------------------------------------------------------------
-Node* StateBin::nodeAt(int index)
+Node::Ptr StateBin::nodeAt(int index)
 {
     if(index>=0 && index<=position) return items[index].node;
     return nullptr;

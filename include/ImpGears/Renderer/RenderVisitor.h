@@ -56,8 +56,8 @@ public:
     virtual void reset(RenderQueue::Ptr initQueue = nullptr);
 
     // return true if the node has to be traversal
-    virtual bool apply( Node* node );
-    virtual void push( Node* node );
+    virtual bool apply( Node::Ptr node );
+    virtual void push( Node::Ptr node );
     virtual void pop();
 
     RenderQueue::Ptr getQueue() { return _queue; }
@@ -66,10 +66,10 @@ public:
 
 protected:
 
-    virtual void applyDefault( Node* node );
-    virtual void applyCamera( Camera* node );
-    virtual void applyLightNode( LightNode* node );
-    virtual void applyClearNode( ClearNode* node );
+    virtual void applyDefault( Node::Ptr node );
+    virtual void applyCamera( Camera::Ptr node );
+    virtual void applyLightNode( LightNode::Ptr node );
+    virtual void applyClearNode( ClearNode::Ptr node );
     
     StateStack stack;
     RenderQueue::Ptr _queue;

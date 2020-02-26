@@ -4,10 +4,10 @@
 #include <Core/Object.h>
 
 #include <SceneGraph/ClearNode.h>
-#include <SceneGraph/Visitor.h>
 
 IMPGEARS_BEGIN
 
+class Visitor;
 class IMP_API Graph : public Object
 {
 public:
@@ -20,7 +20,7 @@ public:
     State::Ptr getInitState() { return _initState; }
     const State::Ptr& getInitState() const { return _initState; }
 
-    void accept(Visitor::Ptr& visitor);
+    void accept(Visitor& visitor);
     void setRoot(const Node::Ptr& node);
     const Node::Ptr& getRoot() const {return _root;}
 

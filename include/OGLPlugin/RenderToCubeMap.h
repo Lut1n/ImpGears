@@ -11,7 +11,7 @@
 
 IMPGEARS_BEGIN
 
-struct GlRenderer;
+class GlRenderer;
 
 class IMP_API RenderToCubeMap : public Object
 {

@@ -12,8 +12,9 @@ uniform sampler2D u_input_sampler_depth;
 uniform samplerCube u_input_cubemap_shadow;
 uniform vec3 u_light_pos;
 uniform mat4 u_view_cam;
+uniform int u_sampleCount;
 
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
 float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
 float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
@@ -111,6 +112,7 @@ void lighting(out vec4 out_color,
     for(int i=0;i<N;++i)
     {
         int index = i;
+        if(index >= u_sampleCount) break;
         // int index = // int(16.0*random(floor(world_pos.xyz*1000.0), i))%16;
         // int index = int(16.0*hash(vec3(v_texCoord, i)))%16;
 
@@ -134,7 +136,7 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 ShadowCasting::ShadowCasting()
 {
-
+    _samples = 16;
 }
 
 //--------------------------------------------------------------
@@ -188,6 +190,7 @@ void ShadowCasting::apply(GlRenderer* renderer, bool skip)
         _graph->getInitState()->setUniform("u_input_cubemap_shadow", _shadows, 1);
         _graph->getInitState()->setUniform("u_light_pos", light_pos );
         _graph->getInitState()->setUniform("u_view_cam", view );
+        _graph->getInitState()->setUniform("u_sampleCount", _samples);
         if(_queue == nullptr) _queue = RenderQueue::create();
         _queue = renderer->applyRenderVisitor(_graph,_queue);
         renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Lighting);

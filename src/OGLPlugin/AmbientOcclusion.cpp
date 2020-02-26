@@ -12,6 +12,7 @@ uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
 uniform mat4 u_cam_view;
 uniform mat4 u_scene_proj;
+uniform int u_sampleCount;
 
 varying vec2 v_texCoord;
 
@@ -111,6 +112,7 @@ void lighting(out vec4 out_color,
     for(int i=0; i<KERNEL_SIZE; ++i)
     {
         int index = i;
+        if(index >= u_sampleCount) break;
         // int index = int(16.0*random(view_origin, i))%16;
         // int index = int(16.0*hash(vec3(v_texCoord, i)))%16;
 
@@ -147,7 +149,7 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 AmbientOcclusion::AmbientOcclusion()
 {
-
+    _samples = 16;
 }
 
 //--------------------------------------------------------------
@@ -202,6 +204,7 @@ void AmbientOcclusion::apply(GlRenderer* renderer, bool skip)
         _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
         _graph->getInitState()->setUniform("u_cam_view", view);
         _graph->getInitState()->setUniform("u_scene_proj", _proj);
+        _graph->getInitState()->setUniform("u_sampleCount", _samples);
         if(_queue==nullptr)_queue  =RenderQueue::create();
         _queue= renderer->applyRenderVisitor(_graph,_queue);
         renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Lighting);

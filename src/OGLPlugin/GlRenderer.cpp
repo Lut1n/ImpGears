@@ -59,16 +59,21 @@ IMPGEARS_BEGIN
 GlRenderer::GlRenderer()
     : SceneRenderer()
 {
+    _shadowResolution = 256;
+    _environmentResolution = 128;
+    _shadowSamples = 16;
+    _ssaoSamples = 16;
+    
     // CubeMaps rendering setup
-    _environmentMap = CubeMapSampler::create(128.0,128.0,4,Vec4(1.0));
+     _environmentMap = CubeMapSampler::create(_environmentResolution,_environmentResolution,4,Vec4(1.0));
     _environmentRenderer = RenderToCubeMap::create(this);
     _environmentRenderer->setCubeMap(_environmentMap);
-    _environmentRenderer->setResolution(128);
+    _environmentRenderer->setResolution(_environmentResolution);
 
-    _shadowsMap = CubeMapSampler::create(256.0,256.0,4,Vec4(1.0));
+    _shadowsMap = CubeMapSampler::create(_shadowResolution,_shadowResolution,4,Vec4(1.0));
     _shadowsRenderer = RenderToCubeMap::create(this);
     _shadowsRenderer->setCubeMap(_shadowsMap);
-    _shadowsRenderer->setResolution(256.0);
+    _shadowsRenderer->setResolution(_shadowResolution);
     _shadowsmapShader = ReflexionModel::create(
                 ReflexionModel::Lighting_Customized,
                 ReflexionModel::Texturing_Samplers_CNE,
@@ -324,6 +329,15 @@ void checkQueue(RenderQueue::Ptr queue)
 void GlRenderer::render(const Graph::Ptr& scene)
 {
     if(_renderPlugin == nullptr) return;
+    
+    ShadowCasting::Ptr shadowOp =
+        std::dynamic_pointer_cast<ShadowCasting>( _pipeline->getOperation(FRAMEOP_ID_SHAFX) );
+    shadowOp->setSampleCount(_shadowSamples);
+
+    AmbientOcclusion::Ptr ssaoOp =
+            std::dynamic_pointer_cast<AmbientOcclusion>( _pipeline->getOperation(FRAMEOP_ID_SSAO) );
+    ssaoOp->setSampleCount(_ssaoSamples);
+    
 
     _renderPlugin->init(_internalFrames);
     _renderPlugin->bind(_internalFrames);
@@ -350,6 +364,17 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
     if(env_enabled)
     {
+        // update resolution if needed
+        static int s_lastEnvRes = 128;
+        if(_environmentResolution != s_lastEnvRes)
+        {
+            // qDebug() << "env resolution updating";
+            _environmentMap = CubeMapSampler::create(_environmentResolution,_environmentResolution,4,Vec4(1.0));
+            _environmentRenderer->setCubeMap(_environmentMap);
+            _environmentRenderer->setResolution(_environmentResolution);
+            s_lastEnvRes = _environmentResolution;
+        }
+        
        Vec3 p(0.0);
        if(queue->_camera)
            p = queue->_camera->getAbsolutePosition();
@@ -361,6 +386,17 @@ void GlRenderer::render(const Graph::Ptr& scene)
 
     if(shadows_enabled)
     {
+        // update resolution if needed
+        static int s_lastShadowRes = 256;
+        if(_shadowResolution != s_lastShadowRes)
+        {
+            // qDebug() << "shadow resolution updating";
+            _shadowsMap = CubeMapSampler::create(_shadowResolution,_shadowResolution,4,Vec4(1.0));
+            _shadowsRenderer->setCubeMap(_shadowsMap);
+            _shadowsRenderer->setResolution(_shadowResolution);
+            s_lastShadowRes = _shadowResolution;
+        }
+        
        Vec3 p(0.0);
        if(light0) p = light0->_worldPosition;
 

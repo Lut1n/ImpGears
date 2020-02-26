@@ -82,6 +82,13 @@ public:
 
     void setOperation(const FrameOperation::Ptr& op, int index);
 
+    FrameOperation::Ptr getOperation(int index)
+    {
+        if(index>=0 && index<(int)_operations.size())
+            return _operations[index];
+        return nullptr;
+    }
+
     void setActive(int opIndex, bool activate);
 
     void bindExternal(int dstOpId, const RenderTarget::Ptr& rt, int dstInputId, int srcOuputId = 0);

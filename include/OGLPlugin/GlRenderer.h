@@ -40,10 +40,15 @@ public:
     void drawGeometry(GeoNode* geoNode);
 
     virtual void setOuputViewport(const Vec4& vp);
-    
+
     void applyRenderToSampler(RenderQueue::Ptr queue);
     
     void clearRenderCache();
+
+    void setShadowResolution(int res){_shadowResolution=res;}
+    void setEnvironmentResolution(int res){_environmentResolution=res;}
+    void setShadowSampleCount(int samples){_shadowSamples=samples;}
+    void setSsaoSampleCount(int samples){_ssaoSamples=samples;}
 
     RenderPlugin* _renderPlugin;
 
@@ -57,10 +62,15 @@ protected:
     ReflexionModel::Ptr _shadowsmapShader;
 
     RenderTarget::Ptr _internalFrames;
-    // RenderTarget::Ptr _renderTargets;
+    
     std::map<Graph::Ptr, RenderQueue::Ptr> _renderCache;
     
     State::Ptr _localState;
+
+    int _shadowResolution;
+    int _environmentResolution;
+    int _shadowSamples;
+    int _ssaoSamples;
 };
 
 IMPGEARS_END

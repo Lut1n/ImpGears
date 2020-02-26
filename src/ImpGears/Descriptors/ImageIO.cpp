@@ -155,8 +155,8 @@ Image::Ptr ImageIO::load(std::string filename, const Options& opts)
 
 void decode_packet_header(unsigned char packet_header, bool& rl_type, int& len)
 {
-    unsigned char type_filter = 0b1000'0000;
-    unsigned char size_filter = 0b0111'1111;
+    unsigned char type_filter = 0b10000000;
+    unsigned char size_filter = 0b01111111;
 
     rl_type = (packet_header & type_filter) == type_filter;
     len = 1 + int(packet_header & size_filter);
@@ -256,7 +256,7 @@ Image::Ptr tga_load(std::string& filename, bool flipY)
     // bits 6,7 : unused (ignored)
     char id_info;
     istrm.read(&id_info, sizeof(char));
-    char flip_y_bit = 0b0010'0000;
+    char flip_y_bit = 0b00100000;
     bool need_flipY = (id_info & flip_y_bit) == flip_y_bit;
     if(need_flipY) std::cout << "need flip Y" << std::endl;
     flipY ^= need_flipY;
@@ -347,7 +347,7 @@ void bmp_save(const std::string& filename, const Image::Ptr img)
     header.paletteColorNumber = 0;
     header.importantColorUsedNumber = 0;
 
-    int rawSize = (int)( (dibHeader.bitmapInfoHeader.bpp * dibHeader.bitmapInfoHeader.width + 31)/32 ) * 4;
+    const int rawSize = (int)( (dibHeader.bitmapInfoHeader.bpp * dibHeader.bitmapInfoHeader.width + 31)/32 ) * 4;
     int bufferSize = rawSize * dibHeader.bitmapInfoHeader.height;
 
     fileHeader.magicNumber = 0x424d;
@@ -441,7 +441,7 @@ Image::Ptr bmp_load(std::string& filename)
     header.paletteColorNumber = read<int>(is);
     header.importantColorUsedNumber = read<int>(is);
 
-    unsigned int rawSize = (unsigned int)( (header.bpp * header.width + 31)/32 ) * 4; // take floor of [(bpp*width+31)/32]
+    const unsigned int rawSize = (unsigned int)( (header.bpp * header.width + 31)/32 ) * 4; // take floor of [(bpp*width+31)/32]
     // unsigned int bufferSize = rawSize * header.height; // should take absolute value of height
 
     int chnls = 3;

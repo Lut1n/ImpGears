@@ -32,6 +32,8 @@ public:
 
     Sampler(Filtering filtering = Filtering_Nearest) : _filtering(filtering) {}
 
+    virtual ~Sampler(){}
+
     virtual TyOut operator()(const TyIn& t) = 0;
     void setFiltering(Filtering filtering) {_filtering = filtering;}
     Filtering getFiltering() const {return _filtering;}
@@ -48,6 +50,9 @@ public:
 
     ImageSampler(Image::Ptr src = nullptr, Wrapping wrapping = Wrapping_Clamp);
     ImageSampler(int w, int h, int chnl, const Vec4& color);
+
+    virtual ~ImageSampler(){}
+
     void setSource(Image::Ptr src);
     const Image::Ptr& getSource() const;
     Image::Ptr& getSource();
@@ -83,6 +88,9 @@ public:
     CubeMapSampler(Image::Ptr src = nullptr, Wrapping wrapping = Wrapping_Clamp);
     CubeMapSampler(const std::vector<Image::Ptr>& src, Wrapping wrapping = Wrapping_Clamp);
     CubeMapSampler(int w, int h, int chnl, const Vec4& color);
+
+    virtual ~CubeMapSampler(){}
+
     void setSource(const std::vector<Image::Ptr>& src);
     const std::vector<Image::Ptr>& getSource() const;
 

@@ -35,6 +35,7 @@ public:
 
     void addNode(const Node::Ptr& sceneNode);
     void remNode(const Node::Ptr& sceneNode);
+    void clearNode();
 
     void accept( Visitor::Ptr& visitor );
 
@@ -43,6 +44,8 @@ public:
     const Matrix4& getModelMatrix() const { return _modelMatrix; }
 
     virtual State::Ptr getState() { return _state; }
+
+    int childrenCount() const {return _children.size();}
 
 protected:
 

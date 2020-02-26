@@ -8,6 +8,7 @@
 #include <fstream>
 #include <map>
 
+
 IMPGEARS_BEGIN
 
 //-------------------------------------------------------
@@ -60,43 +61,48 @@ using OperationCache = std::vector<ImgOperation::Ptr>;
 //-------------------------------------------------------
 void generateImageFromJson(const std::string filename)
 {
-	std::cout << "loading json data..." << std::endl;
-	OperationCache opCache;
+    std::cout << "loading json data..." << std::endl;
 	std::string json = loadText(filename);
-	std::string jsonWithoutSpace = removeSpace(json);
-	
-	JsonObject* root = dynamic_cast<JsonObject*>( parse(jsonWithoutSpace) );
-	JsonArray* array = root->getArray("operations");
+    generateImageFromJsonData(json);
+}
+//-------------------------------------------------------
+void generateImageFromJsonData(const std::string jsonData)
+{
+    OperationCache opCache;
+    std::string jsonWithoutSpace = removeSpace(jsonData);
 
-	JsonObject* prop = root->getObject("properties");
-	ImgOperation::s_width = prop->getNumeric("width")->value;
-	ImgOperation::s_height = prop->getNumeric("height")->value;
-	
-	int s = array->value.size();
-	for(int i=0; i<s; ++i)
-	{
-		JsonObject* jo = array->getObject(i);
-		ImgOperation::Ptr op = createFromJsonObj(jo);
-		opCache.push_back(op);
-	}
-	std::cout << "done" << std::endl;
-	
-	
-	std::cout << "start generations... (0/" << opCache.size() << ")" << std::endl;
-	int notReady = opCache.size();
-	while(notReady)
-	{
-		for(auto op : opCache) if( !op->_done )
-		{
-			if( op->isReady() )
-			{
-				std::cout << "applying " << op->_opName << "..." << std::endl;
-				op->apply();
-				notReady--;
-				std::cout << "done (" << (opCache.size()-notReady) << "/" << opCache.size() << ")" << std::endl;
-			}
-		}
-	}
+    JsonObject* root = dynamic_cast<JsonObject*>( parse(jsonWithoutSpace) );
+    JsonArray* array = root->getArray("operations");
+
+    JsonObject* prop = root->getObject("properties");
+    ImgOperation::s_width = prop->getNumeric("width")->value;
+    ImgOperation::s_height = prop->getNumeric("height")->value;
+
+    int s = array->value.size();
+    for(int i=0; i<s; ++i)
+    {
+        JsonObject* jo = array->getObject(i);
+        ImgOperation::Ptr op = createFromJsonObj(jo);
+        opCache.push_back(op);
+    }
+    std::cout << "done" << std::endl;
+
+
+    std::cout << "start generations... (0/" << opCache.size() << ")" << std::endl;
+    int notReady = opCache.size();
+    while(notReady)
+    {
+        for(auto op : opCache) if( !op->_done )
+        {
+            if( op->isReady() )
+            {
+                std::cout << "applying " << op->_opName << "..." << std::endl;
+                op->apply();
+                notReady--;
+                std::cout << "done (" << (opCache.size()-notReady) << "/" << opCache.size() << ")" << std::endl;
+            }
+        }
+    }
 }
 
 //-------------------------------------------------------
@@ -277,6 +283,31 @@ void JsonSaveOperation::apply()
 	_done = true;
 }
 
+
+
+
+//-------------------------------------------------------
+std::map<std::string,Image::Ptr> JsonFakeSaveOperation::s_fakeFiles;
+JsonFakeSaveOperation::JsonFakeSaveOperation() : ImgOperation("fakesave") {}
+bool JsonFakeSaveOperation::load(JsonObject* jo)
+{
+    _input_id = tryString(jo,"input_id");
+    _filename = tryString(jo,"filename");
+    addDepend(_input_id);
+    return true;
+}
+void JsonFakeSaveOperation::apply()
+{
+    if( !isReady() ) return;
+    s_fakeFiles[_filename] = s_finished[_input_id];
+    _done = true;
+}
+//-------------------------------------------------------
+
+
+
+
+
 //-------------------------------------------------------
 JsonBlurOperation::JsonBlurOperation() : ImageTransform("blur") {}
 
@@ -351,6 +382,7 @@ ImgOperation::Ptr createFromJsonObj(JsonObject* obj)
 	else if(opname == "noise") res = JsonNoiseOperation::create();
 	else if(opname == "voronoi") res = JsonVoronoiOperation::create();
 	else if(opname == "save") res = JsonSaveOperation::create();
+    else if(opname == "fakesave") res = JsonFakeSaveOperation::create();
 	else if(opname == "fbm") res = JsonFbmOperation::create();
 	else if(opname == "signal") res = JsonSignalOperation::create();
 	else if(opname == "colorMix") res = JsonColorMixOperation::create();

@@ -12,6 +12,7 @@ IMPGEARS_BEGIN
 
 //-------------------------------------------------------
 void IMP_API generateImageFromJson(const std::string filename);
+void IMP_API generateImageFromJsonData(const std::string json);
 
 //-------------------------------------------------------
 struct IMP_API ImgOperation : public Object
@@ -189,6 +190,20 @@ struct IMP_API JsonSaveOperation : public ImgOperation
 	
 	std::string _input_id;
 	std::string _filename;
+};
+
+//-------------------------------------------------------
+struct IMP_API JsonFakeSaveOperation : public ImgOperation
+{
+    Meta_Class(JsonFakeSaveOperation);
+    JsonFakeSaveOperation();
+    virtual bool load(JsonObject* jo);
+    virtual void apply();
+
+    std::string _input_id;
+    std::string _filename;
+
+    static std::map<std::string,Image::Ptr> s_fakeFiles;
 };
 
 //-------------------------------------------------------

@@ -30,6 +30,12 @@ void Node::remNode(const Node::Ptr& node)
 }
 
 //--------------------------------------------------------------
+void Node::clearNode()
+{
+    _children.clear();
+}
+
+//--------------------------------------------------------------
 void Node::accept( Visitor::Ptr& visitor )
 {
     update();
@@ -69,6 +75,5 @@ void Node::setScale(const Vec3& scale)
     _scale=scale;
     _scaleMat = Matrix4::scale(_scale.x(), _scale.y(), _scale.z());
 }
-
 
 IMPGEARS_END

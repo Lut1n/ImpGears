@@ -246,11 +246,13 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    vec3 color = u_color * v_color;
-    color *= textureColor(v_texCoord).xyz;
+    vec4 color = vec4(u_color * v_color,1.0);
+    color *= textureColor(v_texCoord);
+    if(color.w==0.0) discard;
+    
     vec4 emi = textureEmissive(v_texCoord);
 
-    out_color = vec4(clamp( max(color,emi.xyz),0.0,1.0 ), 1.0);
+    out_color = vec4(clamp( max(color.xyz,emi.xyz),0.0,1.0 ), color.w);
     out_emissive = clamp(emi,0.0,1.0);
 
     vec3 normal = textureNormal(v_texCoord);

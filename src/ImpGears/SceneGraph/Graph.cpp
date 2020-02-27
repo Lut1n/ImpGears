@@ -20,6 +20,11 @@ Graph::Graph()
     _initState->setViewport(0.0,0.0,512.0,512.0);
     _initState->setLineWidth(1.0);
     _initState->setDepthTest( true );
+    
+    ReflexionModel::Ptr reflexion = ReflexionModel::create();
+    RenderPass::Ptr pass_info = RenderPass::create();
+    _initState->setReflexion(reflexion);
+    _initState->setRenderPass(pass_info);
 }
 
 //--------------------------------------------------------------

@@ -18,9 +18,7 @@ public:
 
     Geometry::Ptr _geo;
     Material::Ptr _material;
-    int _gBuffer;
     bool _wireframe;
-    bool _loaded;
 
     GeoNode(const Polyhedron& buf, bool wireframe = false);
     GeoNode(const Geometry::Ptr& geo, bool wireframe = false);
@@ -31,8 +29,6 @@ public:
     void setMaterial(const Material::Ptr material);
 
     virtual ~GeoNode();
-
-    virtual void update();
 
 };
 

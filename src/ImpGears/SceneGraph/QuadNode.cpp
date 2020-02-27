@@ -5,8 +5,6 @@ IMPGEARS_BEGIN
 QuadNode::QuadNode()
     : GeoNode(nullptr,false)
 {
-    _loaded = true;
-
     // quad generation
     Vec3 p1(-1,-1,0);
     Vec3 p2(-1,+1,0);
@@ -32,12 +30,6 @@ QuadNode::QuadNode()
 
 QuadNode::~QuadNode()
 {
-}
-
-
-void QuadNode::update()
-{
-    // do nothing
 }
 
 IMPGEARS_END

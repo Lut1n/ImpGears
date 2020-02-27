@@ -13,8 +13,6 @@ public:
 
     QuadNode();
     virtual ~QuadNode();
-
-    virtual void update();
 };
 
 IMPGEARS_END

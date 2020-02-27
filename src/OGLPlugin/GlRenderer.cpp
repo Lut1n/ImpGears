@@ -208,8 +208,8 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
         _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
         if( overrideState ) _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
         
-        GeoNode::Ptr geode = std::dynamic_pointer_cast<GeoNode>( renderState.node );
-        ClearNode::Ptr clear = std::dynamic_pointer_cast<ClearNode>( renderState.node );
+        GeoNode::Ptr geode = GeoNode::dMorph( renderState.node );
+        ClearNode::Ptr clear = ClearNode::dMorph( renderState.node );
 
         if(geode)
         {
@@ -272,7 +272,7 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
 {
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
-        RenderToSamplerNode::Ptr render2sampler = std::dynamic_pointer_cast<RenderToSamplerNode>( queue->_renderBin.nodeAt(i) );
+        RenderToSamplerNode::Ptr render2sampler = RenderToSamplerNode::dMorph( queue->_renderBin.nodeAt(i) );
         if(render2sampler && render2sampler->ready()==false && render2sampler->cubemap() && render2sampler->scene())
         {
             Vec3 p(0.0);
@@ -303,8 +303,8 @@ void checkQueue(RenderQueue::Ptr queue)
     {
         RenderState renderState = queue->_renderBin.at(i);
         
-        GeoNode::Ptr geode = std::dynamic_pointer_cast<GeoNode>( renderState.node );
-        ClearNode::Ptr clear = std::dynamic_pointer_cast<ClearNode>( renderState.node );
+        GeoNode::Ptr geode = GeoNode::dMorph(renderState.node);
+        ClearNode::Ptr clear = ClearNode::dMorph(renderState.node);
 
         if(geode)
         {
@@ -380,7 +380,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
            p = queue->_camera->getAbsolutePosition();
 
        _environmentRenderer->render(
-                   scene, p,
+                   queue, p,
                    SceneRenderer::RenderFrame_Environment);
     }
 
@@ -401,7 +401,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
        if(light0) p = light0->_worldPosition;
 
        _shadowsRenderer->render(
-                   scene, p,
+                   queue, p,
                    SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
     }
 

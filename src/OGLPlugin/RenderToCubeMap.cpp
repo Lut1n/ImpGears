@@ -110,4 +110,34 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
 }
 
 
+void RenderToCubeMap::render(RenderQueue::Ptr& queue, const Vec3& center, SceneRenderer::RenderFrame frameType, ReflexionModel::Ptr overrideShader)
+{
+    const Camera* keep_cam = queue->_camera;
+    
+    _state->setUniform("u_proj", _proj);
+    _state->setViewport( Vec4(0.0,0.0,_resolution,_resolution) );
+    if(overrideShader) _state->setReflexion( overrideShader );
+
+    for(int i=0;i<6;++i)
+    {
+        _camera->setPosition(center);
+        _camera->setAbsolutePosition(center);
+        _camera->setTarget( center + _directions[i] );
+        _camera->setUpDir( _upDirections[i] * -1.0 );
+        _camera->lookAt();
+        queue->_camera = _camera.get();
+
+        _renderer->_renderPlugin->init(_targets[i]);
+        _renderer->_renderPlugin->bind(_targets[i]);
+        _targets[i]->change();
+
+        _renderer->drawQueue(queue, _state, frameType);
+
+        _renderer->_renderPlugin->unbind();
+    }
+    
+    queue->_camera = keep_cam;
+}
+
+
 IMPGEARS_END

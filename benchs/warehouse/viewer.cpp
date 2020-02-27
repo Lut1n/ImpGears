@@ -15,6 +15,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <Geometry/InstancedGeometry.h>
+
 using namespace imp;
 
 // common stuff
@@ -25,12 +27,13 @@ using namespace imp;
 #include "../common/basic_geometries.h"
 // #include "../common/basic_skybox.h"
 
+#define USE_INSTANCING
 
 Geometry::Ptr generateCase()
 {
     Geometry::Ptr geometry = Geometry::create();
     *geometry = imp::Geometry::cube();
-    *geometry = geometry->subdivise(10);
+    // *geometry = geometry->subdivise(10);
     Geometry::intoCCW(*geometry,true);
     geometry->generateColors(Vec3(0.8, 0.5, 0.3));
     geometry->generateTexCoords(Geometry::TexGenMode_Cubic,1.0);
@@ -41,50 +44,49 @@ Geometry::Ptr generateCase()
     return geometry;
 }
 
+
 #define GLSL_CODE( code ) #code
 
-static std::string glsl_phong_bis = GLSL_CODE(
-uniform mat4 u_model;
+static std::string glsl_instancing_vert = GLSL_CODE(
+
+// vertex attributes ( @see glBindAttribLocation )
+in vec3 a_vertex;   // location 0
+in vec3 a_color;    // location 1
+in vec3 a_normal;   // location 2
+in vec2 a_texcoord; // location 3
+
+in mat4 a_instTransform; // location 4,5,6,7
+
+// uniforms
+uniform mat4 u_proj;
 uniform mat4 u_view;
-uniform vec3 u_color;
-uniform float u_shininess;
+uniform mat4 u_model;
+uniform mat3 u_normal;
 
-varying vec2 v_texCoord;
-varying vec3 v_m;
-varying vec3 v_mv;
-varying vec3 v_n;
-varying vec3 a_n;
-varying vec3 v_vertex;
+// fragment shader stage input
+out vec2 v_texCoord;
+out vec3 v_m;
+out vec3 v_mv;
+out vec3 v_n;
+out vec3 v_vertex;
+out vec3 v_color;
+out mat4 v_model;
 
-mat3 build_tbn(vec3 n_ref)
+void main()
 {
-    vec3 n_z = n_ref; // normalize();
-    vec3 n_x = vec3(1.0,0.0,0.0);
-    vec3 n_y = cross(n_z,n_x);
-    vec3 n_x2 = vec3(0.0,1.0,0.0);
-    vec3 n_y_2 = cross(n_z,n_x2);
-    if(length(n_y) < length(n_y_2)) n_y = n_y_2;
+    mat4 _model = u_model * a_instTransform;
+    vec4 mv_pos = u_view * _model * vec4(a_vertex,1.0);
+    gl_Position = u_proj * mv_pos;
+    v_n = normalize(a_normal);
+    v_color = a_color;
 
-    n_y = normalize(n_y);
-    n_x = cross(n_y,n_z); n_x=normalize(n_x);
-    mat3 tbn = mat3(n_x,n_y,n_z);
-    return tbn;
+    v_texCoord = a_texcoord;
+    v_m = (_model * vec4(a_vertex,1.0)).xyz;
+    v_mv = mv_pos.xyz;
+    v_vertex = a_vertex;
+    v_model = _model;
 }
 
-void lighting(out vec4 out_color,
-              out vec4 out_emissive,
-              out vec3 out_normal,
-              out float out_reflectivity,
-              out float out_shininess,
-              out float out_depth)
-{
-    out_color = vec4(1.0,0.0,1.0, 1.0);
-    out_emissive = vec4(1.0,0.0,1.0, 1.0);
-    out_normal = vec3(0.0);
-    out_reflectivity = 0.0;
-    out_shininess = 0.0;
-    out_depth = 1.0;
-}
 );
 
 
@@ -103,50 +105,11 @@ Geometry::Ptr generateRoom()
     Geometry::Ptr geometry = Geometry::create();
     *geometry = imp::Geometry::cube();
     Geometry::intoCCW(*geometry,false);
-    geometry->generateColors(Vec3(0.3,0.5,1.0));
+    geometry->generateColors(Vec3(0.5,0.7,1.0));
     geometry->generateTexCoords(Geometry::TexGenMode_Cubic,10.0);
     geometry->scale(Vec3(50.0));
     geometry->generateNormals(Geometry::NormalGenMode_PerFace);
     *geometry += Vec3(0.0, 50.0, 0.0);
-
-    return geometry;
-}
-
-
-Geometry::Ptr generateRoom2()
-{
-    Geometry::Ptr wall_01 = generateCase();
-    Geometry::Ptr wall_02 = generateCase();
-    Geometry::Ptr wall_03 = generateCase();
-    Geometry::Ptr wall_04 = generateCase();
-    Geometry::Ptr ground = generateCase();
-    Geometry::Ptr woof = generateCase();
-
-    wall_01->scale( Vec3(1.0, 50.0, 50.0) );
-    wall_02->scale( Vec3(50.0, 50.0, 1.0) );
-    wall_03->scale( Vec3(1.0, 50.0, 50.0) );
-    wall_04->scale( Vec3(50.0, 50.0, 1.0) );
-    ground->scale( Vec3(50.0, 1.0, 50.0) );
-    woof->scale( Vec3(50.0, 1.0, 50.0) );
-
-    *wall_01 += Vec3(50.0, 0.0, 0.0);
-    *wall_02 += Vec3(0.0, 0.0, 50.0);
-    *wall_03 += Vec3(-50.0, 0.0, 0.0);
-    *wall_04 += Vec3(0.0, 0.0, -50.0);
-    *woof += Vec3(0.0, 49.0, 0.0);
-    *ground += Vec3(0.0, -51.0, 0.0);
-
-    Geometry::Ptr geometry = Geometry::create();
-    *geometry = *wall_01;
-    *geometry += *wall_02;
-    *geometry += *wall_03;
-    *geometry += *wall_04;
-    *geometry += *ground;
-    *geometry += *woof;
-
-    *geometry += Vec3(0.0, 50.0, 0.0);
-    // geometry->generateColors(Vec3(0.3,0.7,0.5));
-    geometry->generateColors(Vec3(0.5,0.5,1.0));
 
     return geometry;
 }
@@ -211,7 +174,6 @@ int main(int argc, char* argv[])
             imp::ReflexionModel::Texturing_Samplers_CNE,
             imp::ReflexionModel::MRT_1_Col,
             "glsl for scene object");
-    // r->_fragCode_lighting = glsl_phong_bis;
 
     imp::ReflexionModel::Ptr r2 = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_None,
@@ -232,7 +194,7 @@ int main(int argc, char* argv[])
     Material::Ptr light_material = Material::create(Vec3(1.0), 1.0);
     light_material->_emissive = emi;
 
-    GeoNode::Ptr roomNode = GeoNode::create(generateRoom2(), false);
+    GeoNode::Ptr roomNode = GeoNode::create(generateRoom(), false);
     roomNode->setReflexion(r);
     roomNode->setMaterial(material);
     roomNode->setPosition(Vec3(0.0,-50.0,0.0));
@@ -256,7 +218,12 @@ int main(int argc, char* argv[])
     pointNode->setPosition(Vec3(0.0,-50.0+10.0,0.0));
     pointNode->setReflexion(r);
     pointNode->setMaterial(light_material);
-
+    
+    
+    
+        
+    
+    // =====  classic geometry ========
     GeoNode::Ptr case01_node = GeoNode::create(generateCase2(), false);
     case01_node->setReflexion(r);
     case01_node->setMaterial(case_material);
@@ -266,34 +233,91 @@ int main(int argc, char* argv[])
     case02_node->setReflexion(r);
     case02_node->setMaterial(case_material);
     case02_node->setScale(Vec3(5.0));
+    case02_node->setRotation(Vec3(0.0,2.0,0.0));
     case02_node->setPosition(Vec3(-10.0, -50.0, 10.0));
     GeoNode::Ptr case03_node = GeoNode::create(generateCase2(), false);
     case03_node->setReflexion(r);
     case03_node->setMaterial(case_material);
     case03_node->setScale(Vec3(2.0));
+    case03_node->setRotation(Vec3(0.0,1.0,0.0));
     case03_node->setPosition(Vec3(0.0, -50.0, 0.0));
+    // =====  classic geometry ========
+    
+    
+    
+    
+    
+    #ifdef USE_INSTANCING
+    
+    imp::ReflexionModel::Ptr instance_shader = imp::ReflexionModel::create(
+            imp::ReflexionModel::Lighting_Phong,
+            imp::ReflexionModel::Texturing_Samplers_CNE,
+            imp::ReflexionModel::MRT_2_Col_Emi, "glsl instancing");
+    instance_shader->_vertCode = glsl_instancing_vert;
+    // instance_shader->_fragCode_lighting = glsl_instancing_frag;
+    
+    
+    
+    
+    
+    InstancedGeometry::Ptr instanced = InstancedGeometry::create();
+    instanced->clone(case01_node->_geo);
+    case01_node->computeMatrices();
+    case02_node->computeMatrices();
+    case03_node->computeMatrices();
+    
+    instanced->setTransformAt(0, case01_node->getModelMatrix());
+    instanced->setTransformAt(1, case02_node->getModelMatrix());
+    instanced->setTransformAt(2, case03_node->getModelMatrix());
+    
+    GeoNode::Ptr instance_node = GeoNode::create(instanced, false);
+    instance_node->setMaterial(case_material);
+    instance_node->setReflexion(instance_shader);
+    root->addNode(instance_node);
+    
+    #else
+    
+    root->addNode(case01_node);
+    root->addNode(case02_node);
+    root->addNode(case03_node);
+    
+    #endif
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     root->addNode(camera);
     root->addNode(roomNode);
     root->addNode(coordsNode);
     root->addNode(light);
     root->addNode(pointNode);
-    root->addNode(case01_node);
-    root->addNode(case02_node);
-    root->addNode(case03_node);
     graph->setRoot(root);
+    
+    RenderPass::Ptr env_sha = RenderPass::create();
+    RenderPass::Ptr env = RenderPass::create();
+    RenderPass::Ptr sha = RenderPass::create();
+    
+    env->enablePass(RenderPass::Pass_EnvironmentMapping);
+    env_sha->enablePass(RenderPass::Pass_EnvironmentMapping);
+    env_sha->enablePass(RenderPass::Pass_ShadowMapping);
+    sha->enablePass(RenderPass::Pass_ShadowMapping);
 
-    roomNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
-    coordsNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
-    case01_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
-    case02_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
-    case03_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_ShadowMapping);
-
-    // coordsNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
-    roomNode->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
-    case01_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
-    case02_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
-    // case03_node->getState()->getRenderPass()->enablePass(RenderPass::Pass_EnvironmentMapping);
+    roomNode->getState()->setRenderPass(env);
+    coordsNode->getState()->setRenderPass(sha);
+    case01_node->getState()->setRenderPass(env_sha);
+    case02_node->getState()->setRenderPass(env_sha);
+    case03_node->getState()->setRenderPass(env_sha);
+    
+    #ifdef USE_INSTANCING
+    instance_node->getState()->setRenderPass(env_sha);
+    #endif
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);

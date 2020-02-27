@@ -12,6 +12,8 @@
 #include <OGLPlugin/ShadowCasting.h>
 #include <OGLPlugin/AmbientOcclusion.h>
 #include <SceneGraph/RenderToSamplerNode.h>
+#include <OGLPlugin/GlslCode.h>
+#include <Geometry/InstancedGeometry.h>
 
 #define FRAMEOP_ID_ENVFX 0
 #define FRAMEOP_ID_SHAMIX 1
@@ -36,7 +38,7 @@
 
 //--------------------------------------------------------------
 static std::string glsl_shadow_depth = GLSL_CODE(
-varying vec3 v_mv;
+in vec3 v_mv;
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -80,6 +82,14 @@ GlRenderer::GlRenderer()
                 ReflexionModel::MRT_2_Col_Emi,
                 "glsl_shadow_depth");
     _shadowsmapShader->_fragCode_lighting = glsl_shadow_depth;
+    
+    _shadowsmapShader_instanced = ReflexionModel::create(
+                ReflexionModel::Lighting_Customized,
+                ReflexionModel::Texturing_Samplers_CNE,
+                ReflexionModel::MRT_2_Col_Emi,
+                "glsl_shadow_depth");
+    _shadowsmapShader_instanced->_fragCode_lighting = glsl_shadow_depth;
+    _shadowsmapShader_instanced->_vertCode = glsl_instancedBasicVert;
 
 
     // mrt setup
@@ -198,6 +208,7 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
                             SceneRenderer::RenderFrame renderPass )
 {
     if(_localState==nullptr) _localState = State::create();
+    
     Matrix4 view;
     if(queue->_camera) view = queue->_camera->getViewMatrix();
 
@@ -205,20 +216,45 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
     {
         RenderState renderState = queue->_renderBin.at(i);
         
-        _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
-        if( overrideState ) _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
-        
         GeoNode::Ptr geode = GeoNode::dMorph( renderState.node );
         ClearNode::Ptr clear = ClearNode::dMorph( renderState.node );
 
         if(geode)
         {
-            Material::Ptr mat = geode->_material;
-            float shininess = mat->_shininess;
-            Vec3 color = mat->_color;
+            // filter with render pass flag
+            RenderPass::PassFlag expectedFlag = RenderPass::Pass_DefaultMRT;
+            if( renderPass==SceneRenderer::RenderFrame_Environment )
+                expectedFlag = RenderPass::Pass_EnvironmentMapping;
+            if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
+                expectedFlag = RenderPass::Pass_ShadowMapping;
 
+            RenderPass::Ptr renderPass_info = renderState.state->getRenderPass();
+            if(!renderPass_info || !renderPass_info->isPassEnabled(expectedFlag)) continue;
+            
+            
+            
+            // state copy and override
+            _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
+            if( overrideState )
+            {
+                _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
+                
+                // case of shadow pass + instanced geometry
+                InstancedGeometry::Ptr instanced = InstancedGeometry::dMorph(geode->_geo);
+                if(renderPass == RenderFrame_ShadowMap &&  instanced)
+                {
+                    _localState->setReflexion(_shadowsmapShader_instanced);
+                }
+            }
+            
+            
+            // update Material uniforms
             if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
+                Material::Ptr mat = geode->_material;
+                float shininess = mat->_shininess;
+                Vec3 color = mat->_color;
+                
                 if(mat->_baseColor)
                         _localState->setUniform("u_sampler_color", mat->_baseColor, 0);
                 if(mat->_normalmap)
@@ -240,23 +276,14 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             renderState.normal = Matrix3(renderState.model).inverse().transpose();
             renderState.proj = _localState->getProjectionMatrix();
             
+            // update matrix uniforms
             _localState->setUniform("u_view", view);
             _localState->setUniform("u_proj", renderState.proj);
             _localState->setUniform("u_model", renderState.model);
             _localState->setUniform("u_normal", renderState.normal);
 
             applyState(_localState, renderPass);
-            if( renderPass==SceneRenderer::RenderFrame_ShadowMap ) _renderPlugin->setCulling(2);
-
-            RenderPass::Ptr renderPass_info = _localState->getRenderPass();
-
-            RenderPass::PassFlag expectedFlag = RenderPass::Pass_DefaultMRT;
-            if( renderPass==SceneRenderer::RenderFrame_Environment )
-                expectedFlag = RenderPass::Pass_EnvironmentMapping;
-            if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
-                expectedFlag = RenderPass::Pass_ShadowMapping;
-
-            if(renderPass_info && renderPass_info->isPassEnabled(expectedFlag)) drawGeometry(geode.get());
+            drawGeometry(geode.get());
         }
         else if(clear)
         {
@@ -470,7 +497,9 @@ void GlRenderer::applyState(const State::Ptr& state,
     if(_renderPlugin == nullptr) return;
 
     if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
+    {
         _renderPlugin->setCulling(2); // front culling
+    }
     else
         _renderPlugin->setCulling(state->getFaceCullingMode());
 

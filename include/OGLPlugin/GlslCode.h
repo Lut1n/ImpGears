@@ -1,3 +1,6 @@
+#ifndef IMP_GLSL_CODE_H
+#define IMP_GLSL_CODE_H
+
 #define GLSL_CODE( code ) #code
 
 /// =========== VERTEX SHADER SOURCE =====================
@@ -22,6 +25,7 @@ out vec3 v_mv;
 out vec3 v_n;
 out vec3 v_vertex;
 out vec3 v_color;
+out mat4 v_model;
 
 void main()
 {
@@ -34,6 +38,50 @@ void main()
     v_m = (u_model * vec4(a_vertex,1.0)).xyz;
     v_mv = mv_pos.xyz;
     v_vertex = a_vertex;
+    v_model = u_model;
+}
+
+);
+
+
+static std::string glsl_instancedBasicVert = GLSL_CODE(
+
+// vertex attributes ( @see glBindAttribLocation )
+in vec3 a_vertex;   // location 0
+in vec3 a_color;    // location 1
+in vec3 a_normal;   // location 2
+in vec2 a_texcoord; // location 3
+
+in mat4 a_instTransform; // location 4,5,6,7
+
+// uniforms
+uniform mat4 u_proj;
+uniform mat4 u_view;
+uniform mat4 u_model;
+uniform mat3 u_normal;
+
+// fragment shader stage input
+out vec2 v_texCoord;
+out vec3 v_m;
+out vec3 v_mv;
+out vec3 v_n;
+out vec3 v_vertex;
+out vec3 v_color;
+out mat4 v_model;
+
+void main()
+{
+    mat4 _model = u_model * a_instTransform;
+    vec4 mv_pos = u_view * _model * vec4(a_vertex,1.0);
+    gl_Position = u_proj * mv_pos;
+    v_n = normalize(a_normal);
+    v_color = a_color;
+
+    v_texCoord = a_texcoord;
+    v_m = (_model * vec4(a_vertex,1.0)).xyz;
+    v_mv = mv_pos.xyz;
+    v_vertex = a_vertex;
+    v_model = _model;
 }
 
 );
@@ -50,6 +98,7 @@ in vec3 v_m;
 in vec3 v_mv;
 in vec3 v_vertex;
 in vec3 v_color;
+in mat4 v_model;
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -211,7 +260,6 @@ float textureReflectivity(vec2 uv)
 static std::string glsl_phong = GLSL_CODE(
 
 // uniforms
-uniform mat4 u_model;
 uniform mat4 u_view;
 uniform vec3 u_color;
 uniform float u_shininess;
@@ -223,6 +271,7 @@ in vec3 v_mv;
 in vec3 v_n;
 in vec3 v_vertex;
 in vec3 v_color;
+in mat4 v_model;
 
 mat3 build_tbn(vec3 n_ref)
 {
@@ -256,7 +305,7 @@ void lighting(out vec4 out_color,
     out_emissive = clamp(emi,0.0,1.0);
 
     vec3 normal = textureNormal(v_texCoord);
-    mat3 normal_mat = transpose( inverse( mat3(u_view*u_model) ) );
+    mat3 normal_mat = transpose( inverse( mat3(u_view*v_model) ) );
 
     mat3 tbn = build_tbn( normalize(v_n) );
     out_normal = (normal_mat * tbn * normal) * 0.5 + 0.5;
@@ -361,3 +410,5 @@ void main()
 }
 
 );
+
+#endif // IMP_GLSL_CODE_H

@@ -3,6 +3,7 @@
 
 #include <Core/Object.h>
 #include <Geometry/Geometry.h>
+#include <Geometry/InstancedGeometry.h>
 
 #include <OGLPlugin/GlError.h>
 
@@ -14,8 +15,6 @@ class IMP_API VertexArray : public Object
 public:
 
     Meta_Class(VertexArray)
-
-    const int MAX_VBO_COUNT = 5;
 
     enum UsageMode
     {
@@ -30,6 +29,7 @@ public:
         Buffer_Colors,
         Buffer_Normals,
         Buffer_TexCoords,
+        Buffer_InstTransforms,
 
         // buffer vector size
         Buffer_Count
@@ -82,6 +82,8 @@ private:
     static std::uint32_t _s_count;
     static std::uint32_t _s_vboCount;
 
+    bool _instanced;
+    int _instanceCount;
 };
 
 

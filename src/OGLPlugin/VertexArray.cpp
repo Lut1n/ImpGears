@@ -12,7 +12,9 @@ VertexArray::VertexArray()
     _buffers.resize(Buffer_Count, 0);
     _primitive = Geometry::Primitive_Triangles;
     _useElements = false;
+    _instanced = false;
     _count = 0;
+    _instanceCount = 0;
 
     glGenVertexArrays(1, &_vao);
     GL_CHECKERROR("gen vao");
@@ -70,8 +72,29 @@ void VertexArray::load(const Geometry& geometry)
         loadBuffer<std::uint32_t>(Buffer_Indices, geometry._indices, true);
         _count = geometry._indices.size();
     }
+    
+    
+    const InstancedGeometry* instancedGeo = dynamic_cast<const InstancedGeometry*>( &geometry );
+    if(instancedGeo && instancedGeo->getTransforms().size()>0)// && instancedGeo->hasChanged())
+    {
+        std::cout << "instanced geometry detected" << std::endl;
+        const std::vector<Matrix4>& bufMat = instancedGeo->getTransforms();
+        _instanced = bufMat.size()>0;
+        _instanceCount = bufMat.size();
+        
+        
+        std::vector<float> buf(_instanceCount * 16);
+        for(int i=0;i<_instanceCount;++i)
+        {
+            const float* data = bufMat[i].data();
+            for(int k=0;k<16;++k) buf[i*16+k] = data[k];
+        }
+        loadBuffer<float>(Buffer_InstTransforms, buf);
+    }
+    
 
     GLuint glVertex = 0, glColor = 1, glNormal = 2, glTexCoord = 3;
+    GLuint glInstTransform1 = 4, glInstTransform2 = 5, glInstTransform3 = 6, glInstTransform4 = 7;
 
     enableAttrib(Buffer_Vertices, glVertex, 3, sizeof(float)*3, 0);
     if(geometry._hasColors)
@@ -80,6 +103,19 @@ void VertexArray::load(const Geometry& geometry)
         enableAttrib(Buffer_Normals, glNormal, 3, sizeof(float)*3, 0);
     if(geometry._hasTexCoords)
         enableAttrib(Buffer_TexCoords, glTexCoord, 2, sizeof(float)*2, 0);
+    if(_instanced)
+    {
+        GLsizei vec4size = sizeof(float)*4;
+        enableAttrib(Buffer_InstTransforms, glInstTransform1, 4, 4*vec4size, 0*4);
+        enableAttrib(Buffer_InstTransforms, glInstTransform2, 4, 4*vec4size, 1*4);
+        enableAttrib(Buffer_InstTransforms, glInstTransform3, 4, 4*vec4size, 2*4);
+        enableAttrib(Buffer_InstTransforms, glInstTransform4, 4, 4*vec4size, 3*4);
+        
+        glVertexAttribDivisor(glInstTransform1, 1);
+        glVertexAttribDivisor(glInstTransform2, 1);
+        glVertexAttribDivisor(glInstTransform3, 1);
+        glVertexAttribDivisor(glInstTransform4, 1);
+    }
 }
 
 //--------------------------------------------------------------
@@ -115,8 +151,12 @@ void VertexArray::draw()
     else if(_primitive == Geometry::Primitive_Lines) glPrimitive = GL_LINES;
     else if(_primitive == Geometry::Primitive_Triangles) glPrimitive = GL_TRIANGLES;
 
-    if(_useElements)
+    if(_useElements && _instanced)
+        glDrawElementsInstanced(glPrimitive,_count,GL_UNSIGNED_INT,(void*)0,_instanceCount);
+    else if(_useElements)
         glDrawElements(glPrimitive, _count, GL_UNSIGNED_INT, (void*)0);
+    else if(_instanced)
+        glDrawArraysInstanced(glPrimitive,0,_count,_instanceCount);
     else
         glDrawArrays(glPrimitive, 0, _count);
 

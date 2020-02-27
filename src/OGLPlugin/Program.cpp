@@ -58,11 +58,12 @@ void Program::load(const std::string& vertCode, const std::string& fragCode)
     GL_CHECKERROR(_name + " - attach fragment shader");
 
     // setup input attribute locations
-    GLuint glVertex = 0, glColor = 1, glNormal = 2, glTexCoord = 3;
+    GLuint glVertex = 0, glColor = 1, glNormal = 2, glTexCoord = 3, glInstTransform = 4;
     glBindAttribLocation(_programID, glVertex, "a_vertex");
     glBindAttribLocation(_programID, glColor, "a_color");
     glBindAttribLocation(_programID, glNormal, "a_normal");
     glBindAttribLocation(_programID, glTexCoord, "a_texcoord");
+    glBindAttribLocation(_programID, glInstTransform, "a_instTransform");
 
     // setup output fragment data locations
     GLuint dataColor = 0, dataEmi = 1, dataNormal = 2, dataReflect = 3, dataShininess = 4, dataDepth = 5;

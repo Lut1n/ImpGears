@@ -60,6 +60,7 @@ protected:
     RenderToCubeMap::Ptr _shadowsRenderer;
     RenderToCubeMap::Ptr _environmentRenderer;
     ReflexionModel::Ptr _shadowsmapShader;
+    ReflexionModel::Ptr _shadowsmapShader_instanced;
 
     RenderTarget::Ptr _internalFrames;
     

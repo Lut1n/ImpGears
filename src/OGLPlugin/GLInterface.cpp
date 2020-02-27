@@ -277,7 +277,7 @@ int GlPlugin::load(CubeMapSampler::Ptr& sampler)
 //--------------------------------------------------------------
 int GlPlugin::load(ReflexionModel::Ptr& program)
 {
-    static const std::string glsl_version = "#version 130\n"; // "#version 330 core\n";
+    static const std::string glsl_version = "#version 330\n"; // "#version 130\n";
 
     ProgData::Ptr d = s_internalState->getProg(program);
     if(d != nullptr) return 0;

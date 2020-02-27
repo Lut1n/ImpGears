@@ -12,7 +12,7 @@ struct IMP_API ReflexionModel : public Object
 {
     Meta_Class(ReflexionModel);
 
-    struct TexturingCallback
+    struct TexturingCallback : public Object
     {
         Meta_Class(TexturingCallback)
 
@@ -21,14 +21,14 @@ struct IMP_API ReflexionModel : public Object
         virtual Vec3 textureEmissive(const Vec2& uv, const UniformMap& uniforms, Varyings& varyings) = 0;
     };
 
-    struct LightingCallback
+    struct LightingCallback : public Object
     {
         Meta_Class(LightingCallback)
 
         virtual void applyLighting(const UniformMap& uniforms, Varyings& varyings, TexturingCallback::Ptr& texturing, std::vector<Vec3>& outColor) = 0;
     };
 
-    struct MRTCallback
+    struct MRTCallback : public Object
     {
         Meta_Class(MRTCallback)
 

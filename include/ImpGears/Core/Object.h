@@ -15,6 +15,8 @@
 
 #define Meta_Class(name) \
 	typedef std::shared_ptr<name> Ptr;\
+    static name::Ptr dMorph(Object::Ptr obj){return std::dynamic_pointer_cast<name>(obj);}\
+    static name::Ptr sMorph(Object::Ptr obj){return std::static_pointer_cast<name>(obj);}\
 	static std::string getClassName() {return std::string( #name );}\
 	virtual std::string getObjectID() const {std::stringstream ss; ss << getClassName() << "@" << (this); return ss.str();}\
 	template<class... Args> static Ptr create(Args&&... args) {return std::make_shared<name>(std::forward<Args>(args)...);}

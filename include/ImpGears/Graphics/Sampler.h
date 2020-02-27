@@ -10,7 +10,7 @@ IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 template<typename TyIn, typename TyOut>
-class IMP_API Sampler
+class IMP_API Sampler : public Object
 {
 public:
 

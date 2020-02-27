@@ -13,7 +13,7 @@ IMPGEARS_BEGIN
 
 class GlRenderer;
 
-class IMP_API FrameOperation
+class IMP_API FrameOperation : public Object
 {
 public:
 
@@ -55,7 +55,7 @@ protected:
     static std::string s_glsl_fill;
 };
 
-class IMP_API Pipeline
+class IMP_API Pipeline : public Object
 {
 public:
 

@@ -43,7 +43,7 @@ public:
 
     const Matrix4& getModelMatrix() const { return _modelMatrix; }
 
-    virtual State::Ptr getState() { return _state; }
+    virtual State::Ptr getState(bool createIfNotExist = true);
 
     int childrenCount() const {return _children.size();}
 
@@ -56,6 +56,7 @@ protected:
 
     Matrix4 _positionMat, _rotationMat, _scaleMat;
     Matrix4 _modelMatrix;
+    bool _transformChanged;
 
     NodeList _children;
 };

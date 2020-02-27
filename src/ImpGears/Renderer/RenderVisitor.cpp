@@ -15,14 +15,15 @@ State::Ptr StackItem::s_defaultState = nullptr;
 StackItem::StackItem()
 {
     state = State::create();
+    overrideState = nullptr;
     if(s_defaultState == nullptr) s_defaultState = State::create();
 }
 
 //--------------------------------------------------------------
 void StackItem::reset()
 {
-    // state = State::create();
     state->clone(s_defaultState,State::CloneOpt_OverrideRef);
+    overrideState = nullptr;
     matrix = Matrix4();
 }
 
@@ -38,17 +39,33 @@ void StateStack::push(const State::Ptr src_state, const Matrix4& mat)
     position++;
     if( size()>(int)items.size() ) items.resize( size() );
     
-    Matrix4 prev_mat;
-    if(position>0)
+    StackItem& curr = items[position];
+    curr.overrideState = nullptr;
+    
+    if(position == 0)
     {
-        items[position].state->clone(items[position-1].state, State::CloneOpt_OverrideRef);
-        prev_mat = items[position-1].matrix;
+        if(src_state)
+            curr.state->clone(src_state, State::CloneOpt_OverrideRef);
+        else 
+            curr.reset();
+        curr.matrix = mat;
     }
     else
-        items[position].reset();
-    
-    items[position].state->clone(src_state, State::CloneOpt_OverrideChangedRef);
-    items[position].matrix = mat * prev_mat;
+    {
+        StackItem& prev = items[position-1];
+        State::Ptr& baseSt = prev.overrideState ? prev.overrideState : prev.state;
+        curr.matrix = mat * prev.matrix;
+        if(src_state)
+        {
+            curr.state->clone(baseSt, State::CloneOpt_OverrideRef);
+            curr.state->clone(src_state, State::CloneOpt_OverrideChangedRef);
+        }
+        else
+        {
+            curr.overrideState = baseSt;
+        }
+        
+    }
 }
 
 //--------------------------------------------------------------
@@ -72,7 +89,10 @@ void StateStack::reset()
 //--------------------------------------------------------------
 State::Ptr StateStack::topState() const
 {
-    if(position>=0) return items[position].state;
+    if(position>=0)
+    {
+        return items[position].overrideState ? items[position].overrideState : items[position].state;
+    }
     return nullptr;
 }
 
@@ -103,7 +123,6 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
     {
         std::cout << "Warning : matrices or states stacks are not consistent" << std::endl;
     }
-    // stack = StateStack();
     stack.reset();
 
     _queue = initQueue;
@@ -116,8 +135,6 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
 //--------------------------------------------------------------
 bool RenderVisitor::apply( Node::Ptr node )
 {
-    // if(_toSkip == node) return false;
-
     Camera::Ptr asCamera = std::dynamic_pointer_cast<Camera>( node );
     ClearNode::Ptr asClear = std::dynamic_pointer_cast<ClearNode>( node );
     LightNode::Ptr asLight = std::dynamic_pointer_cast<LightNode>( node );
@@ -173,7 +190,7 @@ void RenderVisitor::applyClearNode( ClearNode::Ptr node )
 //--------------------------------------------------------------
 void RenderVisitor::push( Node::Ptr node )
 {
-    stack.push(node->getState(), node->getModelMatrix() );
+    stack.push(node->getState(false), node->getModelMatrix() );
     
 }
 

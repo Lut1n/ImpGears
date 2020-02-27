@@ -37,7 +37,6 @@ void StateBin::push(const State::Ptr state, Node::Ptr node, const Matrix4& model
     position++;
     if( size()>(int)items.size() ) items.resize( size() );
     
-    // items[position].state = state;
     items[position].state->clone(state, State::CloneOpt_OverrideRef);
     items[position].node = node;
     items[position].model = model;

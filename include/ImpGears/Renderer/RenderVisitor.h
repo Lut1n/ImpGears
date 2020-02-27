@@ -17,6 +17,7 @@ IMPGEARS_BEGIN
 struct IMP_API StackItem
 {
     State::Ptr state;
+    State::Ptr overrideState;
     Matrix4 matrix;
     
     

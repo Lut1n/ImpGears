@@ -10,7 +10,7 @@ Node::Node()
     , _rotation(0.0)
     , _scale(1.0)
 {
-    _state = State::create();
+    _transformChanged = true;
 }
 
 //--------------------------------------------------------------
@@ -53,10 +53,11 @@ void Node::accept( Visitor& visitor )
 //--------------------------------------------------------------
 void Node::computeMatrices()
 {
-    _modelMatrix =
-            _scaleMat
-            * _rotationMat
-            * _positionMat;
+    if(_transformChanged)
+    {
+        _modelMatrix = _scaleMat * _rotationMat * _positionMat;
+        _transformChanged = false;
+    }
 }
 
 
@@ -65,6 +66,7 @@ void Node::setPosition(const Vec3& position)
 {
     _position=position;
     _positionMat = Matrix4::translation(_position.x(), _position.y(), _position.z());
+    _transformChanged = true;
 }
 void Node::setRotation(const Vec3& rotation)
 {
@@ -72,11 +74,20 @@ void Node::setRotation(const Vec3& rotation)
     _rotationMat = Matrix4::rotationX(_rotation.x())
             * Matrix4::rotationY(_rotation.y())
             * Matrix4::rotationZ(_rotation.z());
+    _transformChanged = true;
 }
 void Node::setScale(const Vec3& scale)
 {
     _scale=scale;
     _scaleMat = Matrix4::scale(_scale.x(), _scale.y(), _scale.z());
+    _transformChanged = true;
+}
+
+State::Ptr Node::getState(bool createIfNotExist)
+{
+    if(createIfNotExist && _state==nullptr)
+        _state = State::create();
+    return _state;
 }
 
 IMPGEARS_END

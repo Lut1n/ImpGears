@@ -300,18 +300,51 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
         RenderToSamplerNode::Ptr render2sampler = RenderToSamplerNode::dMorph( queue->_renderBin.nodeAt(i) );
-        if(render2sampler && render2sampler->ready()==false && render2sampler->cubemap() && render2sampler->scene())
+        if(render2sampler && render2sampler->ready()==false && render2sampler->scene())
         {
-            Vec3 p(0.0);
-            
-            RenderToCubeMap::Ptr render2cm = RenderToCubeMap::create(this);
-            render2cm->setCubeMap(render2sampler->cubemap());
-            render2cm->setResolution(128.0);
             Graph::Ptr scene = render2sampler->scene();
-
-            render2cm->render(scene, p, SceneRenderer::RenderFrame_Default);
+            if( render2sampler->cubemap() )
+            {
+                RenderToCubeMap::Ptr render2cm;
+                if( render2sampler->getRenderData() )
+                {
+                    render2cm = RenderToCubeMap::dMorph( render2sampler->getRenderData() );
+                }
+                else
+                {
+                    render2cm = RenderToCubeMap::create(this);
+                    render2cm->setCubeMap( render2sampler->cubemap() );
+                    render2cm->setResolution(128.0);
+                    render2sampler->setRenderData( render2cm );
+                }
+                render2cm->render(scene, Vec3(0.0));
+            }
+            else if( render2sampler->texture() )
+            {
+                RenderTarget::Ptr render2tex;
+                if( render2sampler->getRenderData() )
+                {
+                    render2tex = RenderTarget::dMorph( render2sampler->getRenderData() );
+                }
+                else
+                {
+                    render2tex = RenderTarget::create();
+                    render2tex->build({render2sampler->texture()}, true);
+                    render2tex->setClearColor(0, Vec4(1.0));
+                    render2sampler->setRenderData( render2tex );
+                }
+                RenderQueue::Ptr queue = RenderQueue::create();
+                queue = applyRenderVisitor(scene, queue);
+                _renderPlugin->init(render2tex);
+                _renderPlugin->bind(render2tex);
+                render2tex->change();
+                drawQueue(queue);
+                _renderPlugin->unbind();
+                
+            }
             render2sampler->makeReady();
         }
+        
     }
 }
 

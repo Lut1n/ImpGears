@@ -19,16 +19,26 @@ public:
     CubeMapSampler::Ptr cubemap() {return _cubemap;}
     void setCubeMap(CubeMapSampler::Ptr cm){_cubemap=cm;}
     
+    ImageSampler::Ptr texture() {return _texture;}
+    void setTexture(ImageSampler::Ptr tx){_texture=tx;}
+    
     Graph::Ptr scene() {return _scene;}
     void setScene(Graph::Ptr s){_scene=s;}
     
     bool ready() const {return _rendered;}
     void makeReady() {_rendered=true;}
+    void makeDirty() {_rendered=false;}
+    
+    void setRenderData(Object::Ptr rd) {_renderData=rd;}
+    Object::Ptr getRenderData() { return _renderData; }
     
 
 protected:
 
     CubeMapSampler::Ptr _cubemap;
+    ImageSampler::Ptr _texture;
+    Object::Ptr _renderData;
+    
     Graph::Ptr _scene;
     bool _rendered;
 

@@ -29,15 +29,11 @@ public:
     void makeReady() {_rendered=true;}
     void makeDirty() {_rendered=false;}
     
-    void setRenderData(Object::Ptr rd) {_renderData=rd;}
-    Object::Ptr getRenderData() { return _renderData; }
-    
 
 protected:
 
     CubeMapSampler::Ptr _cubemap;
     ImageSampler::Ptr _texture;
-    Object::Ptr _renderData;
     
     Graph::Ptr _scene;
     bool _rendered;

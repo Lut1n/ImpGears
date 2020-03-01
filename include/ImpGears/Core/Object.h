@@ -27,10 +27,17 @@ class IMP_API Object
 {
 	public:
 	
+	Meta_Class(Object)
+	
 	Object(){}
 	virtual ~Object(){}
-	
-	Meta_Class(Object)
+    
+    Object::Ptr getRenderData(){return _renderData;}
+    void setRenderData(Object::Ptr obj){_renderData=obj;}
+    
+    private:
+    
+    Object::Ptr _renderData;
 };
 
 IMPGEARS_END

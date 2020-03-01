@@ -28,84 +28,9 @@ IMP_EXTERN IMP_API imp::RenderPlugin::Ptr loadRenderPlugin()
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-struct VboData : public RenderPlugin::Data
-{
-    Meta_Class(VboData)
-    VboData() { ty=RenderPlugin::Ty_Vbo; }
-
-    VertexArray vbo;
-};
-
-//--------------------------------------------------------------
-struct TexData : public RenderPlugin::Data
-{
-    Meta_Class(TexData)
-    TexData() { ty=RenderPlugin::Ty_Tex; }
-
-    Texture::Ptr tex;
-    CubeMap::Ptr cubetex;
-    std::string info;
-};
-
-//--------------------------------------------------------------
-struct ProgData : public RenderPlugin::Data
-{
-    Meta_Class(ProgData)
-    ProgData() { ty=RenderPlugin::Ty_Shader; }
-
-    Program sha;
-};
-
-//--------------------------------------------------------------
-struct FboData : public RenderPlugin::Data
-{
-    Meta_Class(FboData)
-    FboData() { ty=RenderPlugin::Ty_Tgt; }
-
-    FrameBuffer frames;
-};
-
-//--------------------------------------------------------------
 struct GlPlugin::Priv
 {
-    std::map<Geometry::Ptr,VboData::Ptr> vertexBuffers;
-    std::map<ImageSampler::Ptr,TexData::Ptr> samplers;
-    std::map<CubeMapSampler::Ptr,TexData::Ptr> cubesamplers;
-    std::map<ReflexionModel::Ptr,ProgData::Ptr> programs;
-    std::map<RenderTarget::Ptr,FboData::Ptr> renderTargets;
-    
     bool _needInverseMat;
-
-    VboData::Ptr getVbo(Geometry::Ptr& g)
-    {
-        auto it=vertexBuffers.find(g);
-        if(it==vertexBuffers.end())return nullptr;
-        else return it->second;
-    }
-    TexData::Ptr getTex(ImageSampler::Ptr& is)
-    {
-        auto it=samplers.find(is);
-        if(it==samplers.end())return nullptr;
-        else return it->second;
-    }
-    TexData::Ptr getTex(CubeMapSampler::Ptr& is)
-    {
-        auto it=cubesamplers.find(is);
-        if(it==cubesamplers.end())return nullptr;
-        else return it->second;
-    }
-    ProgData::Ptr getProg(ReflexionModel::Ptr& cb)
-    {
-        auto it=programs.find(cb);
-        if(it==programs.end())return nullptr;
-        else return it->second;
-    }
-    FboData::Ptr getFbo(RenderTarget::Ptr& t)
-    {
-        auto it=renderTargets.find(t);
-        if(it==renderTargets.end())return nullptr;
-        else return it->second;
-    }
 };
 
 //--------------------------------------------------------------
@@ -229,12 +154,11 @@ void GlPlugin::setDepthTest(int mode)
 //--------------------------------------------------------------
 int GlPlugin::load(Geometry::Ptr& geo)
 {
-    VboData::Ptr d = s_internalState->getVbo(geo);
-    if(d == nullptr)
+    if( geo->getRenderData() == nullptr )
     {
-        d = VboData::create();
-        d->vbo.load(*geo);
-        s_internalState->vertexBuffers[geo] = d;
+        VertexArray::Ptr vao = VertexArray::create();
+        vao->load(*geo);
+        geo->setRenderData(vao);
     }
     return 0;
 }
@@ -242,20 +166,18 @@ int GlPlugin::load(Geometry::Ptr& geo)
 //--------------------------------------------------------------
 int GlPlugin::load(ImageSampler::Ptr& sampler)
 {
-    TexData::Ptr d = s_internalState->getTex(sampler);
-    if(d == nullptr)
+    if( sampler->getRenderData() == nullptr )
     {
-        d = TexData::create();
-        d->tex = Texture::create();
+        Texture::Ptr tex = Texture::create();
         Image::Ptr img = sampler->getSource();
         if(img == nullptr)
             std::cout << "error no img in sampler" << std::endl;
         else
-            d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
-        d->tex->setSmooth( sampler->getFiltering() != ImageSampler::Filtering_Nearest );
-        d->tex->setRepeated( sampler->getWrapping() == ImageSampler::Wrapping_Repeat );
-        // d->tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
-        s_internalState->samplers[sampler] = d;
+            tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
+        tex->setSmooth( sampler->getFiltering() != ImageSampler::Filtering_Nearest );
+        tex->setRepeated( sampler->getWrapping() == ImageSampler::Wrapping_Repeat );
+        // tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
+        sampler->setRenderData( tex );
     }
     return 0;
 }
@@ -263,13 +185,11 @@ int GlPlugin::load(ImageSampler::Ptr& sampler)
 //--------------------------------------------------------------
 int GlPlugin::load(CubeMapSampler::Ptr& sampler)
 {
-    TexData::Ptr d = s_internalState->getTex(sampler);
-    if(d == nullptr)
+    if(sampler->getRenderData() == nullptr)
     {
-        d = TexData::create();
-        d->cubetex = CubeMap::create();
-        d->cubetex->loadFromImage(sampler->getSource());
-        s_internalState->cubesamplers[sampler] = d;
+        CubeMap::Ptr cubemap = CubeMap::create();
+        cubemap->loadFromImage(sampler->getSource());
+        sampler->setRenderData(cubemap);
     }
     return 0;
 }
@@ -279,10 +199,7 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
 {
     static const std::string glsl_version = "#version 330\n"; // "#version 130\n";
 
-    ProgData::Ptr d = s_internalState->getProg(program);
-    if(d != nullptr) return 0;
-
-    d = ProgData::create();
+    if( program->getRenderData() ) return 0;
 
     std::string fullVertCode = glsl_version;
     std::string fullFragCode = glsl_version;
@@ -349,37 +266,37 @@ int GlPlugin::load(ReflexionModel::Ptr& program)
     // }
     fullFragCode = fullFragCode + glsl_mrt_default;
 
+    Program::Ptr shader = Program::create();
     const std::string& name = program->getName();
-    if(name != REFLEXION_DEFAULT_NAME) d->sha.rename(name);
-
-    d->sha.load(fullVertCode.c_str(),fullFragCode.c_str());
-        s_internalState->programs[program] = d;
+    if(name != REFLEXION_DEFAULT_NAME) shader->rename(name);
+    shader->load(fullVertCode.c_str(),fullFragCode.c_str());
+    program->setRenderData(shader);
     return 0;
 }
 
 //--------------------------------------------------------------
 void GlPlugin::update(ImageSampler::Ptr& sampler)
 {
-    TexData::Ptr d = s_internalState->getTex(sampler);
-    if(d)
+    Texture::Ptr tex = Texture::dMorph( sampler->getRenderData() );
+    if(tex)
     {
         Image::Ptr img = sampler->getSource();
-        d->tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
+        tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
     }
 }
 
 //--------------------------------------------------------------
 void GlPlugin::bind(RenderTarget::Ptr& target)
 {
-    FboData::Ptr d = s_internalState->getFbo(target);
-    if(d) d->frames.bind();
+    FrameBuffer::Ptr fbo = FrameBuffer::dMorph( target->getRenderData() );
+    if(fbo) fbo->bind();
 }
 
 //--------------------------------------------------------------
 void GlPlugin::bind(ReflexionModel::Ptr& reflexion)
 {
-    ProgData::Ptr d = s_internalState->getProg(reflexion);
-    if(d) d->sha.use();
+    Program::Ptr program = Program::dMorph( reflexion->getRenderData() );
+    if(program) program->use();
 }
 
 //--------------------------------------------------------------
@@ -390,40 +307,38 @@ void GlPlugin::bind(Geometry::Ptr& geo)
 //--------------------------------------------------------------
 void GlPlugin::bind(ImageSampler::Ptr& sampler)
 {
-    TexData::Ptr d = s_internalState->getTex(sampler);
-    if(d) d->tex->bind();
+    Texture::Ptr tex = Texture::dMorph( sampler->getRenderData() );
+    if(tex) tex->bind();
 }
 
 //--------------------------------------------------------------
 void GlPlugin::bind(CubeMapSampler::Ptr& sampler)
 {
-    TexData::Ptr d = s_internalState->getTex(sampler);
-    if(d) d->cubetex->bind();
+    CubeMap::Ptr cubemap = CubeMap::dMorph( sampler->getRenderData() );
+    if(cubemap) cubemap->bind();
 }
 
 //--------------------------------------------------------------
 void GlPlugin::init(RenderTarget::Ptr& target)
 {
-    FboData::Ptr d = s_internalState->getFbo(target);
-    if(d == nullptr)
+    if(target->getRenderData() == nullptr)
     {
-        d = FboData::create();
+        FrameBuffer::Ptr fbo = FrameBuffer::create();
 
         if(target->useFaceSampler())
         {
             RenderTarget::FaceSampler faceSampler = target->getFace();
             CubeMapSampler::Ptr sampler = faceSampler.first;
             int faceID = faceSampler.second;
-            TexData::Ptr dtex = s_internalState->getTex(sampler);
-            if(dtex == nullptr)
+            CubeMap::Ptr cubemap = CubeMap::dMorph( sampler->getRenderData() );
+            if(cubemap == nullptr)
             {
-                load(sampler);
-                dtex = s_internalState->getTex(sampler);
-                if(dtex == nullptr) std::cout << "error loading cubemap" << std::endl;
-                else dtex->info = "loaded from renderTarget (cubemap)";
+                load( sampler );
+                cubemap = CubeMap::dMorph( sampler->getRenderData() );
+                if(cubemap == nullptr) std::cout << "error loading cubemap" << std::endl;
+                // else dtex->info = "loaded from renderTarget (cubemap)";
             }
-            CubeMap::Ptr cm = dtex->cubetex;
-            d->frames.build(cm, faceID, target->hasDepth());
+            fbo->build(cubemap, faceID, target->hasDepth());
         }
         else
         {
@@ -431,22 +346,21 @@ void GlPlugin::init(RenderTarget::Ptr& target)
             for(int i=0;i<target->count();++i)
             {
                 ImageSampler::Ptr s = target->get(i);
-                TexData::Ptr dtex = s_internalState->getTex(s);
-                if(dtex == nullptr)
+                Texture::Ptr tex = Texture::dMorph( s->getRenderData() );
+                if(tex == nullptr)
                 {
                     load(s);
-                    dtex = s_internalState->getTex(s);
-                    dtex->info = "loaded from renderTarget";
+                    tex = Texture::dMorph( s->getRenderData() );
+                    // dtex->info = "loaded from renderTarget";
                 }
-                Texture::Ptr t = dtex->tex;
-                textures.push_back(t);
+                textures.push_back(tex);
             }
-            d->frames.build(textures, target->hasDepth());
+            fbo->build(textures, target->hasDepth());
         }
 
         std::vector<Vec4> clearColors = target->getClearColors();
-        d->frames.setClearColors( clearColors );
-        s_internalState->renderTargets[target] = d;
+        fbo->setClearColors( clearColors );
+        target->setRenderData( fbo );
     }
 }
 
@@ -460,30 +374,30 @@ void GlPlugin::unbind()
 //--------------------------------------------------------------
 void GlPlugin::bringBack(ImageSampler::Ptr& sampler)
 {
-    TexData::Ptr d = s_internalState->getTex(sampler);
-    if(d)
+    Texture::Ptr tex = Texture::dMorph( sampler->getRenderData() );
+    if(tex)
     {
         Image::Ptr img = sampler->getSource();
-        d->tex->saveToImage(img);
+        tex->saveToImage(img);
     }
 }
 
 //--------------------------------------------------------------
 void GlPlugin::draw(Geometry::Ptr& geo)
 {
-    VboData::Ptr d = s_internalState->getVbo(geo);
-    if(d) d->vbo.draw();
+    VertexArray::Ptr vao = VertexArray::dMorph( geo->getRenderData() );
+    if(vao) vao->draw();
 }
 
 //--------------------------------------------------------------
 void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 {
-    ProgData::Ptr sha = s_internalState->getProg(reflexion);
-    if(sha == nullptr) return;
+    Program::Ptr program = Program::dMorph( reflexion->getRenderData() );
+    if(program == nullptr) return;
 
     std::string uId = uniform->getID();
     Uniform::Type type = uniform->getType();
-    std::int32_t uniformLocation = sha->sha.locate(uId);
+    std::int32_t uniformLocation = program->locate(uId);
     if(uniformLocation == -1) return;
 
     if(type == Uniform::Type_1f)
@@ -520,31 +434,31 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
     else if(type == Uniform::Type_Sampler)
     {
         ImageSampler::Ptr sampler = uniform->getSampler();
-        TexData::Ptr d = s_internalState->getTex(sampler);
-        if(d == nullptr)
+        Texture::Ptr tex = Texture::dMorph( sampler->getRenderData() );
+        if(tex == nullptr)
         {
             load(sampler);
-            d = s_internalState->getTex(sampler);
-            if(d == nullptr) std::cout << "error loading texture" << std::endl;
-            else d->info = "loaded from uniform sampler";
+            tex = Texture::dMorph( sampler->getRenderData() );
+            if(tex == nullptr) std::cout << "error loading texture" << std::endl;
+            // else d->info = "loaded from uniform sampler";
         }
         glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
-        glBindTexture(GL_TEXTURE_2D, d->tex->getVideoID());
+        glBindTexture(GL_TEXTURE_2D, tex->getVideoID());
         glUniform1i(uniformLocation, uniform->getInt1());
     }
     else if(type == Uniform::Type_CubeMap)
     {
         CubeMapSampler::Ptr sampler = uniform->getCubeMap();
-        TexData::Ptr d = s_internalState->getTex(sampler);
-        if(d == nullptr)
+        CubeMap::Ptr cubemap = CubeMap::dMorph( sampler->getRenderData() );
+        if(cubemap == nullptr)
         {
             load(sampler);
-            d = s_internalState->getTex(sampler);
-            if(d == nullptr) std::cout << "error loading cubemap" << std::endl;
-            else d->info = "loaded from uniform sampler";
+            cubemap = CubeMap::dMorph( sampler->getRenderData() );
+            if(cubemap == nullptr) std::cout << "error loading cubemap" << std::endl;
+            // else d->info = "loaded from uniform sampler";
         }
         glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
-        glBindTexture(GL_TEXTURE_CUBE_MAP, d->cubetex->getVideoID());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getVideoID());
         glUniform1i(uniformLocation, uniform->getInt1());
     }
     else
@@ -559,7 +473,7 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
         glErrToString(errorState, strErr);
         std::cout << "impError : Send param (" << uId << ") to shader (error "
         << errorState << " : " << strErr << ")" << std::endl;
-        std::cout << "loc " << uniformLocation << " in " << sha->sha.id() << std::endl;
+        std::cout << "loc " << uniformLocation << " in " << program->id() << std::endl;
     }
 
     GL_CHECKERROR("end of uniform setting");
@@ -568,98 +482,36 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
 //--------------------------------------------------------------
 void GlPlugin::unload(Geometry::Ptr& geo)
 {
-    s_internalState->vertexBuffers.erase(geo);
+    geo->setRenderData(nullptr);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(ImageSampler::Ptr& sampler)
 {
-    s_internalState->samplers.erase(sampler);
+    sampler->setRenderData(nullptr);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(CubeMapSampler::Ptr& sampler)
 {
-    s_internalState->cubesamplers.erase(sampler);
+    sampler->setRenderData(nullptr);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(RenderTarget::Ptr& target)
 {
-    s_internalState->renderTargets.erase(target);
+    target->setRenderData(nullptr);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unload(ReflexionModel::Ptr& shader)
 {
-    s_internalState->programs.erase(shader);
+    shader->setRenderData(nullptr);
 }
 
 //--------------------------------------------------------------
 void GlPlugin::unloadUnused()
 {
-    bool change = false;
-
-    for(auto it = s_internalState->vertexBuffers.begin(); it!=s_internalState->vertexBuffers.end(); it++)
-    {
-        // Warning : In multithreaded environment, use_count() is approximate.
-        if( it->first.use_count() == 1 )
-        {
-            it = s_internalState->vertexBuffers.erase( it );
-            change = true;
-        }
-    }
-
-    for(auto it = s_internalState->samplers.begin(); it!=s_internalState->samplers.end(); it++)
-    {
-        // Warning : In multithreaded environment, use_count() is approximate.
-        if( it->first.use_count() == 1 )
-        {
-            it = s_internalState->samplers.erase( it );
-            change = true;
-        }
-    }
-
-    for(auto it = s_internalState->cubesamplers.begin(); it!=s_internalState->cubesamplers.end(); it++)
-    {
-        // Warning : In multithreaded environment, use_count() is approximate.
-        if( it->first.use_count() == 1 )
-        {
-            it = s_internalState->cubesamplers.erase( it );
-            change = true;
-        }
-    }
-
-    for(auto it = s_internalState->programs.begin(); it!=s_internalState->programs.end(); it++)
-    {
-        // Warning : In multithreaded environment, use_count() is approximate.
-        if( it->first.use_count() == 1 )
-        {
-            it = s_internalState->programs.erase( it );
-            change = true;
-        }
-    }
-
-    for(auto it = s_internalState->renderTargets.begin(); it!=s_internalState->renderTargets.end(); it++)
-    {
-        // Warning : In multithreaded environment, use_count() is approximate.
-        if( it->first.use_count() == 1 )
-        {
-            it = s_internalState->renderTargets.erase( it );
-            change = true;
-        }
-    }
-
-
-    if(change)
-    {
-        std::cout << "Unload - Remaining gl objects :" << std::endl;
-        std::cout << "frames = " << FrameBuffer::s_count() << std::endl;
-        std::cout << "buffers = " << VertexArray::s_count() << " (" << VertexArray::s_vboCount() << " vbo)" << std::endl;
-        std::cout << "textures = " << Texture::s_count() << std::endl;
-        std::cout << "programs = " << Program::s_count() << std::endl;
-        std::cout << "cubemaps = " << CubeMap::s_count() << std::endl;
-    }
 }
 
 

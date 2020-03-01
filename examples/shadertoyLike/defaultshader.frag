@@ -66,12 +66,12 @@ float frac(float f)
     return f - floor(f);
 }
 
-vec3 textureColor(vec2 uv)
+vec4 textureColor(vec2 uv)
 {
     vec3 uvw = vec3(uv,u_timer * 0.02);
     vec3 uvw2 = mainNoise(uvw,10).xyz;
     uvw += uvw2 * 0.05;
-	return texture2D(u_sampler_color,uvw.xy).xyz;
+	return texture2D(u_sampler_color,uvw.xy).xyzw;
 }
 
 vec3 textureNormal(vec2 uv)
@@ -79,10 +79,12 @@ vec3 textureNormal(vec2 uv)
 	return vec3(0.0,0.0,1.0);
 }
 
-vec3 textureEmissive(vec2 uv)
+float textureReflectivity(vec2 uv){ return 0.0; }
+
+vec4 textureEmissive(vec2 uv)
 {
 	// return vec3(0.0);
     vec3 uvw = vec3(uv,u_timer * 0.02);
-    return vec3(mainNoise(uvw,10));
+    return mainNoise(uvw,10);
 }
 

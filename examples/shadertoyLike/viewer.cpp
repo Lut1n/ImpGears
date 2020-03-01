@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
     graph->setClearColor(Vec4(1.0,0.0,0.0,1.0));
     State::Ptr state = graph->getInitState();
     state->setOrthographicProjection(-1.f, 1.f, -1.f, 1.f, 0.f, 1.f);
-    state->setViewport(0.0, 0.0, 512.0, 512.0);
+    state->setViewport(0.0, 0.0, 1024.0, 1024.0);
 
 
     // Target::Ptr target = Target::create();
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     graph->setRoot(root);
     sf::Clock timer;
 
-    std::string pluginName = "glPlugin";
+    std::string pluginName = "OGLPlugin";
     pluginName = "lib" + pluginName + "." + LIB_EXT;
     RenderPlugin::Ptr plugin = PluginManager::open( pluginName );
     SceneRenderer::Ptr renderer = plugin->getRenderer();

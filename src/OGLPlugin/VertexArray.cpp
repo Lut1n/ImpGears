@@ -34,7 +34,7 @@ VertexArray::~VertexArray()
     GL_CHECKERROR("delete vbo");
     _s_vboCount -= _buffers.size();
 
-    glDeleteBuffers(1, &_vao);
+    glDeleteVertexArrays(1, &_vao);
     GL_CHECKERROR("delete vao");
     _s_count--;
 }

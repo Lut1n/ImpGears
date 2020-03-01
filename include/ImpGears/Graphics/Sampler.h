@@ -30,7 +30,10 @@ public:
         Wrapping_Repeat
     };
 
-    Sampler(Filtering filtering = Filtering_Nearest) : _filtering(filtering) {}
+    Sampler(Filtering filtering = Filtering_Nearest)
+        : _filtering(filtering)
+        , _mipmap(false)
+        , _needUpdate(false) {}
 
     virtual ~Sampler(){}
 
@@ -39,6 +42,8 @@ public:
     Filtering getFiltering() const {return _filtering;}
 
     Filtering _filtering;
+    bool _mipmap;
+    bool _needUpdate;
 };
 
 //--------------------------------------------------------------

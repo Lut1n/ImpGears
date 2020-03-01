@@ -176,7 +176,7 @@ int GlPlugin::load(ImageSampler::Ptr& sampler)
             tex->loadFromMemory(img->asGrid()->data(), img->width(),img->height(),img->channels());
         tex->setSmooth( sampler->getFiltering() != ImageSampler::Filtering_Nearest );
         tex->setRepeated( sampler->getWrapping() == ImageSampler::Wrapping_Repeat );
-        // tex->setMipmap(sampler->hasMipmapEnable(), sampler->getMaxMipmapLvl());
+        tex->setMipmap(sampler->_mipmap);
         sampler->setRenderData( tex );
     }
     return 0;
@@ -308,14 +308,30 @@ void GlPlugin::bind(Geometry::Ptr& geo)
 void GlPlugin::bind(ImageSampler::Ptr& sampler)
 {
     Texture::Ptr tex = Texture::dMorph( sampler->getRenderData() );
-    if(tex) tex->bind();
+    if(tex)
+    {
+        if(sampler->_needUpdate)
+        {
+            tex->update();
+            sampler->_needUpdate = false;
+        }
+        tex->bind();
+    }
 }
 
 //--------------------------------------------------------------
 void GlPlugin::bind(CubeMapSampler::Ptr& sampler)
 {
     CubeMap::Ptr cubemap = CubeMap::dMorph( sampler->getRenderData() );
-    if(cubemap) cubemap->bind();
+    if(cubemap)
+    {
+        if(sampler->_needUpdate)
+        {
+            cubemap->update();
+            sampler->_needUpdate = false;
+        }
+        cubemap->bind();
+    }
 }
 
 //--------------------------------------------------------------
@@ -435,6 +451,7 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
     {
         ImageSampler::Ptr sampler = uniform->getSampler();
         Texture::Ptr tex = Texture::dMorph( sampler->getRenderData() );
+        glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
         if(tex == nullptr)
         {
             load(sampler);
@@ -442,7 +459,11 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
             if(tex == nullptr) std::cout << "error loading texture" << std::endl;
             // else d->info = "loaded from uniform sampler";
         }
-        glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
+        if(sampler->_needUpdate)
+        {
+            tex->update();
+            sampler->_needUpdate = false;
+        }
         glBindTexture(GL_TEXTURE_2D, tex->getVideoID());
         glUniform1i(uniformLocation, uniform->getInt1());
     }
@@ -450,6 +471,7 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
     {
         CubeMapSampler::Ptr sampler = uniform->getCubeMap();
         CubeMap::Ptr cubemap = CubeMap::dMorph( sampler->getRenderData() );
+        glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
         if(cubemap == nullptr)
         {
             load(sampler);
@@ -457,7 +479,11 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
             if(cubemap == nullptr) std::cout << "error loading cubemap" << std::endl;
             // else d->info = "loaded from uniform sampler";
         }
-        glActiveTexture(GL_TEXTURE0 + uniform->getInt1());
+        if(sampler->_needUpdate)
+        {
+            cubemap->update();
+            sampler->_needUpdate = false;
+        }
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getVideoID());
         glUniform1i(uniformLocation, uniform->getInt1());
     }

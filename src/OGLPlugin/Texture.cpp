@@ -13,7 +13,7 @@ Texture::Texture(const std::string& name)
     : _videoID(0)
     , _width(0)
     , _height(0)
-    , _isSmooth(false)
+    , _isSmooth(true)
     , _isRepeated(false)
     , _hasMipmap(false)
     , _mipmapMaxLevel(1000)
@@ -36,8 +36,6 @@ Texture::~Texture()
 //--------------------------------------------------------------
 void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32_t height, int chnls)
 {
-    update();
-
     std::int32_t glInternalFormat = 0;
     std::int32_t glDataFormat = 0;
     std::int32_t glDataType = GL_UNSIGNED_BYTE;
@@ -72,11 +70,13 @@ void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
     _width = width;
     _height = height;
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     bind();
     glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, width, height,0, glDataFormat, glDataType, buf);
     GL_CHECKERROR("texture update gpu Texture");
     unbind();
+    
+    update();
 }
 
 //--------------------------------------------------------------
@@ -110,7 +110,7 @@ void Texture::saveToImage(Image::Ptr& img)
     }
 
     GLvoid* pixels = (GLvoid*)img->data();
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     bind();
     glGetTexImage(GL_TEXTURE_2D, 0, glDataFormat, glDataType, pixels);
     unbind();
@@ -133,21 +133,21 @@ void Texture::update()
             glFilterMinValue = GL_LINEAR_MIPMAP_LINEAR;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     bind();
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapMode);
     GL_CHECKERROR("texture update 1");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilterMagValue);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
+    GL_CHECKERROR("texture update 2");
     if(_hasMipmap)
     {
         glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _mipmapMaxLevel);
-        GL_CHECKERROR("texture update 2");
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _mipmapMaxLevel);
+        GL_CHECKERROR("texture update 3");
     }
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilterMagValue);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
-    GL_CHECKERROR("texture update 3");
 
     unbind();
 }

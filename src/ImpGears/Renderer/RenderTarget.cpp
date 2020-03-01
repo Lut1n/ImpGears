@@ -149,6 +149,18 @@ bool RenderTarget::useFaceSampler() const
 void RenderTarget::change()
 {
     _hasChanged = true;
+    if(_useFaceSampler)
+    {
+        CubeMapSampler::Ptr sampler = _faceTarget.first;
+        if(sampler) sampler->_needUpdate = true;
+    }
+    else
+    {
+        for(int i=0;i<count();++i)
+        {
+            if(_targets[i]) _targets[i]->_needUpdate = true;
+        }
+    }
 }
 
 //--------------------------------------------------------------

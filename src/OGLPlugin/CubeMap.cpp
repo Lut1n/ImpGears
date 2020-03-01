@@ -29,8 +29,6 @@ CubeMap::~CubeMap()
 //--------------------------------------------------------------
 void CubeMap::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32_t height, int chnls, int faceID)
 {
-    update();
-
     std::int32_t glInternalFormat = 0;
     std::int32_t glDataFormat = 0;
     std::int32_t glDataType = GL_UNSIGNED_BYTE;
@@ -62,11 +60,13 @@ void CubeMap::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
         std::cerr << "impError : " << _name << " CubeMap format error (" << chnls << " chnls)" << std::endl;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     bind();
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+faceID, 0, glInternalFormat, width, height,0, glDataFormat, glDataType, buf);
     GL_CHECKERROR("CubeMap update gpu Texture");
     unbind();
+    
+    update();
 }
 
 //--------------------------------------------------------------
@@ -91,7 +91,7 @@ void CubeMap::saveToMemory(std::uint8_t* buf, std::uint32_t width, std::uint32_t
         // glInternalFormat = GL_RGBA8;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     bind();
     glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X+faceID, 0, glDataFormat, glDataType, buf);
     unbind();
@@ -123,7 +123,7 @@ void CubeMap::update()
 
     GLint glFilterMinValue = glFilterMagValue;
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     bind();
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, glWrapMode);

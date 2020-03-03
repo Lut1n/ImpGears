@@ -74,7 +74,7 @@ void lighting(out vec4 out_color,
         specular = pow(specAngle, shininess);
     }
 
-    float intensity = lightPower/dist;
+    float intensity = clamp( lightPower/dist, 0.0, 1.0);
     float ambient = 0.02;
     float colorModel = ambient + (lambertian + specular) * intensity;
 

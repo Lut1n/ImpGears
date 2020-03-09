@@ -17,6 +17,7 @@ struct RenderModeManager
 
     RenderModeManager();
 
+    void setArgs(int argc, const char* argv[]);
     void setArgs(int argc, char* argv[]);
 
     SceneRenderer::Ptr loadRenderer();
@@ -32,6 +33,14 @@ struct RenderModeManager
 RenderModeManager::RenderModeManager()
 {
     offscreen = false;
+}
+
+void RenderModeManager::setArgs(int argc, const char* argv[])
+{
+    std::string arg = "";
+    if(argc>1) arg = argv[1];
+
+    offscreen = arg != "-gpu";
 }
 
 void RenderModeManager::setArgs(int argc, char* argv[])

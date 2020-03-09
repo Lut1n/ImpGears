@@ -15,8 +15,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <Geometry/InstancedGeometry.h>
-
 using namespace imp;
 
 // common stuff
@@ -25,77 +23,19 @@ using namespace imp;
 #include "../common/RenderModeManager.h"
 #define IMPLEMENT_BASIC_GEOMETRIES
 #include "../common/basic_geometries.h"
-// #include "../common/basic_skybox.h"
 
-#define USE_INSTANCING
-
-Geometry::Ptr generateCase()
+Geometry::Ptr generateBox()
 {
     Geometry::Ptr geometry = Geometry::create();
     *geometry = imp::Geometry::cube();
     // *geometry = geometry->subdivise(10);
     Geometry::intoCCW(*geometry,true);
-    geometry->generateColors(Vec3(0.8, 0.5, 0.3));
+    geometry->generateColors(Vec3(1.0));
     geometry->generateTexCoords(Geometry::TexGenMode_Cubic,1.0);
     // geometry->scale(Vec3(1.0,1.0,1.0));
     geometry->generateNormals(Geometry::NormalGenMode_PerFace);
     // geometry->interpolateNormals();
-
-    return geometry;
-}
-
-
-#define GLSL_CODE( code ) #code
-
-static std::string glsl_instancing_vert = GLSL_CODE(
-
-// vertex attributes ( @see glBindAttribLocation )
-in vec3 a_vertex;   // location 0
-in vec3 a_color;    // location 1
-in vec3 a_normal;   // location 2
-in vec2 a_texcoord; // location 3
-
-in mat4 a_instTransform; // location 4,5,6,7
-
-// uniforms
-uniform mat4 u_proj;
-uniform mat4 u_view;
-uniform mat4 u_model;
-uniform mat3 u_normal;
-
-// fragment shader stage input
-out vec2 v_texCoord;
-out vec3 v_m;
-out vec3 v_mv;
-out vec3 v_n;
-out vec3 v_vertex;
-out vec3 v_color;
-out mat4 v_model;
-
-void main()
-{
-    mat4 _model = u_model * a_instTransform;
-    vec4 mv_pos = u_view * _model * vec4(a_vertex,1.0);
-    gl_Position = u_proj * mv_pos;
-    v_n = normalize(a_normal);
-    v_color = a_color;
-
-    v_texCoord = a_texcoord;
-    v_m = (_model * vec4(a_vertex,1.0)).xyz;
-    v_mv = mv_pos.xyz;
-    v_vertex = a_vertex;
-    v_model = _model;
-}
-
-);
-
-
-Geometry::Ptr generateCase2()
-{
-    Geometry::Ptr geometry = generateCase();
-    // geometry->sphericalNormalization(0.7);
     *geometry += Vec3(0.0, 1.0, 0.0);
-    // geometry->interpolateNormals();
 
     return geometry;
 }
@@ -127,11 +67,13 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
     sampler->setSource( ImageIO::load("./cache/scene_terrain.tga") );
     sampler->setWrapping(ImageSampler::Wrapping_Repeat);
     sampler->setFiltering(ImageSampler::Filtering_Linear);
+    sampler->_mipmap = true;
 
     color =ImageSampler::create();
     color->setSource( ImageIO::load("./cache/scene_color.tga") );
     color->setWrapping(ImageSampler::Wrapping_Repeat);
     color->setFiltering(ImageSampler::Filtering_Linear);
+    color->_mipmap = true;
 }
 
 int main(int argc, char* argv[])
@@ -151,11 +93,16 @@ int main(int argc, char* argv[])
     op.execute(normals->getSource());
 
 
-    ImageSampler::Ptr reflectivityMap = ImageSampler::create(32,32,3,Vec4(1.0));
-    for(float u=0.1;u<0.9;u+=0.03125) for(float v=0.1;v<0.9;v+=0.03125) reflectivityMap->set(u,v,Vec4(0.0));
+    ImageSampler::Ptr emissiveMap = ImageSampler::create(32,32,3,Vec4(1.0));
+    // emissiveMap->setWrapping(ImageSampler::Wrapping_Repeat);
+    emissiveMap->setFiltering(ImageSampler::Filtering_Linear);
+    emissiveMap->_mipmap = true;
+    float texelS = 1.0/32.0;
+    for(float u=texelS;u<1.0-texelS*2.0;u+=texelS) for(float v=texelS;v<1.0-texelS*2.0;v+=texelS) emissiveMap->set(u,v,Vec4(0.0));
 
-    ImageSampler::Ptr emissiveMap = ImageSampler::create(16,16,3,Vec4(0.0));
-    for(float u=0.4;u<0.6;u+=0.125) for(float v=0.4;v<0.6;v+=0.125) emissiveMap->set(u,v,Vec4(1.0,1.0,1.0,1.0));
+    ImageSampler::Ptr reflectivityMap = ImageSampler::create(16,16,3,Vec4(0.0));
+    reflectivityMap->_mipmap = true;
+    for(float u=0.4;u<0.6;u+=0.125) for(float v=0.4;v<0.6;v+=0.125) reflectivityMap->set(u,v,Vec4(1.0,1.0,1.0,1.0));
 
     sf::Clock clock;
 
@@ -181,12 +128,13 @@ int main(int argc, char* argv[])
             imp::ReflexionModel::MRT_1_Col,
             "glsl for coords");
 
-    Material::Ptr case_material = Material::create(Vec3(1.0), 32.0);
+    Material::Ptr case_material = Material::create(Vec3(1.0), 128.0);
+    case_material->_baseColor = color;
     case_material->_emissive = emissiveMap;
     case_material->_normalmap = normals;
     case_material->_reflectivity = reflectivityMap;
 
-    Material::Ptr material = Material::create(Vec3(1.0), 32.0);
+    Material::Ptr material = Material::create(Vec3(1.0), 128.0);
     // material->_baseColor = color;
     // material->_emissive = color;
     material->_normalmap = normals;
@@ -224,18 +172,19 @@ int main(int argc, char* argv[])
         
     
     // =====  classic geometry ========
-    GeoNode::Ptr case01_node = GeoNode::create(generateCase2(), false);
+    Geometry::Ptr box_geometry = generateBox();
+    GeoNode::Ptr case01_node = GeoNode::create(box_geometry);
     case01_node->setReflexion(r);
     case01_node->setMaterial(case_material);
     case01_node->setScale(Vec3(10.0));
     case01_node->setPosition(Vec3(20.0, -50.0, 20.0));
-    GeoNode::Ptr case02_node = GeoNode::create(generateCase2(), false);
+    GeoNode::Ptr case02_node = GeoNode::create(box_geometry);
     case02_node->setReflexion(r);
     case02_node->setMaterial(case_material);
     case02_node->setScale(Vec3(5.0));
     case02_node->setRotation(Vec3(0.0,2.0,0.0));
     case02_node->setPosition(Vec3(-10.0, -50.0, 10.0));
-    GeoNode::Ptr case03_node = GeoNode::create(generateCase2(), false);
+    GeoNode::Ptr case03_node = GeoNode::create(box_geometry);
     case03_node->setReflexion(r);
     case03_node->setMaterial(case_material);
     case03_node->setScale(Vec3(2.0));
@@ -244,50 +193,9 @@ int main(int argc, char* argv[])
     // =====  classic geometry ========
     
     
-    
-    
-    
-    #ifdef USE_INSTANCING
-    
-    imp::ReflexionModel::Ptr instance_shader = imp::ReflexionModel::create(
-            imp::ReflexionModel::Lighting_Phong,
-            imp::ReflexionModel::Texturing_Samplers_CNE,
-            imp::ReflexionModel::MRT_2_Col_Emi, "glsl instancing");
-    instance_shader->_vertCode = glsl_instancing_vert;
-    // instance_shader->_fragCode_lighting = glsl_instancing_frag;
-    
-    
-    
-    
-    
-    InstancedGeometry::Ptr instanced = InstancedGeometry::create();
-    instanced->clone(case01_node->_geo);
-    case01_node->computeMatrices();
-    case02_node->computeMatrices();
-    case03_node->computeMatrices();
-    
-    instanced->setTransformAt(0, case01_node->getModelMatrix());
-    instanced->setTransformAt(1, case02_node->getModelMatrix());
-    instanced->setTransformAt(2, case03_node->getModelMatrix());
-    
-    GeoNode::Ptr instance_node = GeoNode::create(instanced, false);
-    instance_node->setMaterial(case_material);
-    instance_node->setReflexion(instance_shader);
-    root->addNode(instance_node);
-    
-    #else
-    
     root->addNode(case01_node);
     root->addNode(case02_node);
     root->addNode(case03_node);
-    
-    #endif
-    
-    
-    
-    
-    
-    
     
     
     
@@ -309,15 +217,12 @@ int main(int argc, char* argv[])
     env_sha->enablePass(RenderPass::Pass_ShadowMapping);
     sha->enablePass(RenderPass::Pass_ShadowMapping);
 
+    light->getState()->setRenderPass(env);
     roomNode->getState()->setRenderPass(env);
     coordsNode->getState()->setRenderPass(sha);
     case01_node->getState()->setRenderPass(env_sha);
     case02_node->getState()->setRenderPass(env_sha);
     case03_node->getState()->setRenderPass(env_sha);
-    
-    #ifdef USE_INSTANCING
-    instance_node->getState()->setRenderPass(env_sha);
-    #endif
 
     SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);

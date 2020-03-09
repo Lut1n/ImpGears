@@ -55,7 +55,7 @@ void Image::copy(const Image::Ptr& other, const std::vector<int>& mask, bool fli
         Vec4 swizzled;
         for(int k=0;k<c;++k) swizzled[k] = pixel[ mask[k] ];
 
-        if(flipY) uv[1] = height()-uv[1];
+        if(flipY) uv[1] = height()-1-uv[1];
         setPixel(uv,swizzled);
     }
 }

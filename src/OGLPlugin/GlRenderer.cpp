@@ -290,8 +290,6 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             applyClear(clear.get(), renderPass);
         }
     }
-
-    // _renderPlugin->unbind();
 }
 
 
@@ -337,9 +335,9 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
                 queue = applyRenderVisitor(scene, queue);
                 _renderPlugin->init(render2tex);
                 _renderPlugin->bind(render2tex);
-                render2tex->change();
                 drawQueue(queue);
                 _renderPlugin->unbind();
+                render2tex->change();
                 
             }
             render2sampler->makeReady();
@@ -397,11 +395,6 @@ void GlRenderer::render(const Graph::Ptr& scene)
     AmbientOcclusion::Ptr ssaoOp =
             std::dynamic_pointer_cast<AmbientOcclusion>( _pipeline->getOperation(FRAMEOP_ID_SSAO) );
     ssaoOp->setSampleCount(_ssaoSamples);
-    
-
-    _renderPlugin->init(_internalFrames);
-    _renderPlugin->bind(_internalFrames);
-    _internalFrames->change();
 
     if(_renderCache.find( scene ) == _renderCache.end())
         _renderCache[scene] = RenderQueue::create();
@@ -411,7 +404,13 @@ void GlRenderer::render(const Graph::Ptr& scene)
     // checkQueue(queue);
     
     applyRenderToSampler(queue);
+    
+    
+    _renderPlugin->init(_internalFrames);
+    _renderPlugin->bind(_internalFrames);
     drawQueue(queue);
+    _renderPlugin->unbind();
+    _internalFrames->change();
 
     LightNode* light0 = nullptr;
     if( !queue->_lights.empty() ) light0 = queue->_lights[0];

@@ -55,6 +55,11 @@ void GlPlugin::init()
         glGetIntegerv(GL_MINOR_VERSION, &minor);
         std::cout << "OGL version " << major << "." << minor << std::endl;
         std::cout << "OpenGL version supported by this platform (" << glGetString(GL_VERSION) << ")" << std::endl;
+        
+        // debug info
+        // int maxVertUniformsVect;
+        // glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertUniformsVect);
+        // std::cout << "OpenGL GL_MAX_VERTEX_UNIFORM_VECTORS = " << maxVertUniformsVect << std::endl;
 
         // inverse(mat) is available from gl version 3.1 .
         // Here, glsl version is forced to 1.30 (needInverseMat has te be alway true)
@@ -419,6 +424,11 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
     if(type == Uniform::Type_1f)
     {
         glUniform1f(uniformLocation, uniform->getFloat1());
+    }
+    else if(type == Uniform::Type_1fv)
+    {
+        const std::vector<float>& fv = uniform->getFloat1v();
+        glUniform1fv(uniformLocation, fv.size(), fv.data());
     }
     else if(type == Uniform::Type_2f)
     {

@@ -31,7 +31,9 @@ public:
         Type_Mat3,
         Type_Mat4,
         Type_Sampler,
-        Type_CubeMap
+        Type_CubeMap,
+        
+        Type_1fv
     };
 
     enum Mode
@@ -65,6 +67,8 @@ public:
     void set(const ImageSampler::Ptr& sampler, int textureUnit = 0);
 
     void set(const CubeMapSampler::Ptr& cubemap, int textureUnit = 0);
+    
+    void set(const std::vector<float>& f1v);
 
     const std::string& getID() const {return _id;}
 
@@ -79,6 +83,8 @@ public:
     Type getType() const { return _type; }
     const ImageSampler::Ptr getSampler() const {return _sampler;}
     const CubeMapSampler::Ptr getCubeMap() const {return _cubemap;}
+    
+    const std::vector<float>& getFloat1v() const {return _value_1fv;}
 
     void setMode(Mode mode) { _mode = mode; }
     Mode getMode() const { return _mode; }
@@ -99,6 +105,7 @@ private:
     Matrix4 _value_mat4;
     ImageSampler::Ptr _sampler;
     CubeMapSampler::Ptr _cubemap;
+    std::vector<float> _value_1fv;
 };
 
 IMPGEARS_END

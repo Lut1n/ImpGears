@@ -253,7 +253,7 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             {
                 Material::Ptr mat = geode->_material;
                 float shininess = mat->_shininess;
-                Vec3 color = mat->_color;
+                Vec4 color = mat->_color;
                 
                 if(mat->_baseColor)
                         _localState->setUniform("u_sampler_color", mat->_baseColor, 0);

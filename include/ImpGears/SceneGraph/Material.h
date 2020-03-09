@@ -13,7 +13,7 @@ public:
     Meta_Class(Material)
 
     Material();
-    Material(const Vec3& color, float shininess);
+    Material(const Vec4& color, float shininess);
     Material(ImageSampler::Ptr& baseColor,
              ImageSampler::Ptr& emissive,
              ImageSampler::Ptr& normalmap,
@@ -27,7 +27,7 @@ public:
     ImageSampler::Ptr _reflectivity;
 
     float _shininess;
-    Vec3 _color;
+    Vec4 _color;
 
     static ImageSampler::Ptr s_default_baseColor;
     static ImageSampler::Ptr s_default_emissive;

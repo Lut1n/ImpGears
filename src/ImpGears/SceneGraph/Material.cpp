@@ -28,7 +28,7 @@ Material::Material()
 }
 
 //--------------------------------------------------------------
-Material::Material(const Vec3& color, float shininess)
+Material::Material(const Vec4& color, float shininess)
     : _shininess(shininess)
     , _color(color)
 {

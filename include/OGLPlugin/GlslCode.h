@@ -90,7 +90,7 @@ void main()
 static std::string basicFrag = GLSL_CODE(
 
 // uniforms
-uniform vec3 u_color;
+uniform vec4 u_color;
 
 // vertex shader stage output
 in vec2 v_texCoord;
@@ -107,13 +107,15 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    vec4 color = vec4(u_color * v_color,1.0);
+    vec4 color = u_color*vec4(v_color,1.0);
     color *= textureColor(v_texCoord);
+    if(color.w==0.0) discard;
+    
     vec4 emi = textureEmissive(v_texCoord);
 
-    out_color = max(emi,color);
+    out_color = color;
     out_emissive = emi;
-    out_normal = vec3(0.0,0.0,1.0);
+    out_normal = vec3(0.5,0.5,1.0);
 
     out_reflectivity = textureReflectivity(v_texCoord);
     out_shininess = 0.0;
@@ -261,7 +263,7 @@ static std::string glsl_phong = GLSL_CODE(
 
 // uniforms
 uniform mat4 u_view;
-uniform vec3 u_color;
+uniform vec4 u_color;
 uniform float u_shininess;
 
 // vertex shader stage output
@@ -295,13 +297,13 @@ void lighting(out vec4 out_color,
               out float out_shininess,
               out float out_depth)
 {
-    vec4 color = vec4(u_color * v_color,1.0);
+    vec4 color = u_color*vec4(v_color,1.0);
     color *= textureColor(v_texCoord);
     if(color.w==0.0) discard;
     
     vec4 emi = textureEmissive(v_texCoord);
 
-    out_color = vec4(clamp( max(color.xyz,emi.xyz),0.0,1.0 ), color.w);
+    out_color = clamp(color,0.0,1.0); //vec4(clamp( max(color.xyz,emi.xyz),0.0,1.0 ), color.w);
     out_emissive = clamp(emi,0.0,1.0);
 
     vec3 normal = textureNormal(v_texCoord);

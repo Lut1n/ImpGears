@@ -5,7 +5,8 @@ IMPGEARS_BEGIN
 InstancedGeometry::InstancedGeometry()
 {
     // _transforms;
-    _transformsChanged = true;
+    _instanceCount = 0;
+    _transformsChanged = false;
 }
 
 void InstancedGeometry::clone(Geometry::Ptr geometry)

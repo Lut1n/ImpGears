@@ -128,6 +128,7 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
     _queue = initQueue;
     if( !_queue ) _queue = RenderQueue::create();
     
+    _queue->_camera = nullptr;
     _queue->_lights.clear();
     _queue->_renderBin.reset();
 }

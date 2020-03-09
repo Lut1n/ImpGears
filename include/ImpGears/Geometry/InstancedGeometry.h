@@ -16,6 +16,9 @@ public:
 
     void clone(Geometry::Ptr geometry);
     
+    void setCount(int c) {_instanceCount=c;}
+    int count() const {return _instanceCount;}
+    
     void setTransforms(const std::vector<Matrix4>& buf);
     void setTransformAt(int index, const Matrix4& mat);
     
@@ -26,6 +29,7 @@ public:
     
 protected:
 
+    int _instanceCount;
     std::vector<Matrix4> _transforms;
     bool _transformsChanged;
 };

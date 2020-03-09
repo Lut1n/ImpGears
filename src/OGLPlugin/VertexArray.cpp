@@ -75,21 +75,27 @@ void VertexArray::load(const Geometry& geometry)
     
     
     const InstancedGeometry* instancedGeo = dynamic_cast<const InstancedGeometry*>( &geometry );
-    if(instancedGeo && instancedGeo->getTransforms().size()>0)// && instancedGeo->hasChanged())
+    bool hasInstanceTransforms = false;
+    if(instancedGeo)
     {
+        _instanced = true;
+        _instanceCount = instancedGeo->count();
+        hasInstanceTransforms = instancedGeo->hasChanged() && instancedGeo->getTransforms().size()>0;
         std::cout << "instanced geometry detected" << std::endl;
-        const std::vector<Matrix4>& bufMat = instancedGeo->getTransforms();
-        _instanced = bufMat.size()>0;
-        _instanceCount = bufMat.size();
         
-        
-        std::vector<float> buf(_instanceCount * 16);
-        for(int i=0;i<_instanceCount;++i)
+        if(hasInstanceTransforms)
         {
-            const float* data = bufMat[i].data();
-            for(int k=0;k<16;++k) buf[i*16+k] = data[k];
+            const std::vector<Matrix4>& bufMat = instancedGeo->getTransforms();
+            _instanceCount = std::min(_instanceCount,(int)bufMat.size());
+            
+            std::vector<float> buf(_instanceCount * 16);
+            for(int i=0;i<_instanceCount;++i)
+            {
+                const float* data = bufMat[i].data();
+                for(int k=0;k<16;++k) buf[i*16+k] = data[k];
+            }
+            loadBuffer<float>(Buffer_InstTransforms, buf);
         }
-        loadBuffer<float>(Buffer_InstTransforms, buf);
     }
     
 
@@ -103,7 +109,7 @@ void VertexArray::load(const Geometry& geometry)
         enableAttrib(Buffer_Normals, glNormal, 3, sizeof(float)*3, 0);
     if(geometry._hasTexCoords)
         enableAttrib(Buffer_TexCoords, glTexCoord, 2, sizeof(float)*2, 0);
-    if(_instanced)
+    if(_instanced && hasInstanceTransforms)
     {
         GLsizei vec4size = sizeof(float)*4;
         enableAttrib(Buffer_InstTransforms, glInstTransform1, 4, 4*vec4size, 0*4);

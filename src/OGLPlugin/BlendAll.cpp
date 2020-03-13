@@ -8,10 +8,10 @@ static std::string glsl_mult = GLSL_CODE(
 
 uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
+vec4 i_lighting(vec2 uv){return texture(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture(u_input_sampler_bloom, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -30,10 +30,10 @@ static std::string glsl_min = GLSL_CODE(
 
 uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
+vec4 i_lighting(vec2 uv){return texture(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture(u_input_sampler_bloom, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -52,10 +52,10 @@ static std::string glsl_max = GLSL_CODE(
 
 uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
+vec4 i_lighting(vec2 uv){return texture(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture(u_input_sampler_bloom, uv).xyzw;}
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
               out vec3 out_normal,
@@ -73,10 +73,10 @@ static std::string glsl_mix = GLSL_CODE(
 
 uniform sampler2D u_input_sampler_lighting;
 uniform sampler2D u_input_sampler_bloom;
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec4 i_lighting(vec2 uv){return texture2D(u_input_sampler_lighting, uv).xyzw;}
-vec4 i_bloom(vec2 uv){return texture2D(u_input_sampler_bloom, uv).xyzw;}
+vec4 i_lighting(vec2 uv){return texture(u_input_sampler_lighting, uv).xyzw;}
+vec4 i_bloom(vec2 uv){return texture(u_input_sampler_bloom, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -126,7 +126,7 @@ void BlendAll::setup(const Vec4& vp)
 }
 
 //--------------------------------------------------------------
-void BlendAll::apply(GlRenderer* renderer, bool skip)
+void BlendAll::apply(GlRenderer* renderer, bool /*skip*/)
 {
     if(_output.size() > 0)
     {
@@ -140,7 +140,6 @@ void BlendAll::apply(GlRenderer* renderer, bool skip)
     }
     _graph->getInitState()->setUniform("u_input_sampler_lighting", _input[0], 0);
     _graph->getInitState()->setUniform("u_input_sampler_bloom", _input[1], 1);
-    
     if(_queue == nullptr) _queue = RenderQueue::create();
     _queue = renderer->applyRenderVisitor(_graph,_queue);
     renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Bloom);

@@ -86,7 +86,7 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
     _state->setViewport( Vec4(0.0,0.0,_resolution,_resolution) );
     if(overrideShader) _state->setReflexion( overrideShader );
     _clone->setRoot(scene->getRoot());
-        
+
     if(_queue == nullptr) _queue = RenderQueue::create();
     _queue = _renderer->applyRenderVisitor(_clone, _queue);
 
@@ -109,11 +109,10 @@ void RenderToCubeMap::render(const Graph::Ptr& scene, const Vec3& center, SceneR
     }
 }
 
-
 void RenderToCubeMap::render(RenderQueue::Ptr& queue, const Vec3& center, SceneRenderer::RenderFrame frameType, ReflexionModel::Ptr overrideShader)
 {
     const Camera* keep_cam = queue->_camera;
-    
+
     _state->setUniform("u_proj", _proj);
     _state->setViewport( Vec4(0.0,0.0,_resolution,_resolution) );
     if(overrideShader) _state->setReflexion( overrideShader );
@@ -135,7 +134,7 @@ void RenderToCubeMap::render(RenderQueue::Ptr& queue, const Vec3& center, SceneR
 
         _renderer->_renderPlugin->unbind();
     }
-    
+
     queue->_camera = keep_cam;
 }
 

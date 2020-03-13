@@ -9,9 +9,9 @@
 static std::string glsl_copy = GLSL_CODE(
 
 uniform sampler2D u_input_sampler;
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec4 i_col(vec2 uv){return texture2D(u_input_sampler, uv).xyzw;}
+vec4 i_col(vec2 uv){return texture(u_input_sampler, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,

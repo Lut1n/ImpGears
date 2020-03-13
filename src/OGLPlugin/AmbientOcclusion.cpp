@@ -14,10 +14,10 @@ uniform mat4 u_cam_view;
 uniform mat4 u_scene_proj;
 uniform int u_sampleCount;
 
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
-float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
+vec3 i_normal(vec2 uv){return texture(u_input_sampler_normal, uv).xyz;}
+float i_depth(vec2 uv){return texture(u_input_sampler_depth, uv).x;}
 
 float hash(vec3 xyz)
 {
@@ -108,21 +108,20 @@ void lighting(out vec4 out_color,
     );
 
     float occlusion = 0.0f;
-    const float KERNEL_SIZE = 16.0;
+    int KERNEL_SIZE = u_sampleCount; // 16;
     for(int i=0; i<KERNEL_SIZE; ++i)
     {
         int index = i;
-        if(index >= u_sampleCount) break;
         // int index = int(16.0*random(view_origin, i))%16;
         // int index = int(16.0*hash(vec3(v_texCoord, i)))%16;
 
         // get sample position
-        vec3 sample = poissonDisk[index];
-        sample = normal*2.0 + tbn * sample;
-        sample = sampleRadius * normalize(sample) + view_origin;
+        vec3 sample3 = poissonDisk[index];
+        sample3 = normal*2.0 + tbn * sample3;
+        sample3 = sampleRadius * normalize(sample3) + view_origin;
 
         // project sample position
-        vec4 offset = vec4(sample, 1.0);
+        vec4 offset = vec4(sample3, 1.0);
         offset = u_scene_proj * offset;
         offset /= offset.w;
         offset.xy = offset.xy * 0.5 + 0.5;
@@ -132,11 +131,11 @@ void lighting(out vec4 out_color,
 
         // range check and acc
         float rangeCheck = abs(depth_origin - depth_sample) < sampleRadius ? 1.0 : 0.0;
-        occlusion += (depth_sample <= length(sample) ? 1.0 : 0.0) * rangeCheck;
+        occlusion += (depth_sample <= length(sample3) ? 1.0 : 0.0) * rangeCheck;
 
     }
 
-    occlusion = 1.0 - (occlusion/KERNEL_SIZE);
+    occlusion = 1.0 - (occlusion/float(KERNEL_SIZE));
 
     out_color = vec4(occlusion, occlusion, occlusion, 1.0);
 }

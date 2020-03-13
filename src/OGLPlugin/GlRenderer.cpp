@@ -6,7 +6,6 @@
 #include <OGLPlugin/BloomFX.h>
 #include <OGLPlugin/EnvironmentFX.h>
 #include <OGLPlugin/LightingModel.h>
-#include <OGLPlugin/CopyFrame.h>
 #include <OGLPlugin/BlendAll.h>
 #include <OGLPlugin/RenderToCubeMap.h>
 #include <OGLPlugin/ShadowCasting.h>
@@ -65,9 +64,11 @@ GlRenderer::GlRenderer()
     _environmentResolution = 128;
     _shadowSamples = 16;
     _ssaoSamples = 16;
-    
+    _lightpower = 200.0;
+    _ambient = 0.1;
+
     // CubeMaps rendering setup
-     _environmentMap = CubeMapSampler::create(_environmentResolution,_environmentResolution,4,Vec4(1.0));
+    _environmentMap = CubeMapSampler::create(_environmentResolution,_environmentResolution,4,Vec4(1.0));
     _environmentRenderer = RenderToCubeMap::create(this);
     _environmentRenderer->setCubeMap(_environmentMap);
     _environmentRenderer->setResolution(_environmentResolution);
@@ -82,7 +83,7 @@ GlRenderer::GlRenderer()
                 ReflexionModel::MRT_2_Col_Emi,
                 "glsl_shadow_depth");
     _shadowsmapShader->_fragCode_lighting = glsl_shadow_depth;
-    
+
     _shadowsmapShader_instanced = ReflexionModel::create(
                 ReflexionModel::Lighting_Customized,
                 ReflexionModel::Texturing_Samplers_CNE,
@@ -90,7 +91,6 @@ GlRenderer::GlRenderer()
                 "glsl_shadow_depth");
     _shadowsmapShader_instanced->_fragCode_lighting = glsl_shadow_depth;
     _shadowsmapShader_instanced->_vertCode = glsl_instancedBasicVert;
-
 
     // mrt setup
     int mrt_size = 6;
@@ -121,6 +121,9 @@ GlRenderer::GlRenderer()
     ShadowCasting::Ptr shadowFX = ShadowCasting::create();
     AmbientOcclusion::Ptr ssaoFX = AmbientOcclusion::create();
 
+    _lighting = lighting;
+    _lighting->setLightPower(_lightpower);
+    _lighting->setAmbient(_ambient);
 
     // build dependances
     _pipeline->setOperation( environFX, FRAMEOP_ID_ENVFX );
@@ -157,6 +160,11 @@ GlRenderer::GlRenderer()
     _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_ENVMIX, 0);
     _pipeline->bind( FRAMEOP_ID_BLOOMMIX, FRAMEOP_ID_BLOOM, 1);
     _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+
+    _debugToScreen = CopyFrame::create();
+    _debugToScreen->clearOutput();
+    _debugToScreen->setInput(_internalFrames->get(0), 0);
+    _debugToScreen->setup(Vec4(0.0,0.0,512.0,512.0));
 }
 
 //--------------------------------------------------------------
@@ -169,6 +177,7 @@ void GlRenderer::setOuputViewport(const Vec4& vp)
 {
     _outputViewport = vp;
     _pipeline->setViewport(_outputViewport);
+    _debugToScreen->setup(_outputViewport);
 }
 
 //---------------------------------------------------------------
@@ -208,14 +217,13 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
                             SceneRenderer::RenderFrame renderPass )
 {
     if(_localState==nullptr) _localState = State::create();
-    
     Matrix4 view;
     if(queue->_camera) view = queue->_camera->getViewMatrix();
 
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
         RenderState renderState = queue->_renderBin.at(i);
-        
+
         GeoNode::Ptr geode = GeoNode::dMorph( renderState.node );
         ClearNode::Ptr clear = ClearNode::dMorph( renderState.node );
 
@@ -230,15 +238,15 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
 
             RenderPass::Ptr renderPass_info = renderState.state->getRenderPass();
             if(!renderPass_info || !renderPass_info->isPassEnabled(expectedFlag)) continue;
-            
-            
-            
+
+
+
             // state copy and override
             _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
             if( overrideState )
             {
                 _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
-                
+
                 // case of shadow pass + instanced geometry
                 InstancedGeometry::Ptr instanced = InstancedGeometry::dMorph(geode->_geo);
                 if(renderPass == RenderFrame_ShadowMap &&  instanced)
@@ -246,15 +254,15 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
                     _localState->setReflexion(_shadowsmapShader_instanced);
                 }
             }
-            
-            
+
+
             // update Material uniforms
             if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
             {
                 Material::Ptr mat = geode->_material;
                 float shininess = mat->_shininess;
                 Vec4 color = mat->_color;
-                
+
                 if(mat->_baseColor)
                         _localState->setUniform("u_sampler_color", mat->_baseColor, 0);
                 if(mat->_normalmap)
@@ -275,12 +283,13 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             // state->setUniform("u_normal", normalMat );
             renderState.normal = Matrix3(renderState.model).inverse().transpose();
             renderState.proj = _localState->getProjectionMatrix();
-            
+
             // update matrix uniforms
             _localState->setUniform("u_view", view);
             _localState->setUniform("u_proj", renderState.proj);
             _localState->setUniform("u_model", renderState.model);
             _localState->setUniform("u_normal", renderState.normal);
+
 
             applyState(_localState, renderPass);
             drawGeometry(geode.get());
@@ -290,7 +299,85 @@ void GlRenderer::drawQueue( RenderQueue::Ptr& queue, State::Ptr overrideState,
             applyClear(clear.get(), renderPass);
         }
     }
+
+    // sorting transparent render bin
+    Vec3 camPos;
+    if(queue->_camera) camPos = queue->_camera->getAbsolutePosition();
+    queue->_transparentRenderBin.sortByDistance(camPos);
+
+    // render tranparent geometry
+    for(int i=(int)queue->_transparentRenderBin.size()-1;i>=0;--i)
+    {
+        RenderState renderState = queue->_transparentRenderBin.at(i);
+        GeoNode::Ptr geode = GeoNode::dMorph( renderState.node );
+
+        if(geode)
+        {
+            // filter with render pass flag
+            RenderPass::PassFlag expectedFlag = RenderPass::Pass_DefaultMRT;
+            if( renderPass==SceneRenderer::RenderFrame_Environment )
+                expectedFlag = RenderPass::Pass_EnvironmentMapping;
+            if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
+                expectedFlag = RenderPass::Pass_ShadowMapping;
+
+            RenderPass::Ptr renderPass_info = renderState.state->getRenderPass();
+            if(!renderPass_info || !renderPass_info->isPassEnabled(expectedFlag)) continue;
+
+            // state copy and override
+            _localState->clone(renderState.state, State::CloneOpt_OverrideRef);
+            if( overrideState )
+            {
+                _localState->clone( overrideState, State::CloneOpt_OverrideChangedRef );
+
+                // case of shadow pass + instanced geometry
+                InstancedGeometry::Ptr instanced = InstancedGeometry::dMorph(geode->_geo);
+                if(renderPass == RenderFrame_ShadowMap &&  instanced)
+                {
+                    _localState->setReflexion(_shadowsmapShader_instanced);
+                }
+            }
+
+            // update Material uniforms
+            if(renderPass==SceneRenderer::RenderFrame_Default || renderPass==SceneRenderer::RenderFrame_Environment)
+            {
+                Material::Ptr mat = geode->_material;
+                float shininess = mat->_shininess;
+                Vec4 color = mat->_color;
+
+                if(mat->_baseColor)
+                        _localState->setUniform("u_sampler_color", mat->_baseColor, 0);
+                if(mat->_normalmap)
+                        _localState->setUniform("u_sampler_normal", mat->_normalmap, 1);
+                if(mat->_emissive)
+                        _localState->setUniform("u_sampler_emissive", mat->_emissive, 2);
+                if(mat->_reflectivity)
+                        _localState->setUniform("u_sampler_reflectivity", mat->_reflectivity, 3);
+
+                _localState->setUniform("u_color", color);
+                _localState->setUniform("u_shininess", shininess);
+            }
+
+            // ---- if we want a normal matrix for view space instead of model space ----
+            // Matrix4 model = local_state->getUniforms()["u_model"]->getMat4();
+            // Matrix3 normalMat = Matrix3(model * view).inverse().transpose();
+            // state->setUniform("u_normal", normalMat );
+            renderState.normal = Matrix3(renderState.model).inverse().transpose();
+            renderState.proj = _localState->getProjectionMatrix();
+
+            // update matrix uniform
+            _localState->setUniform("u_view", view);
+            _localState->setUniform("u_proj", renderState.proj);
+            _localState->setUniform("u_model", renderState.model);
+            _localState->setUniform("u_normal", renderState.normal);
+
+
+            applyState(_localState, renderPass);
+            drawGeometry(geode.get());
+        }
+    }
 }
+
+// #include <QDebug>
 
 
 void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
@@ -312,7 +399,7 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
                 {
                     render2cm = RenderToCubeMap::create(this);
                     render2cm->setCubeMap( render2sampler->cubemap() );
-                    render2cm->setResolution(128.0);
+                    render2cm->setResolution(512.0);
                     render2sampler->setRenderData( render2cm );
                 }
                 render2cm->render(scene, Vec3(0.0));
@@ -328,7 +415,7 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
                 {
                     render2tex = RenderTarget::create();
                     render2tex->build({render2sampler->texture()}, true);
-                    render2tex->setClearColor(0, Vec4(1.0));
+                    render2tex->setClearColor(0, Vec4(0.0));
                     render2sampler->setRenderData( render2tex );
                 }
                 RenderQueue::Ptr queue = RenderQueue::create();
@@ -338,13 +425,14 @@ void GlRenderer::applyRenderToSampler(RenderQueue::Ptr queue)
                 drawQueue(queue);
                 _renderPlugin->unbind();
                 render2tex->change();
-                
+
             }
             render2sampler->makeReady();
         }
-        
+
     }
 }
+
 
 //---------------------------------------------------------------
 void GlRenderer::clearRenderCache()
@@ -360,9 +448,9 @@ void checkQueue(RenderQueue::Ptr queue)
     for(int i=0;i<(int)queue->_renderBin.size();++i)
     {
         RenderState renderState = queue->_renderBin.at(i);
-        
-        GeoNode::Ptr geode = GeoNode::dMorph(renderState.node);
-        ClearNode::Ptr clear = ClearNode::dMorph(renderState.node);
+
+        GeoNode::Ptr geode = GeoNode::dMorph( renderState.node );
+        ClearNode::Ptr clear = ClearNode::dMorph( renderState.node );
 
         if(geode)
         {
@@ -381,31 +469,57 @@ void checkQueue(RenderQueue::Ptr queue)
     }
     std::cout << "geode in queue = " << geodeCount << std::endl;
     std::cout << "clear in queue = " << clearCount << std::endl;
+
+    std::cout << "node in transparent queue = " << queue->_transparentRenderBin.size() << std::endl;
+    geodeCount = 0;
+    clearCount = 0;
+    for(int i=0;i<(int)queue->_transparentRenderBin.size();++i)
+    {
+        RenderState renderState = queue->_renderBin.at(i);
+
+        GeoNode::Ptr geode = GeoNode::dMorph( renderState.node );
+        ClearNode::Ptr clear = ClearNode::dMorph( renderState.node );
+
+        if(geode)
+        {
+            geodeCount++;
+            if( renderState.state->getRenderPass() == nullptr ) std::cout << "geode render state has no renderPassInfo" << std::endl;
+            if( renderState.state->getReflexion() == nullptr ) std::cout << "geode render state has no reflection model" << std::endl;
+        }
+        else if(clear)
+        {
+            clearCount++;
+        }
+        else
+        {
+            std::cout << "incorrect type node - " << renderState.node->getObjectID() << std::endl;
+        }
+    }
+    std::cout << "geode in transparent queue = " << geodeCount << std::endl;
+    std::cout << "clear in transparent queue = " << clearCount << std::endl;
 }
 
 //---------------------------------------------------------------
 void GlRenderer::render(const Graph::Ptr& scene)
 {
     if(_renderPlugin == nullptr) return;
-    
-    ShadowCasting::Ptr shadowOp =
-        std::dynamic_pointer_cast<ShadowCasting>( _pipeline->getOperation(FRAMEOP_ID_SHAFX) );
+
+
+    ShadowCasting::Ptr shadowOp = ShadowCasting::dMorph( _pipeline->getOperation(FRAMEOP_ID_SHAFX) );
     shadowOp->setSampleCount(_shadowSamples);
 
-    AmbientOcclusion::Ptr ssaoOp =
-            std::dynamic_pointer_cast<AmbientOcclusion>( _pipeline->getOperation(FRAMEOP_ID_SSAO) );
+    AmbientOcclusion::Ptr ssaoOp = AmbientOcclusion::dMorph( _pipeline->getOperation(FRAMEOP_ID_SSAO) );
     ssaoOp->setSampleCount(_ssaoSamples);
 
     if(_renderCache.find( scene ) == _renderCache.end())
         _renderCache[scene] = RenderQueue::create();
-    
+
     RenderQueue::Ptr queue = _renderCache[scene];
     queue = applyRenderVisitor(scene,queue);
     // checkQueue(queue);
-    
     applyRenderToSampler(queue);
     
-    
+
     _renderPlugin->init(_internalFrames);
     _renderPlugin->bind(_internalFrames);
     drawQueue(queue);
@@ -433,7 +547,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             _environmentRenderer->setResolution(_environmentResolution);
             s_lastEnvRes = _environmentResolution;
         }
-        
+
        Vec3 p(0.0);
        if(queue->_camera)
            p = queue->_camera->getAbsolutePosition();
@@ -455,7 +569,7 @@ void GlRenderer::render(const Graph::Ptr& scene)
             _shadowsRenderer->setResolution(_shadowResolution);
             s_lastShadowRes = _shadowResolution;
         }
-        
+
        Vec3 p(0.0);
        if(light0) p = light0->_worldPosition;
 
@@ -477,48 +591,65 @@ void GlRenderer::render(const Graph::Ptr& scene)
        switch(getOutputFrame())
        {
        case RenderFrame_Default:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
            break;
        case RenderFrame_Color:
-            _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_COLOR);
+            // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_COLOR);
+            _debugToScreen->setInput(_internalFrames->get(MRT_OUT_COLOR), 0);
            break;
        case RenderFrame_ShadowMap:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
+           _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_SHAFX,0), 0);
            break;
        case RenderFrame_Environment:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
+            _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_ENVFX,0), 0);
            break;
        case RenderFrame_Lighting:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
+            _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_PHONG,0), 0);
            break;
        case RenderFrame_Depth:
-           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_DEPTH);
+           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_DEPTH);
+           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_DEPTH), 0);
            break;
        case RenderFrame_Emissive:
-           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_EMISSIVE);
+           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_EMISSIVE);
+           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_EMISSIVE), 0);
            break;
        case RenderFrame_Bloom:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
+            _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_BLOOM,0), 0);
            break;
        case RenderFrame_Normals:
-           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_NORMAL);
+           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_NORMAL);
+           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_NORMAL), 0);
            break;
        case RenderFrame_Reflectivity:
-           _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_REFLECTIVITY);
+           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_REFLECTIVITY);
+           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_REFLECTIVITY), 0);
            break;
        case RenderFrame_SSAO:
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SSAO, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SSAO, 0);
+            _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_SSAO,0), 0);
            break;
        default: // assume RenderFrame_Default
-            _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
            break;
        }
 
        s_lastOutput = getOutputFrame();
     }
 
+    _lighting->setLightPower(_lightpower);
+    _lighting->setAmbient(_ambient);
     _pipeline->prepare(queue->_camera, light0, _shadowsMap, _environmentMap);
     _pipeline->run( FRAMEOP_ID_COPY );
+
+    if(getOutputFrame() != RenderFrame_Default)
+    {
+        _debugToScreen->apply(this,false);
+    }
 }
 
 
@@ -529,9 +660,7 @@ void GlRenderer::applyState(const State::Ptr& state,
     if(_renderPlugin == nullptr) return;
 
     if( renderPass==SceneRenderer::RenderFrame_ShadowMap )
-    {
         _renderPlugin->setCulling(2); // front culling
-    }
     else
         _renderPlugin->setCulling(state->getFaceCullingMode());
 
@@ -550,7 +679,7 @@ void GlRenderer::applyState(const State::Ptr& state,
 }
 
 //---------------------------------------------------------------
-void GlRenderer::applyClear(ClearNode* clearNode, SceneRenderer::RenderFrame renderPass)
+void GlRenderer::applyClear(ClearNode* clearNode, SceneRenderer::RenderFrame /*renderPass*/)
 {
     static ClearNode::Ptr clear;
     if(clear.get() == nullptr) clear = ClearNode::create();

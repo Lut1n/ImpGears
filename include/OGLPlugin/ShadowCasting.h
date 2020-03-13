@@ -5,7 +5,7 @@
 
 IMPGEARS_BEGIN
 
-struct GlRenderer;
+class GlRenderer;
 
 class IMP_API ShadowCasting : public FrameOperation
 {
@@ -17,7 +17,7 @@ public:
 
     virtual void setup(const Vec4& vp);
     virtual void apply(GlRenderer* renderer, bool skip = false);
-    
+
     void setSampleCount(int samples){_samples=samples;}
 
 protected:
@@ -27,7 +27,7 @@ protected:
     
     RenderQueue::Ptr _queue;
     RenderQueue::Ptr _fillingQueue;
-    
+
     int _samples;
 };
 

@@ -10,9 +10,9 @@ static std::string glsl_blur = GLSL_CODE(
 
 uniform float u_horizontal_blur;
 uniform sampler2D u_input_sampler;
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec4 i_emi(vec2 uv){return texture2D(u_input_sampler, uv).xyzw;}
+vec4 i_emi(vec2 uv){return texture(u_input_sampler, uv).xyzw;}
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -32,8 +32,8 @@ void lighting(out vec4 out_color,
 
     for(int i = 1; i < 5; ++i)
     {
-        result += i_emi(v_texCoord + dir*i) * weight[i];
-        result += i_emi(v_texCoord - dir*i) * weight[i];
+        result += i_emi(v_texCoord + dir*float(i)) * weight[i];
+        result += i_emi(v_texCoord - dir*float(i)) * weight[i];
     }
 
     result = clamp(result,0.0,1.0);
@@ -92,7 +92,7 @@ void BloomFX::process(GlRenderer* renderer, int subpassID)
 
     _graph->getInitState()->setUniform("u_input_sampler", sampler, 0);
     _graph->getInitState()->setUniform("u_horizontal_blur", h);
-
+    
     if(_queue == nullptr)
         _queue = renderer->applyRenderVisitor(_graph);
     renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Bloom);

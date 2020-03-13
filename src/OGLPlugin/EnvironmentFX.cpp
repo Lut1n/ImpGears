@@ -14,11 +14,11 @@ uniform sampler2D u_input_sampler_reflectivity;
 uniform samplerCube u_input_cubemap_environment;
 uniform mat4 u_scene_view;
 
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-float i_reflectivity(vec2 uv){return texture2D(u_input_sampler_reflectivity, uv).x;}
-vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
-float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
+float i_reflectivity(vec2 uv){return texture(u_input_sampler_reflectivity, uv).x;}
+vec3 i_normal(vec2 uv){return texture(u_input_sampler_normal, uv).xyz;}
+float i_depth(vec2 uv){return texture(u_input_sampler_depth, uv).x;}
 vec3 i_env(vec3 uvw){return texture(u_input_cubemap_environment, uvw).xyz;}
 
 vec3 unproject(vec2 txCoord, float depth)

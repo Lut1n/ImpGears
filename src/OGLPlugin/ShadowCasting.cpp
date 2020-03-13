@@ -16,7 +16,7 @@ uniform int u_sampleCount;
 
 in vec2 v_texCoord;
 
-float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
+float i_depth(vec2 uv){return texture(u_input_sampler_depth, uv).x;}
 float i_shadow(vec3 uvw){return texture(u_input_cubemap_shadow, uvw).x;}
 
 float hash(vec3 xyz)
@@ -107,17 +107,16 @@ void lighting(out vec4 out_color,
     float distance_light = (length(pos_from_light)-near) / (far-near);
     mat3 tbn = build_tbn(pos_from_light);
 
-    const float N = 16;
+    int N = u_sampleCount;
     float received_light = 1.0;
     for(int i=0;i<N;++i)
     {
         int index = i;
-        if(index >= u_sampleCount) break;
         // int index = // int(16.0*random(floor(world_pos.xyz*1000.0), i))%16;
         // int index = int(16.0*hash(vec3(v_texCoord, i)))%16;
 
         float distance_occlusion = i_shadow(pos_from_light + tbn * poissonDisk[index]);
-        if(distance_light < 1.0-EPSILON && distance_light > distance_occlusion+EPSILON) received_light -= 0.8/N;
+        if(distance_light < 1.0-EPSILON && distance_light > distance_occlusion+EPSILON) received_light -= 0.8/float(N);
     }
 
     // without multi-sampling

@@ -5,7 +5,7 @@
 
 IMPGEARS_BEGIN
 
-struct GlRenderer;
+class GlRenderer;
 
 class IMP_API LightingModel : public FrameOperation
 {
@@ -18,6 +18,9 @@ public:
     virtual void setup(const Vec4& vp);
     virtual void apply(GlRenderer* renderer, bool skip = false);
 
+    void setLightPower(float lightpower) {_lightpower=lightpower;}
+    void setAmbient(float ambient) {_ambient=ambient;}
+
 protected:
     Graph::Ptr _graph;
     Graph::Ptr _fillingGraph;
@@ -25,6 +28,9 @@ protected:
     
     RenderQueue::Ptr _queue;
     RenderQueue::Ptr _fillingQueue;
+
+    float _lightpower;
+    float _ambient;
 };
 
 IMPGEARS_END

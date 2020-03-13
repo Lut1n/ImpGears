@@ -8,11 +8,13 @@
 #include <SceneGraph/ClearNode.h>
 #include <SceneGraph/GeoNode.h>
 #include <OGLPlugin/Pipeline.h>
+#include <OGLPlugin/LightingModel.h>
+#include <OGLPlugin/CopyFrame.h>
 
 IMPGEARS_BEGIN
 
-struct BloomFX;
-struct EnvironmentFX;
+class BloomFX;
+class EnvironmentFX;
 
 class IMP_API GlRenderer : public SceneRenderer
 {
@@ -50,17 +52,23 @@ public:
     void setShadowSampleCount(int samples){_shadowSamples=samples;}
     void setSsaoSampleCount(int samples){_ssaoSamples=samples;}
 
+    void setLightPower(float lightpower) {_lightpower=lightpower;}
+    void setAmbient(float ambient) {_ambient=ambient;}
+
     RenderPlugin* _renderPlugin;
 
 protected:
 
     Pipeline::Ptr _pipeline;
+    LightingModel::Ptr _lighting;
+
     CubeMapSampler::Ptr _shadowsMap;
     CubeMapSampler::Ptr _environmentMap;
     RenderToCubeMap::Ptr _shadowsRenderer;
     RenderToCubeMap::Ptr _environmentRenderer;
     ReflexionModel::Ptr _shadowsmapShader;
     ReflexionModel::Ptr _shadowsmapShader_instanced;
+    CopyFrame::Ptr _debugToScreen;
 
     RenderTarget::Ptr _internalFrames;
     
@@ -72,6 +80,9 @@ protected:
     int _environmentResolution;
     int _shadowSamples;
     int _ssaoSamples;
+
+    float _lightpower;
+    float _ambient;
 };
 
 IMPGEARS_END

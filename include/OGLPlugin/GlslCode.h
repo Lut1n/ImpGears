@@ -25,6 +25,7 @@ out vec3 v_mv;
 out vec3 v_n;
 out vec3 v_vertex;
 out vec3 v_color;
+out mat4 v_view;
 out mat4 v_model;
 
 void main()
@@ -38,6 +39,7 @@ void main()
     v_m = (u_model * vec4(a_vertex,1.0)).xyz;
     v_mv = mv_pos.xyz;
     v_vertex = a_vertex;
+    v_view = u_view;
     v_model = u_model;
 }
 
@@ -68,6 +70,7 @@ out vec3 v_n;
 out vec3 v_vertex;
 out vec3 v_color;
 out mat4 v_model;
+out mat4 v_view;
 
 void main()
 {
@@ -82,6 +85,7 @@ void main()
     v_mv = mv_pos.xyz;
     v_vertex = a_vertex;
     v_model = _model;
+    v_view = u_view;
 }
 
 );
@@ -98,7 +102,6 @@ in vec3 v_m;
 in vec3 v_mv;
 in vec3 v_vertex;
 in vec3 v_color;
-in mat4 v_model;
 
 void lighting(out vec4 out_color,
               out vec4 out_emissive,
@@ -201,12 +204,12 @@ uniform sampler2D u_sampler_normal;
 
 vec4 textureColor(vec2 uv)
 {
-    return texture2D(u_sampler_color, uv).xyzw;
+    return texture(u_sampler_color, uv).xyzw;
 }
 
 vec3 textureNormal(vec2 uv)
 {
-    vec3 n = texture2D(u_sampler_normal,uv).xyz;
+    vec3 n = texture(u_sampler_normal,uv).xyz;
     return n * 2.0 - 1.0;
 }
 
@@ -237,23 +240,23 @@ uniform sampler2D u_sampler_reflectivity;
 
 vec4 textureColor(vec2 uv)
 {
-    return texture2D(u_sampler_color, uv).xyzw;
+    return texture(u_sampler_color, uv).xyzw;
 }
 
 vec3 textureNormal(vec2 uv)
 {
-    vec3 n = texture2D(u_sampler_normal,uv).xyz;
+    vec3 n = texture(u_sampler_normal,uv).xyz;
     return n * 2.0 - 1.0;
 }
 
 vec4 textureEmissive(vec2 uv)
 {
-    return texture2D(u_sampler_emissive,uv).xyzw;
+    return texture(u_sampler_emissive,uv).xyzw;
 }
 
 float textureReflectivity(vec2 uv)
 {
-    return texture2D(u_sampler_reflectivity,uv).x;
+    return texture(u_sampler_reflectivity,uv).x;
 }
 
 );
@@ -262,7 +265,6 @@ float textureReflectivity(vec2 uv)
 static std::string glsl_phong = GLSL_CODE(
 
 // uniforms
-uniform mat4 u_view;
 uniform vec4 u_color;
 uniform float u_shininess;
 
@@ -274,6 +276,7 @@ in vec3 v_n;
 in vec3 v_vertex;
 in vec3 v_color;
 in mat4 v_model;
+in mat4 v_view;
 
 mat3 build_tbn(vec3 n_ref)
 {
@@ -300,14 +303,14 @@ void lighting(out vec4 out_color,
     vec4 color = u_color*vec4(v_color,1.0);
     color *= textureColor(v_texCoord);
     if(color.w==0.0) discard;
-    
+
     vec4 emi = textureEmissive(v_texCoord);
 
     out_color = clamp(color,0.0,1.0); //vec4(clamp( max(color.xyz,emi.xyz),0.0,1.0 ), color.w);
     out_emissive = clamp(emi,0.0,1.0);
 
     vec3 normal = textureNormal(v_texCoord);
-    mat3 normal_mat = transpose( inverse( mat3(u_view*v_model) ) );
+    mat3 normal_mat = transpose( inverse( mat3(v_view*v_model) ) );
 
     mat3 tbn = build_tbn( normalize(v_n) );
     out_normal = (normal_mat * tbn * normal) * 0.5 + 0.5;

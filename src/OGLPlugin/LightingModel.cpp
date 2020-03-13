@@ -12,12 +12,14 @@ uniform sampler2D u_input_sampler_normal;
 uniform sampler2D u_input_sampler_depth;
 uniform sampler2D u_input_sampler_shininess;
 uniform vec3 u_light_pos;
+uniform float u_light_power;
+uniform float u_ambient;
 
-varying vec2 v_texCoord;
+in vec2 v_texCoord;
 
-vec3 i_normal(vec2 uv){return texture2D(u_input_sampler_normal, uv).xyz;}
-float i_depth(vec2 uv){return texture2D(u_input_sampler_depth, uv).x;}
-float i_shininess(vec2 uv){return texture2D(u_input_sampler_shininess, uv).x;}
+vec3 i_normal(vec2 uv){return texture(u_input_sampler_normal, uv).xyz;}
+float i_depth(vec2 uv){return texture(u_input_sampler_depth, uv).x;}
+float i_shininess(vec2 uv){return texture(u_input_sampler_shininess, uv).x;}
 
 vec3 unproject(vec2 txCoord, float depth)
 {
@@ -50,7 +52,7 @@ void lighting(out vec4 out_color,
 
     vec3 view_pos = unproject(v_texCoord, depth);
 
-    float lightPower = 200.0;
+    float lightPower = u_light_power; // 200.0;
     float shininess = i_shininess(v_texCoord) * 100.0;
 
     // view space
@@ -74,14 +76,15 @@ void lighting(out vec4 out_color,
         specular = pow(specAngle, shininess);
     }
 
-    float intensity = clamp( lightPower/dist, 0.0, 1.0);
-    float ambient = 0.02;
-    float colorModel = ambient + (lambertian + specular) * intensity;
+    float intensity = clamp(lightPower/dist,0.0,1.0);
+    float ambient = u_ambient; // 0.3;
+    float lighting = (lambertian+specular)*intensity;
+    lighting = mix(ambient,1.0,clamp(lighting,0.0,1.0));
 
     const float EPSILON = 0.001;
-    if( length(i_normal(v_texCoord)) < EPSILON ) colorModel = 0.0;
+    if( length(i_normal(v_texCoord)) < EPSILON ) lighting = 0.0;
 
-    out_color = vec4(vec3(colorModel),1.0);
+    out_color = vec4(vec3(lighting),1.0);
 }
 
 );
@@ -92,7 +95,8 @@ IMPGEARS_BEGIN
 //--------------------------------------------------------------
 LightingModel::LightingModel()
 {
-
+    _lightpower = 200.0;
+    _ambient = 0.1;
 }
 
 //--------------------------------------------------------------
@@ -145,6 +149,8 @@ void LightingModel::apply(GlRenderer* renderer, bool skip)
         _graph->getInitState()->setUniform("u_input_sampler_depth", _input[1], 1);
         _graph->getInitState()->setUniform("u_input_sampler_shininess", _input[2], 2);
         _graph->getInitState()->setUniform("u_light_pos", Vec3(light_pos) );
+        _graph->getInitState()->setUniform("u_light_power", _lightpower );
+        _graph->getInitState()->setUniform("u_ambient", _ambient );
         if(_queue == nullptr) _queue = RenderQueue::create();
         _queue = renderer->applyRenderVisitor(_graph,_queue);
         renderer->drawQueue(_queue, nullptr, SceneRenderer::RenderFrame_Lighting);

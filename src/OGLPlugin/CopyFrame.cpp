@@ -30,7 +30,7 @@ void CopyFrame::setup(const Vec4& vp)
 }
 
 //--------------------------------------------------------------
-void CopyFrame::apply(GlRenderer* renderer, bool skip)
+void CopyFrame::apply(GlRenderer* renderer, bool /*skip*/)
 {
     if(_output.size() > 0)
     {

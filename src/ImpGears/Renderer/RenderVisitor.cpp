@@ -131,6 +131,7 @@ void RenderVisitor::reset( RenderQueue::Ptr initQueue )
     _queue->_camera = nullptr;
     _queue->_lights.clear();
     _queue->_renderBin.reset();
+    _queue->_transparentRenderBin.reset();
 }
 
 //--------------------------------------------------------------
@@ -157,7 +158,10 @@ void RenderVisitor::applyDefault( Node::Ptr node )
     Matrix4 topMat = stack.topMatrix();
     State::Ptr topState = stack.topState();
     
-    _queue->_renderBin.push(topState,node,topMat);
+    if(topState->getTransparent())
+        _queue->_transparentRenderBin.push(topState,node,topMat);
+    else
+        _queue->_renderBin.push(topState,node,topMat);
 }
 
 //--------------------------------------------------------------

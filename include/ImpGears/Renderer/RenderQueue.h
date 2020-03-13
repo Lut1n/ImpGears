@@ -33,6 +33,7 @@ struct IMP_API StateBin
     StateBin();
     
     void push(const State::Ptr state, Node::Ptr node, const Matrix4& model);
+    void sortByDistance(const Vec3& camPos);
     
     int size();
     void reset();
@@ -55,6 +56,7 @@ public:
     const Camera* _camera;
     std::vector<LightNode*> _lights;
     StateBin _renderBin;
+    StateBin _transparentRenderBin;
 };
 
 IMPGEARS_END

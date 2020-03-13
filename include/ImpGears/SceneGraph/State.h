@@ -64,6 +64,9 @@ public:
     void setDepthTest(bool depthTest);
     bool getDepthTest() const {return _depthTest;}
 
+    void setTransparent(bool transparent);
+    bool getTransparent() const {return _transparent;}
+
     void setViewport(float x, float y, float width, float height);
     void setViewport(const Vec4& viewport);
     const Vec4 getViewport() const {return _viewport;}
@@ -107,6 +110,7 @@ private:
     BlendMode _blendMode;
     float _lineWidth;
     bool _depthTest;
+    bool _transparent;
 
     ReflexionModel::Ptr _reflexion;
     RenderPass::Ptr _renderPass;
@@ -120,6 +124,7 @@ private:
     bool _blendModeChanged;
     bool _lineWidthChanged;
     bool _depthTestChanged;
+    bool _transparentChanged;
     bool _reflexionChanged;
     bool _renderPassChanged;
     bool _uniformsChanged;

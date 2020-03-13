@@ -10,6 +10,7 @@ State::State()
     , _blendMode(BlendMode_SrcAlphaBased)
     , _lineWidth(1.0)
     , _depthTest(false)
+    , _transparent(false)
     , _reflexion(nullptr)
     , _renderPass(nullptr)
     , _uniforms()
@@ -20,6 +21,7 @@ State::State()
     , _blendModeChanged(false)
     , _lineWidthChanged(false)
     , _depthTestChanged(false)
+    , _transparentChanged(false)
     , _reflexionChanged(false)
     , _renderPassChanged(false)
     , _uniformsChanged(false)
@@ -34,6 +36,7 @@ State::State(const State& other)
     , _blendMode(other._blendMode)
     , _lineWidth(other._lineWidth)
     , _depthTest(other._depthTest)
+    , _transparent(other._transparent)
     , _reflexion(other._reflexion)
     , _renderPass(other._renderPass)
     , _uniforms(other._uniforms)
@@ -44,6 +47,7 @@ State::State(const State& other)
     , _blendModeChanged(other._blendModeChanged)
     , _lineWidthChanged(other._lineWidthChanged)
     , _depthTestChanged(other._depthTestChanged)
+    , _transparentChanged(other._transparentChanged)
     , _reflexionChanged(other._reflexionChanged)
     , _renderPassChanged(other._renderPassChanged)
     , _uniformsChanged(other._uniformsChanged)
@@ -66,6 +70,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _blendMode = other->_blendMode;
         _lineWidth = other->_lineWidth;
         _depthTest = other->_depthTest;
+        _transparent = other->_transparent;
         _reflexion = other->_reflexion;
         _renderPass = other->_renderPass;
         
@@ -79,6 +84,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _blendModeChanged = other->_blendModeChanged;
         _lineWidthChanged = other->_lineWidthChanged;
         _depthTestChanged = other->_depthTestChanged;
+        _transparentChanged = other->_transparentChanged;
         _reflexionChanged = other->_reflexionChanged;
         _renderPassChanged = other->_renderPassChanged;
     }
@@ -90,6 +96,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         if(other->_blendModeChanged) setBlendMode(other->_blendMode);
         if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
         if(other->_depthTestChanged) setDepthTest(other->_depthTest);
+        if(other->_transparentChanged) setTransparent(other->_transparent);
         if(other->_reflexionChanged) setReflexion(other->_reflexion);
         if(other->_renderPassChanged) setRenderPass(other->_renderPass);
         
@@ -105,6 +112,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _blendMode = other->_blendMode;
         _lineWidth = other->_lineWidth;
         _depthTest = other->_depthTest;
+        _transparent = other->_transparent;
         _reflexion = other->_reflexion;
         _renderPass = other->_renderPass;
         
@@ -119,6 +127,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         _blendModeChanged = other->_blendModeChanged;
         _lineWidthChanged = other->_lineWidthChanged;
         _depthTestChanged = other->_depthTestChanged;
+        _transparentChanged = other->_transparentChanged;
         _reflexionChanged = other->_reflexionChanged;
         _renderPassChanged = other->_renderPassChanged;
     }
@@ -130,6 +139,7 @@ void State::clone(const State::Ptr& other, CloneOpt opt)
         if(other->_blendModeChanged) setBlendMode(other->_blendMode);
         if(other->_lineWidthChanged) setLineWidth(other->_lineWidth);
         if(other->_depthTestChanged) setDepthTest(other->_depthTest);
+        if(other->_transparentChanged) setTransparent(other->_transparent);
         if(other->_reflexionChanged) setReflexion(other->_reflexion);
         if(other->_renderPassChanged) setRenderPass(other->_renderPass);
         
@@ -148,6 +158,7 @@ const State& State::operator=(const State& other)
     _blendMode = other._blendMode;
     _lineWidth = other._lineWidth;
     _depthTest = other._depthTest;
+    _transparent = other._transparent;
     _reflexion = other._reflexion;
     _renderPass = other._renderPass;
     _uniforms = other._uniforms;
@@ -158,6 +169,7 @@ const State& State::operator=(const State& other)
     _blendModeChanged = other._blendModeChanged;
     _lineWidthChanged = other._lineWidthChanged;
     _depthTestChanged = other._depthTestChanged;
+    _transparentChanged = other._transparentChanged;
     _reflexionChanged = other._reflexionChanged;
     _renderPassChanged = other._renderPassChanged;
     _uniformsChanged = other._uniformsChanged;
@@ -184,6 +196,13 @@ void State::setDepthTest(bool test)
 {
     _depthTest = test;
     _depthTestChanged = true;
+}
+
+//--------------------------------------------------------------
+void State::setTransparent(bool transparent)
+{
+    _transparent = transparent;
+    _transparentChanged = true;
 }
 
 //--------------------------------------------------------------

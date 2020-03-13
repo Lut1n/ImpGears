@@ -19,7 +19,6 @@ RenderState::RenderState()
 void RenderState::reset()
 {
     state->clone(s_defaultState,State::CloneOpt_OverrideRef);
-    // state = State::create();
     node = nullptr;
 }
 
@@ -28,7 +27,6 @@ void RenderState::reset()
 StateBin::StateBin()
     : position(-1)
 {
-    
 }
 
 //--------------------------------------------------------------
@@ -40,6 +38,16 @@ void StateBin::push(const State::Ptr state, Node::Ptr node, const Matrix4& model
     items[position].state->clone(state, State::CloneOpt_OverrideRef);
     items[position].node = node;
     items[position].model = model;
+}
+
+//--------------------------------------------------------------
+void StateBin::sortByDistance(const Vec3& camPos)
+{
+    std::sort(items.begin(),items.end(), [camPos](const RenderState& a, const RenderState& b) {
+        Vec3 mpos1(a.model.at(3,0),a.model.at(3,1),a.model.at(3,2));
+        Vec3 mpos2(b.model.at(3,0),b.model.at(3,1),b.model.at(3,2));
+        return (mpos1-camPos).length2() < (mpos2-camPos).length2();
+    });
 }
 
 //--------------------------------------------------------------

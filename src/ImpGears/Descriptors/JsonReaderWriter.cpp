@@ -209,7 +209,10 @@ int getEndOf(const std::string& str, int beginPos)
 
 bool isNumeric(const std::string& str)
 {
-	return str.size()>0 && str[0] >= '0' && str[0] <= '9';
+    bool pos = str.size()>0 && str[0] >= '0' && str[0] <= '9';
+    bool neg = str.size()>1 && str[0] == '-' && str[1] >='0' && str[1] <='9';
+
+    return pos || neg;
 }
 
 bool isString(const std::string& str)

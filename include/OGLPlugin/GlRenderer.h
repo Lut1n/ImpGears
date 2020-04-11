@@ -24,6 +24,8 @@ public:
 
     GlRenderer();
     virtual ~GlRenderer();
+    
+    virtual void initialize();
 
     RenderQueue::Ptr applyRenderVisitor(const Graph::Ptr& scene, RenderQueue::Ptr queue = nullptr);
 
@@ -47,14 +49,6 @@ public:
     
     void clearRenderCache();
 
-    void setShadowResolution(int res){_shadowResolution=res;}
-    void setEnvironmentResolution(int res){_environmentResolution=res;}
-    void setShadowSampleCount(int samples){_shadowSamples=samples;}
-    void setSsaoSampleCount(int samples){_ssaoSamples=samples;}
-
-    void setLightPower(float lightpower) {_lightpower=lightpower;}
-    void setAmbient(float ambient) {_ambient=ambient;}
-
     RenderPlugin* _renderPlugin;
 
 protected:
@@ -71,18 +65,11 @@ protected:
     CopyFrame::Ptr _debugToScreen;
 
     RenderTarget::Ptr _internalFrames;
+    RenderTarget::Ptr _resolvedFrames;
     
     std::map<Graph::Ptr, RenderQueue::Ptr> _renderCache;
     
     State::Ptr _localState;
-
-    int _shadowResolution;
-    int _environmentResolution;
-    int _shadowSamples;
-    int _ssaoSamples;
-
-    float _lightpower;
-    float _ambient;
 };
 
 IMPGEARS_END

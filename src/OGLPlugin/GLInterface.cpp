@@ -174,6 +174,7 @@ int GlPlugin::load(ImageSampler::Ptr& sampler)
     if( sampler->getRenderData() == nullptr )
     {
         Texture::Ptr tex = Texture::create();
+        tex->setMSAA( sampler->getMSAA() );
         Image::Ptr img = sampler->getSource();
         if(img == nullptr)
             std::cout << "error no img in sampler" << std::endl;
@@ -474,7 +475,7 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
             tex->update();
             sampler->_needUpdate = false;
         }
-        glBindTexture(GL_TEXTURE_2D, tex->getVideoID());
+        tex->bind();
         glUniform1i(uniformLocation, uniform->getInt1());
     }
     else if(type == Uniform::Type_CubeMap)
@@ -494,7 +495,7 @@ void GlPlugin::update(ReflexionModel::Ptr& reflexion, Uniform::Ptr& uniform)
             cubemap->update();
             sampler->_needUpdate = false;
         }
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getVideoID());
+        cubemap->bind();
         glUniform1i(uniformLocation, uniform->getInt1());
     }
     else

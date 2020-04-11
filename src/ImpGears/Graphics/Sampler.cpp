@@ -46,6 +46,7 @@ inline float applyWrapping(float& c, CubeMapSampler::Wrapping wrapping)
 //--------------------------------------------------------------
 ImageSampler::ImageSampler(Image::Ptr src, Wrapping wrapping)
     : _wrapping(wrapping)
+    , _msaa(false)
 {
     setSource(src);
 }
@@ -53,6 +54,7 @@ ImageSampler::ImageSampler(Image::Ptr src, Wrapping wrapping)
 //--------------------------------------------------------------
 ImageSampler::ImageSampler(int w, int h, int chnl, const Vec4& color)
     : _wrapping(Wrapping_Clamp)
+    , _msaa(false)
 {
     Image::Ptr src = Image::create(w,h,chnl);
     src->fill(color * 255.0);

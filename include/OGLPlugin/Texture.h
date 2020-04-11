@@ -47,6 +47,9 @@ public:
     bool hasMimap() const{return _hasMipmap;}
     void setMipmap(bool mipmap, std::uint32_t maxLevel = 1000){_hasMipmap = mipmap; _mipmapMaxLevel = maxLevel; update();}
 
+    bool hasMSAA() const{return _hasMSAA;}
+    void setMSAA(bool msaa, std::uint32_t samples = 4){_hasMSAA = msaa;}
+
     void update();
 
     int width() const {return _width;}
@@ -66,6 +69,7 @@ private:
     bool _isSmooth;
     bool _isRepeated;
     bool _hasMipmap;
+    bool _hasMSAA;
 
     std::uint32_t _mipmapMaxLevel;
 

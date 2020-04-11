@@ -39,6 +39,12 @@ public:
     static FrameBuffer* s_bound;
 
     static std::uint32_t s_count() { return _s_count; }
+    
+    int getVideoID() const {return _id;}
+    int count() const { return _colorTextures.size(); }
+    
+    int width() const {return _width;}
+    int height() const {return _height;}
 
 protected:
 
@@ -48,6 +54,8 @@ protected:
     int _faceID;
     bool _hasDepthBuffer;
     bool _useCubeMap;
+    int _width;
+    int _height;
 
     static std::uint32_t _s_count;
 

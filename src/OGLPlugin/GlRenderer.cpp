@@ -14,6 +14,9 @@
 #include <OGLPlugin/GlslCode.h>
 #include <Geometry/InstancedGeometry.h>
 
+#include <OGLPlugin/FrameBuffer.h>
+#include <OGLPlugin/GlError.h>
+
 #define FRAMEOP_ID_ENVFX 0
 #define FRAMEOP_ID_SHAMIX 1
 #define FRAMEOP_ID_COLORMIX 2
@@ -60,13 +63,16 @@ IMPGEARS_BEGIN
 GlRenderer::GlRenderer()
     : SceneRenderer()
 {
-    _shadowResolution = 256;
-    _environmentResolution = 128;
-    _shadowSamples = 16;
-    _ssaoSamples = 16;
-    _lightpower = 200.0;
-    _ambient = 0.1;
+}
 
+//--------------------------------------------------------------
+GlRenderer::~GlRenderer()
+{
+}
+
+//---------------------------------------------------------------
+void GlRenderer::initialize()
+{
     // CubeMaps rendering setup
     _environmentMap = CubeMapSampler::create(_environmentResolution,_environmentResolution,4,Vec4(1.0));
     _environmentRenderer = RenderToCubeMap::create(this);
@@ -94,8 +100,10 @@ GlRenderer::GlRenderer()
 
     // mrt setup
     int mrt_size = 6;
+    bool enableMSAA = isMsaaEnabled();
+    
     _internalFrames = RenderTarget::create();
-    _internalFrames->build(1024.0,1024.0,mrt_size,true);
+    _internalFrames->build(1024.0,1024.0,mrt_size,true,enableMSAA);
     _internalFrames->setClearColor(MRT_OUT_COLOR, Vec4(1.0));
     _internalFrames->setClearColor(MRT_OUT_EMISSIVE, Vec4(0.0));
     _internalFrames->setClearColor(MRT_OUT_NORMAL, Vec4(0.0));
@@ -103,7 +111,11 @@ GlRenderer::GlRenderer()
     _internalFrames->setClearColor(MRT_OUT_SHININESS, Vec4(0.0));
     _internalFrames->setClearColor(MRT_OUT_DEPTH, Vec4(1.0));
 
-
+    if(enableMSAA)
+    {
+        _resolvedFrames = RenderTarget::create();
+        _resolvedFrames->build(1024.0,1024.0,mrt_size,false,false);
+    }
 
     // pipeline setup
     _pipeline = Pipeline::create(this);
@@ -137,18 +149,21 @@ GlRenderer::GlRenderer()
     _pipeline->setOperation( bloomFX, FRAMEOP_ID_BLOOM );
     _pipeline->setOperation( ssaoFX, FRAMEOP_ID_SSAO );
     _pipeline->setOperation( ssao_mix, FRAMEOP_ID_SSAOMIX );
+    
+    RenderTarget::Ptr pipelineInputFrames = _internalFrames;
+    if(enableMSAA) pipelineInputFrames = _resolvedFrames;
 
-    _pipeline->bindExternal( FRAMEOP_ID_BLOOM, _internalFrames, 0, MRT_OUT_EMISSIVE);
-    _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 0, MRT_OUT_NORMAL);
-    _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 1, MRT_OUT_DEPTH);
-    _pipeline->bindExternal( FRAMEOP_ID_PHONG, _internalFrames, 2, MRT_OUT_SHININESS);
-    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 0, MRT_OUT_NORMAL);
-    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 1, MRT_OUT_DEPTH);
-    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, _internalFrames, 2, MRT_OUT_REFLECTIVITY);
-    _pipeline->bindExternal( FRAMEOP_ID_SHAFX, _internalFrames, 0, MRT_OUT_DEPTH);
-    _pipeline->bindExternal( FRAMEOP_ID_COLORMIX, _internalFrames, 0, MRT_OUT_COLOR);
-    _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 0, MRT_OUT_NORMAL);
-    _pipeline->bindExternal( FRAMEOP_ID_SSAO, _internalFrames, 1, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_BLOOM, pipelineInputFrames, 0, MRT_OUT_EMISSIVE);
+    _pipeline->bindExternal( FRAMEOP_ID_PHONG, pipelineInputFrames, 0, MRT_OUT_NORMAL);
+    _pipeline->bindExternal( FRAMEOP_ID_PHONG, pipelineInputFrames, 1, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_PHONG, pipelineInputFrames, 2, MRT_OUT_SHININESS);
+    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, pipelineInputFrames, 0, MRT_OUT_NORMAL);
+    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, pipelineInputFrames, 1, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_ENVFX, pipelineInputFrames, 2, MRT_OUT_REFLECTIVITY);
+    _pipeline->bindExternal( FRAMEOP_ID_SHAFX, pipelineInputFrames, 0, MRT_OUT_DEPTH);
+    _pipeline->bindExternal( FRAMEOP_ID_COLORMIX, pipelineInputFrames, 0, MRT_OUT_COLOR);
+    _pipeline->bindExternal( FRAMEOP_ID_SSAO, pipelineInputFrames, 0, MRT_OUT_NORMAL);
+    _pipeline->bindExternal( FRAMEOP_ID_SSAO, pipelineInputFrames, 1, MRT_OUT_DEPTH);
 
     _pipeline->bind( FRAMEOP_ID_SSAOMIX, FRAMEOP_ID_SSAO, 0);
     _pipeline->bind( FRAMEOP_ID_SSAOMIX, FRAMEOP_ID_PHONG, 1);
@@ -163,18 +178,15 @@ GlRenderer::GlRenderer()
 
     _debugToScreen = CopyFrame::create();
     _debugToScreen->clearOutput();
-    _debugToScreen->setInput(_internalFrames->get(0), 0);
+    _debugToScreen->setInput(pipelineInputFrames->get(0), 0);
     _debugToScreen->setup(Vec4(0.0,0.0,512.0,512.0));
-}
-
-//--------------------------------------------------------------
-GlRenderer::~GlRenderer()
-{
 }
 
 //---------------------------------------------------------------
 void GlRenderer::setOuputViewport(const Vec4& vp)
 {
+    if(_pipeline==nullptr) initialize();
+        
     _outputViewport = vp;
     _pipeline->setViewport(_outputViewport);
     _debugToScreen->setup(_outputViewport);
@@ -503,6 +515,7 @@ void checkQueue(RenderQueue::Ptr queue)
 void GlRenderer::render(const Graph::Ptr& scene)
 {
     if(_renderPlugin == nullptr) return;
+    if(_pipeline==nullptr) initialize();
 
 
     ShadowCasting::Ptr shadowOp = ShadowCasting::dMorph( _pipeline->getOperation(FRAMEOP_ID_SHAFX) );
@@ -520,6 +533,9 @@ void GlRenderer::render(const Graph::Ptr& scene)
     applyRenderToSampler(queue);
     
 
+    if(isMsaaEnabled()) glEnable(GL_MULTISAMPLE);
+    else glDisable(GL_MULTISAMPLE);
+    
     _renderPlugin->init(_internalFrames);
     _renderPlugin->bind(_internalFrames);
     drawQueue(queue);
@@ -577,6 +593,39 @@ void GlRenderer::render(const Graph::Ptr& scene)
                    queue, p,
                    SceneRenderer::RenderFrame_ShadowMap, _shadowsmapShader);
     }
+    
+    bool enableMSAA = isMsaaEnabled();
+    RenderTarget::Ptr pipelineInputFrames = _internalFrames;
+    if(enableMSAA)
+    {
+        _renderPlugin->init(_resolvedFrames);
+        
+        RenderTarget::Ptr rt_src = _internalFrames;
+        RenderTarget::Ptr rt_dst = _resolvedFrames;
+            
+        FrameBuffer::Ptr fbo_src = FrameBuffer::dMorph(rt_src->getRenderData());
+        FrameBuffer::Ptr fbo_dst = FrameBuffer::dMorph(rt_dst->getRenderData());
+      
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst->getVideoID());
+        GL_CHECKERROR("bind draw framebuffer");
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_src->getVideoID());
+        GL_CHECKERROR("bind read framebuffer");
+        
+        // resolve msaa : blit each multisampled buffer to texture
+        for(int i=0;i<6;++i)
+        {
+            glDrawBuffer( static_cast<GLenum>(GL_COLOR_ATTACHMENT0+i) );
+            GL_CHECKERROR("set draw buffers");
+            glReadBuffer( static_cast<GLenum>(GL_COLOR_ATTACHMENT0+i) );
+            GL_CHECKERROR("set read buffers");
+            
+            glBlitFramebuffer(0, 0, fbo_src->width(), fbo_src->height(), 0, 0, fbo_dst->width(), fbo_dst->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            GL_CHECKERROR("resolve msaa");
+        }
+        
+        _resolvedFrames->change();
+        pipelineInputFrames = _resolvedFrames;
+    }
 
     _pipeline->setActive(FRAMEOP_ID_SHAFX, shadows_enabled);
     _pipeline->setActive(FRAMEOP_ID_ENVFX, env_enabled);
@@ -590,51 +639,39 @@ void GlRenderer::render(const Graph::Ptr& scene)
     {
        switch(getOutputFrame())
        {
-       case RenderFrame_Default:
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
+       case RenderFrame_Default: // do nothing
            break;
        case RenderFrame_Color:
-            // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_COLOR);
-            _debugToScreen->setInput(_internalFrames->get(MRT_OUT_COLOR), 0);
+            _debugToScreen->setInput(pipelineInputFrames->get(MRT_OUT_COLOR), 0);
            break;
        case RenderFrame_ShadowMap:
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SHAFX, 0);
            _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_SHAFX,0), 0);
            break;
        case RenderFrame_Environment:
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_ENVFX, 0);
             _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_ENVFX,0), 0);
            break;
        case RenderFrame_Lighting:
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_PHONG, 0);
             _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_PHONG,0), 0);
            break;
        case RenderFrame_Depth:
-           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_DEPTH);
-           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_DEPTH), 0);
+           _debugToScreen->setInput(pipelineInputFrames->get(MRT_OUT_DEPTH), 0);
            break;
        case RenderFrame_Emissive:
-           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_EMISSIVE);
-           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_EMISSIVE), 0);
+           _debugToScreen->setInput(pipelineInputFrames->get(MRT_OUT_EMISSIVE), 0);
            break;
        case RenderFrame_Bloom:
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOM, 0);
             _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_BLOOM,0), 0);
            break;
        case RenderFrame_Normals:
-           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_NORMAL);
-           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_NORMAL), 0);
+           _debugToScreen->setInput(pipelineInputFrames->get(MRT_OUT_NORMAL), 0);
            break;
        case RenderFrame_Reflectivity:
-           // _pipeline->bindExternal( FRAMEOP_ID_COPY, _internalFrames, 0, MRT_OUT_REFLECTIVITY);
-           _debugToScreen->setInput(_internalFrames->get(MRT_OUT_REFLECTIVITY), 0);
+           _debugToScreen->setInput(pipelineInputFrames->get(MRT_OUT_REFLECTIVITY), 0);
            break;
        case RenderFrame_SSAO:
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_SSAO, 0);
             _debugToScreen->setInput(_pipeline->getOutputFrame(FRAMEOP_ID_SSAO,0), 0);
            break;
        default: // assume RenderFrame_Default
-            // _pipeline->bind( FRAMEOP_ID_COPY, FRAMEOP_ID_BLOOMMIX, 0);
            break;
        }
 

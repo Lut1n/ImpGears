@@ -16,6 +16,7 @@ Texture::Texture(const std::string& name)
     , _isSmooth(false)
     , _isRepeated(false)
     , _hasMipmap(false)
+    , _hasMSAA(false)
     , _mipmapMaxLevel(1000)
     , _name(name)
 {
@@ -72,7 +73,17 @@ void Texture::loadFromMemory(std::uint8_t* buf, std::uint32_t width, std::uint32
 
     // glActiveTexture(GL_TEXTURE0);
     bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, width, height,0, glDataFormat, glDataType, buf);
+    if(_hasMSAA)
+    {
+        int samples = 4;
+        bool fixedSampleLocations = true; // compatibilty when mixed with render buffer in a fbo
+        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, glInternalFormat, width, height,fixedSampleLocations);
+    }
+    else
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, width, height,0, glDataFormat, glDataType, buf);
+    }
+    // @see glTexImage2DMultisample for MSAA
     GL_CHECKERROR("texture update gpu Texture");
     unbind();
     
@@ -88,6 +99,8 @@ void Texture::loadFromImage(const Image::Ptr img)
 //--------------------------------------------------------------
 void Texture::saveToImage(Image::Ptr& img)
 {
+    if(_hasMSAA) return;
+    
     int chnls = img->channels();
     // std::int32_t glInternalFormat = 0;
     std::int32_t glDataFormat = 0;
@@ -121,6 +134,8 @@ void Texture::saveToImage(Image::Ptr& img)
 //--------------------------------------------------------------
 void Texture::update()
 {
+    if(_hasMSAA) return; // sampler state not available with multisample
+    
     std::int32_t glFilterMagValue = _isSmooth? GL_LINEAR : GL_NEAREST;
     std::int32_t glWrapMode = _isRepeated? GL_REPEAT : GL_CLAMP_TO_EDGE;
 
@@ -136,16 +151,17 @@ void Texture::update()
     // glActiveTexture(GL_TEXTURE0);
     bind();
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapMode);
+    GLenum target = _hasMSAA ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, glWrapMode);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, glWrapMode);
     GL_CHECKERROR("texture update 1");
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilterMagValue);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, glFilterMagValue);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, glFilterMinValue);
     GL_CHECKERROR("texture update 2");
     if(_hasMipmap)
     {
-        glGenerateMipmap(GL_TEXTURE_2D);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _mipmapMaxLevel);
+        glGenerateMipmap(target);
+        // glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, _mipmapMaxLevel);
         GL_CHECKERROR("texture update 3");
     }
 
@@ -155,14 +171,16 @@ void Texture::update()
 //--------------------------------------------------------------
 void Texture::bind() const
 {
-    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_videoID));
+    GLenum target = _hasMSAA ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+    glBindTexture(target, static_cast<GLuint>(_videoID));
     GL_CHECKERROR("bind texture");
 }
 
 //--------------------------------------------------------------
 void Texture::unbind() const
 {
-    glBindTexture(GL_TEXTURE_2D, 0);
+    GLenum target = _hasMSAA ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+    glBindTexture(target, 0);
 }
 
 IMPGEARS_END

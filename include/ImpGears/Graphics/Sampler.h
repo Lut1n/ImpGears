@@ -74,12 +74,16 @@ public:
     Wrapping getWrapping() const;
 
     void setInternalSrc(int w, int h, int chnl);
+    
+    void setMSAA(bool msaa) {_msaa=msaa;}
+    bool getMSAA() const {return _msaa;}
 
 protected:
 
     Image::Ptr _src;
     Wrapping _wrapping;
     Vec2 _dims;
+    bool _msaa;
 };
 
 

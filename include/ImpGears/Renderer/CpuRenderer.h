@@ -18,6 +18,8 @@ public:
 
     CpuRenderer();
     virtual ~CpuRenderer();
+    
+    virtual void initialize();
 
     virtual void render(const Graph::Ptr& scene);
 

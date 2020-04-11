@@ -45,29 +45,46 @@ void FrameBuffer::build(const std::vector<Texture::Ptr>& textures, bool depthBuf
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     GL_CHECKERROR("bind FBO");
 
+    int samples = 4;
+    bool depth_msaa = false;
+
     _drawBuffers.clear();
-    // GLenum drawBuffers[_textureCount];
     for(int i=0; i<_textureCount; ++i)
     {
-        _colorTextures[i]->bind();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, _colorTextures[i]->getVideoID(), 0);
-        // drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
+        GLenum textarget = GL_TEXTURE_2D;
+        if(_colorTextures[i]->hasMSAA())
+        {
+             textarget = GL_TEXTURE_2D_MULTISAMPLE;
+             depth_msaa = true;
+        }
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, textarget, _colorTextures[i]->getVideoID(), 0);
         _drawBuffers.push_back( (unsigned int)(GL_COLOR_ATTACHMENT0+i) );
         GL_CHECKERROR("set color buffer");
     }
     glDrawBuffers(_drawBuffers.size(), static_cast<GLenum*>(_drawBuffers.data()) );
     GL_CHECKERROR("set draw buffers");
+    
+    _width = _colorTextures[0]->width();
+    _height = _colorTextures[0]->height();
 
     if(_hasDepthBuffer)
     {
-        int width = _colorTextures[0]->width();
-        int height = _colorTextures[0]->height();
-
         // render buffer
         GLuint rbo = _rbo;
         glGenRenderbuffers(1, &rbo); _rbo = rbo;
         glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+        
+        if(depth_msaa)
+            glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT16, _width, _height);
+        else
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, _width, _height);
+        
+        samples = 0;
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &samples);
+        std::cout << "render buffer samples = " << samples << std::endl;
+        GL_CHECKERROR("glGetIntegerv");
+        
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbo);
@@ -78,11 +95,12 @@ void FrameBuffer::build(const std::vector<Texture::Ptr>& textures, bool depthBuf
     if(error != GL_FRAMEBUFFER_COMPLETE)
     {
         std::string string;
+        ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_UNSUPPORTED, string)
-        std::cout << "[impError] FrameBuffer creation failed : " << string << std::endl;
+        std::cout << "[impError] FrameBuffer creation failed : " << string << " (" << error << ")" << std::endl;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -93,13 +111,15 @@ void FrameBuffer::build(int width, int height, int textureCount, bool depthBuffe
 {
     std::vector<Texture::Ptr> textures;
     textures.resize(textureCount);
+    
+    _width = width;
+    _height = height;
 
     for(int i=0; i<textureCount; ++i)
     {
         textures[i] = Texture::create();
-        textures[i]->loadFromMemory(NULL, width, height, 4);
+        textures[i]->loadFromMemory(NULL, _width, _height, 4);
         textures[i]->update();
-        textures[i]->bind();
     }
 
     build(textures, depthBuffer);
@@ -127,29 +147,26 @@ void FrameBuffer::build(const CubeMap::Ptr& cubemap, int faceID, bool depthBuffe
     GL_CHECKERROR("bind FBO");
 
     _drawBuffers.clear();
-    // GLenum drawBuffers[_textureCount];
     for(int i=0; i<_textureCount; ++i)
     {
-        _cubemap->bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_CUBE_MAP_POSITIVE_X+faceID, _cubemap->getVideoID(), 0);
-        // drawBuffers[i] = GL_COLOR_ATTACHMENT0+i;
         _drawBuffers.push_back( (unsigned int)(GL_COLOR_ATTACHMENT0+i) );
         GL_CHECKERROR("set color buffer");
     }
-    // glDrawBuffers(_textureCount, drawBuffers);
     glDrawBuffers(_drawBuffers.size(), static_cast<GLenum*>(_drawBuffers.data()) );
     GL_CHECKERROR("set draw buffers");
 
+    _width = 1024.0;
+    _height = 1024.0;
+    
     if(_hasDepthBuffer)
     {
-        int width = 1024.0; // _colorTextures[0]->width();
-        int height = 1024.0; // _colorTextures[0]->height();
 
         // render buffer
         GLuint rbo = _rbo;
         glGenRenderbuffers(1, &rbo); _rbo = rbo;
         glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, _width, _height);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbo);

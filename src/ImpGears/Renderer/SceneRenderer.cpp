@@ -9,12 +9,23 @@ SceneRenderer::SceneRenderer()
     _direct = true;
     _renderFrame = RenderFrame_Default;
     _outputViewport = Vec4(0.0,0.0,512.0,512.0);
+    _shadowResolution = 256;
+    _environmentResolution = 128;
+    _shadowSamples = 16;
+    _ssaoSamples = 16;
+    _lightpower = 200.0;
+    _ambient = 0.1;
+    _msaa = false;
 
     for(auto& f : _enabledFeatures) f=false;
 }
 
 //--------------------------------------------------------------
 SceneRenderer::~SceneRenderer()
+{
+}
+
+void SceneRenderer::initialize()
 {
 }
 

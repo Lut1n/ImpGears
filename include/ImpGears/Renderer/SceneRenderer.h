@@ -45,6 +45,8 @@ public:
 
     SceneRenderer();
     virtual ~SceneRenderer();
+    
+    virtual void initialize();
 
     virtual void render(const Graph::Ptr& scene) = 0;
 
@@ -66,6 +68,17 @@ public:
     virtual void setOuputViewport(const Vec4& vp) {_outputViewport = vp;}
     const Vec4& getOuputViewport() const {return _outputViewport;}
 
+    void setShadowResolution(int res){_shadowResolution=res;}
+    void setEnvironmentResolution(int res){_environmentResolution=res;}
+    void setShadowSampleCount(int samples){_shadowSamples=samples;}
+    void setSsaoSampleCount(int samples){_ssaoSamples=samples;}
+
+    void setLightPower(float lightpower) {_lightpower=lightpower;}
+    void setAmbient(float ambient) {_ambient=ambient;}
+    
+    void enableMsaa(bool msaa) {_msaa=msaa;}
+    bool isMsaaEnabled() const {return _msaa;}
+
 protected:
 
     bool _direct;
@@ -76,6 +89,16 @@ protected:
 
     RenderFrame _renderFrame;
     Vec4 _outputViewport;
+
+    int _shadowResolution;
+    int _environmentResolution;
+    int _shadowSamples;
+    int _ssaoSamples;
+
+    float _lightpower;
+    float _ambient;
+    
+    bool _msaa;
 };
 
 IMPGEARS_END

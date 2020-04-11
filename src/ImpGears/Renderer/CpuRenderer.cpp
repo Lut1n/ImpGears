@@ -23,6 +23,11 @@ CpuRenderer::~CpuRenderer()
 {
 }
 
+//--------------------------------------------------------------
+void CpuRenderer::initialize()
+{
+}
+
 //---------------------------------------------------------------
 void CpuRenderer::render(const Graph::Ptr& scene)
 {

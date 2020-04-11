@@ -17,7 +17,7 @@ public:
     RenderTarget();
     virtual ~RenderTarget();
 
-    void build(int w, int h, int count = 1, bool hasDepth = false);
+    void build(int w, int h, int count = 1, bool hasDepth = false, bool msaa = false);
     void build(const std::vector<ImageSampler::Ptr>& textures, bool hasDepth = false);
     void build(const FaceSampler& face, bool hasDepth = false);
 

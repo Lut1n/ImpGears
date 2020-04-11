@@ -19,7 +19,7 @@ RenderTarget::~RenderTarget()
 }
 
 //--------------------------------------------------------------
-void RenderTarget::build(int w, int h, int count, bool hasDepth)
+void RenderTarget::build(int w, int h, int count, bool hasDepth, bool msaa)
 {
     _useFaceSampler = false;
     _targets.resize(count);
@@ -28,6 +28,7 @@ void RenderTarget::build(int w, int h, int count, bool hasDepth)
     {
         _targets[i] = ImageSampler::create();
         _targets[i]->setInternalSrc(w,h,4);
+        _targets[i]->setMSAA(msaa);
     }
 
     _hasDepthBuffer = hasDepth;

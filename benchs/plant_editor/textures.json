@@ -1,0 +1,17 @@
+{
+	"properties":
+	{
+		"width":128,
+		"height":128,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01", "seed":14214.62354123},
+		{"op":"fbm", "noise_type":"perlin", "input_id":"hash_01", "freq":4.0, "octaves":4.0, "persist":0.7, "id":"perlin_01"},
+		{"op":"fbm", "noise_type":"perlin", "input_id":"hash_01", "freq":8.0, "octaves":2.0, "persist":0.7, "id":"perlin_02"},
+		{"op":"save", "input_id":"perlin_01", "filename":"./cache/scene_terrain.tga"},
+		{"op":"save", "input_id":"perlin_02", "filename":"./cache/scene_color.tga"},
+        {"op":"bumpToNormal", "input_id":"perlin_01","id":"normal_01"},
+		{"op":"save", "input_id":"normal_01", "filename":"./cache/scene_normal.tga"},
+	]
+}

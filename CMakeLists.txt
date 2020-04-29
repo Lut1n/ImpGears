@@ -28,6 +28,12 @@ add_subdirectory(src/ImpGears/Renderer)
 add_subdirectory(src/ImpGears/Descriptors)
 add_subdirectory(src/ImpGears/Plugins)
 
+file(GLOB IMPGEARS_API_H
+${PROJECT_SOURCE_DIR}/include/ImpGears/*.h
+)
+
+install(FILES ${IMPGEARS_API_H} DESTINATION include/ImpGears/)
+
 if(BUILD_GLPLUGIN)
     add_subdirectory(src/OGLPlugin)
 endif()

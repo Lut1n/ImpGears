@@ -1,0 +1,15 @@
+{
+	"properties":
+	{
+		"width":32,
+		"height":32,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01"},
+		{"op":"fbm", "noise_type":"perlin", "input_id":"hash_01", "freq":8.0, "octaves":8.0, "persist":0.6, "id":"noise_03"},
+		{"op":"save", "input_id":"noise_03", "filename":"./output/pixel_perlin32.tga"},
+        {"op":"bumpToNormal", "input_id":"noise_03","id":"normal_01"},
+		{"op":"save", "input_id":"normal_01", "filename":"./output/perlinNormal32x32.tga"},
+	]
+}

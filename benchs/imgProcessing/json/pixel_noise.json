@@ -1,0 +1,17 @@
+{
+	"properties":
+	{
+		"width":32,
+		"height":32,
+	},
+	"operations":
+	[
+		{"op":"hash", "id":"hash_01"},
+		{"op":"fbm", "noise_type":"voronoi", "input_id":"hash_01", "freq":4.0, "octaves":8.0, "persist":0.6, "id":"noise_01"},
+		{"op":"save", "input_id":"noise_01", "filename":"./output/pixel_voronoi32.tga"},
+		{"op":"fbm", "noise_type":"simplex", "input_id":"hash_01", "freq":4.0, "octaves":8.0, "persist":0.6, "id":"noise_02"},
+		{"op":"save", "input_id":"noise_02", "filename":"./output/pixel_simplex32.tga"},
+		{"op":"fbm", "noise_type":"perlin", "input_id":"hash_01", "freq":8.0, "octaves":8.0, "persist":0.6, "id":"noise_03"},
+		{"op":"save", "input_id":"noise_03", "filename":"./output/pixel_perlin32.tga"},
+	]
+}

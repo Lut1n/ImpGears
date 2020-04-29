@@ -1,4 +1,4 @@
-#include <Geometry/InstancedGeometry.h>
+#include <ImpGears/Geometry/InstancedGeometry.h>
 
 IMPGEARS_BEGIN
 

@@ -1,10 +1,10 @@
 #ifndef IMPGEARS_DESCRIPTORS_INCLUDED_H
 #define IMPGEARS_DESCRIPTORS_INCLUDED_H
 
-#include "Descriptors/Fileinfo.h"
-#include "Descriptors/ImageIO.h"
-#include "Descriptors/JsonReaderWriter.h"
-#include "Descriptors/JsonGeometryOp.h"
-#include "Descriptors/JsonImageOp.h"
+#include <ImpGears/Descriptors/Fileinfo.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/JsonReaderWriter.h>
+#include <ImpGears/Descriptors/JsonGeometryOp.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
 
 #endif // IMPGEARS_DESCRIPTORS_INCLUDED_H

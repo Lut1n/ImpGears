@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include <Core/Config.h>
+#include <ImpGears/Core/Config.h>
 
 #define Meta_Class(name) \
     typedef std::shared_ptr<name> Ptr;\

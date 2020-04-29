@@ -10,9 +10,9 @@
 #include <OGLPlugin/RenderToCubeMap.h>
 #include <OGLPlugin/ShadowCasting.h>
 #include <OGLPlugin/AmbientOcclusion.h>
-#include <SceneGraph/RenderToSamplerNode.h>
+#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
 #include <OGLPlugin/GlslCode.h>
-#include <Geometry/InstancedGeometry.h>
+#include <ImpGears/Geometry/InstancedGeometry.h>
 
 #include <OGLPlugin/FrameBuffer.h>
 #include <OGLPlugin/GlError.h>

@@ -18,7 +18,7 @@ endif()
 add_definitions("-Wall" "-Werror" "-g" "-fvisibility=hidden")
 add_definitions("-DIMPGEARS_BUILD_DLL" "-DIMPGEARS_DEBUG")
 
-include_directories(${PROJECT_SOURCE_DIR}/include/ImpGears)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory(src/ImpGears/Core)
 add_subdirectory(src/ImpGears/Geometry)

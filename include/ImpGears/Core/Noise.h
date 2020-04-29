@@ -1,7 +1,7 @@
 #ifndef IMP_NOISE_H
 #define IMP_NOISE_H
 
-#include <Core/Object.h>
+#include <ImpGears/Core/Object.h>
 
 #include <cstring>
 #include <cmath>

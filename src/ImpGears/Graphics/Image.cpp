@@ -1,4 +1,4 @@
-#include <Graphics/Image.h>
+#include <ImpGears/Graphics/Image.h>
 #include <cstring>
 
 IMPGEARS_BEGIN

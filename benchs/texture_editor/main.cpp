@@ -6,16 +6,16 @@
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/QuadNode.h>
-#include <Plugins/RenderPlugin.h>
-#include <Descriptors/ImageIO.h>
-#include <Descriptors/FileInfo.h>
-#include <Descriptors/JsonImageOp.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/FileInfo.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
 
 using namespace imp;
 
-#include <SceneGraph/RenderToSamplerNode.h>
+#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
 #include "leafrenderer.h"
 
 #define IMPLEMENT_RENDER_MODE_MANAGER

@@ -1,7 +1,7 @@
 #ifndef IMP_FRAMEBUFFER_H
 #define IMP_FRAMEBUFFER_H
 
-#include <Core/Object.h>
+#include <ImpGears/Core/Object.h>
 
 #include <OGLPlugin/Texture.h>
 #include <OGLPlugin/CubeMap.h>

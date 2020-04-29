@@ -1,13 +1,13 @@
 #ifndef IMP_SCENE_RENDERER_H
 #define IMP_SCENE_RENDERER_H
 
-#include <Core/Object.h>
+#include <ImpGears/Core/Object.h>
 
-#include <Renderer/RenderVisitor.h>
-#include <Renderer/RenderTarget.h>
-#include <Graphics/Image.h>
+#include <ImpGears/Renderer/RenderVisitor.h>
+#include <ImpGears/Renderer/RenderTarget.h>
+#include <ImpGears/Graphics/Image.h>
 
-#include <SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Graph.h>
 
 IMPGEARS_BEGIN
 

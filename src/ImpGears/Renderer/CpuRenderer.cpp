@@ -1,6 +1,6 @@
-#include <Renderer/CpuRenderer.h>
+#include <ImpGears/Renderer/CpuRenderer.h>
 
-#include <Renderer/CpuBlinnPhong.h>
+#include <ImpGears/Renderer/CpuBlinnPhong.h>
 
 #include "LightModelImpl.h"
 

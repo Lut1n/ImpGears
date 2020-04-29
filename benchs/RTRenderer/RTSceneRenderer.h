@@ -1,12 +1,12 @@
 #ifndef IMP_RT_SCENE_RENDERER_H
 #define IMP_RT_SCENE_RENDERER_H
 
-#include <Renderer/SceneRenderer.h>
-#include <Renderer/RenderTarget.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
+#include <ImpGears/Renderer/RenderTarget.h>
 
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/ClearNode.h>
-#include <SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
 
 IMPGEARS_BEGIN
 

@@ -1,8 +1,8 @@
 #ifndef IMP_RENDER_PASS_H
 #define IMP_RENDER_PASS_H
 
-#include <Graphics/Rasterizer.h>
-#include <Geometry/Geometry.h>
+#include <ImpGears/Graphics/Rasterizer.h>
+#include <ImpGears/Geometry/Geometry.h>
 
 IMPGEARS_BEGIN
 

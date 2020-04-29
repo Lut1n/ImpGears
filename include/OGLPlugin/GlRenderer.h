@@ -1,12 +1,12 @@
 #ifndef IMP_GL_RENDERER_H
 #define IMP_GL_RENDERER_H
 
-#include <Renderer/RenderTarget.h>
+#include <ImpGears/Renderer/RenderTarget.h>
 
-#include <Plugins/RenderPlugin.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
 
-#include <SceneGraph/ClearNode.h>
-#include <SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
 #include <OGLPlugin/Pipeline.h>
 #include <OGLPlugin/LightingModel.h>
 #include <OGLPlugin/CopyFrame.h>

@@ -1,8 +1,8 @@
 #ifndef IMP_IMAGE_IO_H
 #define IMP_IMAGE_IO_H
 
-#include <Core/Object.h>
-#include <Graphics/Image.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Graphics/Image.h>
 
 IMPGEARS_BEGIN
 

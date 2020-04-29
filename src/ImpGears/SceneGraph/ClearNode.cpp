@@ -1,4 +1,4 @@
-#include <SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
 
 IMPGEARS_BEGIN
 

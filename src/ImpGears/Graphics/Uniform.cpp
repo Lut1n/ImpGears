@@ -1,5 +1,5 @@
-#include <Graphics/Uniform.h>
-#include <Core/Math.h>
+#include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/Core/Math.h>
 
 #include <cstdio>
 #include <iostream>

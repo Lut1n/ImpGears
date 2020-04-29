@@ -1,8 +1,8 @@
 #ifndef IMP_MATERIAL_H
 #define IMP_MATERIAL_H
 
-#include <SceneGraph/Node.h>
-#include <Graphics/Sampler.h>
+#include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
 

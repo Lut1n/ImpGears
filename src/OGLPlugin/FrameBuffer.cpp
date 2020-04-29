@@ -1,5 +1,5 @@
 
-#include <SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/Camera.h>
 
 #include <OGLPlugin/FrameBuffer.h>
 #include <OGLPlugin/GlError.h>

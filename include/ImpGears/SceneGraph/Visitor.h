@@ -1,8 +1,8 @@
 #ifndef IMP_VISITOR_H
 #define IMP_VISITOR_H
 
-#include <Core/Object.h>
-#include <SceneGraph/Node.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/SceneGraph/Node.h>
 
 #include <vector>
 

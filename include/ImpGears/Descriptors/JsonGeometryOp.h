@@ -1,8 +1,8 @@
 #ifndef IMP_JSON_GEOMETRYOP_H
 #define IMP_JSON_GEOMETRYOP_H
 
-#include <Geometry/Geometry.h>
-#include <Descriptors/JsonReaderWriter.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Descriptors/JsonReaderWriter.h>
 
 #include <map>
 

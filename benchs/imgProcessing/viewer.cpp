@@ -1,4 +1,4 @@
-#include <Descriptors/JsonImageOp.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
 
 #include <iostream>
 

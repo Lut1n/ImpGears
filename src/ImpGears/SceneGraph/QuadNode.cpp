@@ -1,4 +1,4 @@
-#include <SceneGraph/QuadNode.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
 
 IMPGEARS_BEGIN
 

@@ -1,7 +1,7 @@
 #ifndef IMP_CAMERA_H
 #define IMP_CAMERA_H
 
-#include <SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Node.h>
 
 IMPGEARS_BEGIN
 

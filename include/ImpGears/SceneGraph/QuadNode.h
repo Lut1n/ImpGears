@@ -1,7 +1,7 @@
 #ifndef IMP_QUADNODE_H
 #define IMP_QUADNODE_H
 
-#include <SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
 
 IMPGEARS_BEGIN
 

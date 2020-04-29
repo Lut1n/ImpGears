@@ -1,14 +1,14 @@
 #ifndef IMP_SCENEVISITOR_H
 #define IMP_SCENEVISITOR_H
 
-#include <SceneGraph/Visitor.h>
-#include <SceneGraph/Node.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/State.h>
-#include <SceneGraph/ClearNode.h>
-#include <Core/Matrix4.h>
+#include <ImpGears/SceneGraph/Visitor.h>
+#include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/State.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/Core/Matrix4.h>
 
-#include <Renderer/RenderQueue.h>
+#include <ImpGears/Renderer/RenderQueue.h>
 
 #include <vector>
 

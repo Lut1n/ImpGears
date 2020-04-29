@@ -1,5 +1,5 @@
-#include <Renderer/CpuBlinnPhong.h>
-#include <Core/Matrix3.h>
+#include <ImpGears/Renderer/CpuBlinnPhong.h>
+#include <ImpGears/Core/Matrix3.h>
 
 IMPGEARS_BEGIN
 

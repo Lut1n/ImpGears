@@ -4,13 +4,13 @@
 #include <vector>
 #include <memory>
 
-#include <Core/Vec2.h>
-#include <Core/Vec3.h>
-#include <Core/Vec4.h>
-#include <Core/Matrix3.h>
-#include <Core/Matrix4.h>
+#include <ImpGears/Core/Vec2.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Core/Matrix3.h>
+#include <ImpGears/Core/Matrix4.h>
 
-#include <Graphics/Sampler.h>
+#include <ImpGears/Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
 

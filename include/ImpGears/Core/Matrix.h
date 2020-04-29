@@ -1,8 +1,8 @@
 #ifndef IMP_MATRIX_H
 #define IMP_MATRIX_H
 
-#include <Core/Object.h>
-#include <Core/Vec.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec.h>
 
 IMPGEARS_BEGIN
 

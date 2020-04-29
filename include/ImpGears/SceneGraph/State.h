@@ -1,13 +1,13 @@
 #ifndef IMP_STATE_H
 #define IMP_STATE_H
 
-#include <Core/Object.h>
-#include <Core/Vec3.h>
-#include <Core/Matrix4.h>
-#include <Core/Vec4.h>
-#include <Graphics/Uniform.h>
-#include <SceneGraph/ReflexionModel.h>
-#include <SceneGraph/RenderPass.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/SceneGraph/ReflexionModel.h>
+#include <ImpGears/SceneGraph/RenderPass.h>
 
 #include <map>
 

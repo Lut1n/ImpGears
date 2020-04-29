@@ -10,7 +10,7 @@ SOURCES += $(IMGUI_PATH)imgui.cpp $(IMGUI_PATH)imgui_demo.cpp $(IMGUI_PATH)imgui
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
-CXXFLAGS = -I$(EXAMPLES_PATH) -I$(IMGUI_PATH) -I/usr/include/ImpGears
+CXXFLAGS = -I$(EXAMPLES_PATH) -I$(IMGUI_PATH) -I/usr/local/include
 CXXFLAGS += -g -Wall -Wformat
 LIBS =
 

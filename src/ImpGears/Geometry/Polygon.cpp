@@ -1,5 +1,5 @@
-#include <Geometry/Polygon.h>
-#include <Core/Matrix3.h>
+#include <ImpGears/Geometry/Polygon.h>
+#include <ImpGears/Core/Matrix3.h>
 
 #include <map>
 #include <cstdlib>

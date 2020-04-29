@@ -2,11 +2,11 @@
 #define IMP_GEOMETRY_RENDERER_H
 
 
-#include <Core/Matrix4.h>
-#include <Geometry/Geometry.h>
-#include <Graphics/FloatImage.h>
-#include <Graphics/Image.h>
-#include <Graphics/Rasterizer.h>
+#include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Graphics/FloatImage.h>
+#include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Graphics/Rasterizer.h>
 
 IMPGEARS_BEGIN
 

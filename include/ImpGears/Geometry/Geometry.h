@@ -1,11 +1,11 @@
 #ifndef IMP_PROCEDURAL_GEOMETRY_H
 #define IMP_PROCEDURAL_GEOMETRY_H
 
-#include <Core/Object.h>
-#include <Core/Vec3.h>
-#include <Core/Math.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Math.h>
 
-#include <Geometry/Path.h>
+#include <ImpGears/Geometry/Path.h>
 
 #include <vector>
 

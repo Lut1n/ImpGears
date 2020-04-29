@@ -1,8 +1,8 @@
 #ifndef IMP_MATH_H
 #define IMP_MATH_H
 
-#include <Core/Object.h>
-#include <Core/Vec.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec.h>
 
 IMPGEARS_BEGIN
 

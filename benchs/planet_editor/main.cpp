@@ -11,16 +11,16 @@
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
-#include <Graphics/ImageOperation.h>
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/GeoNode.h>
-#include <SceneGraph/QuadNode.h>
-#include <SceneGraph/RenderPass.h>
-#include <Plugins/RenderPlugin.h>
-#include <Descriptors/ImageIO.h>
-#include <Descriptors/FileInfo.h>
-#include <Descriptors/JsonImageOp.h>
+#include <ImpGears/Graphics/ImageOperation.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
+#include <ImpGears/SceneGraph/RenderPass.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/FileInfo.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
 
 using namespace imp;
 

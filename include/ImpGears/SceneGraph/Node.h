@@ -1,10 +1,10 @@
 #ifndef IMP_NODE_H
 #define IMP_NODE_H
 
-#include <Core/Object.h>
-#include <Core/Vec3.h>
-#include <Core/Matrix4.h>
-#include <SceneGraph/State.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/SceneGraph/State.h>
 
 #include <list>
 

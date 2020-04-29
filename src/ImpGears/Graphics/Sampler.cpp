@@ -1,6 +1,6 @@
-#include <Graphics/Sampler.h>
+#include <ImpGears/Graphics/Sampler.h>
 
-#include <Core/Math.h>
+#include <ImpGears/Core/Math.h>
 
 IMPGEARS_BEGIN
 

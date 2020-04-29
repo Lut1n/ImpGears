@@ -1,5 +1,5 @@
-#include <Core/Math.h>
-#include <Graphics/Rasterizer.h>
+#include <ImpGears/Core/Math.h>
+#include <ImpGears/Graphics/Rasterizer.h>
 
 #include <utility>	// std::swap
 

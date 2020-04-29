@@ -1,8 +1,8 @@
 #ifndef IMP_RENDERTARGET_H
 #define IMP_RENDERTARGET_H
 
-#include <Core/Object.h>
-#include <Graphics/Sampler.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
 

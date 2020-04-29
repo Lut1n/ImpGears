@@ -15,10 +15,10 @@ viewer: viewer.o RTSceneRenderer.o
 	$(CXX) -o viewer viewer.o RTSceneRenderer.o -L /usr/lib $(LDFLAGS)
 
 viewer.o: viewer.cpp RTSceneRenderer.h
-	$(CXX) $(CXXFLAGS) -I /usr/include/ImpGears -c viewer.cpp -o viewer.o
+	$(CXX) $(CXXFLAGS) -I /usr/local/include -c viewer.cpp -o viewer.o
 
 RTSceneRenderer.o: RTSceneRenderer.cpp RTSceneRenderer.h
-	$(CXX) $(CXXFLAGS) -I /usr/include/ImpGears -c RTSceneRenderer.cpp -o RTSceneRenderer.o
+	$(CXX) $(CXXFLAGS) -I /usr/local/include -c RTSceneRenderer.cpp -o RTSceneRenderer.o
 
 .PHONY : clean
 

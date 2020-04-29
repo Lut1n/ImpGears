@@ -1,10 +1,10 @@
 #ifndef IMP_IMAGE_H
 #define IMP_IMAGE_H
 
-#include <Core/Object.h>
-#include <Core/Vec2.h>
-#include <Core/Vec4.h>
-#include <Core/Grid.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec2.h>
+#include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Core/Grid.h>
 
 IMPGEARS_BEGIN
 

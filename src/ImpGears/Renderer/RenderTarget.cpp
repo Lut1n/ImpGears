@@ -1,5 +1,5 @@
-#include <Core/Object.h>
-#include <Renderer/RenderTarget.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Renderer/RenderTarget.h>
 
 IMPGEARS_BEGIN
 

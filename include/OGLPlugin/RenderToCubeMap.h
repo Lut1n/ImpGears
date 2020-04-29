@@ -1,12 +1,12 @@
 #ifndef IMP_RENDER_TO_CUBEMAP_H
 #define IMP_RENDER_TO_CUBEMAP_H
 
-#include <Core/Object.h>
-#include <Graphics/Sampler.h>
-#include <Renderer/RenderTarget.h>
-#include <Renderer/SceneRenderer.h>
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Camera.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/Renderer/RenderTarget.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Camera.h>
 
 
 IMPGEARS_BEGIN

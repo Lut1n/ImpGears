@@ -1,8 +1,8 @@
 #ifndef IMP_MATRIX3_H
 #define IMP_MATRIX3_H
 
-#include <Core/Matrix.h>
-#include <Core/Vec3.h>
+#include <ImpGears/Core/Matrix.h>
+#include <ImpGears/Core/Vec3.h>
 
 IMPGEARS_BEGIN
 

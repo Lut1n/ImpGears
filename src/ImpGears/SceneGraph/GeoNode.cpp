@@ -1,4 +1,4 @@
-#include <SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
 
 
 IMPGEARS_BEGIN

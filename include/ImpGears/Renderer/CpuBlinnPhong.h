@@ -1,7 +1,7 @@
 #ifndef IMP_CPU_BLINN_PHONG_H
 #define IMP_CPU_BLINN_PHONG_H
 
-#include <Graphics/Rasterizer.h>
+#include <ImpGears/Graphics/Rasterizer.h>
 
 IMPGEARS_BEGIN
 

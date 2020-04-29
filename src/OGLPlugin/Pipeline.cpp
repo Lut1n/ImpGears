@@ -1,7 +1,7 @@
 #include <OGLPlugin/Pipeline.h>
 #include <OGLPlugin/GlRenderer.h>
 
-#include <SceneGraph/QuadNode.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
 
 #define GLSL_CODE( code ) #code
 

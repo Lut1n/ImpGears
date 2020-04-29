@@ -1,4 +1,4 @@
-#include <Core/Vec4.h>
+#include <ImpGears/Core/Vec4.h>
 
 IMPGEARS_BEGIN
 

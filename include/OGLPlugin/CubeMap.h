@@ -1,8 +1,8 @@
 #ifndef IMP_CUBEMAP_H
 #define IMP_CUBEMAP_H
 
-#include <Core/Object.h>
-#include <Graphics/Image.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Graphics/Image.h>
 
 #include <string>
 

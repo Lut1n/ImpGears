@@ -1,4 +1,4 @@
-#include <SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/Camera.h>
 
 IMPGEARS_BEGIN
 

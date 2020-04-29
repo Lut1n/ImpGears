@@ -1,4 +1,4 @@
-#include <Descriptors/FileInfo.h>
+#include <ImpGears/Descriptors/FileInfo.h>
 
 // struct stat is defined in <sys/stat.h>
 #include <sys/stat.h>

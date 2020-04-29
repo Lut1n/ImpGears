@@ -1,5 +1,5 @@
-#include <Core/Noise.h>
-#include <Core/Math.h>
+#include <ImpGears/Core/Noise.h>
+#include <ImpGears/Core/Math.h>
 
 #include <ctime>
 #include <cstdlib>

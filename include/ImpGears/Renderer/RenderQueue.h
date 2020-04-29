@@ -1,10 +1,10 @@
 #ifndef IMP_RENDER_QUEUE_H
 #define IMP_RENDER_QUEUE_H
 
-#include <SceneGraph/Node.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/LightNode.h>
-#include <SceneGraph/State.h>
+#include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/LightNode.h>
+#include <ImpGears/SceneGraph/State.h>
 
 #include <vector>
 

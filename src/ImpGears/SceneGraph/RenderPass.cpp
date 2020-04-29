@@ -1,4 +1,4 @@
-#include <SceneGraph/RenderPass.h>
+#include <ImpGears/SceneGraph/RenderPass.h>
 
 IMPGEARS_BEGIN
 

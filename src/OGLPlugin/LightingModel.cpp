@@ -1,8 +1,8 @@
 #include <OGLPlugin/LightingModel.h>
 #include <OGLPlugin/GlRenderer.h>
 
-#include <SceneGraph/QuadNode.h>
-#include <Descriptors/ImageIO.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
+#include <ImpGears/Descriptors/ImageIO.h>
 
 #define GLSL_CODE( code ) #code
 

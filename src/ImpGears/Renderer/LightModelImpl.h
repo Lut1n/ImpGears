@@ -1,4 +1,4 @@
-#include <SceneGraph/ReflexionModel.h>
+#include <ImpGears/SceneGraph/ReflexionModel.h>
 
 IMPGEARS_BEGIN
 

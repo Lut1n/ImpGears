@@ -1,9 +1,9 @@
 #include <SFML/Graphics.hpp>
 
-#include <Graphics/Rasterizer.h>
-#include <Graphics/Image.h>
+#include <ImpGears/Graphics/Rasterizer.h>
+#include <ImpGears/Graphics/Image.h>
 
-#include <Geometry/Triangulator.h>
+#include <ImpGears/Geometry/Triangulator.h>
 
 
 using Vec3 = imp::Vec3;

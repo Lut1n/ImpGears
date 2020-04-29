@@ -1,7 +1,7 @@
 #ifndef IMP_SHADER_H
 #define IMP_SHADER_H
 
-#include <Core/Object.h>
+#include <ImpGears/Core/Object.h>
 
 #include <map>
 

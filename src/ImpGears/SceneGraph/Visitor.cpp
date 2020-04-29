@@ -1,4 +1,4 @@
-#include <SceneGraph/Visitor.h>
+#include <ImpGears/SceneGraph/Visitor.h>
 
 IMPGEARS_BEGIN
 

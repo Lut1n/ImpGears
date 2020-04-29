@@ -1,9 +1,9 @@
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/GeoNode.h>
-#include <Descriptors/ImageIO.h>
-#include <Descriptors/FileInfo.h>
-#include <Descriptors/JsonImageOp.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/FileInfo.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
 
 #include "RTSceneRenderer.h"
 

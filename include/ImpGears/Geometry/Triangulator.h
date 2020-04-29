@@ -1,4 +1,4 @@
-#include <Geometry/Polygon.h>
+#include <ImpGears/Geometry/Polygon.h>
 
 IMPGEARS_BEGIN
 

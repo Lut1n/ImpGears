@@ -1,9 +1,9 @@
 #ifndef IMP_GRAPH_H
 #define IMP_GRAPH_H
 
-#include <Core/Object.h>
+#include <ImpGears/Core/Object.h>
 
-#include <SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
 
 IMPGEARS_BEGIN
 

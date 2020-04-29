@@ -1,9 +1,9 @@
 #ifndef IMP_IMG_OPERATION_H
 #define IMP_IMG_OPERATION_H
 
-#include <Core/Object.h>
-#include <Core/Matrix3.h>
-#include <Graphics/Sampler.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Matrix3.h>
+#include <ImpGears/Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
 

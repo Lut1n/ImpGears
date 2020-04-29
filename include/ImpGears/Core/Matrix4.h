@@ -1,9 +1,9 @@
 #ifndef IMP_MATRIX4_H
 #define IMP_MATRIX4_H
 
-#include <Core/Matrix.h>
-#include <Core/Vec3.h>
-#include <Core/Vec4.h>
+#include <ImpGears/Core/Matrix.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Vec4.h>
 
 IMPGEARS_BEGIN
 

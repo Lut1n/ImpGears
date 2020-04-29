@@ -1,4 +1,4 @@
-#include <SceneGraph/State.h>
+#include <ImpGears/SceneGraph/State.h>
 
 IMPGEARS_BEGIN
 

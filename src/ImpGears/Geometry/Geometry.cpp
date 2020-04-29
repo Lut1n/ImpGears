@@ -1,7 +1,7 @@
-#include <Geometry/Geometry.h>
-#include <Core/Matrix3.h>
-#include <Core/Noise.h>
-#include <Core/Math.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Core/Matrix3.h>
+#include <ImpGears/Core/Noise.h>
+#include <ImpGears/Core/Math.h>
 
 #include <cmath>
 

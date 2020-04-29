@@ -1,4 +1,4 @@
-#include <Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/ImageIO.h>
 
 #include <fstream>
 

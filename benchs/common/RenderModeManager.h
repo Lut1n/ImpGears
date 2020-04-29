@@ -1,9 +1,9 @@
 #ifndef RENDER_MODE_MANAGER_H
 #define RENDER_MODE_MANAGER_H
 
-#include <Renderer/SceneRenderer.h>
-#include <Renderer/CpuRenderer.h>
-#include <Plugins/RenderPlugin.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
+#include <ImpGears/Renderer/CpuRenderer.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
 
 struct RenderModeManager
 {

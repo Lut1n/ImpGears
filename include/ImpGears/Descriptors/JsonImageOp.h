@@ -1,8 +1,8 @@
 #ifndef IMP_JSON_IMAGEOP_H
 #define IMP_JSON_IMAGEOP_H
 
-#include <Graphics/ImageOperation.h>
-#include <Descriptors/JsonReaderWriter.h>
+#include <ImpGears/Graphics/ImageOperation.h>
+#include <ImpGears/Descriptors/JsonReaderWriter.h>
 
 // #include <ctime>
 // #include <iostream>

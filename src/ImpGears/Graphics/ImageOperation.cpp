@@ -1,6 +1,6 @@
-#include <Graphics/ImageOperation.h>
+#include <ImpGears/Graphics/ImageOperation.h>
 
-#include <Core/Math.h>
+#include <ImpGears/Core/Math.h>
 
 IMPGEARS_BEGIN
 

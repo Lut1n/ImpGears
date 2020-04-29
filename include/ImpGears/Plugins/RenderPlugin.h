@@ -1,18 +1,18 @@
 #ifndef IMP_RENDERPLUGIN_H
 #define IMP_RENDERPLUGIN_H
 
-#include <Core/Object.h>
-#include <Core/Vec4.h>
-#include <Graphics/Image.h>
-#include <Graphics/Uniform.h>
-#include <Renderer/RenderTarget.h>
-#include <Renderer/SceneRenderer.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/Renderer/RenderTarget.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
 
-#include <SceneGraph/ClearNode.h>
-#include <SceneGraph/State.h>
-#include <Geometry/Geometry.h>
-#include <Graphics/Sampler.h>
-#include <SceneGraph/ReflexionModel.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/State.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/SceneGraph/ReflexionModel.h>
 
 #include <map>
 

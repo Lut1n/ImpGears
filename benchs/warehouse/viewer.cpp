@@ -1,17 +1,9 @@
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/GeoNode.h>
-#include <SceneGraph/QuadNode.h>
-#include <SceneGraph/RenderPass.h>
-#include <Descriptors/ImageIO.h>
-#include <Descriptors/FileInfo.h>
-#include <Descriptors/JsonImageOp.h>
 
-#include <Renderer/CpuRenderer.h>
-
-#include <Plugins/RenderPlugin.h>
-
-#include <Graphics/ImageOperation.h>
+#include <ImpGears/Graphics.h>
+#include <ImpGears/Plugins.h>
+#include <ImpGears/Renderer.h>
+#include <ImpGears/Descriptors.h>
+#include <ImpGears/SceneGraph.h>
 
 #include <SFML/Graphics.hpp>
 

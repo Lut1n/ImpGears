@@ -1,4 +1,4 @@
-#include <Renderer/SceneRenderer.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
 
 IMPGEARS_BEGIN
 

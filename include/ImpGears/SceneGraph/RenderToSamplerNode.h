@@ -1,9 +1,9 @@
 #ifndef IMP_RENDERTOSAMPLER_NODE_H
 #define IMP_RENDERTOSAMPLER_NODE_H
 
-#include <Graphics/Sampler.h>
-#include <SceneGraph/Node.h>
-#include <SceneGraph/Graph.h>
+#include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Graph.h>
 
 IMPGEARS_BEGIN
 

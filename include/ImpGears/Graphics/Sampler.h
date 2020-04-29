@@ -1,10 +1,10 @@
 #ifndef IMP_SAMPLER_H
 #define IMP_SAMPLER_H
 
-#include <Core/Object.h>
-#include <Core/Vec2.h>
-#include <Core/Vec3.h>
-#include <Graphics/Image.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec2.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Graphics/Image.h>
 
 IMPGEARS_BEGIN
 

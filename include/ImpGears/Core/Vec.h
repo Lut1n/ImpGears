@@ -1,10 +1,10 @@
 #ifndef IMP_VEC_H
 #define IMP_VEC_H
 
-#include <Core/Object.h>
+#include <ImpGears/Core/Object.h>
 
 #include <vector>
-// #include <Core/Matrix4.h>
+// #include <ImpGears/Core/Matrix4.h>
 
 IMPGEARS_BEGIN
 

@@ -1,4 +1,4 @@
-#include <Plugins/RenderPlugin.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
 
 #include <dlfcn.h>
 

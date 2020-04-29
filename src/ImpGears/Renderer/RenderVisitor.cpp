@@ -1,11 +1,11 @@
-#include <Renderer/RenderVisitor.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/ClearNode.h>
+#include <ImpGears/Renderer/RenderVisitor.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
 
-#include <SceneGraph/GeoNode.h>
-#include <SceneGraph/ReflexionModel.h>
-#include <SceneGraph/RenderPass.h>
-#include <SceneGraph/RenderToSamplerNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/ReflexionModel.h>
+#include <ImpGears/SceneGraph/RenderPass.h>
+#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
 
 IMPGEARS_BEGIN
 

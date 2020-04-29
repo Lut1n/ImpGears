@@ -1,4 +1,4 @@
-#include <Graphics/FloatImage.h>
+#include <ImpGears/Graphics/FloatImage.h>
 #include <cstring>
 
 IMPGEARS_BEGIN

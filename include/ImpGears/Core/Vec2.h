@@ -1,7 +1,7 @@
 #ifndef IMP_VEC2_H
 #define IMP_VEC2_H
 
-#include <Core/Vec.h>
+#include <ImpGears/Core/Vec.h>
 
 #include <cmath>
 

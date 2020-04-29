@@ -1,5 +1,5 @@
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Visitor.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Visitor.h>
 
 IMPGEARS_BEGIN
 

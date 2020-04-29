@@ -1,21 +1,21 @@
-#include <Geometry/Geometry.h>
-#include <SceneGraph/Camera.h>
-#include <Graphics/Image.h>
-#include <Descriptors/JsonImageOp.h>
-#include <Renderer/GeometryRenderer.h>
-#include <Renderer/CpuBlinnPhong.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
+#include <ImpGears/Renderer/GeometryRenderer.h>
+#include <ImpGears/Renderer/CpuBlinnPhong.h>
 
-#include <Core/Vec4.h>
-#include <Core/Matrix3.h>
-#include <Core/Matrix4.h>
-#include <Core/Noise.h>
+#include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Core/Matrix3.h>
+#include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/Core/Noise.h>
 #include <fstream>
 
 #include <SFML/Graphics.hpp>
 
-#include <Descriptors/FileInfo.h>
-#include <Descriptors/ImageIO.h>
-#include <Descriptors/JsonGeometryOp.h>
+#include <ImpGears/Descriptors/FileInfo.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/JsonGeometryOp.h>
 
 #include <ctime>
 #include <vector>

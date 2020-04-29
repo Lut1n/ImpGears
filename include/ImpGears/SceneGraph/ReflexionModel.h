@@ -1,8 +1,8 @@
 #ifndef IMP_REFLEXION_MODEL_H
 #define IMP_REFLEXION_MODEL_H
 
-#include <Graphics/Rasterizer.h>
-#include <Geometry/Geometry.h>
+#include <ImpGears/Graphics/Rasterizer.h>
+#include <ImpGears/Geometry/Geometry.h>
 
 IMPGEARS_BEGIN
 

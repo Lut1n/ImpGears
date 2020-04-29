@@ -1,7 +1,7 @@
 #ifndef IMP_VEC4_H
 #define IMP_VEC4_H
 
-#include <Core/Vec.h>
+#include <ImpGears/Core/Vec.h>
 
 IMPGEARS_BEGIN
 

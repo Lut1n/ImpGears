@@ -1,12 +1,12 @@
 #ifndef IMP_GEONODE_H
 #define IMP_GEONODE_H
 
-#include <Core/Object.h>
-#include <Geometry/Polyhedron.h>
-#include <Geometry/Geometry.h>
-#include <SceneGraph/Node.h>
-#include <SceneGraph/Material.h>
-#include <Graphics/Uniform.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Geometry/Polyhedron.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Material.h>
+#include <ImpGears/Graphics/Uniform.h>
 
 IMPGEARS_BEGIN
 

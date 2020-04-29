@@ -1,8 +1,8 @@
 #ifndef IMP_GRID_H
 #define IMP_GRID_H
 
-#include <Core/Object.h>
-#include <Core/Vec.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec.h>
 
 #include <vector>
 #include <cstring>

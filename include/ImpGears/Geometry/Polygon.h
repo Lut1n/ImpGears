@@ -1,11 +1,11 @@
 #ifndef IMP_POLYGON_H
 #define IMP_POLYGON_H
 
-#include <Geometry/Path.h>
+#include <ImpGears/Geometry/Path.h>
 
-#include <Core/Object.h>
-#include <Core/Math.h>
-#include <Core/Vec3.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Math.h>
+#include <ImpGears/Core/Vec3.h>
 
 #include <vector>
 

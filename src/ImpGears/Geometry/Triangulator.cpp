@@ -1,4 +1,4 @@
-#include <Geometry/Triangulator.h>
+#include <ImpGears/Geometry/Triangulator.h>
 
 IMPGEARS_BEGIN
 

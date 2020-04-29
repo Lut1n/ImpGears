@@ -1,9 +1,9 @@
 #ifndef VERTEXARRAY_H
 #define VERTEXARRAY_H
 
-#include <Core/Object.h>
-#include <Geometry/Geometry.h>
-#include <Geometry/InstancedGeometry.h>
+#include <ImpGears/Core/Object.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Geometry/InstancedGeometry.h>
 
 #include <OGLPlugin/GlError.h>
 

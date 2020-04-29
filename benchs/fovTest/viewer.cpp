@@ -1,22 +1,22 @@
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/GeoNode.h>
-#include <SceneGraph/QuadNode.h>
-#include <SceneGraph/RenderPass.h>
-#include <SceneGraph/RenderToSamplerNode.h>
-#include <Descriptors/ImageIO.h>
-#include <Descriptors/FileInfo.h>
-#include <Descriptors/JsonImageOp.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
+#include <ImpGears/SceneGraph/RenderPass.h>
+#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/FileInfo.h>
+#include <ImpGears/Descriptors/JsonImageOp.h>
 
-#include <Renderer/CpuRenderer.h>
+#include <ImpGears/Renderer/CpuRenderer.h>
 
-#include <Plugins/RenderPlugin.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
 
-#include <Graphics/ImageOperation.h>
+#include <ImpGears/Graphics/ImageOperation.h>
 
 #include <SFML/Graphics.hpp>
 
-#include <Geometry/InstancedGeometry.h>
+#include <ImpGears/Geometry/InstancedGeometry.h>
 
 
 using namespace imp;

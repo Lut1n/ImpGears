@@ -1,12 +1,12 @@
 #ifndef IMP_GL_PIPELINE_H
 #define IMP_GL_PIPELINE_H
 
-#include <Renderer/RenderTarget.h>
-#include <Plugins/RenderPlugin.h>
-#include <SceneGraph/ClearNode.h>
-#include <SceneGraph/GeoNode.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/LightNode.h>
+#include <ImpGears/Renderer/RenderTarget.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/LightNode.h>
 #include <OGLPlugin/RenderToCubeMap.h>
 
 IMPGEARS_BEGIN

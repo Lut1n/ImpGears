@@ -1,4 +1,4 @@
-#include <SceneGraph/LightNode.h>
+#include <ImpGears/SceneGraph/LightNode.h>
 
 IMPGEARS_BEGIN
 

@@ -1,8 +1,8 @@
 #ifndef IMP_INSTANCED_GEOMETRY_H
 #define IMP_INSTANCED_GEOMETRY_H
 
-#include <Geometry/Geometry.h>
-#include <Core/Matrix4.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Core/Matrix4.h>
 
 IMPGEARS_BEGIN
 

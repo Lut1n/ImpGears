@@ -1,4 +1,4 @@
-#include <Descriptors/JsonReaderWriter.h>
+#include <ImpGears/Descriptors/JsonReaderWriter.h>
 
 IMPGEARS_BEGIN
 

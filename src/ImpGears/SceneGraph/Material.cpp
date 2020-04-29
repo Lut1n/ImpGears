@@ -1,4 +1,4 @@
-#include <SceneGraph/Material.h>
+#include <ImpGears/SceneGraph/Material.h>
 
 IMPGEARS_BEGIN
 

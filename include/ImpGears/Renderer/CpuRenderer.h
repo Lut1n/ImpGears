@@ -1,12 +1,12 @@
 #ifndef IMP_CPU_RENDERER_H
 #define IMP_CPU_RENDERER_H
 
-#include <Renderer/GeometryRenderer.h>
-#include <Renderer/SceneRenderer.h>
-#include <Renderer/RenderTarget.h>
+#include <ImpGears/Renderer/GeometryRenderer.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
+#include <ImpGears/Renderer/RenderTarget.h>
 
-#include <SceneGraph/ClearNode.h>
-#include <SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
 
 IMPGEARS_BEGIN
 

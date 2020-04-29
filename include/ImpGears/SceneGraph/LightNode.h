@@ -1,7 +1,7 @@
 #ifndef IMP_LIGHT_H
 #define IMP_LIGHT_H
 
-#include <SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Node.h>
 
 IMPGEARS_BEGIN
 

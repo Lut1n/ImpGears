@@ -1,4 +1,4 @@
-#include <SceneGraph/RenderToSamplerNode.h>
+#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
 
 IMPGEARS_BEGIN
 

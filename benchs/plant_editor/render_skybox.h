@@ -1,7 +1,7 @@
 #ifndef BASIC_SKYBOX_H
 #define BASIC_SKYBOX_H
 
-#include <SceneGraph/RenderToSamplerNode.h>
+#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
 
 //--------------------------------------------------------------
 #define GLSL_CODE( code ) #code

@@ -1,9 +1,9 @@
 #ifndef IMP_PATH_H
 #define IMP_PATH_H
 
-#include <Core/Vec3.h>
-#include <Core/Vec4.h>
-#include <Core/Math.h>
+#include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Core/Math.h>
 #include <sstream>
 
 IMPGEARS_BEGIN

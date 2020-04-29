@@ -1,9 +1,9 @@
 #ifndef IMP_POLYHEDRON_H
 #define IMP_POLYHEDRON_H
 
-#include <Geometry/Geometry.h>
-#include <Geometry/Triangulator.h>
-#include <Geometry/Path.h>
+#include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Geometry/Triangulator.h>
+#include <ImpGears/Geometry/Path.h>
 
 
 IMPGEARS_BEGIN

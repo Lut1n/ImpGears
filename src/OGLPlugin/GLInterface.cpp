@@ -1,9 +1,9 @@
-#include <SceneGraph/ClearNode.h>
-#include <SceneGraph/State.h>
-#include <Graphics/Sampler.h>
-#include <Renderer/RenderTarget.h>
-#include <Graphics/Uniform.h>
-#include <Geometry/Geometry.h>
+#include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/State.h>
+#include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/Renderer/RenderTarget.h>
+#include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/Geometry/Geometry.h>
 
 #include <OGLPlugin/GlError.h>
 #include <OGLPlugin/Texture.h>

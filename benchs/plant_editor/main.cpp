@@ -115,27 +115,40 @@ out vec3 v_mv;
 out vec3 v_n;
 out vec3 v_vertex;
 out vec3 v_color;
+out mat4 v_view;
 out mat4 v_model;
 
 
-
+mat4 translate(vec3 tvec)
+{
+    mat4 matrix;
+    matrix[0] = vec4(1,0,0,0);
+    matrix[1] = vec4(0,1,0,0);
+    matrix[2] = vec4(0,0,1,0);
+    matrix[3] = vec4(tvec, 1);
+    return matrix;
+}
 
 void main()
 {
     vec4 vert = vec4(a_vertex,1.0);
     vec4 mvert = u_model * vert;
     float oft = mvert.x+mvert.z;
-    vert += vec4(0.0,1.0,0.0,0.0) * (sin(oft*10.0+u_time*2.0)*0.5+0.5) * 0.5;
-    vec4 mv_pos = u_view * u_model * vert;
+    
+    float ytrans = (sin(oft*10.0+u_time*2.0)*0.5+0.5) * 0.5;
+    mat4 _model = u_model * translate(vec3(0,ytrans,0));
+    
+    vec4 mv_pos = u_view * _model * vert;
     gl_Position = u_proj * mv_pos;
-    v_n = normalize(u_normal * a_normal);
+    v_n = normalize(a_normal);
     v_color = a_color;
 
     v_texCoord = a_texcoord;
-    v_m = (u_model * vert).xyz;
+    v_m = (_model * vert).xyz;
     v_mv = mv_pos.xyz;
     v_vertex = vert.xyz;
-    v_model = u_model;
+    v_view = u_view;
+    v_model = _model;
 }
 
 );
@@ -460,6 +473,9 @@ int main(int argc, char* argv[])
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
     renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
+    renderer->enableMsaa(true);
+    renderer->setAmbient(0.1);
+    renderer->setLightPower(1000.0);
     renderer->setDirect(true);
     graph->getInitState()->setViewport( renderModeMngr.viewport );
     graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));

@@ -32,7 +32,7 @@ void main()
 {
     vec4 mv_pos = u_view * u_model * vec4(a_vertex,1.0);
     gl_Position = u_proj * mv_pos;
-    v_n = normalize(u_normal * a_normal);
+    v_n = normalize(a_normal);
     v_color = a_color;
 
     v_texCoord = a_texcoord;

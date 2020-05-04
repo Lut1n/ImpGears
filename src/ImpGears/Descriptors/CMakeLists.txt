@@ -14,6 +14,7 @@ add_library(impgears-descriptors SHARED ${SRCS} ${IG_DESCRIPTORS_H})
 
 target_link_libraries( impgears-descriptors impgears-geometry )
 target_link_libraries( impgears-descriptors impgears-graphics )
+target_link_libraries( impgears-descriptors impgears-scenegraph )
 
 install(TARGETS impgears-descriptors DESTINATION lib)
 install(FILES ${IG_DESCRIPTORS_H} DESTINATION include/${IG_DESCRIPTORS})

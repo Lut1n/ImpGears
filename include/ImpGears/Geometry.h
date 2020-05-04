@@ -2,6 +2,7 @@
 #define IMPGEARS_GEOMETRY_INCLUDED_H
 
 #include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Geometry/GeometryBuilder.h>
 #include <ImpGears/Geometry/InstancedGeometry.h>
 #include <ImpGears/Geometry/Path.h>
 #include <ImpGears/Geometry/Polygon.h>

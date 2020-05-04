@@ -1,0 +1,12 @@
+{
+	"editor_preference":
+	{
+		"favorite_view":[4.24414,1,10]
+	},
+	"nodes":
+	[
+		{"primitive":"Cube","position":[0,0,0],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},
+		{"primitive":"Cube","position":[-1.111,2.444,-1.029],"rotation":[0,0,0],"scale":[1,1,1],"color":[0.764706,0.648501,0.648501],},
+		{"primitive":"Cube","position":[0.963,-2.593,1.029],"rotation":[0,0,0],"scale":[1,1,1],"color":[0.764706,0.647059,0.647059],},
+	]
+}

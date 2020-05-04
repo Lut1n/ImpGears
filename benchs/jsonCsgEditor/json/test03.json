@@ -1,9 +1,9 @@
 {
-	"editor_view":
+	"editor_preference":
 	{
-		"camera_rad":[-1.81055,0.208334,10]
+		"favorite_view":[-1.81055,0.208334,10]
 	},
-	"models":
+	"nodes":
 	[
 		{"primitive":"Cube","position":[0,3.409,0],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},
 		{"primitive":"Sphere","position":[0,1.364,0],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},

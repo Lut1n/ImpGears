@@ -1,0 +1,15 @@
+{
+	"editor_preference":
+	{
+		"favorite_view":[-0.140625,0.5,10]
+	},
+	"nodes":
+	[
+		{"primitive":"Cube","position":[-3.684,0,0],"rotation":[0,0,0],"scale":[1.194,1.588,1],"color":[1,1,1],},
+		{"primitive":"Sphere","position":[0,4.474,0],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},
+		{"primitive":"Torus","position":[0,0,-4.359],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},
+		{"primitive":"Cylinder","position":[0,0,3.846],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},
+		{"primitive":"Capsule","position":[3.684,-1.053,-2.308],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,1,1],},
+		{"primitive":"Crystal","position":[3.947,0,3.077],"rotation":[0,0,0],"scale":[1,1,1],"color":[1,0.99999,0.99999],},
+	]
+}

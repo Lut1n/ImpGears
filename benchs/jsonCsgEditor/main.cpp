@@ -1,33 +1,46 @@
+// imgui
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+//glfw
 #include <GL/glew.h>
-// Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
+// ImpGears
 #include <ImpGears/Descriptors.h>
 #include <ImpGears/Plugins.h>
 #include <ImpGears/Graphics.h>
 #include <ImpGears/SceneGraph.h>
-
+#include <ImpGears/Descriptors/JsonSceneNode.h>
 using namespace imp;
 
+// help stuff
 #define IMPLEMENT_BASIC_GEOMETRIES
 #include "../common/basic_geometries.h"
-
 #include "render_skybox.h"
 
+// std
 #include <fstream>
-
 
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-#include "geometry_json.h"
-#include "geometry_build.h"
+void save(const std::string& filename, JsonSceneNode::Ptr models)
+{
+    std::string data = models->writeIntoJson();
+    std::ofstream of(filename);
+    of.write(data.c_str(), data.size());
+}
+
+void load(const std::string& filename, JsonSceneNode::Ptr models)
+{
+    std::string json = loadText(filename);
+    models->parseJsonData(json);
+}
+
 
 struct MouseButtonState
 {
@@ -79,30 +92,31 @@ struct MouseButtonState
 
 struct LeftButton : MouseButtonState
 {
-    ViewState* editor_view;
-    Vec2 camera_rad_start;
+    JsonSceneNode::Ptr editor_view;
+    Vec3 camera_rad_start;
     
-    LeftButton(ViewState* view) : editor_view(view) {}
+    LeftButton(JsonSceneNode::Ptr view) : editor_view(view) {}
     
     void onPressed(const Vec2& curr_pos) override
     {
-        camera_rad_start = editor_view->camera_rad;
+        camera_rad_start = editor_view->favoriteViewOri();
         std::cout << "pressed " << camera_rad_start[0] << "; " << camera_rad_start[1] << std::endl;
     }
     
     void onReleased(const Vec2& curr_pos) override
     {
-        Vec2 move = curr_pos - getStartPos();
+        Vec3 move = curr_pos - getStartPos();
         std::cout << "released " << move[0] << "; " << move[1] << std::endl;
     }
     
     void onDragged(const Vec2& curr_pos) override
     {
         // HOLD PRESSING AND MOVE
-        Vec2 move = curr_pos - getStartPos();
+        Vec3 move = curr_pos - getStartPos();
 
-        editor_view->camera_rad[0] = camera_rad_start[0] + move[0] * 10.0;
-        editor_view->camera_rad[1] = clamp(camera_rad_start[1] + move[1] * 10.0,-1.0,1.0);
+        Vec3& camera_rad = editor_view->favoriteViewOri();
+        camera_rad[0] = camera_rad_start[0] + move[0] * 10.0;
+        camera_rad[1] = clamp(camera_rad_start[1] + move[1] * 10.0,-1.0,1.0);
         
     }
 };
@@ -238,7 +252,6 @@ int main(int argc, char* argv[])
     Vec3 obj_scale = Vec3(1.0);
     Vec4 material_color = Vec4(1.0);
     float shininess = 32.0;
-    ViewState editor_view;
 
     // for each timer keep variable after how many seconds to trigger it
     float time = 2.f; // two seconds
@@ -253,8 +266,8 @@ int main(int argc, char* argv[])
 
     Vec4 viewport(0.0,0.0,512.0,512.0);
     
+    JsonSceneNode::Ptr scene = JsonSceneNode::create();
     std::vector<GeoNode::Ptr> models;
-    std::vector<ModelState> states;
     
     bool requestSave = false;
     bool requestLoad = false;
@@ -262,22 +275,17 @@ int main(int argc, char* argv[])
     bool requestDuplicate = false;
     bool requestAdd = false;
     int selected = 0;
-    GeoPrimitive selectedPrimitive = Cube;
+    JsonSceneNode::GeometricPrimitive selectedPrimitive = JsonSceneNode::Cube;
     
     std::string filename; filename.reserve(1024);
     char buff[1024]; buff[0] = '\0';
    
     Vec3 camera_rad_last;
-    LeftButton left(&editor_view);
+    LeftButton left(scene);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
         
         double xpos, ypos;
@@ -285,12 +293,6 @@ int main(int argc, char* argv[])
         Vec2 curr_pos(xpos / 1024.0, ypos / 720.0);
         int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
         left.update(curr_pos,state);
-        
-        
-        
-
-        // common part, do this only once
-        float now = glfwGetTime();
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -324,9 +326,9 @@ int main(int argc, char* argv[])
         ImGui::End();
 
         ImGui::Begin("Scene");
-        ImGui::SliderFloat("Camera long", &editor_view.camera_rad[0], -1.0f, 1.0f);
-        ImGui::SliderFloat("Camera lat", &editor_view.camera_rad[1], -1.0f, 1.0f);
-        ImGui::SliderFloat("Camera dist", &editor_view.camera_rad[2], 1.0f, 100.0f);
+        ImGui::SliderFloat("Camera long", &scene->favoriteViewOri()[0], -1.0f, 1.0f);
+        ImGui::SliderFloat("Camera lat", &scene->favoriteViewOri()[1], -1.0f, 1.0f);
+        ImGui::SliderFloat("Camera dist", &scene->favoriteViewOri()[2], 1.0f, 100.0f);
         
 
         ImGui::InputTextWithHint("filename", "enter filename for saving or loading", buff, filename.capacity());
@@ -351,60 +353,60 @@ int main(int argc, char* argv[])
         ImGui::Begin("Model");
         if(ImGui::Button("Add Cube"))
         {
-            selectedPrimitive = Cube;
+            selectedPrimitive = JsonSceneNode::Cube;
             requestAdd = true;
         }
         
         if(ImGui::Button("Add Sphere"))
         {
-            selectedPrimitive = Sphere;
+            selectedPrimitive = JsonSceneNode::Sphere;
             requestAdd = true;
         }
         ImGui::SameLine();
         
         if(ImGui::Button("Add Torus"))
         {
-            selectedPrimitive = Torus;
+            selectedPrimitive = JsonSceneNode::Torus;
             requestAdd = true;
         }
         
         if(ImGui::Button("Add Cylinder"))
         {
-            selectedPrimitive = Cylinder;
+            selectedPrimitive = JsonSceneNode::Cylinder;
             requestAdd = true;
         }
         ImGui::SameLine();
         if(ImGui::Button("Add Capsule"))
         {
-            selectedPrimitive = Capsule;
+            selectedPrimitive = JsonSceneNode::Capsule;
             requestAdd = true;
         }
         ImGui::SameLine();
         if(ImGui::Button("Add Crystal"))
         {
-            selectedPrimitive = Crystal;
+            selectedPrimitive = JsonSceneNode::Crystal;
             requestAdd = true;
         }
         
         
         
         int n=0;
-        for(int i=0;i<states.size();++i)
+        for(int i=0;i<scene->itemCount();++i)
         {
             std::stringstream ss;
             ss << "primitive #" << i;
             std::string str = ss.str();
             if (ImGui::TreeNode(str.c_str()))
             {
-                ImGui::SliderFloat3("position", states[i].position.data(),-10.0,10.0);
-                ImGui::SliderFloat3("rotation", states[i].rotation.data(),-3.14,3.14);
-                ImGui::SliderFloat3("scale", states[i].scale.data(),0.01,30.0);
-                ImGui::ColorEdit3("color", states[i].color.data());
+                ImGui::SliderFloat3("position", scene->getItem(i).position.data(),-10.0,10.0);
+                ImGui::SliderFloat3("rotation", scene->getItem(i).rotation.data(),-3.14,3.14);
+                ImGui::SliderFloat3("scale", scene->getItem(i).scale.data(),0.01,30.0);
+                ImGui::ColorEdit3("color", scene->getItem(i).color.data());
             
-                models[i]->setPosition(states[i].position);
-                models[i]->setRotation(states[i].rotation);
-                models[i]->setScale(states[i].scale);
-                models[i]->_material->_color = states[i].color;
+                models[i]->setPosition(scene->getItem(i).position);
+                models[i]->setRotation(scene->getItem(i).rotation);
+                models[i]->setScale(scene->getItem(i).scale);
+                models[i]->_material->_color = scene->getItem(i).color;
                 
                 if(ImGui::Button("Erase"))
                 {
@@ -426,7 +428,7 @@ int main(int argc, char* argv[])
         {
             if(models[i] == nullptr)
             {
-                states.erase(states.begin()+i);
+                scene->remItem(i);
                 models.erase(models.begin()+i);
             }
         }
@@ -434,8 +436,8 @@ int main(int argc, char* argv[])
 
         // impgears stuff
         const float PI = 3.141592;
-        Vec3 lp2(cos(editor_view.camera_rad[0]*PI ),sin(editor_view.camera_rad[1]*PI*0.5),sin(editor_view.camera_rad[0]*PI));
-        camera->setPosition(Vec3(0.0,0.0,0.0) + lp2*Vec3(editor_view.camera_rad[2]));
+        Vec3 lp2(cos(scene->favoriteViewOri()[0]*PI ),sin(scene->favoriteViewOri()[1]*PI*0.5),sin(scene->favoriteViewOri()[0]*PI));
+        camera->setPosition(Vec3(0.0,0.0,0.0) + lp2*Vec3(scene->favoriteViewOri()[2]));
         
         light->setPosition(Vec3(20.0,20.0,20.0) );
         camera->setTarget(Vec3(0.0f, 0.0, 0.0f));
@@ -470,29 +472,41 @@ int main(int argc, char* argv[])
         
         if(requestReset)
         {
-            for(int i=0;i<models.size();++i) root->remNode( models[i] );            
-            states.clear();
+            for(int i=0;i<(int)models.size();++i) root->remNode( models[i] );
+            scene->clearItems();
             models.clear();
-            editor_view = ViewState(); // default view
+            scene->favoriteViewOri().set(0.25,0.25,10.0);
         }
         if(requestDuplicate)
         {
-            createMesh( states, models, root, states[selected], reflection_scene, env_sha );
+            JsonSceneNode::Item item = scene->getItem(selected);
+            scene->addItem(item);
+            GeoNode::Ptr node = JsonSceneNode::buildGeometryNode( item, reflection_scene, env_sha );
+            models.push_back( node );
+            root->addNode(node);
         }
         if(requestSave && !requestLoad && filename.size() > 0)
         {
-            save(filename, states, editor_view);
+            save(filename, scene);
         }
         if(requestLoad && !requestSave && filename.size() > 0)
         {
-            std::vector<ModelState> toadd;
-            load(filename, toadd, editor_view);
-            for(auto a : toadd) createMesh( states, models, root, a, reflection_scene, env_sha );
+            int lastSize = scene->itemCount();
+            load(filename, scene);
+            for(int i=lastSize;i<scene->itemCount();++i)
+            {
+                GeoNode::Ptr geo = JsonSceneNode::buildGeometryNode(scene->getItem(i), reflection_scene, env_sha);
+                models.push_back(geo);
+                root->addNode(geo);
+            }
         }
         if(requestAdd)
         {
-            ModelState st; st.primitive = selectedPrimitive;
-            createMesh( states, models, root, st, reflection_scene, env_sha );
+            JsonSceneNode::Item item; item.primitive = selectedPrimitive;
+            scene->addItem(item);
+            GeoNode::Ptr node = JsonSceneNode::buildGeometryNode( item, reflection_scene, env_sha );
+            models.push_back( node );
+            root->addNode(node);
         }
         
         requestReset = false;

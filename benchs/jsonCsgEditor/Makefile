@@ -20,7 +20,7 @@ LIBS =
 CXXFLAGS += -lglew32 -DIMGUI_IMPL_OPENGL_LOADER_GLEW -std=c++17
 
 ECHO_MESSAGE = "MinGW"
-LIBS += -L /usr/lib -lglfw3 -lgdi32 -lopengl32 -limm32 -lstdc++fs -limpgears-core -limpgears-geometry -limpgears-graphics -limpgears-scenegraph -limpgears-renderer -limpgears-descriptors -limpgears-plugins
+LIBS += -L /usr/local/lib -lglfw3 -lgdi32 -lopengl32 -limm32 -lstdc++fs -limpgears-core -limpgears-geometry -limpgears-graphics -limpgears-scenegraph -limpgears-renderer -limpgears-descriptors -limpgears-plugins
 
 #CXXFLAGS += `pkg-config --cflags glfw3`
 CFLAGS = $(CXXFLAGS)

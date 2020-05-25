@@ -69,6 +69,8 @@ bool Polyhedron::contains(const Vec3& p) const
 //--------------------------------------------------------------
 Vec3 Polyhedron::externalPoint() const
 {
+    // take a far away random point
+    // compute a partial bounding box and choose a point with offset to outside
     Vec3 e;
     for(auto f:faces)
     {
@@ -147,13 +149,42 @@ bool Polyhedron::iFacePh(const Path& face, const Polyhedron& ph, std::vector<Edg
         Path::BufType o;
         bool r = iFace2(face,ph[j],o);
         r |= iFace2(ph[j],face,o);
-        res = res || r;
-        if(r)eout.push_back( Edge(o[0],o[1]) );
+        
+        // Exclude 1 point case (min 2)
+        if(r && o.size()>=2)
+        {
+            eout.push_back( Edge(o[0],o[1]) );
+            res = true;
+        }
     }
 
     return res;
 }
 
+//--------------------------------------------------------------
+// remove consecutive duplicate vertices
+void removeDuplicated(std::vector<Vec3>& verts)
+{
+    bool erasing = true;
+    while(erasing && !verts.empty())
+    {
+        erasing = false;
+        
+        Vec3 last = verts.back();
+        for(auto it=verts.begin(); it!=verts.end(); it++)
+        {
+            if(*it == last)
+            {
+                verts.erase(it);
+                erasing = true;
+                break;
+            }
+            last = *it;
+        }
+    }
+}
+
+//--------------------------------------------------------------
 std::vector<Path> Polyhedron::cutFace(const Path& face, Edge cutter)
 {
     std::vector<Path> res;
@@ -204,8 +235,15 @@ std::vector<Path> Polyhedron::cutFace(const Path& face, Edge cutter)
     for(int i=k1;i<k2;++i) geoB.addVertex(face[i]);
     geoB.addVertex(toInsert[k2]); geoB.addVertex(toInsert[k1]);
 
-    res.push_back(geoA);
-    res.push_back(geoB);
+    // Clean paths
+    removeDuplicated(geoA.vertices);
+    removeDuplicated(geoB.vertices);
+
+    // And exclude degenerates
+    if(geoA.vertices.size() >= 3)
+        res.push_back(geoA);
+    if(geoB.vertices.size() >= 3)
+        res.push_back(geoB);
 
     return res;
 }
@@ -231,9 +269,12 @@ std::vector<Path> Polyhedron::cutFace(const Path& face, std::vector<Edge> cutter
 }
 
 //--------------------------------------------------------------
+// Add face to outPh if testPh contains it (Or not if inverse==true)
 void addFaceIf(const Path& face, const Polyhedron& testPh, bool inverse, Polyhedron& outPh)
 {
-    Vec3 mid = face[0] + face[1] + face[2]; mid *= (1.0/3.0);
+    if(face.vertices.size() < 3) return;
+        
+    Vec3 mid = face.gravity();
     if(inverse == testPh.contains(mid)) outPh.addFace(face);
 }
 
@@ -245,7 +286,6 @@ void Polyhedron::cutPolyhedron(const Polyhedron& ph1, const Polyhedron& ph2, Pol
     for(int i=0;i<(int)ph1.faceCount();++i)
     {
         Path face = ph1[i];
-        Vec3 n = face.normal();
 
         std::vector<Edge> eout;
         if( iFacePh(face, ph2, eout) )

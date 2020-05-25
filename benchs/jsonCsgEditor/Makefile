@@ -29,7 +29,7 @@ CFLAGS = $(CXXFLAGS)
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
-%.o:%.cpp geometry_build.h geometry_json.h render_skybox.h
+%.o:%.cpp render_skybox.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(EXAMPLES_PATH)%.cpp

@@ -121,6 +121,112 @@ struct LeftButton : MouseButtonState
     }
 };
 
+struct RightButton : MouseButtonState
+{
+    JsonSceneNode::Ptr editor_view;
+    Vec3 camera_rad_start;
+    
+    RightButton(JsonSceneNode::Ptr view) : editor_view(view) {}
+    
+    void onPressed(const Vec2& curr_pos) override
+    {
+        camera_rad_start = editor_view->favoriteViewOri();
+        std::cout << "pressed " << camera_rad_start[0] << "; " << camera_rad_start[1] << std::endl;
+    }
+    
+    void onReleased(const Vec2& curr_pos) override
+    {
+        Vec3 move = curr_pos - getStartPos();
+        std::cout << "released " << move[0] << "; " << move[1] << std::endl;
+    }
+    
+    void onDragged(const Vec2& curr_pos) override
+    {
+        // HOLD PRESSING AND MOVE
+        Vec3 move = curr_pos - getStartPos();
+
+        Vec3& camera_rad = editor_view->favoriteViewOri();
+        camera_rad[2] = clamp(camera_rad_start[2] + move[1] * 10.0,0.0,100.0);
+        
+    }
+};
+
+#include <ImpGears/Geometry/Polyhedron.h>
+void getLines(Polyhedron poly, std::vector<Vec3>& vertices, std::vector<Vec3>& colors)
+{
+    vertices.clear();
+    for(int f=0;f<poly.faceCount();++f)
+    {
+        std::vector<Vec3> verts = poly[f].vertices;
+        
+        Vec3 last = verts.back();
+        for(auto p : verts)
+        {
+            vertices.push_back(last);
+            vertices.push_back(p);
+            colors.push_back(Vec3(0.0,0.0,1.0));
+            colors.push_back(Vec3(0.0,0.0,1.0));
+            last = p;
+        }
+    }
+}
+
+Geometry transformGeo(const Geometry& geo, const Vec3& p, const Vec3& r, const Vec3& s)
+{
+    Geometry copy = geo;
+    copy *= s;
+    copy.rotX(r[0]); copy.rotY(r[1]); copy.rotZ(r[2]);
+    copy += p;
+    return copy;
+}
+
+GeoNode::Ptr merge2first(const std::vector<GeoNode::Ptr>& nodes)
+{   
+    Geometry::Ptr geomerged = Geometry::create();
+    Polyhedron merged;
+    {
+        // get geometry copies
+        Geometry geo1 = transformGeo(*(nodes[0]->_geo), nodes[0]->getPosition(), nodes[0]->getRotation(), nodes[0]->getScale());
+        Geometry geo2 = transformGeo(*(nodes[1]->_geo), nodes[1]->getPosition(), nodes[1]->getRotation(), nodes[1]->getScale());
+        
+        Polyhedron poly1, poly2;
+        poly1.set(geo1._vertices);
+        poly2.set(geo2._vertices);
+        merged = poly1 + poly2;
+        // merged = override_plus(poly1,poly2);
+    }
+    
+    const bool __DEBUG_MERGE = true;
+    
+    geomerged->setPrimitive(Geometry::Primitive_Triangles);
+    merged.getTriangles(geomerged->_vertices);
+    // getTriangles(merged, geomerged->_vertices);
+    
+    geomerged->generateColors( Vec3(1.0) );
+    geomerged->generateNormals( Geometry::NormalGenMode_PerFace );
+    geomerged->generateTexCoords( Geometry::TexGenMode_Cubic, 1.0);
+    
+    GeoNode::Ptr result = GeoNode::create(geomerged);
+    result->setReflexion( nodes[0]->getState()->getReflexion() );
+    result->setRenderPass( nodes[0]->getState()->getRenderPass() );
+    // result->setMaterial( nodes[0]->_material );
+    
+    if(__DEBUG_MERGE)
+    {
+        Geometry::Ptr geoline = Geometry::create();
+        geoline->setPrimitive(Geometry::Primitive_Lines);
+        getLines(merged, geoline->_vertices, geoline->_colors);
+        geoline->_hasColors = true;
+        GeoNode::Ptr linenode = GeoNode::create(geoline);
+        linenode->setReflexion( nodes[0]->getState()->getReflexion() );
+        linenode->setRenderPass( nodes[0]->getState()->getRenderPass() );
+        result->addNode(linenode);
+    }
+    
+    
+    return result;
+}
+
 int main(int argc, char* argv[])
 {
     // Setup window
@@ -214,10 +320,10 @@ int main(int argc, char* argv[])
 
 
     // SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
-    renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
+    renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
-    renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
+    renderer->enableFeature(SceneRenderer::Feature_SSAO, false);
     renderer->enableMsaa(true);
     renderer->setAmbient(0.5);
     renderer->setLightPower(1000.0);
@@ -229,6 +335,7 @@ int main(int argc, char* argv[])
     
     graph->getInitState()->setViewport( Vec4(0.0,0.0,1024.0,1024.0) );
     graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));
+    graph->getInitState()->setLineWidth( 2.0 );
 
 
     // Setup Dear ImGui context
@@ -257,10 +364,10 @@ int main(int argc, char* argv[])
     float time = 2.f; // two seconds
     float previous = glfwGetTime();
 
-    bool shadowsEnable = true;
+    bool shadowsEnable = false;
     bool environmentEnable = true;
     bool bloomEnable = true;
-    bool ssaoEnable = true;
+    bool ssaoEnable = false;
     bool phongEnable = true;
     bool wireframe = false;
 
@@ -274,6 +381,7 @@ int main(int argc, char* argv[])
     bool requestReset = false;
     bool requestDuplicate = false;
     bool requestAdd = false;
+    bool requestMerge = false;
     int selected = 0;
     JsonSceneNode::GeometricPrimitive selectedPrimitive = JsonSceneNode::Cube;
     
@@ -282,6 +390,7 @@ int main(int argc, char* argv[])
    
     Vec3 camera_rad_last;
     LeftButton left(scene);
+    RightButton right(scene);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -293,6 +402,8 @@ int main(int argc, char* argv[])
         Vec2 curr_pos(xpos / 1024.0, ypos / 720.0);
         int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
         left.update(curr_pos,state);
+        state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+        right.update(curr_pos,state);
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -345,6 +456,10 @@ int main(int argc, char* argv[])
         if(ImGui::Button("Reset"))
         {
             requestReset = true;
+        }
+        if(ImGui::Button("[experimental] Merge"))
+        {
+            requestMerge = true;
         }
         
         ImGui::End();
@@ -508,12 +623,29 @@ int main(int argc, char* argv[])
             models.push_back( node );
             root->addNode(node);
         }
+        if(requestMerge)
+        {
+            // create node
+            GeoNode::Ptr nn = merge2first(models);
+            
+            // reset all
+            for(int i=0;i<(int)models.size();++i) root->remNode( models[i] );
+            scene->clearItems();
+            models.clear();
+            // scene->favoriteViewOri().set(0.25,0.25,10.0);
+            //
+            
+            // add node to scene
+            models.push_back(nn);
+            root->addNode(nn);
+        }
         
         requestReset = false;
         requestSave = false;
         requestLoad = false;
         requestDuplicate = false;
         requestAdd = false;
+        requestMerge = false;
     }
 
     // Cleanup

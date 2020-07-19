@@ -32,6 +32,10 @@ public:
     const Vec3& getPosition() const {return _position;}
     const Vec3& getRotation() const {return _rotation;}
     const Vec3& getScale() const {return _scale;}
+    
+    Vec3& getPosition() {return _position;}
+    Vec3& getRotation() {return _rotation;}
+    Vec3& getScale() {return _scale;}
 
     void addNode(const Node::Ptr& sceneNode);
     void remNode(const Node::Ptr& sceneNode);

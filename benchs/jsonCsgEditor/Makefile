@@ -29,7 +29,7 @@ CFLAGS = $(CXXFLAGS)
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
-%.o:%.cpp render_skybox.h
+%.o:%.cpp render_skybox.h Model.h Constructive.h ModelEdit.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(EXAMPLES_PATH)%.cpp

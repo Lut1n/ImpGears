@@ -22,11 +22,13 @@ using namespace imp;
 // std
 #include <fstream>
 
+//--------------------------------------------------------------
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+//--------------------------------------------------------------
 void save(const std::string& filename, JsonSceneNode::Ptr models)
 {
     std::string data = models->writeIntoJson();
@@ -34,50 +36,51 @@ void save(const std::string& filename, JsonSceneNode::Ptr models)
     of.write(data.c_str(), data.size());
 }
 
+//--------------------------------------------------------------
 void load(const std::string& filename, JsonSceneNode::Ptr models)
 {
     std::string json = loadText(filename);
     models->parseJsonData(json);
 }
 
-
+//--------------------------------------------------------------
 struct MouseButtonState
 {
    Vec2 start_pos;
    Vec2 last_pos;
    int last_state;
-   
+
    MouseButtonState() : last_state(GLFW_RELEASE) {}
-   
+
    Vec2 getStartPos() {return start_pos;}
-   
+
    virtual void onPressed(const Vec2& curr_pos) {}
    virtual void onReleased(const Vec2& curr_pos) {}
    virtual void onDragged(const Vec2& curr_pos) {}
-   
+
    void pressed(const Vec2& curr_pos)
    {
         start_pos = curr_pos;
         onPressed(curr_pos);
    }
-   
+
    void released(const Vec2& curr_pos)
    {
         onReleased(curr_pos);
    }
-   
+
    void dragged(const Vec2& curr_pos)
-   {  
+   {
         onDragged(curr_pos);
    }
-   
+
    void update(const Vec2& curr_pos, int button_state)
    {
         if (button_state == GLFW_PRESS)
         {
             if(last_state == GLFW_RELEASE) pressed(curr_pos);
             else if(last_pos != curr_pos) dragged(curr_pos);
-            
+
         }
         else if(button_state == GLFW_RELEASE)
         {
@@ -89,25 +92,26 @@ struct MouseButtonState
    }
 };
 
+//--------------------------------------------------------------
 struct LeftButton : MouseButtonState
 {
     JsonSceneNode::Ptr editor_view;
     Vec3 camera_rad_start;
-    
+
     LeftButton(JsonSceneNode::Ptr view) : editor_view(view) {}
-    
+
     void onPressed(const Vec2& curr_pos) override
     {
         camera_rad_start = editor_view->favoriteViewOri();
         std::cout << "pressed " << camera_rad_start[0] << "; " << camera_rad_start[1] << std::endl;
     }
-    
+
     void onReleased(const Vec2& curr_pos) override
     {
         Vec3 move = curr_pos - getStartPos();
         std::cout << "released " << move[0] << "; " << move[1] << std::endl;
     }
-    
+
     void onDragged(const Vec2& curr_pos) override
     {
         // HOLD PRESSING AND MOVE
@@ -116,29 +120,30 @@ struct LeftButton : MouseButtonState
         Vec3& camera_rad = editor_view->favoriteViewOri();
         camera_rad[0] = camera_rad_start[0] + move[0] * 10.0;
         camera_rad[1] = clamp(camera_rad_start[1] + move[1] * 10.0,-1.0,1.0);
-        
+
     }
 };
 
+//--------------------------------------------------------------
 struct RightButton : MouseButtonState
 {
     JsonSceneNode::Ptr editor_view;
     Vec3 camera_rad_start;
-    
+
     RightButton(JsonSceneNode::Ptr view) : editor_view(view) {}
-    
+
     void onPressed(const Vec2& curr_pos) override
     {
         camera_rad_start = editor_view->favoriteViewOri();
         std::cout << "pressed " << camera_rad_start[0] << "; " << camera_rad_start[1] << std::endl;
     }
-    
+
     void onReleased(const Vec2& curr_pos) override
     {
         Vec3 move = curr_pos - getStartPos();
         std::cout << "released " << move[0] << "; " << move[1] << std::endl;
     }
-    
+
     void onDragged(const Vec2& curr_pos) override
     {
         // HOLD PRESSING AND MOVE
@@ -146,86 +151,16 @@ struct RightButton : MouseButtonState
 
         Vec3& camera_rad = editor_view->favoriteViewOri();
         camera_rad[2] = clamp(camera_rad_start[2] + move[1] * 10.0,0.0,100.0);
-        
+
     }
 };
 
-#include <ImpGears/Geometry/Polyhedron.h>
-void getLines(Polyhedron poly, std::vector<Vec3>& vertices, std::vector<Vec3>& colors)
-{
-    vertices.clear();
-    for(int f=0;f<poly.faceCount();++f)
-    {
-        std::vector<Vec3> verts = poly[f].vertices;
-        
-        Vec3 last = verts.back();
-        for(auto p : verts)
-        {
-            vertices.push_back(last);
-            vertices.push_back(p);
-            colors.push_back(Vec3(0.0,0.0,1.0));
-            colors.push_back(Vec3(0.0,0.0,1.0));
-            last = p;
-        }
-    }
-}
+//--------------------------------------------------------------
+#include "Constructive.h"
+#include "Model.h"
+#include "ModelEdit.h"
 
-Geometry transformGeo(const Geometry& geo, const Vec3& p, const Vec3& r, const Vec3& s)
-{
-    Geometry copy = geo;
-    copy *= s;
-    copy.rotX(r[0]); copy.rotY(r[1]); copy.rotZ(r[2]);
-    copy += p;
-    return copy;
-}
-
-GeoNode::Ptr merge2first(const std::vector<GeoNode::Ptr>& nodes)
-{   
-    Geometry::Ptr geomerged = Geometry::create();
-    Polyhedron merged;
-    {
-        // get geometry copies
-        Geometry geo1 = transformGeo(*(nodes[0]->_geo), nodes[0]->getPosition(), nodes[0]->getRotation(), nodes[0]->getScale());
-        Geometry geo2 = transformGeo(*(nodes[1]->_geo), nodes[1]->getPosition(), nodes[1]->getRotation(), nodes[1]->getScale());
-        
-        Polyhedron poly1, poly2;
-        poly1.set(geo1._vertices);
-        poly2.set(geo2._vertices);
-        merged = poly1 + poly2;
-        // merged = override_plus(poly1,poly2);
-    }
-    
-    const bool __DEBUG_MERGE = true;
-    
-    geomerged->setPrimitive(Geometry::Primitive_Triangles);
-    merged.getTriangles(geomerged->_vertices);
-    // getTriangles(merged, geomerged->_vertices);
-    
-    geomerged->generateColors( Vec3(1.0) );
-    geomerged->generateNormals( Geometry::NormalGenMode_PerFace );
-    geomerged->generateTexCoords( Geometry::TexGenMode_Cubic, 1.0);
-    
-    GeoNode::Ptr result = GeoNode::create(geomerged);
-    result->setReflexion( nodes[0]->getState()->getReflexion() );
-    result->setRenderPass( nodes[0]->getState()->getRenderPass() );
-    // result->setMaterial( nodes[0]->_material );
-    
-    if(__DEBUG_MERGE)
-    {
-        Geometry::Ptr geoline = Geometry::create();
-        geoline->setPrimitive(Geometry::Primitive_Lines);
-        getLines(merged, geoline->_vertices, geoline->_colors);
-        geoline->_hasColors = true;
-        GeoNode::Ptr linenode = GeoNode::create(geoline);
-        linenode->setReflexion( nodes[0]->getState()->getReflexion() );
-        linenode->setRenderPass( nodes[0]->getState()->getRenderPass() );
-        result->addNode(linenode);
-    }
-    
-    
-    return result;
-}
-
+//--------------------------------------------------------------
 int main(int argc, char* argv[])
 {
     // Setup window
@@ -237,7 +172,7 @@ int main(int argc, char* argv[])
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    
+
     // request MSAA
     int samples = 4;
     // glfwWindowHint(GLFW_SAMPLES, samples);
@@ -262,14 +197,14 @@ int main(int argc, char* argv[])
     // glEnable(GL_MULTISAMPLE);
     // glDisable(GL_MULTISAMPLE);
 
-    
+
     std::string pluginName = "OGLPlugin";
     pluginName = "lib" + pluginName + "." + LIB_EXT;
     SceneRenderer::Ptr renderer;
     RenderPlugin::Ptr plugin = PluginManager::open( pluginName );
     renderer = plugin->getRenderer();
-    
-    
+
+
     // impgears stuff
     Graph::Ptr graph = Graph::create();
     Node::Ptr root = Node::create();
@@ -277,7 +212,7 @@ int main(int argc, char* argv[])
     Camera::Ptr camera = Camera::create(Vec3(0.0,1.0,0.0));
     camera->setPosition(Vec3(10.0f, 10.0f, 10.0f));
     camera->setTarget(Vec3(0.0f, 0.0f, 0.0f));
-            
+
 
     imp::ReflexionModel::Ptr reflection_scene = imp::ReflexionModel::create(
             imp::ReflexionModel::Lighting_Phong,
@@ -286,8 +221,8 @@ int main(int argc, char* argv[])
 
     Material::Ptr material_light = Material::create(Vec3(1.0), 64.0);
     material_light->_emissive = ImageSampler::create(8,8,3,Vec3(1.0));
-    
-    
+
+
     Geometry::Ptr coords = buildCoord();
     coords->scale(Vec3(10.0));
     GeoNode::Ptr coordsNode = GeoNode::create(coords, false);
@@ -307,15 +242,16 @@ int main(int argc, char* argv[])
     RenderPass::Ptr env_sha = RenderPass::create();
     RenderPass::Ptr env = RenderPass::create();
     RenderPass::Ptr sha = RenderPass::create();
-    
+
     env->enablePass(RenderPass::Pass_EnvironmentMapping);
     env_sha->enablePass(RenderPass::Pass_EnvironmentMapping);
     env_sha->enablePass(RenderPass::Pass_ShadowMapping);
     sha->enablePass(RenderPass::Pass_ShadowMapping);
-    
+
     coordsNode->getState()->setRenderPass(env_sha);
-    
+
     sky->getState()->setRenderPass(env);
+
 
 
     // SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
@@ -330,8 +266,7 @@ int main(int argc, char* argv[])
     renderer->setShadowResolution(512.0);
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
     renderer->initialize();
-    
-    
+
     graph->getInitState()->setViewport( Vec4(0.0,0.0,1024.0,1024.0) );
     graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));
     graph->getInitState()->setLineWidth( 2.0 );
@@ -351,7 +286,7 @@ int main(int argc, char* argv[])
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
-    
+
     // Our state
     Vec3 obj_position = Vec3(0.0);
     Vec3 obj_rotation = Vec3(0.0);
@@ -371,31 +306,32 @@ int main(int argc, char* argv[])
     bool wireframe = false;
 
     Vec4 viewport(0.0,0.0,512.0,512.0);
-    
-    JsonSceneNode::Ptr scene = JsonSceneNode::create();
-    std::vector<GeoNode::Ptr> models;
-    
-    bool requestSave = false;
-    bool requestLoad = false;
-    bool requestReset = false;
-    bool requestDuplicate = false;
-    bool requestAdd = false;
-    bool requestMerge = false;
-    int selected = 0;
-    JsonSceneNode::GeometricPrimitive selectedPrimitive = JsonSceneNode::Cube;
-    
-    std::string filename; filename.reserve(1024);
+
+    JsonSceneNode::Ptr model = JsonSceneNode::create();
+    // ConstructiveData geoset;
+    Tree csgGraph;
+
+    GuiControler ctrl;
+
     char buff[1024]; buff[0] = '\0';
-   
+
     Vec3 camera_rad_last;
-    LeftButton left(scene);
-    RightButton right(scene);
+    LeftButton left(model);
+    RightButton right(model);
+
+    Tree a,b,aa,ab,ba,bb,bc,baa,bab,baba;
+    bab.add(&baba);
+    ba.add(&baa); ba.add(&bab);
+    a.add(&aa); a.add(&ab);
+    b.add(&ba); b.add(&bb); b.add(&bc);
+    Tree tree;
+    tree.add(&a); tree.add(&b);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        
+
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
         Vec2 curr_pos(xpos / 1024.0, ypos / 720.0);
@@ -436,123 +372,41 @@ int main(int argc, char* argv[])
         ImGui::End();
 
         ImGui::Begin("Scene");
-        ImGui::SliderFloat("Camera long", &scene->favoriteViewOri()[0], -1.0f, 1.0f);
-        ImGui::SliderFloat("Camera lat", &scene->favoriteViewOri()[1], -1.0f, 1.0f);
-        ImGui::SliderFloat("Camera dist", &scene->favoriteViewOri()[2], 1.0f, 100.0f);
-        
+        ImGui::SliderFloat("Camera long", &model->favoriteViewOri()[0], -1.0f, 1.0f);
+        ImGui::SliderFloat("Camera lat", &model->favoriteViewOri()[1], -1.0f, 1.0f);
+        ImGui::SliderFloat("Camera dist", &model->favoriteViewOri()[2], 1.0f, 100.0f);
 
-        ImGui::InputTextWithHint("filename", "enter filename for saving or loading", buff, filename.capacity());
+
+        ImGui::InputTextWithHint("filename", "enter filename for saving or loading", buff, ctrl.filename.capacity());
         if(ImGui::Button("Save"))
         {
-            filename = buff;
-            requestSave = true;
+            ctrl.filename = buff;
+            ctrl.requestSave = true;
         }
         if(ImGui::Button("Load"))
         {
-            filename = buff;
-            requestLoad = true;
+            ctrl.filename = buff;
+            ctrl.requestLoad = true;
         }
         if(ImGui::Button("Reset"))
         {
-            requestReset = true;
+            ctrl.requestReset = true;
         }
-        if(ImGui::Button("[experimental] Merge"))
-        {
-            requestMerge = true;
-        }
-        
+
         ImGui::End();
 
 
-        ImGui::Begin("Model");
-        if(ImGui::Button("Add Cube"))
-        {
-            selectedPrimitive = JsonSceneNode::Cube;
-            requestAdd = true;
-        }
-        
-        if(ImGui::Button("Add Sphere"))
-        {
-            selectedPrimitive = JsonSceneNode::Sphere;
-            requestAdd = true;
-        }
-        ImGui::SameLine();
-        
-        if(ImGui::Button("Add Torus"))
-        {
-            selectedPrimitive = JsonSceneNode::Torus;
-            requestAdd = true;
-        }
-        
-        if(ImGui::Button("Add Cylinder"))
-        {
-            selectedPrimitive = JsonSceneNode::Cylinder;
-            requestAdd = true;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Add Capsule"))
-        {
-            selectedPrimitive = JsonSceneNode::Capsule;
-            requestAdd = true;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Add Crystal"))
-        {
-            selectedPrimitive = JsonSceneNode::Crystal;
-            requestAdd = true;
-        }
-        
-        
-        
-        int n=0;
-        for(int i=0;i<scene->itemCount();++i)
-        {
-            std::stringstream ss;
-            ss << "primitive #" << i;
-            std::string str = ss.str();
-            if (ImGui::TreeNode(str.c_str()))
-            {
-                ImGui::SliderFloat3("position", scene->getItem(i).position.data(),-10.0,10.0);
-                ImGui::SliderFloat3("rotation", scene->getItem(i).rotation.data(),-3.14,3.14);
-                ImGui::SliderFloat3("scale", scene->getItem(i).scale.data(),0.01,30.0);
-                ImGui::ColorEdit3("color", scene->getItem(i).color.data());
-            
-                models[i]->setPosition(scene->getItem(i).position);
-                models[i]->setRotation(scene->getItem(i).rotation);
-                models[i]->setScale(scene->getItem(i).scale);
-                models[i]->_material->_color = scene->getItem(i).color;
-                
-                if(ImGui::Button("Erase"))
-                {
-                    root->remNode( models[i] );
-                    models[i] = nullptr;
-                }
-                
-                if(ImGui::Button("Duplicate"))
-                {
-                    selected = i;
-                    requestDuplicate = true;
-                }
-                
-                ImGui::TreePop();
-            }
-        }
-        
-        for(int i=models.size()-1;i>=0;--i)
-        {
-            if(models[i] == nullptr)
-            {
-                scene->remItem(i);
-                models.erase(models.begin()+i);
-            }
-        }
+        ImGui::Begin("Graph");
+        showGraph(csgGraph,ctrl);
         ImGui::End();
+
+        ctrl.showNodeEdition();
 
         // impgears stuff
         const float PI = 3.141592;
-        Vec3 lp2(cos(scene->favoriteViewOri()[0]*PI ),sin(scene->favoriteViewOri()[1]*PI*0.5),sin(scene->favoriteViewOri()[0]*PI));
-        camera->setPosition(Vec3(0.0,0.0,0.0) + lp2*Vec3(scene->favoriteViewOri()[2]));
-        
+        Vec3 lp2(cos(model->favoriteViewOri()[0]*PI ),sin(model->favoriteViewOri()[1]*PI*0.5),sin(model->favoriteViewOri()[0]*PI));
+        camera->setPosition(Vec3(0.0,0.0,0.0) + lp2*Vec3(model->favoriteViewOri()[2]));
+
         light->setPosition(Vec3(20.0,20.0,20.0) );
         camera->setTarget(Vec3(0.0f, 0.0, 0.0f));
 
@@ -578,73 +432,66 @@ int main(int argc, char* argv[])
 
         // impgears
         renderer->render( graph );
-        
+
         // imgui
         glViewport(0, 0, display_w, display_h);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
-        
-        if(requestReset)
+
+        if(ctrl.requestReset)
         {
-            for(int i=0;i<(int)models.size();++i) root->remNode( models[i] );
-            scene->clearItems();
-            models.clear();
-            scene->favoriteViewOri().set(0.25,0.25,10.0);
+            for(int i=0;i<(int)csgGraph._data._geoset.size();++i) root->remNode( csgGraph._data._geoset[i] );
+            model->clearItems();
+            csgGraph._data._geoset.clear();
+            model->favoriteViewOri().set(0.25,0.25,10.0);
         }
-        if(requestDuplicate)
+        if(ctrl.requestDuplicate)
         {
-            JsonSceneNode::Item item = scene->getItem(selected);
-            scene->addItem(item);
-            GeoNode::Ptr node = JsonSceneNode::buildGeometryNode( item, reflection_scene, env_sha );
-            models.push_back( node );
-            root->addNode(node);
+            // JsonSceneNode::Item item = ctrl.selectedTree->data().primAt(ctrl.selected);
+            // model->addItem(item);
+            // GeoNode::Ptr node = JsonSceneNode::buildGeometryNode( item, reflection_scene, env_sha );
+
+            // ctrl.selectedTree->_data.addPrim(node, item.primitive);
+            // geoset._geoset.push_back( node );
+            // root->addNode(node);
         }
-        if(requestSave && !requestLoad && filename.size() > 0)
+        if(ctrl.requestSave && !ctrl.requestLoad && ctrl.filename.size() > 0)
         {
-            save(filename, scene);
+            save(ctrl.filename, model);
         }
-        if(requestLoad && !requestSave && filename.size() > 0)
+        if(ctrl.requestLoad && !ctrl.requestSave && ctrl.filename.size() > 0)
         {
-            int lastSize = scene->itemCount();
-            load(filename, scene);
-            for(int i=lastSize;i<scene->itemCount();++i)
+            int lastSize = model->itemCount();
+            load(ctrl.filename, model);
+            for(int i=lastSize;i<model->itemCount();++i)
             {
-                GeoNode::Ptr geo = JsonSceneNode::buildGeometryNode(scene->getItem(i), reflection_scene, env_sha);
-                models.push_back(geo);
+                GeoNode::Ptr geo = JsonSceneNode::buildGeometryNode(model->getItem(i), reflection_scene, env_sha);
+                // geoset._geoset.push_back(geo);
+                csgGraph._data.addPrim(geo, model->getItem(i).primitive);
+
                 root->addNode(geo);
             }
         }
-        if(requestAdd)
+        if(ctrl.requestAdd && ctrl.selectedPrimitive != JsonSceneNode::Undefined)
         {
-            JsonSceneNode::Item item; item.primitive = selectedPrimitive;
-            scene->addItem(item);
+            JsonSceneNode::Item item; item.primitive = ctrl.selectedPrimitive;
+            model->addItem(item);
             GeoNode::Ptr node = JsonSceneNode::buildGeometryNode( item, reflection_scene, env_sha );
-            models.push_back( node );
-            root->addNode(node);
+            // geoset._geoset.push_back( node );
+            ctrl.selectedTree->_data.addPrim(node, ctrl.selectedPrimitive);
+
+            if(ctrl.selectedTree->data()._node)
+            {
+              Node::Ptr pnode = ctrl.selectedTree->data()._node;
+              pnode->addNode(node);
+            }
+            else
+              root->addNode(node);
         }
-        if(requestMerge)
-        {
-            // create node
-            GeoNode::Ptr nn = merge2first(models);
-            
-            // reset all
-            for(int i=0;i<(int)models.size();++i) root->remNode( models[i] );
-            scene->clearItems();
-            models.clear();
-            // scene->favoriteViewOri().set(0.25,0.25,10.0);
-            //
-            
-            // add node to scene
-            models.push_back(nn);
-            root->addNode(nn);
-        }
-        
-        requestReset = false;
-        requestSave = false;
-        requestLoad = false;
-        requestDuplicate = false;
-        requestAdd = false;
-        requestMerge = false;
+
+        ctrl.remFromScene(root);
+        ctrl.addToScene(root);
+        ctrl.endFrame();
     }
 
     // Cleanup

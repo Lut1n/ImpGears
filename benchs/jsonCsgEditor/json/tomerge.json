@@ -1,0 +1,11 @@
+{
+	"editor_preference":
+	{
+		"favorite_view":[0.582032,0.694445,8.22222]
+	},
+	"nodes":
+	[
+		{"primitive":"Cube","position":[-0.377,0,0],"rotation":[0,0,0],"scale":[1,1,1],"color":[0.23837,0.254441,0.784314],},
+		{"primitive":"Cube","position":[0.755,0.755,0.654],"rotation":[0,0,0],"scale":[0.859,0.576,0.571],"color":[0.483464,0.661765,0.10705],},
+	]
+}

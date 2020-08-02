@@ -12,7 +12,6 @@
 #include <ImpGears/Plugins.h>
 #include <ImpGears/Graphics.h>
 #include <ImpGears/SceneGraph.h>
-#include <ImpGears/Descriptors/JsonSceneNode.h>
 using namespace imp;
 
 // help stuff

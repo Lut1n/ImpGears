@@ -7,10 +7,11 @@
 #include <ImpGears/SceneGraph/Node.h>
 #include <ImpGears/SceneGraph/Material.h>
 #include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API GeoNode : public Node
+class IG_SCENE_API GeoNode : public Node
 {
 public:
 

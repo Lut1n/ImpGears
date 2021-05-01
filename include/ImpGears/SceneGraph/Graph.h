@@ -4,11 +4,12 @@
 #include <ImpGears/Core/Object.h>
 
 #include <ImpGears/SceneGraph/ClearNode.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
 class Visitor;
-class IMP_API Graph : public Object
+class IG_SCENE_API Graph : public Object
 {
 public:
 

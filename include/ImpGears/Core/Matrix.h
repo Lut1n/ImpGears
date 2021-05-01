@@ -3,6 +3,7 @@
 
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Core/Vec.h>
+#include <ImpGears/Core/Export.h>
 
 IMPGEARS_BEGIN
 

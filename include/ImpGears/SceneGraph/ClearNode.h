@@ -2,10 +2,11 @@
 #define IMP_CLEARNODE_H
 
 #include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API ClearNode : public Node
+class IG_SCENE_API ClearNode : public Node
 {
 public:
 

@@ -1,8 +1,9 @@
 #include <ImpGears/Geometry/Polygon.h>
+#include <ImpGears/Geometry/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API Triangulation : public Object
+class IG_GEO_API Triangulation : public Object
 {
 public:
 

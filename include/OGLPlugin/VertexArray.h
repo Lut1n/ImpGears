@@ -4,13 +4,14 @@
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Geometry/Geometry.h>
 #include <ImpGears/Geometry/InstancedGeometry.h>
+#include <OGLPlugin/Export.h>
 
 #include <OGLPlugin/GlError.h>
 
 
 IMPGEARS_BEGIN
 
-class IMP_API VertexArray : public Object
+class IG_BKND_GL_API VertexArray : public Object
 {
 public:
 

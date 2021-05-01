@@ -5,12 +5,13 @@
 #include <ImpGears/SceneGraph/Camera.h>
 #include <ImpGears/SceneGraph/LightNode.h>
 #include <ImpGears/SceneGraph/State.h>
+#include <ImpGears/Renderer/Export.h>
 
 #include <vector>
 
 IMPGEARS_BEGIN
 
-struct IMP_API RenderState
+struct IG_RENDERER_API RenderState
 {
     State::Ptr state;
     Node::Ptr node;
@@ -25,7 +26,7 @@ struct IMP_API RenderState
     void reset();
 };
 
-struct IMP_API StateBin
+struct IG_RENDERER_API StateBin
 {
     std::vector<RenderState> items;
     int position;
@@ -44,7 +45,7 @@ struct IMP_API StateBin
     RenderState at(int index);
 };
 
-class IMP_API RenderQueue : public Object
+class IG_RENDERER_API RenderQueue : public Object
 {
 public:
 

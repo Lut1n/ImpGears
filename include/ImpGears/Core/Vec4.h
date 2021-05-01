@@ -2,10 +2,11 @@
 #define IMP_VEC4_H
 
 #include <ImpGears/Core/Vec.h>
+#include <ImpGears/Core/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API Vec4 : public Vec<4,float>
+class IG_CORE_API Vec4 : public Vec<4,float>
 {
 	public:
 	

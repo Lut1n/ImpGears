@@ -1,4 +1,5 @@
 #include <ImpGears/SceneGraph/ReflexionModel.h>
+#include <ImpGears/Renderer/Export.h>
 
 IMPGEARS_BEGIN
 

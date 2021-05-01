@@ -2,10 +2,11 @@
 #define IMP_GEOMETRY_BUILDER_H
 
 #include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/Geometry/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API GeometryBuilder : public Object
+class IG_GEO_API GeometryBuilder : public Object
 {
 public:
 

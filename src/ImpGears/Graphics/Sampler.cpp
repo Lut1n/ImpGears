@@ -226,7 +226,7 @@ Vec4 CubeMapSampler::get(const Vec3& uvw_orig)
 
     Vec3 uvw = uvw_orig;
     for(int i=0;i<3;++i)uvw[i]=applyWrapping(uvw[i],_wrapping);
-    Vec3 coords = uvw * _dims;
+    Vec3 coords = uvw * Vec3(_dims);
 
     Vec4 px;
     if( getFiltering() == Filtering_Nearest )

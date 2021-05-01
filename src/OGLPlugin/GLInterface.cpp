@@ -16,7 +16,11 @@
 
 #include <iostream>
 
-IMP_EXTERN IMP_API imp::RenderPlugin::Ptr loadRenderPlugin()
+//--------------------------------------------------------------
+// Append glad source code here
+#include "../thirdparty/glad/src/glad.c"
+
+IMP_EXTERN IG_BKND_GL_API imp::RenderPlugin::Ptr loadRenderPlugin()
 {
     static imp::GlPlugin::Ptr singleton = NULL;
     if(singleton == NULL) singleton = imp::GlPlugin::create();
@@ -43,12 +47,13 @@ void GlPlugin::init()
     {
         std::cout << "GPU Renderer init" << std::endl;
         s_internalState = new Priv();
-        GLenum err = glewInit();
+        /*GLenum err = glewInit();
         if (GLEW_OK != err)
         {
             std::cout << "Error: " << glewGetErrorString(err) << std::endl;
             exit(0);
-        }
+        }*/
+        
 
         int major, minor;
         glGetIntegerv(GL_MAJOR_VERSION, &major);

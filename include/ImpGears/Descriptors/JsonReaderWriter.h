@@ -2,6 +2,7 @@
 #define IMP_JSON_H
 
 #include <ImpGears/Core/Object.h>
+#include <ImpGears/Descriptors/Export.h>
 
 #include <iostream>
 #include <vector>
@@ -13,7 +14,7 @@ IMPGEARS_BEGIN
 typedef std::string JsonKey;
 
 //-------------------------------------------------------
-class IMP_API JsonValue
+class IG_DESC_API JsonValue
 {
 public:
 	JsonValue(){}
@@ -21,7 +22,7 @@ public:
 };
 
 //-------------------------------------------------------
-class IMP_API JsonPair
+class IG_DESC_API JsonPair
 {
 public:
 	JsonPair() : value(NULL) {}
@@ -33,7 +34,7 @@ public:
 };
 
 //-------------------------------------------------------
-class IMP_API JsonString : public JsonValue
+class IG_DESC_API JsonString : public JsonValue
 {
 public:
 	JsonString(std::string s) : value(s) {}
@@ -41,7 +42,7 @@ public:
 };
 
 //-------------------------------------------------------
-class IMP_API JsonNumeric : public JsonValue
+class IG_DESC_API JsonNumeric : public JsonValue
 {
 public:
 	JsonNumeric(double d) : value(d) {}
@@ -49,7 +50,7 @@ public:
 };
 
 //-------------------------------------------------------
-class IMP_API JsonBoolean : public JsonValue
+class IG_DESC_API JsonBoolean : public JsonValue
 {
 public:
 	JsonBoolean(bool b) : value(b) {}
@@ -60,7 +61,7 @@ public:
 class JsonObject;
 
 //-------------------------------------------------------
-class IMP_API JsonArray : public JsonValue
+class IG_DESC_API JsonArray : public JsonValue
 {
 public:
 
@@ -75,7 +76,7 @@ public:
 };
 
 //-------------------------------------------------------
-class IMP_API JsonObject : public JsonValue
+class IG_DESC_API JsonObject : public JsonValue
 {
 public:
 	std::vector<JsonPair*> value;
@@ -89,11 +90,11 @@ public:
 	JsonString* getString(const JsonKey& key);
 };
 
-std::string IMP_API removeSpace(const std::string& str);
+std::string IG_DESC_API removeSpace(const std::string& str);
 
-bool IMP_API check(const std::string& str);
+bool IG_DESC_API check(const std::string& str);
 
-JsonValue IMP_API *parse(const std::string& str);
+JsonValue IG_DESC_API *parse(const std::string& str);
 
 IMPGEARS_END
 

@@ -7,6 +7,7 @@
 #include <ImpGears/Graphics/Uniform.h>
 #include <ImpGears/Renderer/RenderTarget.h>
 #include <ImpGears/Renderer/SceneRenderer.h>
+#include <ImpGears/Plugins/Export.h>
 
 #include <ImpGears/SceneGraph/ClearNode.h>
 #include <ImpGears/SceneGraph/State.h>
@@ -18,7 +19,7 @@
 
 IMPGEARS_BEGIN 
 
-class IMP_API RenderPlugin : public Object
+class IG_PLUGIN_API RenderPlugin : public Object
 {
 public:
 
@@ -82,7 +83,7 @@ public:
 };
 
 
-class IMP_API PluginManager : public Object
+class IG_PLUGIN_API PluginManager : public Object
 {
 public:
 

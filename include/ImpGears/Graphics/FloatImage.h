@@ -5,10 +5,11 @@
 #include <ImpGears/Core/Vec2.h>
 #include <ImpGears/Core/Vec4.h>
 #include <ImpGears/Core/Grid.h>
+#include <ImpGears/Graphics/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API FloatImage : public Object
+class IG_GRAPHICS_API FloatImage : public Object
 {
  
 public:

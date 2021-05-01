@@ -381,13 +381,13 @@ void bmp_save(const std::string& filename, const Image::Ptr img)
         write<int>(os, header.paletteColorNumber);
         write<int>(os, header.importantColorUsedNumber);
 
-        char buffer[rawSize];
+        std::vector<char> buffer(rawSize);
         for(int i=0; i<header.height; ++i)
         {
             unsigned char* dataPtr = &(img->asGrid()->data()[i*rawSize]);
-            memset(buffer, 0, rawSize);
-            memcpy(buffer, dataPtr, rawSize);
-            os.write((char*)buffer, rawSize);
+            memset(buffer.data(), 0, rawSize);
+            memcpy(buffer.data(), dataPtr, rawSize);
+            os.write((char*)buffer.data(), rawSize);
         }
         os.flush();
         os.close();
@@ -454,11 +454,11 @@ Image::Ptr bmp_load(std::string& filename)
     seek(is, fileHeader.dataOffset);
 
     Image::Ptr loaded = Image::create(header.width, header.height, chnls);
-    unsigned char buffer[rawSize];
+    std::vector<unsigned char> buffer(rawSize);
     for(int i=0; i<header.height; ++i)
     {
-        is.read((char*)buffer, rawSize);
-        memcpy(&(loaded->asGrid()->data()[i*rawSize]), buffer, rawSize);
+        is.read((char*)buffer.data(), rawSize);
+        memcpy(&(loaded->asGrid()->data()[i*rawSize]), buffer.data(), rawSize);
     }
     return loaded;
 }

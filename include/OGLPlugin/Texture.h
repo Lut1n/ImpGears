@@ -3,13 +3,14 @@
 
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Graphics/Image.h>
+#include <OGLPlugin/Export.h>
 
 #include <string>
 
 IMPGEARS_BEGIN
 
 /// \brief Defines a texture.
-class IMP_API Texture : public Object
+class IG_BKND_GL_API Texture : public Object
 {
 public:
 

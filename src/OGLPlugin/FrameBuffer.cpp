@@ -97,7 +97,7 @@ void FrameBuffer::build(const std::vector<Texture::Ptr>& textures, bool depthBuf
         std::string string;
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT, string)
-        ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT, string)
+        // ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_UNSUPPORTED, string)
         std::cout << "[impError] FrameBuffer creation failed : " << string << " (" << error << ")" << std::endl;
@@ -178,7 +178,7 @@ void FrameBuffer::build(const CubeMap::Ptr& cubemap, int faceID, bool depthBuffe
     {
         std::string string;
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT, string)
-        ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT, string)
+        // ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT, string)
         ENUM_TO_STR(error, GL_FRAMEBUFFER_UNSUPPORTED, string)
         std::cout << "[impError] FrameBuffer creation failed : " << string << std::endl;

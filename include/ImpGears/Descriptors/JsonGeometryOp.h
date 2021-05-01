@@ -3,16 +3,17 @@
 
 #include <ImpGears/Geometry/Geometry.h>
 #include <ImpGears/Descriptors/JsonReaderWriter.h>
+#include <ImpGears/Descriptors/Export.h>
 
 #include <map>
 
 IMPGEARS_BEGIN
 
 //-------------------------------------------------------
-void IMP_API generateGeometryFromJson(const std::string filename, std::map<std::string,Geometry>& geo_out);
+void IG_DESC_API generateGeometryFromJson(const std::string filename, std::map<std::string,Geometry>& geo_out);
 
 //-------------------------------------------------------
-struct IMP_API GeoOperation : public Object
+struct IG_DESC_API GeoOperation : public Object
 {
 	Meta_Class(GeoOperation);
 	
@@ -35,10 +36,10 @@ struct IMP_API GeoOperation : public Object
 };
 
 //-------------------------------------------------------
-GeoOperation::Ptr IMP_API createFromJsonGeoObj(JsonObject* obj);
+GeoOperation::Ptr IG_DESC_API createFromJsonGeoObj(JsonObject* obj);
 
 //-------------------------------------------------------
-struct IMP_API GeometryGenerator : public GeoOperation
+struct IG_DESC_API GeometryGenerator : public GeoOperation
 {
 	Meta_Class(GeometryGenerator);
 	GeometryGenerator(const std::string& name) : GeoOperation(name), _id("no_name") {}
@@ -61,7 +62,7 @@ struct IMP_API GeometryGenerator : public GeoOperation
 };
 
 //-------------------------------------------------------
-struct IMP_API GeometryTransform : public GeometryGenerator
+struct IG_DESC_API GeometryTransform : public GeometryGenerator
 {
 	Meta_Class(GeometryTransform);
 	GeometryTransform(const std::string& name) : GeometryGenerator(name), _input_id("no_name") {}
@@ -85,7 +86,7 @@ struct IMP_API GeometryTransform : public GeometryGenerator
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonCylinderOperation : public GeometryGenerator
+struct IG_DESC_API JsonCylinderOperation : public GeometryGenerator
 {
 	Meta_Class(JsonCylinderOperation);
 	JsonCylinderOperation();
@@ -98,7 +99,7 @@ struct IMP_API JsonCylinderOperation : public GeometryGenerator
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonConeOperation : public GeometryGenerator
+struct IG_DESC_API JsonConeOperation : public GeometryGenerator
 {
 	Meta_Class(JsonConeOperation);
 	JsonConeOperation();
@@ -112,7 +113,7 @@ struct IMP_API JsonConeOperation : public GeometryGenerator
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonCubeOperation : public GeometryGenerator
+struct IG_DESC_API JsonCubeOperation : public GeometryGenerator
 {
 	Meta_Class(JsonCubeOperation);
 	JsonCubeOperation();
@@ -123,7 +124,7 @@ struct IMP_API JsonCubeOperation : public GeometryGenerator
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonSphereOperation : public GeometryGenerator
+struct IG_DESC_API JsonSphereOperation : public GeometryGenerator
 {
 	Meta_Class(JsonSphereOperation);
 	JsonSphereOperation();
@@ -135,7 +136,7 @@ struct IMP_API JsonSphereOperation : public GeometryGenerator
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonTranslateOperation : public GeometryTransform
+struct IG_DESC_API JsonTranslateOperation : public GeometryTransform
 {
 	Meta_Class(JsonTranslateOperation);
 	JsonTranslateOperation();
@@ -146,7 +147,7 @@ struct IMP_API JsonTranslateOperation : public GeometryTransform
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonAddOperation : public GeometryTransform
+struct IG_DESC_API JsonAddOperation : public GeometryTransform
 {
 	Meta_Class(JsonAddOperation);
 	JsonAddOperation();
@@ -157,7 +158,7 @@ struct IMP_API JsonAddOperation : public GeometryTransform
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonColorOperation : public GeometryTransform
+struct IG_DESC_API JsonColorOperation : public GeometryTransform
 {
 	Meta_Class(JsonColorOperation);
 	JsonColorOperation();
@@ -168,7 +169,7 @@ struct IMP_API JsonColorOperation : public GeometryTransform
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonTexCoordsOperation : public GeometryTransform
+struct IG_DESC_API JsonTexCoordsOperation : public GeometryTransform
 {
 	Meta_Class(JsonTexCoordsOperation);
 	JsonTexCoordsOperation();
@@ -179,7 +180,7 @@ struct IMP_API JsonTexCoordsOperation : public GeometryTransform
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonNormalsOperation : public GeometryTransform
+struct IG_DESC_API JsonNormalsOperation : public GeometryTransform
 {
 	Meta_Class(JsonNormalsOperation);
 	JsonNormalsOperation();

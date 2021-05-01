@@ -2,8 +2,11 @@
 #define GLCOMMON_H_INCLUDED
 
 // #define GLEW_STATIC
-#include <GL/glew.h>
+// #include <GL/glew.h>
 // #include <GL/gl.h>
+#include <OGLPlugin/Export.h>
+
+#include "glad/glad.h"
 
 
 #define GL_CHECKERROR(msg) GLcheckError(msg, __FILE__, __LINE__)
@@ -20,8 +23,8 @@ inline void glErrToString(GLenum error, std::string& string)
     ENUM_TO_STR(error, GL_INVALID_OPERATION, string)
     ENUM_TO_STR(error, GL_INVALID_FRAMEBUFFER_OPERATION, string)
     ENUM_TO_STR(error, GL_OUT_OF_MEMORY, string)
-    ENUM_TO_STR(error, GL_STACK_UNDERFLOW, string)
-    ENUM_TO_STR(error, GL_STACK_OVERFLOW, string)
+    // ENUM_TO_STR(error, GL_STACK_UNDERFLOW, string)
+    // ENUM_TO_STR(error, GL_STACK_OVERFLOW, string)
 }
 
 

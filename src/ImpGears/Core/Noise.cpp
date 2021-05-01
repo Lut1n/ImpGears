@@ -11,7 +11,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API PermutationTable
+class IG_CORE_API PermutationTable
 {
 public:
 	PermutationTable()

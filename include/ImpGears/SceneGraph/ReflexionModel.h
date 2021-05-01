@@ -3,12 +3,13 @@
 
 #include <ImpGears/Graphics/Rasterizer.h>
 #include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
 #define REFLEXION_DEFAULT_NAME "unnamed ReflexionModel"
 
-struct IMP_API ReflexionModel : public Object
+struct IG_SCENE_API ReflexionModel : public Object
 {
     Meta_Class(ReflexionModel);
 
@@ -35,7 +36,7 @@ struct IMP_API ReflexionModel : public Object
         virtual void applyMRT(ImageBuf& targets, const Vec3& pt, const std::vector<Vec3>& outColor) = 0;
     };
 
-    struct IMP_API AbstractFrag : public FragCallback
+    struct IG_SCENE_API AbstractFrag : public FragCallback
     {
 
         Meta_Class(AbstractFrag)

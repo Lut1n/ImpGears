@@ -3,10 +3,11 @@
 
 #include <ImpGears/Geometry/Geometry.h>
 #include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/Geometry/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API InstancedGeometry : public Geometry
+class IG_GEO_API InstancedGeometry : public Geometry
 {
 public:
 

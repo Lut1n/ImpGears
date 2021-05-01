@@ -8,12 +8,13 @@
 #include <ImpGears/SceneGraph/Camera.h>
 #include <ImpGears/SceneGraph/LightNode.h>
 #include <OGLPlugin/RenderToCubeMap.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
 class GlRenderer;
 
-class IMP_API FrameOperation : public Object
+class IG_BKND_GL_API FrameOperation : public Object
 {
 public:
 
@@ -55,7 +56,7 @@ protected:
     static std::string s_glsl_fill;
 };
 
-class IMP_API Pipeline : public Object
+class IG_BKND_GL_API Pipeline : public Object
 {
 public:
 

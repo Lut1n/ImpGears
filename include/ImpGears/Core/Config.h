@@ -4,7 +4,7 @@
 /// IMPGEARS_BUILD_DLL must be defined for dll building
 /// IMPGEARS_STATIC must be defined for static link
 
-/// use IMP_API for public element (struct, class, enum, union, etc...) of the API.
+/// use IG_BKND_GL_API for public element (struct, class, enum, union, etc...) of the API.
 /// use IMP_LOCAL for private element.
 
 
@@ -34,18 +34,18 @@
 #endif
 
 
-// Use the generic helper definitions above to define IMP_API and IMP_LOCAL
-#ifdef IMPGEARS_STATIC
-    #define IMP_API
-    #define IMP_LOCAL
-#else // as DLL
-    #ifdef IMPGEARS_BUILD_DLL
-        #define IMP_API LIB_HELPER_DLL_EXPORT
-    #else
-        #define IMP_API LIB_HELPER_DLL_IMPORT
-    #endif
-    #define IMP_LOCAL LIB_HELPER_DLL_LOCAL
-#endif
+// Use the generic helper definitions above to define IG_BKND_GL_API and IMP_LOCAL
+// #ifdef IMPGEARS_STATIC
+//     #define IG_BKND_GL_API
+//     #define IMP_LOCAL
+// #else // as DLL
+//     #ifdef IMPGEARS_BUILD_DLL
+//         #define IG_BKND_GL_API LIB_HELPER_DLL_EXPORT
+//     #else
+//         #define IG_BKND_GL_API LIB_HELPER_DLL_IMPORT
+//     #endif
+//     #define IMP_LOCAL LIB_HELPER_DLL_LOCAL
+// #endif
 
 
 // IMP_EXTERN_* for C code, plugin, etc...

@@ -2,12 +2,13 @@
 #define IMP_BLEND_ALL_H
 
 #include <OGLPlugin/Pipeline.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
 struct GlRenderer;
 
-class IMP_API BlendAll : public FrameOperation
+class IG_BKND_GL_API BlendAll : public FrameOperation
 {
 public:
     enum Type { Max = 0, Mix, Min, Mult };

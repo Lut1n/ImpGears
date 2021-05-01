@@ -26,12 +26,15 @@ target_link_libraries(OGLPlugin impgears-plugins )
 target_link_libraries(OGLPlugin impgears-descriptors )
 
 #link to ogl extension wrangler
-if(NOT USE_EXTERNAL_GLEW_LIB)
-    find_package( GLEW REQUIRED )
-endif()
+#if(NOT USE_EXTERNAL_GLEW_LIB)
+ #   find_package( GLEW REQUIRED )
+#endif()
 
-include_directories( ${GLEW_INCLUDE_DIRS} )
-target_link_libraries( OGLPlugin ${GLEW_LIBRARIES} )
+#include_directories( ${GLEW_INCLUDE_DIRS} )
+#target_link_libraries( OGLPlugin ${GLEW_LIBRARIES} )
+
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/glad/include")
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/glad/src")
 
 # link to openGL
 find_package( OpenGL REQUIRED )

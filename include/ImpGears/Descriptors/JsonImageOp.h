@@ -3,6 +3,7 @@
 
 #include <ImpGears/Graphics/ImageOperation.h>
 #include <ImpGears/Descriptors/JsonReaderWriter.h>
+#include <ImpGears/Descriptors/Export.h>
 
 // #include <ctime>
 // #include <iostream>
@@ -11,11 +12,11 @@
 IMPGEARS_BEGIN
 
 //-------------------------------------------------------
-void IMP_API generateImageFromJson(const std::string filename);
-void IMP_API generateImageFromJsonData(const std::string json);
+void IG_DESC_API generateImageFromJson(const std::string filename);
+void IG_DESC_API generateImageFromJsonData(const std::string json);
 
 //-------------------------------------------------------
-struct IMP_API ImgOperation : public Object
+struct IG_DESC_API ImgOperation : public Object
 {
 	Meta_Class(ImgOperation);
 	
@@ -40,11 +41,11 @@ struct IMP_API ImgOperation : public Object
 };
 
 //-------------------------------------------------------
-ImgOperation::Ptr IMP_API createFromJsonObj(JsonObject* obj);
+ImgOperation::Ptr IG_DESC_API createFromJsonObj(JsonObject* obj);
 
 //-------------------------------------------------------
 template<typename OpTy>
-struct IMP_API ImageGenerator : public ImgOperation
+struct IG_DESC_API ImageGenerator : public ImgOperation
 {
 	Meta_Class(ImageGenerator);
 	ImageGenerator(const std::string& name) : ImgOperation(name), _id("no_name") {}
@@ -78,7 +79,7 @@ struct IMP_API ImageGenerator : public ImgOperation
 
 //-------------------------------------------------------
 template<typename OpTy>
-struct IMP_API ImageTransform : public ImageGenerator<OpTy>
+struct IG_DESC_API ImageTransform : public ImageGenerator<OpTy>
 {
 	Meta_Class(ImageTransform);
 	ImageTransform(const std::string& name) : ImageGenerator<OpTy>(name), _input_id("no_name") {}
@@ -102,7 +103,7 @@ struct IMP_API ImageTransform : public ImageGenerator<OpTy>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonHashOperation : public ImageGenerator<HashOperation>
+struct IG_DESC_API JsonHashOperation : public ImageGenerator<HashOperation>
 {
 	Meta_Class(JsonHashOperation);
 	JsonHashOperation();
@@ -111,7 +112,7 @@ struct IMP_API JsonHashOperation : public ImageGenerator<HashOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonNoiseOperation : public ImageTransform<NoiseOperation>
+struct IG_DESC_API JsonNoiseOperation : public ImageTransform<NoiseOperation>
 {
 	Meta_Class(JsonNoiseOperation);
 	JsonNoiseOperation();
@@ -120,7 +121,7 @@ struct IMP_API JsonNoiseOperation : public ImageTransform<NoiseOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonVoronoiOperation : public ImageTransform<VoronoiOperation>
+struct IG_DESC_API JsonVoronoiOperation : public ImageTransform<VoronoiOperation>
 {
 	Meta_Class(JsonVoronoiOperation);
 	JsonVoronoiOperation();
@@ -129,7 +130,7 @@ struct IMP_API JsonVoronoiOperation : public ImageTransform<VoronoiOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonFbmOperation : public ImageTransform<FbmOperation>
+struct IG_DESC_API JsonFbmOperation : public ImageTransform<FbmOperation>
 {
 	Meta_Class(JsonFbmOperation);
 	JsonFbmOperation();
@@ -138,7 +139,7 @@ struct IMP_API JsonFbmOperation : public ImageTransform<FbmOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonSignalOperation : public ImageGenerator<SignalOperation>
+struct IG_DESC_API JsonSignalOperation : public ImageGenerator<SignalOperation>
 {
 	Meta_Class(JsonSignalOperation);
 	JsonSignalOperation();
@@ -151,7 +152,7 @@ struct IMP_API JsonSignalOperation : public ImageGenerator<SignalOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonBumpToNormalOperation : public ImageTransform<BumpToNormalOperation>
+struct IG_DESC_API JsonBumpToNormalOperation : public ImageTransform<BumpToNormalOperation>
 {
 	Meta_Class(JsonBumpToNormalOperation);
 	JsonBumpToNormalOperation();
@@ -159,7 +160,7 @@ struct IMP_API JsonBumpToNormalOperation : public ImageTransform<BumpToNormalOpe
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonPerturbateOperation : public ImageTransform<PerturbateOperation>
+struct IG_DESC_API JsonPerturbateOperation : public ImageTransform<PerturbateOperation>
 {
 	Meta_Class(JsonPerturbateOperation);
 	JsonPerturbateOperation();
@@ -170,7 +171,7 @@ struct IMP_API JsonPerturbateOperation : public ImageTransform<PerturbateOperati
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonColorMixOperation : public ImageTransform<ColorMixOperation>
+struct IG_DESC_API JsonColorMixOperation : public ImageTransform<ColorMixOperation>
 {
 	Meta_Class(JsonColorMixOperation);
 	JsonColorMixOperation();
@@ -181,7 +182,7 @@ struct IMP_API JsonColorMixOperation : public ImageTransform<ColorMixOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonSaveOperation : public ImgOperation
+struct IG_DESC_API JsonSaveOperation : public ImgOperation
 {
 	Meta_Class(JsonSaveOperation);
 	JsonSaveOperation();
@@ -193,7 +194,7 @@ struct IMP_API JsonSaveOperation : public ImgOperation
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonFakeSaveOperation : public ImgOperation
+struct IG_DESC_API JsonFakeSaveOperation : public ImgOperation
 {
     Meta_Class(JsonFakeSaveOperation);
     JsonFakeSaveOperation();
@@ -207,7 +208,7 @@ struct IMP_API JsonFakeSaveOperation : public ImgOperation
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonBlurOperation : public ImageTransform<Conv2dOperation>
+struct IG_DESC_API JsonBlurOperation : public ImageTransform<Conv2dOperation>
 {
 	Meta_Class(JsonBlurOperation);
 	JsonBlurOperation();
@@ -215,7 +216,7 @@ struct IMP_API JsonBlurOperation : public ImageTransform<Conv2dOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonDilatationOperation : public ImageTransform<MorphoOperation>
+struct IG_DESC_API JsonDilatationOperation : public ImageTransform<MorphoOperation>
 {
 	Meta_Class(JsonDilatationOperation);
 	JsonDilatationOperation();
@@ -224,7 +225,7 @@ struct IMP_API JsonDilatationOperation : public ImageTransform<MorphoOperation>
 };
 
 //-------------------------------------------------------
-struct IMP_API JsonErosionOperation : public ImageTransform<MorphoOperation>
+struct IG_DESC_API JsonErosionOperation : public ImageTransform<MorphoOperation>
 {
 	Meta_Class(JsonErosionOperation);
 	JsonErosionOperation();

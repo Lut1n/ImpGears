@@ -2,10 +2,11 @@
 #define GLINTERFACE_H_INCLUDED
 
 #include <ImpGears/Plugins/RenderPlugin.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API GlPlugin : public RenderPlugin
+class IG_BKND_GL_API GlPlugin : public RenderPlugin
 {
 public:
 

@@ -3,12 +3,13 @@
 
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Graphics/Image.h>
+#include <OGLPlugin/Export.h>
 
 #include <string>
 
 IMPGEARS_BEGIN
 
-class IMP_API CubeMap : public Object
+class IG_BKND_GL_API CubeMap : public Object
 {
 public:
 

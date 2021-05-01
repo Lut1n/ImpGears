@@ -5,13 +5,14 @@
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Graphics/Image.h>
 #include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/Graphics/Export.h>
 
 #include <map>
 #include <vector>
 
 IMPGEARS_BEGIN
 
-struct IMP_API UniformMap
+struct IG_GRAPHICS_API UniformMap
 {
 	std::map<std::string,Uniform::Ptr> _values;
 	
@@ -44,7 +45,7 @@ struct IMP_API UniformMap
 	ImageSampler::Ptr _defaultSampler;
 };
 
-struct IMP_API Varyings
+struct IG_GRAPHICS_API Varyings
 {
     std::map<std::string, int> _adr;
     std::vector<float> _allocator;
@@ -64,13 +65,13 @@ struct IMP_API Varyings
 using ImageBuf = std::map<int,imp::Image::Ptr>;
 using VaryingsBuf = std::vector<Varyings>;
 
-struct IMP_API FragCallback : public imp::Object
+struct IG_GRAPHICS_API FragCallback : public imp::Object
 {
     Meta_Class(FragCallback)
     virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings) = 0;
 };
 
-class IMP_API Rasterizer : public imp::Object
+class IG_GRAPHICS_API Rasterizer : public imp::Object
 {
 public:
     

@@ -7,10 +7,11 @@
 #include <ImpGears/Graphics/FloatImage.h>
 #include <ImpGears/Graphics/Image.h>
 #include <ImpGears/Graphics/Rasterizer.h>
+#include <ImpGears/Renderer/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API GeometryRenderer : public Object
+class IG_RENDERER_API GeometryRenderer : public Object
 {
 public:
 

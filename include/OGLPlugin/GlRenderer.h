@@ -10,13 +10,14 @@
 #include <OGLPlugin/Pipeline.h>
 #include <OGLPlugin/LightingModel.h>
 #include <OGLPlugin/CopyFrame.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
 class BloomFX;
 class EnvironmentFX;
 
-class IMP_API GlRenderer : public SceneRenderer
+class IG_BKND_GL_API GlRenderer : public SceneRenderer
 {
 public:
 

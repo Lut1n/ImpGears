@@ -3,10 +3,11 @@
 
 #include <ImpGears/Graphics/Rasterizer.h>
 #include <ImpGears/Geometry/Geometry.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-struct IMP_API RenderPass : public Object
+struct IG_SCENE_API RenderPass : public Object
 {
     Meta_Class(RenderPass);
 

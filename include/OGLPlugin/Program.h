@@ -2,6 +2,7 @@
 #define IMP_SHADER_H
 
 #include <ImpGears/Core/Object.h>
+#include <OGLPlugin/Export.h>
 
 #include <map>
 
@@ -10,7 +11,7 @@ IMPGEARS_BEGIN
 #define PROGRAM_DEFAULT_NAME "unnamed_program"
 #define IMP_GLSL_SRC( src ) #src
 
-class IMP_API Program : public Object
+class IG_BKND_GL_API Program : public Object
 {
 public:
 

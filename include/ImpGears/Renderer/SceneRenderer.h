@@ -6,12 +6,13 @@
 #include <ImpGears/Renderer/RenderVisitor.h>
 #include <ImpGears/Renderer/RenderTarget.h>
 #include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Renderer/Export.h>
 
 #include <ImpGears/SceneGraph/Graph.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API SceneRenderer : public Object
+class IG_RENDERER_API SceneRenderer : public Object
 {
 public:
 

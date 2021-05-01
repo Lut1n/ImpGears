@@ -5,13 +5,14 @@
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Core/Matrix4.h>
 #include <ImpGears/SceneGraph/State.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 #include <list>
 
 IMPGEARS_BEGIN
 
 class Visitor;
-class IMP_API Node : public Object
+class IG_SCENE_API Node : public Object
 {
 public:
 

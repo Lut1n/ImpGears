@@ -2,10 +2,11 @@
 #define IMP_QUADNODE_H
 
 #include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API QuadNode : public GeoNode
+class IG_SCENE_API QuadNode : public GeoNode
 {
 public:
 

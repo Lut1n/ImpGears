@@ -6,6 +6,7 @@
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Core/Math.h>
 #include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Geometry/Export.h>
 
 #include <vector>
 
@@ -13,7 +14,7 @@ IMPGEARS_BEGIN
 
 using PathSet = std::vector<Path>;
 
-class IMP_API Polygon : public Object
+class IG_GEO_API Polygon : public Object
 {
 public:
 

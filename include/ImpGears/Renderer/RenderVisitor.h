@@ -7,6 +7,7 @@
 #include <ImpGears/SceneGraph/State.h>
 #include <ImpGears/SceneGraph/ClearNode.h>
 #include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/Renderer/Export.h>
 
 #include <ImpGears/Renderer/RenderQueue.h>
 
@@ -14,7 +15,7 @@
 
 IMPGEARS_BEGIN
 
-struct IMP_API StackItem
+struct IG_RENDERER_API StackItem
 {
     State::Ptr state;
     State::Ptr overrideState;
@@ -28,7 +29,7 @@ struct IMP_API StackItem
     void reset();
 };
 
-struct IMP_API StateStack
+struct IG_RENDERER_API StateStack
 {
     std::vector<StackItem> items;
     int position;
@@ -45,7 +46,7 @@ struct IMP_API StateStack
     Matrix4 topMatrix() const;
 };
 
-class IMP_API RenderVisitor : public Visitor
+class IG_RENDERER_API RenderVisitor : public Visitor
 {
 public:
 

@@ -5,10 +5,11 @@
 
 #include <OGLPlugin/Texture.h>
 #include <OGLPlugin/CubeMap.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API FrameBuffer : public Object
+class IG_BKND_GL_API FrameBuffer : public Object
 {
 public:
 

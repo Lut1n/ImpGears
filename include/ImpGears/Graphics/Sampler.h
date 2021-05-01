@@ -5,12 +5,13 @@
 #include <ImpGears/Core/Vec2.h>
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Graphics/Export.h>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
 template<typename TyIn, typename TyOut>
-class IMP_API Sampler : public Object
+class IG_GRAPHICS_API Sampler : public Object
 {
 public:
 
@@ -47,7 +48,7 @@ public:
 };
 
 //--------------------------------------------------------------
-class IMP_API ImageSampler : public Sampler< Vec2, Vec4 >
+class IG_GRAPHICS_API ImageSampler : public Sampler< Vec2, Vec4 >
 {
 public:
 
@@ -88,7 +89,7 @@ protected:
 
 
 //--------------------------------------------------------------
-class IMP_API CubeMapSampler : public Sampler< Vec3, Vec4 >
+class IG_GRAPHICS_API CubeMapSampler : public Sampler< Vec3, Vec4 >
 {
 public:
 

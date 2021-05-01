@@ -2,10 +2,11 @@
 #define IMP_CPU_BLINN_PHONG_H
 
 #include <ImpGears/Graphics/Rasterizer.h>
+#include <ImpGears/Renderer/Export.h>
 
 IMPGEARS_BEGIN
 
-struct IMP_API CpuBlinnPhong : public FragCallback
+struct IG_RENDERER_API CpuBlinnPhong : public FragCallback
 {
 
     Meta_Class(CpuBlinnPhong)

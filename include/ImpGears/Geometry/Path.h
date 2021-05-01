@@ -4,12 +4,13 @@
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Core/Vec4.h>
 #include <ImpGears/Core/Math.h>
+#include <ImpGears/Geometry/Export.h>
 #include <sstream>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-class IMP_API Edge : public Object
+class IG_GEO_API Edge : public Object
 {
 public:
 
@@ -28,7 +29,7 @@ public:
 };
 
 //--------------------------------------------------------------
-class IMP_API Path : public Object
+class IG_GEO_API Path : public Object
 {
 public:
 
@@ -96,7 +97,7 @@ public:
 };
 
 //--------------------------------------------------------------
-class IMP_API Intersection : public Object
+class IG_GEO_API Intersection : public Object
 {
 public:
 

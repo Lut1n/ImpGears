@@ -4,10 +4,11 @@
 #include <ImpGears/Graphics/Sampler.h>
 #include <ImpGears/SceneGraph/Node.h>
 #include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API RenderToSamplerNode : public Node
+class IG_SCENE_API RenderToSamplerNode : public Node
 {
 public:
 

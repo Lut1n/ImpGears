@@ -4,10 +4,11 @@
 #include <ImpGears/Core/Matrix.h>
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Core/Vec4.h>
+#include <ImpGears/Core/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API Matrix4 : public Matrix<4,4,float>
+class IG_CORE_API Matrix4 : public Matrix<4,4,float>
 {
 public:
 

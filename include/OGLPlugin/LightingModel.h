@@ -2,12 +2,13 @@
 #define IMP_LIGHTING_MODEL_H
 
 #include <OGLPlugin/Pipeline.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
 class GlRenderer;
 
-class IMP_API LightingModel : public FrameOperation
+class IG_BKND_GL_API LightingModel : public FrameOperation
 {
 public:
     Meta_Class(LightingModel)

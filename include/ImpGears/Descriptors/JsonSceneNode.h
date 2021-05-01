@@ -2,13 +2,14 @@
 #define IMP_JSON_SCENE_NODE_H
 
 #include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/Descriptors/Export.h>
 // #include <ImpGears/Core/Vec3.h>
 // #include <ImpGears/Core/Matrix4.h>
 // #include <ImpGears/SceneGraph/State.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API JsonSceneNode : public Object
+class IG_DESC_API JsonSceneNode : public Object
 {
 public:
 

@@ -3,10 +3,11 @@
 
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/Renderer/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API RenderTarget : public Object
+class IG_RENDERER_API RenderTarget : public Object
 {
 public:
 

@@ -7,13 +7,14 @@
 #include <ImpGears/Renderer/SceneRenderer.h>
 #include <ImpGears/SceneGraph/Graph.h>
 #include <ImpGears/SceneGraph/Camera.h>
+#include <OGLPlugin/Export.h>
 
 
 IMPGEARS_BEGIN
 
 class GlRenderer;
 
-class IMP_API RenderToCubeMap : public Object
+class IG_BKND_GL_API RenderToCubeMap : public Object
 {
 public:
     Meta_Class(RenderToCubeMap)

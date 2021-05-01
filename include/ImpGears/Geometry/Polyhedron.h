@@ -4,11 +4,12 @@
 #include <ImpGears/Geometry/Geometry.h>
 #include <ImpGears/Geometry/Triangulator.h>
 #include <ImpGears/Geometry/Path.h>
+#include <ImpGears/Geometry/Export.h>
 
 
 IMPGEARS_BEGIN
 
-class IMP_API Polyhedron : public Object
+class IG_GEO_API Polyhedron : public Object
 {
 public:
 

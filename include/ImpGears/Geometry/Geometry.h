@@ -4,6 +4,7 @@
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Core/Math.h>
+#include <ImpGears/Geometry/Export.h>
 
 #include <ImpGears/Geometry/Path.h>
 
@@ -11,7 +12,7 @@
 
 IMPGEARS_BEGIN
 
-class IMP_API SignalFunctor
+class IG_GEO_API SignalFunctor
 {
 public:
 
@@ -22,7 +23,7 @@ class VertexOperation : public Object
 {
 public:
 
-    struct IMP_API Attributes
+    struct IG_GEO_API Attributes
     {
         Vec3 color;
         Vec3 texUV;
@@ -36,7 +37,7 @@ public:
     virtual void apply(const Vec3& vertex, Attributes& att) = 0;
 };
 
-class IMP_API Geometry : public Object
+class IG_GEO_API Geometry : public Object
 {
 public:
 

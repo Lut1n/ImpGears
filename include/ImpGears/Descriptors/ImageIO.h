@@ -3,10 +3,11 @@
 
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Descriptors/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API ImageIO : public Object
+class IG_DESC_API ImageIO : public Object
 {
 public:
     

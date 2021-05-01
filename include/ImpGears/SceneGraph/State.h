@@ -8,12 +8,13 @@
 #include <ImpGears/Graphics/Uniform.h>
 #include <ImpGears/SceneGraph/ReflexionModel.h>
 #include <ImpGears/SceneGraph/RenderPass.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 #include <map>
 
 IMPGEARS_BEGIN
 
-class IMP_API State : public Object
+class IG_SCENE_API State : public Object
 {
 public:
 

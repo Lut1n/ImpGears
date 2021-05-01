@@ -2,6 +2,7 @@
 #define IMP_VEC_H
 
 #include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Export.h>
 
 #include <vector>
 // #include <ImpGears/Core/Matrix4.h>

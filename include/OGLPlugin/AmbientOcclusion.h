@@ -2,12 +2,13 @@
 #define IMP_AMBIENT_OCCLUSION_H
 
 #include <OGLPlugin/Pipeline.h>
+#include <OGLPlugin/Export.h>
 
 IMPGEARS_BEGIN
 
 struct GlRenderer;
 
-class IMP_API AmbientOcclusion : public FrameOperation
+class IG_BKND_GL_API AmbientOcclusion : public FrameOperation
 {
 public:
     Meta_Class(AmbientOcclusion)

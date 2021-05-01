@@ -3,12 +3,13 @@
 
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 #include <vector>
 
 IMPGEARS_BEGIN
 
-class IMP_API Visitor : public Object
+class IG_SCENE_API Visitor : public Object
 {
 public:
 

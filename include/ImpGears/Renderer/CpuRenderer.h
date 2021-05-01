@@ -7,10 +7,11 @@
 
 #include <ImpGears/SceneGraph/ClearNode.h>
 #include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/Renderer/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API CpuRenderer : public SceneRenderer
+class IG_RENDERER_API CpuRenderer : public SceneRenderer
 {
 public:
 

@@ -2,12 +2,13 @@
 #define IMP_VEC3_H
 
 #include <ImpGears/Core/Vec.h>
+#include <ImpGears/Core/Export.h>
 
 #include <cmath>
 
 IMPGEARS_BEGIN
 
-class IMP_API Vec3 : public Vec<3,float>
+class IG_CORE_API Vec3 : public Vec<3,float>
 {
 	public:
 	

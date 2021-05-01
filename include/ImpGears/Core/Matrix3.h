@@ -3,10 +3,11 @@
 
 #include <ImpGears/Core/Matrix.h>
 #include <ImpGears/Core/Vec3.h>
+#include <ImpGears/Core/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API Matrix3 : public Matrix<3,3,float>
+class IG_CORE_API Matrix3 : public Matrix<3,3,float>
 {
 public:
 

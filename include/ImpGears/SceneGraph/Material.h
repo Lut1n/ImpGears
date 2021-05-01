@@ -3,10 +3,11 @@
 
 #include <ImpGears/SceneGraph/Node.h>
 #include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API Material : public Object
+class IG_SCENE_API Material : public Object
 {
 public:
 

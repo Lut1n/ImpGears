@@ -9,12 +9,13 @@
 #include <ImpGears/Core/Vec4.h>
 #include <ImpGears/Core/Matrix3.h>
 #include <ImpGears/Core/Matrix4.h>
+#include <ImpGears/Graphics/Export.h>
 
 #include <ImpGears/Graphics/Sampler.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API Uniform : public Object
+class IG_GRAPHICS_API Uniform : public Object
 {
 public:
 

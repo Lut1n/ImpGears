@@ -2,10 +2,11 @@
 #define IMP_LIGHT_H
 
 #include <ImpGears/SceneGraph/Node.h>
+#include <ImpGears/SceneGraph/Export.h>
 
 IMPGEARS_BEGIN
 
-class IMP_API LightNode : public Node
+class IG_SCENE_API LightNode : public Node
 {
 public:
 

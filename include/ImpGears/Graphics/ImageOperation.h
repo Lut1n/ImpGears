@@ -4,11 +4,12 @@
 #include <ImpGears/Core/Object.h>
 #include <ImpGears/Core/Matrix3.h>
 #include <ImpGears/Graphics/Sampler.h>
+#include <ImpGears/Graphics/Export.h>
 
 IMPGEARS_BEGIN
 
 //--------------------------------------------------------------
-struct IMP_API ImageOperation : public Object
+struct IG_GRAPHICS_API ImageOperation : public Object
 {	
     Meta_Class(ImageOperation)
 
@@ -18,7 +19,7 @@ struct IMP_API ImageOperation : public Object
 };
 
 //--------------------------------------------------------------
-struct IMP_API HashOperation : public ImageOperation
+struct IG_GRAPHICS_API HashOperation : public ImageOperation
 {
     float _seed;
 
@@ -30,7 +31,7 @@ struct IMP_API HashOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API NoiseOperation : public ImageOperation
+struct IG_GRAPHICS_API NoiseOperation : public ImageOperation
 {
     Meta_Class(NoiseOperation)
 
@@ -46,7 +47,7 @@ struct IMP_API NoiseOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API VoronoiOperation : public ImageOperation
+struct IG_GRAPHICS_API VoronoiOperation : public ImageOperation
 {
     Meta_Class(VoronoiOperation)
 
@@ -62,7 +63,7 @@ struct IMP_API VoronoiOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API FbmOperation : public ImageOperation
+struct IG_GRAPHICS_API FbmOperation : public ImageOperation
 {
     Image::Ptr _hash;
     float _freq;
@@ -86,7 +87,7 @@ struct IMP_API FbmOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API SignalOperation : public ImageOperation
+struct IG_GRAPHICS_API SignalOperation : public ImageOperation
 {
     Vec3 _vec;
     float _freq;
@@ -113,7 +114,7 @@ struct IMP_API SignalOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API BumpToNormalOperation : public ImageOperation
+struct IG_GRAPHICS_API BumpToNormalOperation : public ImageOperation
 {
     Image::Ptr _target;
 
@@ -123,7 +124,7 @@ struct IMP_API BumpToNormalOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API PerturbateOperation : public ImageOperation
+struct IG_GRAPHICS_API PerturbateOperation : public ImageOperation
 {
     Image::Ptr _target;
     Image::Ptr _uvmap;
@@ -137,7 +138,7 @@ struct IMP_API PerturbateOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API ColorMixOperation : public ImageOperation
+struct IG_GRAPHICS_API ColorMixOperation : public ImageOperation
 {
     Image::Ptr _target;
     Vec4 _color1;
@@ -151,7 +152,7 @@ struct IMP_API ColorMixOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API MorphoOperation : public ImageOperation
+struct IG_GRAPHICS_API MorphoOperation : public ImageOperation
 {
     Image::Ptr _target;
     Matrix3 _mat;
@@ -167,7 +168,7 @@ struct IMP_API MorphoOperation : public ImageOperation
 };
 
 //--------------------------------------------------------------
-struct IMP_API Conv2dOperation : public ImageOperation
+struct IG_GRAPHICS_API Conv2dOperation : public ImageOperation
 {
     Image::Ptr _target;
     Matrix3 _mat;

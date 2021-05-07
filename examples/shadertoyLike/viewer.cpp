@@ -1,18 +1,17 @@
-#include <Graphics/Uniform.h>
-#include <Renderer/SceneRenderer.h>
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/Material.h>
+#include <ImpGears/Graphics/Uniform.h>
+#include <ImpGears/Renderer/SceneRenderer.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/Material.h>
+#include <ImpGears/SceneGraph/QuadNode.h>
+#include <ImpGears/Descriptors/ImageIO.h>
+#include <ImpGears/Descriptors/FileInfo.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
 
-#include <SFML/Graphics.hpp>
-#include <SceneGraph/QuadNode.h>
-
-#include <Descriptors/ImageIO.h>
-
-#include <Descriptors/FileInfo.h>
-
-#include <Plugins/RenderPlugin.h>
 #include <fstream>
+
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 
 using namespace imp;
 
@@ -69,12 +68,13 @@ std::vector<std::string> getarg(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    char default_shader[] = "defaultshader.frag";
+    char default_shader[] = "./defaultshader.frag";
     std::vector<std::string> arg = getarg(argc,argv);
     if(arg.size() < 2) arg.push_back(default_shader);
 
-    sf::RenderWindow window(sf::VideoMode(512, 512), arg[1], sf::Style::Default, sf::ContextSettings(24));
-    window.setFramerateLimit(60);
+    AppContext app;
+    app.offscreen = false;
+    SceneRenderer::Ptr renderer = app.loadRenderer("Example Cube");
 
     long accessLast, modifLast, statusLast;
     getTimeInfo(default_shader, accessLast, modifLast, statusLast);
@@ -92,11 +92,12 @@ int main(int argc, char* argv[])
 
 
     std::cout << "defaultshader.vert + " << arg[1] << std::endl;
-    std::string c_vert = loadText("defaultshader.vert");
+    std::string c_vert = loadText("./defaultshader.vert");
     std::string c_frag = loadText(arg[1]);
     ReflexionModel::Ptr shader = ReflexionModel::create(ReflexionModel::Lighting_Phong, ReflexionModel::Texturing_Customized);
     // shader->_vertCode = c_vert;
     shader->_fragCode_texturing = c_frag;
+
 
     QuadNode::Ptr screen = QuadNode::create();
     screen->setReflexion(shader);
@@ -113,25 +114,15 @@ int main(int argc, char* argv[])
 
     Node::Ptr root = screen;
     graph->setRoot(root);
-    sf::Clock timer;
-
-    std::string pluginName = "OGLPlugin";
-    pluginName = "lib" + pluginName + "." + LIB_EXT;
-    RenderPlugin::Ptr plugin = PluginManager::open( pluginName );
-    SceneRenderer::Ptr renderer = plugin->getRenderer();
 
     bool breakLoop = false;
-    while (window.isOpen())
+    while (app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event)) if (event.type == sf::Event::Closed) {breakLoop=true; break;} //window.close();
-        if(breakLoop) break;
-        
         // reload if changed
         long access, modif, status;
         getTimeInfo(default_shader, access, modif, status);
         if(modif != modifLast)
-        {   
+        {
             std::cout << "[reload shaders] defaultshader.vert + " << arg[1] << std::endl;
             modifLast = modif;
             c_frag = loadText(arg[1]);
@@ -141,18 +132,14 @@ int main(int argc, char* argv[])
             screen->getState()->setReflexion(shader);
         }
         
-        float sec = timer.getElapsedTime().asMilliseconds() / 1000.0;
+        float sec = app.elapsedTime();
         state->setUniform("u_timer", sec);
         light->setPosition( Vec3(std::sin(sec)*2.0,0.0,1.0) );
         
         renderer->render( graph );
 
-        window.display();
+        app.end();
     }
-
-
-    // Image::Ptr result = target->get(0);
-    // ImageIO::save(result, "test.tga");
 
     return EXIT_SUCCESS;
 }

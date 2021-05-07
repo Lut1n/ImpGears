@@ -1,4 +1,6 @@
-#include <SFML/Graphics.hpp>
+
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 
 #include <ImpGears/Graphics/Rasterizer.h>
 #include <ImpGears/Graphics/Image.h>
@@ -120,13 +122,20 @@ int main(int argc, char* argv[])
 {
 	int width=1000,height=600;
 	
-	sf::RenderWindow window(sf::VideoMode(width, height), "CPO bench", sf::Style::Default, sf::ContextSettings(24));
+	imp::AppContext app;
+	app.setArgs(1, argv);
+	app.internalWidth = 1000;
+	app.internalHeight = 600;
+	auto renderer = app.loadRenderer("Polygons", width, height);
+
+
+	/*sf::RenderWindow window(sf::VideoMode(width, height), "CPO bench", sf::Style::Default, sf::ContextSettings(24));
 	sf::Texture texture;
 	texture.create(width, height);
 	sf::Sprite sprite;
-	sprite.setTexture(texture);
+	sprite.setTexture(texture);*/
 	
-	imp::Image::Ptr image = imp::Image::create(width,height,4);
+	imp::Image::Ptr image = app.target; // imp::Image::create(width, height, 4);
     imp::Vec4 bgcol(50,128,200,255);
 	image->fill(bgcol);
 	rast.setTarget(image);
@@ -176,11 +185,11 @@ int main(int argc, char* argv[])
 	display(polys[16], 3,3,0,1);
 	display(polys[17], 4,3,0,1);
 	
-	texture.update(image->asGrid()->data());
+	// texture.update(image->asGrid()->data());
 	
-	while (window.isOpen())
+	while (app.begin()) //window.isOpen())
 	{
-		sf::Event event;
+		/*sf::Event event;
 		while (window.pollEvent(event))
 		{
 			if(event.type==sf::Event::Closed)window.close();
@@ -189,7 +198,9 @@ int main(int argc, char* argv[])
 		
 		window.clear();
 		window.draw(sprite);
-		window.display();
+		window.display();*/
+
+		app.end();
 	}
    
     return 0;

@@ -1,28 +1,18 @@
-#include <ImpGears/SceneGraph/Graph.h>
-#include <ImpGears/SceneGraph/Camera.h>
-#include <ImpGears/SceneGraph/GeoNode.h>
-#include <ImpGears/SceneGraph/QuadNode.h>
-#include <ImpGears/SceneGraph/RenderPass.h>
-#include <ImpGears/Descriptors/ImageIO.h>
-#include <ImpGears/Descriptors/FileInfo.h>
-#include <ImpGears/Descriptors/JsonImageOp.h>
+#include <ImpGears/SceneGraph.h>
+#include <ImpGears/Descriptors.h>
 
 #include <ImpGears/Renderer/CpuRenderer.h>
-
 #include <ImpGears/Plugins/RenderPlugin.h>
-
 #include <ImpGears/Graphics/ImageOperation.h>
-
-#include <SFML/Graphics.hpp>
 
 using namespace imp;
 
 // common stuff
-#include "../common/inc_experimental.h"
-#define IMPLEMENT_RENDER_MODE_MANAGER
-#include "../common/RenderModeManager.h"
+#include "../utils/inc_experimental.h"
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 #define IMPLEMENT_BASIC_GEOMETRIES
-#include "../common/basic_geometries.h"
+#include "../utils/basic_geometries.h"
 
 #include "render_skybox.h"
 
@@ -137,8 +127,9 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
 
 int main(int argc, char* argv[])
 {
-    RenderModeManager renderModeMngr;
-    renderModeMngr.setArgs(argc, argv);
+    AppContext app;
+    app.setArgs(argc, argv);
+    app.offscreen = false;
 
     ImageSampler::Ptr sampler, color, emi, normals;
     loadSamplers(sampler,color);
@@ -162,11 +153,6 @@ int main(int argc, char* argv[])
     ImageSampler::Ptr reflectivityMap = ImageSampler::create(16,16,3,Vec4(0.0));
     reflectivityMap->_mipmap = true;
     for(float u=0.4;u<0.6;u+=0.125) for(float v=0.4;v<0.6;v+=0.125) reflectivityMap->set(u,v,Vec4(1.0,1.0,1.0,1.0));
-
-    sf::Clock clock;
-
-    sf::RenderWindow window(sf::VideoMode(512, 512), "Warehouse scene", sf::Style::Default, sf::ContextSettings(24));
-    window.setFramerateLimit(60);
 
     Graph::Ptr graph = Graph::create();
     Node::Ptr root = Node::create();
@@ -318,14 +304,14 @@ int main(int argc, char* argv[])
     cubeNode->getState()->setRenderPass(env_sha);
     terrainNode->getState()->setRenderPass(env_sha);
 
-    SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
+    SceneRenderer::Ptr renderer = app.loadRenderer("Free camera");
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     renderer->enableFeature(SceneRenderer::Feature_Environment, false);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
     renderer->enableFeature(SceneRenderer::Feature_SSAO, false);
     renderer->enableFeature(SceneRenderer::Feature_Phong, true);
     // renderer->setDirect(false);
-    graph->getInitState()->setViewport( renderModeMngr.viewport );
+    graph->getInitState()->setViewport( app.viewport );
     graph->getInitState()->setLineWidth( 5.0 );
     // graph->setClearColor(Vec4(0.0,1.0,0.0,1.0));
 
@@ -350,25 +336,15 @@ int main(int argc, char* argv[])
     Vec3 up(0.0,1.0,0.0);
     Vec3 side = up.cross(forward);
     
-    double lastt = clock.getElapsedTime().asSeconds();
+    double lastt = app.elapsedTime();
     
-    sf::Mouse::setPosition(sf::Vector2i(256, 256), window);
+    glfwSetCursorPos(app.window, 256.0, 256.0);
 
-    while (window.isOpen())
+    auto isPressed = [app] (int key) {return glfwGetKey(app.window, key) == GLFW_PRESS; };
+
+    while (app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed /* || event.type == sf::Event::KeyPressed*/)
-                window.close();
-            // if(event.type == sf::Event::KeyPressed)
-            // {
-            //     
-            // }
-        }
-        if(!window.isOpen()) break;
-
-        double t = clock.getElapsedTime().asSeconds();
+        double t = app.elapsedTime();
         double difft = t - lastt;
         
         double speed = 50.0;
@@ -377,14 +353,14 @@ int main(int argc, char* argv[])
         
         
                 
-        sf::Vector2i center(256, 256);
-        // get global mouse position
-        sf::Vector2i position = sf::Mouse::getPosition(window);
-        // set mouse position relative to a window
-        sf::Mouse::setPosition(center, window);
+        Vec2 center(256.0f, 256.0f);
+        double px, py;
+        glfwGetCursorPos(app.window, &px, &py);
+        Vec2 position((float) px, (float) py);
+        glfwSetCursorPos(app.window, center.x() , center.y());
         
-        sf::Vector2i diff = position - center;
-        Vec2 move( float(diff.x)/256.0,  float(diff.y)/256.0);
+        Vec2 diff = position - center;
+        Vec2 move = diff / 255.0f;
 
             float sensibility = 0.3;
         rotH += -move[0] * sensibility;
@@ -397,44 +373,44 @@ int main(int argc, char* argv[])
         
         
         double speed_bonus = 0.0;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+        if (isPressed(GLFW_KEY_LEFT_SHIFT))
         {
             // move left...
             speed_bonus = 20.0;
         }
         
         
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        if (isPressed(GLFW_KEY_LEFT) || isPressed(GLFW_KEY_Q))
         {
             // move left...
             campos += side * (speed+speed_bonus) * difft;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        else if (isPressed(GLFW_KEY_RIGHT) || isPressed(GLFW_KEY_D))
         {
             // move right...
             campos -= side * (speed+speed_bonus) * difft;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+        if (isPressed(GLFW_KEY_UP) || isPressed(GLFW_KEY_Z))
         {
             // move right...
             campos += forward * (speed+speed_bonus) * difft;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        else if (isPressed(GLFW_KEY_DOWN) || isPressed(GLFW_KEY_S))
         {
             // move right...
             campos -= forward * (speed+speed_bonus) * difft;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        else if (isPressed(GLFW_KEY_SPACE))
         {
             // move right...
             campos += up * (speed+speed_bonus) * difft;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+        else if (isPressed(GLFW_KEY_LEFT_CONTROL))
         {
             // move right...
             campos -= up * (speed+speed_bonus) * difft;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+        if (isPressed(GLFW_KEY_ESCAPE))
         {
             return 0;
         }
@@ -444,18 +420,12 @@ int main(int argc, char* argv[])
         light->setPosition(lp);
         pointNode->setPosition(lp);
 
-        // Vec3 oft(0.0,0.0,0.0);
-        // Vec3 lp2(cos(-t * 0.2),1.0,sin(-t * 0.2));
         camera->setPosition(campos);
         camera->setTarget(campos+forward);
 
-
-        window.clear();
         renderer->render( graph );
 
-        renderModeMngr.draw(window);
-        window.display();
-        // break;
+        app.end();
         
         lastt = t;
     }

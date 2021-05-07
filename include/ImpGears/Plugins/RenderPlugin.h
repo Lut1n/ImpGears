@@ -29,7 +29,7 @@ public:
 
     struct Data : public Object { Meta_Class(Data) Type ty; };
 
-    virtual void init() = 0;
+    virtual void init(void* glLoaderFunc) = 0;
 
     virtual void apply(ClearNode::Ptr& clear, int bufferIndex = -1) = 0;
 

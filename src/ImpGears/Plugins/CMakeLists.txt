@@ -13,17 +13,20 @@ file(GLOB IG_PLUGINS_H
 add_library(impgears-plugins SHARED ${SRCS} ${IG_PLUGINS_H})
 
 
-# link dlfcn
-if (USE_DLFCN_WIN32)
-  find_package(dlfcn-win32 REQUIRED)
-  set(CMAKE_DL_LIBS dlfcn-win32::dl)
+if (WIN32)
 else()
-  set(CMAKE_DL_LIBS dl)
-endif ()
-target_link_libraries(impgears-plugins ${CMAKE_DL_LIBS})
+    # link dlfcn
+    if (USE_DLFCN_WIN32)
+      find_package(dlfcn-win32 REQUIRED)
+      set(CMAKE_DL_LIBS dlfcn-win32::dl)
+    else()
+      set(CMAKE_DL_LIBS dl)
+    endif ()
+    target_link_libraries(impgears-plugins ${CMAKE_DL_LIBS})
+    message(STATUS ${CMAKE_DL_LIBS})
+endif()
 
-message(STATUS ${CMAKE_DL_LIBS})
-
+target_link_libraries( impgears-plugins impgears-core )
 
 
 install(TARGETS impgears-plugins DESTINATION lib)

@@ -91,7 +91,7 @@ void RTSceneRenderer::render(const Graph::Ptr& scene)
 {	
 	Visitor::Ptr visitor = _visitor;
 	_visitor->reset();
-	scene->accept(visitor);
+	scene->accept(*visitor.get());
 	
 	RenderQueue::Ptr queue = _visitor->getQueue();
 	Matrix4 view;
@@ -107,9 +107,11 @@ void RTSceneRenderer::render(const Graph::Ptr& scene)
 	Vec3 color(1.0);
 	Vec3 latt(0.0);
 	
-	for(int i=0;i<(int)queue->_nodes.size();++i)
+	for(int i=0;i<(int)queue->_renderBin.items.size();++i)
 	{
-		LightNode* light = closest(queue->_nodes[i], queue->_lights);
+		auto& state = queue->_renderBin.items[i];
+		auto node = state.node;
+		LightNode* light = closest(node.get(), queue->_lights);
 		if(light)
 		{
 			lightPos = light->_worldPosition;
@@ -117,8 +119,8 @@ void RTSceneRenderer::render(const Graph::Ptr& scene)
 			latt[0] = light->_power;
 		}
 		
-		GeoNode* geode = dynamic_cast<GeoNode*>( queue->_nodes[i] );
-		ClearNode* clear = dynamic_cast<ClearNode*>( queue->_nodes[i] );
+		GeoNode* geode = dynamic_cast<GeoNode*>( node.get() );
+		ClearNode* clear = dynamic_cast<ClearNode*>( node.get() );
 		if(geode)
 		{
 			Material::Ptr mat = geode->_material;
@@ -126,18 +128,18 @@ void RTSceneRenderer::render(const Graph::Ptr& scene)
 			color = mat->_color;
 			
 			if(mat->_baseColor)
-				queue->_states[i]->setUniform("u_sampler_color", mat->_baseColor, 0);
+				state.state->setUniform("u_sampler_color", mat->_baseColor, 0);
 			if(mat->_normalmap)
-				queue->_states[i]->setUniform("u_sampler_normal", mat->_normalmap, 1);
+				state.state->setUniform("u_sampler_normal", mat->_normalmap, 1);
 			if(mat->_emissive)
-				queue->_states[i]->setUniform("u_sampler_emissive", mat->_emissive, 2);
+				state.state->setUniform("u_sampler_emissive", mat->_emissive, 2);
 		
-			queue->_states[i]->setUniform("u_view", view);
-			queue->_states[i]->setUniform("u_lightPos", lightPos);
-			queue->_states[i]->setUniform("u_lightCol", lightCol);
-			queue->_states[i]->setUniform("u_lightAtt", latt);
-			queue->_states[i]->setUniform("u_color", color);
-			applyState(queue->_states[i]);
+			state.state->setUniform("u_view", view);
+			state.state->setUniform("u_lightPos", lightPos);
+			state.state->setUniform("u_lightCol", lightCol);
+			state.state->setUniform("u_lightAtt", latt);
+			state.state->setUniform("u_color", color);
+			applyState(state.state);
 			drawGeometry(geode);
 		}
 		else if(clear)
@@ -151,14 +153,17 @@ void RTSceneRenderer::render(const Graph::Ptr& scene)
 //---------------------------------------------------------------
 void RTSceneRenderer::applyState(const State::Ptr& state)
 {
-	const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();	
-	_proj = uniforms.at("u_proj")->getMat4();
+	const std::map<std::string,Uniform::Ptr>& uniforms = state->getUniforms();
+	auto it = uniforms.find("u_proj");
+	if (it != uniforms.end())
+		_proj = it->second->getMat4();
 }
 
 //---------------------------------------------------------------
 void RTSceneRenderer::applyClear(ClearNode* clearNode)
 {
-    for(auto& t : _targets) t->fill(Vec3(0.0));
+	for(int i=0; i<_targets->count(); ++i)
+		_targets->get(i)->getSource()->fill(Vec3(0.0));
 }
 
 //---------------------------------------------------------------
@@ -235,10 +240,10 @@ void rayl(const Vec2& uv, const Vec3& r, GeoNode* geoNode, Image::Ptr& _target, 
 //---------------------------------------------------------------
 void RTSceneRenderer::drawGeometry(GeoNode* geoNode)
 {
-	float near = 0.1;
+	float impNear = 0.1;
 	float fov = 60.0;
 	float rad_fov = fov * 3.141592 / 180.0;
-	float n_tan = std::tan( rad_fov*0.5 ) * near;
+	float n_tan = std::tan( rad_fov*0.5 ) * impNear;
 	
 	Vec3 camTarget(0.0,0.0,0.0);
 	Vec3 camOri = camTarget - _camPos; camOri.normalize();
@@ -253,9 +258,9 @@ void RTSceneRenderer::drawGeometry(GeoNode* geoNode)
 	{
 		Vec2 uv = Vec2(i,j) / Vec2(RES);
 		Vec2 cuv = uv * 2.0 - 1.0;
-		Vec3 ray = Vec3(cuv.x()*n_tan,cuv.y()*n_tan,-near);
+		Vec3 ray = Vec3(cuv.x()*n_tan,cuv.y()*n_tan,-impNear);
 		ray.normalize();
-                rayl(uv,ray,geoNode,_targets[0],_view);
+                rayl(uv,ray,geoNode,_targets->get(0)->getSource(),_view);
 	}
 }
 

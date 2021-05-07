@@ -2,13 +2,13 @@
 	"properties":
 	{
 		"width":128,
-		"height":128,
+		"height":128
 	},
 	"operations":
 	[
 		{"op":"hash", "id":"hash_01", "seed":76482.264},
 		{"op":"fbm", "noise_type":"voronoi", "input_id":"hash_01", "freq":4.0, "octaves":2.0, "persist":0.7, "id":"noise_01"},
 		{"op":"colorMix", "input_id":"noise_01", "r1":0.8, "g1":0.8, "b1":0.8, "r2":0.2, "g2":0.2, "b2":1.0, "id":"color_01"},
-		{"op":"save", "input_id":"color_01", "filename":"./output/texture_cube.tga"},
+		{"op":"save", "input_id":"color_01", "filename":"./output/texture_cube.tga"}
 	]
 }

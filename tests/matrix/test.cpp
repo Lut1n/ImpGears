@@ -1,5 +1,5 @@
-#include <Core/Matrix3.h>
-#include <Core/Matrix4.h>
+#include <ImpGears/Core/Matrix3.h>
+#include <ImpGears/Core/Matrix4.h>
 
 using namespace imp;
 

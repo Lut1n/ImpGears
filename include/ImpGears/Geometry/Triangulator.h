@@ -1,3 +1,6 @@
+#ifndef IMP_GEO_TRIANGULATE_H
+#define IMP_GEO_TRIANGULATE_H
+
 #include <ImpGears/Geometry/Polygon.h>
 #include <ImpGears/Geometry/Export.h>
 
@@ -15,3 +18,5 @@ public:
 };
 
 IMPGEARS_END
+
+#endif // IMP_GEO_TRIANGULATE_H

@@ -5,16 +5,16 @@
 #include <ImpGears/Descriptors.h>
 #include <ImpGears/SceneGraph.h>
 
-#include <SFML/Graphics.hpp>
-
 using namespace imp;
 
 // common stuff
-#include "../common/inc_experimental.h"
-#define IMPLEMENT_RENDER_MODE_MANAGER
-#include "../common/RenderModeManager.h"
+// #include "../utils/inc_experimental.h"
+#include <filesystem>
+
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 #define IMPLEMENT_BASIC_GEOMETRIES
-#include "../common/basic_geometries.h"
+#include "../utils/basic_geometries.h"
 
 Geometry::Ptr generateBox()
 {
@@ -52,7 +52,7 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
     if( !fileExists("./cache/scene_terrain.tga") || !fileExists("./cache/scene_color.tga"))
     {
         std::filesystem::create_directories("cache");
-        generateImageFromJson("textures.json");
+        generateImageFromJson("./textures.json");
     }
 
     sampler =ImageSampler::create();
@@ -70,8 +70,9 @@ void loadSamplers(ImageSampler::Ptr& sampler, ImageSampler::Ptr& color)
 
 int main(int argc, char* argv[])
 {
-    RenderModeManager renderModeMngr;
-    renderModeMngr.setArgs(argc, argv);
+    std::cout << "exe path: " << argv[0] << std::endl;
+    AppContext app;
+    app.setArgs(argc, argv);
 
     ImageSampler::Ptr sampler, color, emi, normals;
     loadSamplers(sampler,color);
@@ -96,10 +97,8 @@ int main(int argc, char* argv[])
     reflectivityMap->_mipmap = true;
     for(float u=0.4;u<0.6;u+=0.125) for(float v=0.4;v<0.6;v+=0.125) reflectivityMap->set(u,v,Vec4(1.0,1.0,1.0,1.0));
 
-    sf::Clock clock;
 
-    sf::RenderWindow window(sf::VideoMode(512, 512), "Warehouse scene", sf::Style::Default, sf::ContextSettings(24));
-    window.setFramerateLimit(60);
+    SceneRenderer::Ptr renderer = app.loadRenderer("Warehouse scene");
 
     Graph::Ptr graph = Graph::create();
     Node::Ptr root = Node::create();
@@ -125,7 +124,7 @@ int main(int argc, char* argv[])
     case_material->_emissive = emissiveMap;
     case_material->_normalmap = normals;
     case_material->_reflectivity = reflectivityMap;
-
+    
     Material::Ptr material = Material::create(Vec3(1.0), 128.0);
     // material->_baseColor = color;
     // material->_emissive = color;
@@ -189,10 +188,6 @@ int main(int argc, char* argv[])
     root->addNode(case02_node);
     root->addNode(case03_node);
     
-    
-    
-    
-
     root->addNode(camera);
     root->addNode(roomNode);
     root->addNode(coordsNode);
@@ -216,15 +211,13 @@ int main(int argc, char* argv[])
     case02_node->getState()->setRenderPass(env_sha);
     case03_node->getState()->setRenderPass(env_sha);
 
-    SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
     renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
     renderer->enableFeature(SceneRenderer::Feature_SSAO, true);
     renderer->enableFeature(SceneRenderer::Feature_Phong, true);
-    // renderer->setDirect(false);
-    graph->getInitState()->setViewport( renderModeMngr.viewport );
-    // graph->setClearColor(Vec4(0.0,1.0,0.0,1.0));
+    renderer->setDirect(false);
+    graph->getInitState()->setViewport( app.viewport );
 
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
@@ -238,19 +231,9 @@ int main(int argc, char* argv[])
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Color);
     // renderer->setOutputFrame(SceneRenderer::RenderFrame_Reflectivity);
 
-    Image::Ptr target;
-
-    while (window.isOpen())
+    while(app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
-                window.close();
-        }
-        if(!window.isOpen()) break;
-
-        double t = clock.getElapsedTime().asSeconds();
+        double t = app.elapsedTime();
 
         Vec3 lp(cos(t)*20.0,20.0+cos(t)*10.0-50.0,sin(t)*20.0);
         light->setPosition(lp);
@@ -261,13 +244,9 @@ int main(int argc, char* argv[])
         camera->setPosition(lp2*Vec3(40.0,25.0-50.0,40.0));
         camera->setTarget(oft+Vec3(0.0f, 10.f-50.0, 0.0f));
 
-
-        window.clear();
         renderer->render( graph );
 
-        renderModeMngr.draw(window);
-        window.display();
-        // break;
+        app.end();
     }
 
 

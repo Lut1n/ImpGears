@@ -11,7 +11,7 @@
 #include <ImpGears/Core/Noise.h>
 #include <fstream>
 
-#include <SFML/Graphics.hpp>
+// #include <SFML/Graphics.hpp>
 
 #include <ImpGears/Descriptors/FileInfo.h>
 #include <ImpGears/Descriptors/ImageIO.h>
@@ -21,12 +21,16 @@
 #include <vector>
 #include <map>
 
-// common stuff
-#include "../common/inc_experimental.h"
-
 using namespace imp;
 
-#define INTERN_RES 128
+// common stuff
+#include "../utils/inc_experimental.h"
+
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
+
+
+#define INTERN_RES 64
 
 // -----------------------------------------------------------------------------------------------------------------------
 struct LightFrag : public FragCallback
@@ -35,7 +39,6 @@ struct LightFrag : public FragCallback
 	virtual void exec(ImageBuf& targets, const Vec3& pt, const UniformMap& uniforms, Varyings& varyings)
 	{
 		targets[0]->setPixel(pt[0],pt[1],Vec4(varyings.get("color"),1.0) * 255.0);
-		// targets[1]->setPixel(pt[0],pt[1],Vec4(varyings.get("color"),1.0) * 255.0);
 	}
 };
 
@@ -145,8 +148,13 @@ void loadSamplers(ImageSampler::Ptr& colorSampler, ImageSampler::Ptr& illuSample
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
+	AppContext app;
+	app.setArgs(1, argv);
+	app.internalWidth = INTERN_RES;
+	app.internalHeight = INTERN_RES;
+	SceneRenderer::Ptr renderer = app.loadRenderer("CPU rendering");
+
 	Vec3 observer(10.0, 0.0, 2.5);
-	// Vec3 observer(20.0, 0.0, 4.5);
      
     Vec3 lightPosition(4.0,2.0,3.0);
     Vec3 lightColor(0.3,1.0,0.3);
@@ -154,9 +162,8 @@ int main(int argc, char* argv[])
 	
 	ImageSampler::Ptr sampler, nsampler, illusampler;
 	loadSamplers(sampler,illusampler, nsampler);
-	Image::Ptr rgbtarget = Image::create(INTERN_RES,INTERN_RES,4);
-	
-	double a = 0.0;
+
+	Image::Ptr rgbtarget = app.target;
 	
 	FragCallback::Ptr phongFrag = CpuBlinnPhong::create();
 	LightFrag::Ptr lightFrag = LightFrag::create();
@@ -168,18 +175,7 @@ int main(int argc, char* argv[])
 	Geometry plane = geo_load["ground_04"]; Geometry::intoCCW(plane);
 	
 	int frames = 0;
-	sf::Clock c;
-	
-	sf::RenderWindow win(sf::VideoMode(500, 500), "CPU rendering");
-	win.setFramerateLimit(60);
-	win.setTitle("Cpu Renderer");
-	sf::Texture texture;
-	sf::Sprite sprite;
-	texture.create(INTERN_RES,INTERN_RES);
-	sprite.setTexture(texture);
-	sprite.setPosition( 0, 500 );
-	sprite.scale( 500.0/INTERN_RES, -500.0/INTERN_RES );
-	
+
 	Matrix4 model;
 	Matrix4 proj = Matrix4::perspectiveProj(60.0, 1.0, 0.1, 10.0);
 	Vec4 vp(0.0,0.0,INTERN_RES,INTERN_RES);
@@ -187,7 +183,6 @@ int main(int argc, char* argv[])
 	
 	GeometryRenderer georender;
 	georender.setTarget(0, rgbtarget, Vec4(100.0,100.0,255.0,255.0) );
-	// georender.setTarget(1, rgbtarget2, Vec4(0.0,0.0,0.0,255.0) );
 	georender.setViewport( vp );
 	
 	UniformMap uniforms;
@@ -207,18 +202,17 @@ int main(int argc, char* argv[])
 	uniforms.set("u_view", view );
 	uniforms.set("u_sampler_color",sampler);
 	uniforms.set("u_sampler_normal",nsampler);
-	// uniforms.set("u_sampler_illu",illusampler);
 	uniforms.set("u_lightCol",lightColor);
 	uniforms.set("u_lightAtt",lightAttn);
 	uniforms.set("u_color",Vec3(1.0));
-	
-	while (win.isOpen())
+
+
+	double a = 0.0;
+	double lastElapsedTime = 0.0;
+
+	while (app.begin())
 	{
-		sf::Event ev;
-		while (win.pollEvent(ev)) if (ev.type == sf::Event::Closed) win.close();
-		
 		a += 0.05; if(a > 6.28) a = 0.0;
-		// view = Matrix4::view(observer * Matrix3::rotationZ(a*2.0), Vec3(0.0), Vec3::Z);
 		Vec3 lightPos = lightPosition * Matrix3::rotationZ(a*2.0);
 		uniforms.set("u_view", view );
 		uniforms.set("u_lightPos", lightPos);
@@ -238,22 +232,17 @@ int main(int argc, char* argv[])
 		
 		uniforms.set("u_model", Matrix4() );
 		georender.render(mushr);
-		
-		texture.update(rgbtarget->data());
-		
-		// ImageIO::save(rgbtarget,"output.tga"); // debug
-		// break;
-		
-		win.draw(sprite);
-		win.display();
+
+		app.end();
 		
 		frames++;
 		
-		if(c.getElapsedTime().asMilliseconds() > 1000.0)
+		double delta = app.elapsedTime() - lastElapsedTime;
+		if(delta > 1.0)
 		{
 			std::cout << "FPS : " << frames << std::endl;
 			frames = 0;
-			c.restart();
+			lastElapsedTime = app.elapsedTime();
 		}
 	}
    

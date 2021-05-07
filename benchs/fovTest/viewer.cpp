@@ -1,29 +1,17 @@
-#include <ImpGears/SceneGraph/Graph.h>
-#include <ImpGears/SceneGraph/Camera.h>
-#include <ImpGears/SceneGraph/GeoNode.h>
-#include <ImpGears/SceneGraph/QuadNode.h>
-#include <ImpGears/SceneGraph/RenderPass.h>
-#include <ImpGears/SceneGraph/RenderToSamplerNode.h>
-#include <ImpGears/Descriptors/ImageIO.h>
-#include <ImpGears/Descriptors/FileInfo.h>
-#include <ImpGears/Descriptors/JsonImageOp.h>
+#include <ImpGears/SceneGraph.h>
+#include <ImpGears/Descriptors.h>
 
 #include <ImpGears/Renderer/CpuRenderer.h>
-
 #include <ImpGears/Plugins/RenderPlugin.h>
-
 #include <ImpGears/Graphics/ImageOperation.h>
-
-#include <SFML/Graphics.hpp>
-
 #include <ImpGears/Geometry/InstancedGeometry.h>
 
 
 using namespace imp;
 
 // common stuff
-#define IMPLEMENT_RENDER_MODE_MANAGER
-#include "../common/RenderModeManager.h"
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 
 
 
@@ -249,13 +237,13 @@ public:
         u_p3 = Uniform::create("u_p1", Uniform::Type_3f);
         u_p4 = Uniform::create("u_p2", Uniform::Type_3f);
         
-        float near = NEAR;
+        float impNear = NEAR;
         
         Vec3 p2 = Vec3(0.0,0.0,-1.0)*50.0 * Matrix3::rotationY(FOV*0.5 * 3.141592 / 180.0);
         Vec3 p4 = Vec3(0.0,0.0,-1.0)*50.0 * Matrix3::rotationY(-FOV*0.5 * 3.141592 / 180.0);
         
-        Vec3 p1 = p2; p1.normalize(); p1 *= near;
-        Vec3 p3 = p4; p3.normalize(); p3 *= near;
+        Vec3 p1 = p2; p1.normalize(); p1 *= impNear;
+        Vec3 p3 = p4; p3.normalize(); p3 *= impNear;
         
         u_p1->set(p1);
         u_p2->set(p2);
@@ -299,15 +287,15 @@ public:
         makeDirty();
     }
     
-    void updateFov(Vec3 cam, float fov, float near = NEAR)
+    void updateFov(Vec3 cam, float fov, float impNear = NEAR)
     {
         fakecamera->setPosition(cam);
         
         Vec3 p2 = Vec3(0.0,0.0,-1.0)*50.0 * Matrix3::rotationY(fov*0.5 * 3.141592 / 180.0);
         Vec3 p4 = Vec3(0.0,0.0,-1.0)*50.0 * Matrix3::rotationY(-fov*0.5 * 3.141592 / 180.0);
         
-        Vec3 p1 = p2; p1.normalize(); p1 *= near;
-        Vec3 p3 = p4; p3.normalize(); p3 *= near;
+        Vec3 p1 = p2; p1.normalize(); p1 *= impNear;
+        Vec3 p3 = p4; p3.normalize(); p3 *= impNear;
         
         u_p1->set(Vec3(cam+p1));
         u_p2->set(Vec3(cam+p2));
@@ -381,10 +369,10 @@ public:
         makeDirty();
     }
     
-    void updateFov(Vec3 cam, float fov, float near = NEAR)
+    void updateFov(Vec3 cam, float fov, float impNear = NEAR)
     {
         camera->setPosition(cam);
-        scene()->getInitState()->setPerspectiveProjection(fov, 1.0,near, 1024.0);
+        scene()->getInitState()->setPerspectiveProjection(fov, 1.0, impNear, 1024.0);
         
         makeDirty();
     }
@@ -392,13 +380,9 @@ public:
 
 int main(int argc, char* argv[])
 {
-    RenderModeManager renderModeMngr;
-    renderModeMngr.setArgs(argc, argv);
-
-    sf::Clock clock;
-
-    sf::RenderWindow window(sf::VideoMode(512, 512), "FOV test", sf::Style::Default, sf::ContextSettings(24));
-    window.setFramerateLimit(60);
+    AppContext app;
+    app.setArgs(argc, argv);
+    app.offscreen = false;
 
     Graph::Ptr graph3d = Graph::create();
     Node::Ptr root = Node::create();
@@ -426,13 +410,13 @@ int main(int argc, char* argv[])
     light->setPosition( Vec3(10.0,10.0,10.0) );
     graph3d->setRoot(root);
 
-    SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
+    SceneRenderer::Ptr renderer = app.loadRenderer("Test FOV");
     renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
     renderer->enableFeature(SceneRenderer::Feature_Environment, false);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
     renderer->enableFeature(SceneRenderer::Feature_SSAO, false);
     renderer->enableFeature(SceneRenderer::Feature_Phong, true);
-    graph3d->getInitState()->setViewport( renderModeMngr.viewport );
+    graph3d->getInitState()->setViewport( app.viewport );
     graph3d->getInitState()->setOrthographicProjection(-1.f, 1.f, -1.f, 1.f, 0.f, 1.f);
     graph3d->setClearColor(Vec4(1.0,0.0,0.0,1.0));
 
@@ -450,39 +434,30 @@ int main(int argc, char* argv[])
     
     bool fuse = true;
 
-    while (window.isOpen())
+    while (app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
-                window.close();
-        }
-        if(!window.isOpen()) break;
-
-        float elapsed = clock.getElapsedTime().asSeconds();
+        float elapsed = app.elapsedTime();
         
         float fct = std::sin(elapsed)*0.5+0.5;
-       float fov = fct * (90.0 - 30.0) + 30.0;
-       float near = 0.1;
-       Vec3 p0(0.0f, 0.0f, 0.0f);
-       Vec3 p1(0.0f, 10.0f, 20.0f);
-       Vec3 cam = (p1-p0)*(1.0-fct) + p0;
-       // float fov = 90.0;
-       // float near = fct * (12.0 - 0.1) + 0.1;
+        float fov = fct * (90.0 - 30.0) + 30.0;
+        float impNear = 0.1;
+        Vec3 p0(0.0f, 0.0f, 0.0f);
+        Vec3 p1(0.0f, 10.0f, 20.0f);
+        Vec3 cam = (p1-p0)*(1.0-fct) + p0;
+        // float fov = 90.0;
+        // float near = fct * (12.0 - 0.1) + 0.1;
         
         // if(fuse)
         {            
-            minimap->updateFov(cam,fov,near);
-            mainscene->updateFov(cam,fov,near);
+            minimap->updateFov(cam,fov, impNear);
+            mainscene->updateFov(cam,fov, impNear);
         }
         fuse = !fuse;
 
         // window.clear();
         renderer->render( graph3d );
 
-        window.display();
-        
+        app.end();
     }
 
 

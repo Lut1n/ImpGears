@@ -2,6 +2,7 @@
 #define IMP_PROCEDURAL_GEOMETRY_H
 
 #include <ImpGears/Core/Object.h>
+#include <ImpGears/Core/Vec2.h>
 #include <ImpGears/Core/Vec3.h>
 #include <ImpGears/Core/Math.h>
 #include <ImpGears/Geometry/Export.h>
@@ -41,7 +42,7 @@ class IG_GEO_API Geometry : public Object
 {
 public:
 
-    using TexCoord = Vec<2,float>;
+    using TexCoord = Vec2;
     using IndexType = std::uint32_t;
     using BufType = std::vector<Vec3>;
     using TexCoordBuf = std::vector<TexCoord>;

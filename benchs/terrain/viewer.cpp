@@ -13,17 +13,17 @@
 
 #include <ImpGears/Graphics/ImageOperation.h>
 
-#include <SFML/Graphics.hpp>
+// #include <SFML/Graphics.hpp>
 
 using namespace imp;
 
 // common stuff
-#include "../common/inc_experimental.h"
-#define IMPLEMENT_RENDER_MODE_MANAGER
-#include "../common/RenderModeManager.h"
+#include "../utils/inc_experimental.h"
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 #define IMPLEMENT_BASIC_GEOMETRIES
-#include "../common/basic_geometries.h"
-#include "../common/basic_skybox.h"
+#include "../utils/basic_geometries.h"
+#include "../utils/basic_skybox.h"
 
 Geometry generateTerrain(const ImageSampler::Ptr& hm)
 {
@@ -73,7 +73,7 @@ struct MyContext
     Camera::Ptr camera;
     Node::Ptr light;
 
-    void init(RenderModeManager& renderModeMngr)
+    void init(AppContext& app)
     {
         ImageSampler::Ptr sampler, color, emi, normals;
         loadSamplers(sampler,color);
@@ -162,7 +162,7 @@ struct MyContext
         root->addNode(baseNode);
         root->addNode(coordsNode);
         root->addNode(pointNode);
-        if(renderModeMngr.plugin) root->addNode(sky);
+        if(app.plugin) root->addNode(sky);
         graph->setRoot(root);
 
         RenderPass::Ptr rp_info = RenderPass::create();
@@ -176,7 +176,7 @@ struct MyContext
         terrainNode->setRenderPass(rp_info2);
         baseNode->setRenderPass(rp_info2);
 
-        graph->getInitState()->setViewport( renderModeMngr.viewport );
+        graph->getInitState()->setViewport( app.viewport );
         graph->setClearColor(Vec4(0.0,0.0,1.0,1.0));
     }
 
@@ -198,16 +198,10 @@ struct MyContext
 
 int main(int argc, char* argv[])
 {
-    RenderModeManager renderModeMngr;
-    renderModeMngr.setArgs(argc, argv);
+    AppContext app;
+    app.setArgs(argc, argv);
 
-    sf::Clock clock;
-
-    sf::RenderWindow window(sf::VideoMode(512, 512), "Terrain", sf::Style::Default, sf::ContextSettings(24));
-    window.setFramerateLimit(60);
-
-
-    SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
+    SceneRenderer::Ptr renderer = app.loadRenderer("Terrain scene");
     // renderer->enableFeature(SceneRenderer::Feature_Shadow, true);
     // renderer->enableFeature(SceneRenderer::Feature_Environment, true);
     // renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
@@ -215,31 +209,13 @@ int main(int argc, char* argv[])
     
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
-    MyContext* context = new MyContext(); context->init(renderModeMngr);
+    MyContext* context = new MyContext(); context->init(app);
 
-    while (window.isOpen())
+    while (app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
-            {
-                window.close();
-            }
-        }
-        if(!window.isOpen()) break;
-
-        double t = clock.getElapsedTime().asSeconds();
-        context->update(t);
-
-        window.clear();
-        
+        context->update(app.elapsedTime());
         renderer->render( context->graph );
-        if(renderModeMngr.plugin) renderModeMngr.plugin->unloadUnused();
-
-        renderModeMngr.draw(window);
-        window.display();
-        // break;
+        app.end();
     }
 
     exit(EXIT_SUCCESS);

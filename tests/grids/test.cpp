@@ -1,4 +1,4 @@
-#include <Core/Grid.h>
+#include <ImpGears/Core/Grid.h>
 
 using namespace imp;
 

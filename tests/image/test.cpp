@@ -1,6 +1,6 @@
-#include <Graphics/Image.h>
-#include <Graphics/Rasterizer.h>
-#include <Descriptors/ImageIO.h>
+#include <ImpGears/Graphics/Image.h>
+#include <ImpGears/Graphics/Rasterizer.h>
+#include <ImpGears/Descriptors/ImageIO.h>
 
 void hsym(imp::Image& image, const imp::Vec4& col)
 {

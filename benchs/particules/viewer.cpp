@@ -1,28 +1,18 @@
-#include <ImpGears/SceneGraph/Graph.h>
-#include <ImpGears/SceneGraph/Camera.h>
-#include <ImpGears/SceneGraph/GeoNode.h>
-#include <ImpGears/SceneGraph/QuadNode.h>
-#include <ImpGears/SceneGraph/RenderPass.h>
-#include <ImpGears/Descriptors/ImageIO.h>
-#include <ImpGears/Descriptors/FileInfo.h>
-#include <ImpGears/Descriptors/JsonImageOp.h>
+#include <ImpGears/SceneGraph.h>
+#include <ImpGears/Descriptors.h>
 
 #include <ImpGears/Renderer/CpuRenderer.h>
-
 #include <ImpGears/Plugins/RenderPlugin.h>
-
 #include <ImpGears/Graphics/ImageOperation.h>
-
-#include <SFML/Graphics.hpp>
 
 #include <ImpGears/Geometry/InstancedGeometry.h>
 
 using namespace imp;
 
 // common stuff
-#include "../common/inc_experimental.h"
-#define IMPLEMENT_RENDER_MODE_MANAGER
-#include "../common/RenderModeManager.h"
+#include "../utils/inc_experimental.h"
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 
 
 #define N_PARTICULES 10000
@@ -121,11 +111,10 @@ Geometry::Ptr generateRoom()
 
 int main(int argc, char* argv[])
 {
-    RenderModeManager renderModeMngr;
+    AppContext app;
     
-    std::vector<const char*> argarr = {argv[0],"-gpu"};
-    renderModeMngr.setArgs(argarr.size(), argarr.data());
-
+    std::vector<char*> argarr = {argv[0],"-gpu"};
+    app.setArgs(argarr.size(), argarr.data());
 
     ImageSampler::Ptr colorMap = ImageSampler::create(16,16,4,Vec4(0.0));
     ImageSampler::Ptr emissiveMap = ImageSampler::create(16,16,4,Vec4(0.0));
@@ -141,11 +130,6 @@ int main(int argc, char* argv[])
         emissiveMap->set(u,v,emi);
         colorMap->set(u,v,color);
     }
-
-    sf::Clock clock;
-
-    sf::RenderWindow window(sf::VideoMode(512, 512), "Particules system", sf::Style::Default, sf::ContextSettings(24));
-    window.setFramerateLimit(60);
 
     Graph::Ptr graph = Graph::create();
     Node::Ptr root = Node::create();
@@ -200,35 +184,25 @@ int main(int argc, char* argv[])
     
     u_count->set(float(N_PARTICULES));
 
-    SceneRenderer::Ptr renderer = renderModeMngr.loadRenderer();
+    SceneRenderer::Ptr renderer = app.loadRenderer("Particules");
     renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
     renderer->enableFeature(SceneRenderer::Feature_Environment, false);
     renderer->enableFeature(SceneRenderer::Feature_Bloom, true);
     renderer->enableFeature(SceneRenderer::Feature_SSAO, false);
     renderer->enableFeature(SceneRenderer::Feature_Phong, true);
-    graph->getInitState()->setViewport( renderModeMngr.viewport );
+    graph->getInitState()->setViewport( app.viewport );
 
     renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
 
 
-    while (window.isOpen())
+    while (app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed || event.type == sf::Event::KeyPressed)
-                window.close();
-        }
-        if(!window.isOpen()) break;
-
-        double t = clock.getElapsedTime().asSeconds();
+        double t = app.elapsedTime();
         u_time->set(float(t));
 
-        window.clear();
         renderer->render( graph );
 
-        renderModeMngr.draw(window);
-        window.display();
+        app.end();
     }
 
 

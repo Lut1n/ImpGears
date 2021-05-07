@@ -1,19 +1,20 @@
-#include <Core/Matrix3.h>
-#include <SceneGraph/Graph.h>
-#include <SceneGraph/GeoNode.h>
-#include <SceneGraph/Camera.h>
-#include <SceneGraph/LightNode.h>
-#include <Descriptors/ImageIO.h>
+#include <ImpGears/Core/Matrix3.h>
+#include <ImpGears/SceneGraph/Graph.h>
+#include <ImpGears/SceneGraph/GeoNode.h>
+#include <ImpGears/SceneGraph/Camera.h>
+#include <ImpGears/SceneGraph/LightNode.h>
+#include <ImpGears/Descriptors/ImageIO.h>
 
-// #include <Renderer/GlRenderer.h>
-#include <Renderer/CpuRenderer.h>
-#include <Plugins/RenderPlugin.h>
+// #include <ImpGears/Renderer/GlRenderer.h>
+#include <ImpGears/Renderer/CpuRenderer.h>
+#include <ImpGears/Plugins/RenderPlugin.h>
 
-#include <SFML/Graphics.hpp>
+#define IMPLEMENT_APP_CONTEXT
+#include "../utils/AppContext.h"
 
 #include <ctime>
 
-#define RES 512
+#define RES 200
 
 using namespace imp;
 
@@ -80,7 +81,7 @@ struct Custom : public ReflexionModel::TexturingCallback
     {
         // return Vec3(0.0);
         ImageSampler::Ptr sampler = uniforms.getSampler("u_sampler_color");
-        return sampler->get(uv) * Vec3(1.0,0.0,0.0);
+        return Vec3(sampler->get(uv)) * Vec3(1.0,0.0,0.0);
     }
 };
 
@@ -107,11 +108,14 @@ vec4 textureEmissive(vec2 uv)
     return texture2D(u_sampler_color,uv).xyzw  * vec4(1.0,0.0,0.0,1.0);
 }
 
+float textureReflectivity(vec2 uv) { return 0.0; }
+
 );
 
 
 struct IGStuff
 {
+    AppContext app;
     SceneRenderer::Ptr renderer;
     Graph::Ptr graph;
     Node::Ptr root;
@@ -128,41 +132,21 @@ struct IGStuff
         ReflexionModel::Ptr model = ReflexionModel::create(ReflexionModel::Lighting_Phong, ReflexionModel::Texturing_Customized);
         model->_texturingCb = customTexturing;
         model->_fragCode_texturing = glsl_texturing;
-        
-        if(arg != "-gpu")
-            renderer = CpuRenderer::create();
-        else
-        {
-            std::string pluginName = "OGLPlugin";
-            pluginName = "lib" + pluginName + "." + LIB_EXT;
-            RenderPlugin::Ptr rp = PluginManager::open( pluginName ) ;
-            renderer = rp->getRenderer();
-            
-        }
 
-        target = Image::create(RES,RES,4);
-        ImageSampler::Ptr sampler = ImageSampler::create(target);
+        app.offscreen = (arg != "-gpu");
+        renderer = app.loadRenderer("Example Cube");
+        target = app.target;
 
-        std::vector<ImageSampler::Ptr> samplers = {sampler};
-        RenderTarget::Ptr rt = RenderTarget::create();
-        rt->build(samplers, true);
-        renderer->setTargets(rt);
+        renderer->enableFeature(SceneRenderer::Feature_Shadow, false);
+        renderer->enableFeature(SceneRenderer::Feature_Environment, false);
+        renderer->enableFeature(SceneRenderer::Feature_Bloom, false);
+        renderer->enableFeature(SceneRenderer::Feature_SSAO, false);
+        renderer->enableFeature(SceneRenderer::Feature_Phong, true);
+        renderer->setOutputFrame(SceneRenderer::RenderFrame_Default);
+        // renderer->setDirect(false);
         
-        Vec4 viewport(0.0,0.0,512,512);
         graph = Graph::create();
-        
-        if(arg != "-gpu")
-        {
-            viewport.set(0.0,0.0,RES,RES);
-            renderer->setDirect(false);
-        }
-        /*else
-        {
-            GlRenderer& g = dynamic_cast<GlRenderer&>( *renderer );
-            g.loadRenderPlugin("libglPlugin");
-        }*/
-        
-        graph->getInitState()->setViewport( viewport );
+        graph->getInitState()->setViewport( app.viewport );
 
         // Geometry cubeGeo = Geometry::sphere(8,1.0);
         Geometry::Ptr cubeGeo = Geometry::create();
@@ -210,11 +194,6 @@ struct IGStuff
 // -----------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-    int sfDepthBufferBits = 24;
-    sf::RenderWindow window(sf::VideoMode(512, 512), "Example cube", sf::Style::Default, sf::ContextSettings(sfDepthBufferBits));
-    sf::Texture texture; texture.create(512, 512); // texture.setSmooth(true);
-    sf::Sprite sprite(texture);
-
     std::string engine_arg = ""; if(argc > 1) engine_arg = argv[1];
     IGStuff engine(engine_arg);
 
@@ -222,43 +201,28 @@ int main(int argc, char* argv[])
     double a = 0.0;
 
     int frames = 0;
-    sf::Clock c;
+    double lastElapsed = 0.0;
 
-    while (window.isOpen())
+    while (engine.app.begin())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed) window.close();
-        };
-
-        window.clear();
-        
         a += 0.02 * acc; if(a > 2.0*3.141592) a = 0.0;
         engine.updateCamera(a);
         
         engine.render();
 
-        if(engine_arg != "-gpu") 
-        {
-            texture.update(engine.target->data(),engine.target->width(),engine.target->height(),0,0);
-            sprite.setScale( 512.0 / engine.target->width(), -512.0 / engine.target->height() );
-            sprite.setPosition( 0, 512 );
-            window.draw(sprite);
-        }
-        window.display();
-        
+        engine.app.end();
+
         frames++;
         
-        if(c.getElapsedTime().asMilliseconds() > 1000.0)
+        if(engine.app.elapsedTime() - lastElapsed > 1.0)
         {
             current_fps = frames;
-            acc = target_fps / std::max(current_fps,1.f);
+            acc = target_fps / (current_fps>1.f ? current_fps:1.f);
             std::cout << "FPS : " << std::endl;
             std::cout << "update : " << current_fps*acc << std::endl;
             std::cout << "render : " << current_fps << std::endl;
             frames = 0;
-            c.restart();
+            lastElapsed = engine.app.elapsedTime();
         }
     }
 

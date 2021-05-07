@@ -5,9 +5,8 @@ project(libimpgears)
 option(BUILD_BENCH_FOLDER "Build bench folder" OFF)
 option(BUILD_TEST_FOLDER "Build test folder" OFF)
 option(BUILD_EXAMPLE_FOLDER "Build example folder" OFF)
-option(BUILD_GLPLUGIN "Build the OpenGL plugin" ON)
+option(BUILD_GL_RENDERER "Build the OpenGL plugin" ON)
 option(USE_DLFCN_WIN32 "Use the dlfcn-win32 for Mingw" OFF)
-#option(USE_EXTERNAL_GLEW_LIB "Use an external glew library" OFF)
 option(PROFILING_OPT "Build with the profiling option (to be used with gprof)" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -56,19 +55,11 @@ macro(IG_SETUP_EXE IG_EXE_NAME IG_SRC_DIR SRCS)
     target_link_libraries(${EXE_NAME} impgears-plugins)
     target_link_libraries(${EXE_NAME} impgears-renderer)
     target_link_libraries(${EXE_NAME} impgears-scenegraph)
-    target_link_libraries(${EXE_NAME} OGLPlugin)
+    #target_link_libraries(${EXE_NAME} impgears-renderer-gl)
     
     # glad (gl extensions loader used. Can be used to blit texture when rendering offscreen)
     include_directories("${CMAKE_SOURCE_DIR}/thirdparty/glad/include")
     include_directories("${CMAKE_SOURCE_DIR}/thirdparty/glad/src")
-
-    ## In most cases better set in the CMake cache
-    #set(SFML_DIR "${PROJECT_SOURCE_DIR}/thirdparty/SFML-2.5.1/lib/cmake/SFML")
-    ## If you want to link SFML statically
-    #set(SFML_STATIC_LIBRARIES TRUE)
-    #find_package(SFML 2.5.1 COMPONENTS graphics REQUIRED)
-    #target_link_libraries(${EXE_NAME} sfml-graphics)
-    #set(EXTERNAL_LIBS ${PROJECT_SOURCE_DIR}/thirdparty/SFML-2.5.1/bin)
 
     #link to glfw
     # Help to find glfw3 config on Windows (May need to build it from source)
@@ -80,16 +71,10 @@ macro(IG_SETUP_EXE IG_EXE_NAME IG_SRC_DIR SRCS)
     find_package( OpenGL REQUIRED )
     include_directories( ${OPENGL_INCLUDE_DIR} )
     target_link_libraries( ${EXE_NAME} ${OPENGL_LIBRARIES} )
-
-    # eg. commands: copy_directory, copy_if_different
-    #add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-    #    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    #        ${EXTERNAL_LIBS}
-    #        $<TARGET_FILE_DIR:${EXE_NAME}>)
 endmacro()
 
-if(BUILD_GLPLUGIN)
-    add_subdirectory(src/ImpGears/OGLPlugin)
+if(BUILD_GL_RENDERER)
+    add_subdirectory(src/ImpGears/RendererGL)
 endif()
 
 if(BUILD_BENCH_FOLDER)

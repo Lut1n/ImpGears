@@ -181,8 +181,7 @@ imp::SceneRenderer::Ptr imp::AppContext::loadRenderer(const std::string& title, 
 
     if(!offscreen)
     {
-        std::string pluginName = "./OGLPlugin";
-        pluginName = pluginName + "." + LIB_EXT;
+        std::string pluginName = std::string("./impgears-renderer-gl.") + LIB_EXT;
         plugin = PluginManager::open( pluginName );
         if(plugin)
         {
